@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1a2e"><meta name="ttr-build" content="v0.13.6.63"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tiny Track Rivals"><meta name="application-name" content="Tiny Track Rivals"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><link rel="manifest" href="manifest.webmanifest"><title>Tiny Track Rivals — Colazione Turbo</title><style>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1a2e"><meta name="ttr-build" content="v0.13.6.64"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tiny Track Rivals"><meta name="application-name" content="Tiny Track Rivals"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><link rel="manifest" href="manifest.webmanifest"><title>Tiny Track Rivals — Colazione Turbo</title><style>
 
 :root{color-scheme:dark;--cyan:#60d9ff;--yellow:#ffd55d;--ink:#071326;--line:#345577;--orange:#f39b43}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#081324;color:#f0f7ff;font-family:system-ui,-apple-system,'Arial Black',sans-serif;touch-action:none;user-select:none}#game{position:fixed;inset:0;width:100vw;height:100dvh;display:block;background:#7a5842}.screen{position:absolute;inset:0;z-index:8;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,rgba(3,10,24,.94),rgba(8,36,62,.84)),repeating-linear-gradient(45deg,#061b2b 0 35px,#122b43 35px 70px);padding:12px;overflow:auto;touch-action:pan-y}.panel{width:min(840px,100%);border:2px solid #5092bc;border-radius:22px;background:linear-gradient(170deg,#162f4e,#0a1a30 80%);box-shadow:0 18px 70px #000a,inset 0 0 35px #23688d22;padding:clamp(18px,4vw,40px);max-height:calc(100dvh - 24px);overflow-y:auto}.panel.resultsPanel{width:min(760px,100%);padding:clamp(16px,3vw,26px)}.panel.resultsPanel.compact{width:min(800px,100%);padding:16px 18px;overflow:hidden}.eyebrow{font-size:11px;letter-spacing:.2em;color:#86dfff;font-weight:850;margin:0 0 10px;text-transform:uppercase}.logo{font-weight:1000;font-style:italic;font-size:clamp(35px,8vw,83px);letter-spacing:-.055em;line-height:.94;color:#ffd054;text-shadow:3px 4px 0 #9f3c24,7px 8px 0 #06111e}.logo span{display:block;color:#fff;font-size:.48em;letter-spacing:.08em;text-shadow:3px 4px 0 #385a76}.sub{color:#bed1e2;line-height:1.45;font-size:14px;max-width:680px;margin:16px 0 22px}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.chip{padding:7px 10px;border-radius:99px;border:1px solid #446b86;background:#102e4b;color:#c8e2f8;font-size:12px;font-weight:700}.menu-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:20px}.resultsPanel .menu-row{margin-top:14px}.btn{touch-action:manipulation;border:2px solid #eccd76;border-radius:13px;background:linear-gradient(#fff3a5,#f5b73f);box-shadow:0 4px 0 #ab5d1f;color:#17203a;font-size:15px;font-weight:950;padding:13px 22px;cursor:pointer;text-align:center;min-height:48px}.btn.secondary{background:linear-gradient(#20466a,#123250);color:#e5f5ff;border-color:#5293b8;box-shadow:0 4px 0 #07182b}.btn:active{transform:translateY(3px);box-shadow:none}.settings{display:flex;flex-wrap:wrap;gap:14px;margin-top:19px}.settings label{display:flex;flex-direction:column;gap:5px;color:#add7ef;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.settings select{font-size:15px;background:#102943;color:#fff;border:1px solid #497ca2;padding:10px;border-radius:9px;min-width:130px}.note{font-size:12px;color:#a9c1d2;line-height:1.55;margin:17px 0 0}.resultTitle{font-size:clamp(28px,5vw,45px);font-weight:950;color:#ffe17d;margin:0 0 14px}.results{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}.results td{border-bottom:1px solid #3b5972;padding:8px 4px;vertical-align:middle}.results tr.me{color:#ffe395;font-weight:850}.results.compact{font-size:12px}.results.compact td{padding:5px 3px}.results td:first-child{width:44px}.resultSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin:10px 0 14px}.resultCard{border:1px solid #36617d;background:#0b1f36;border-radius:12px;padding:8px 10px}.resultCard b{display:block;color:#8fe5fd;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}.variantDot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:7px;vertical-align:-1px;border:1px solid #ffffff99;box-shadow:0 0 0 1px #0a1325}#hud{position:fixed;inset:0;pointer-events:none;z-index:4;display:none}.hudTop{position:absolute;left:8px;right:8px;top:max(7px,env(safe-area-inset-top));display:flex;align-items:flex-start;justify-content:space-between;gap:5px}.statBlock{border:1px solid #3f829e;background:#071831df;border-radius:10px;padding:8px 11px;box-shadow:0 3px 0 #0008;min-width:82px}.statBlock small{font-size:9px;display:block;color:#8ce3ff;font-weight:850;letter-spacing:.08em}.statBlock strong{font-size:clamp(15px,2.8vw,23px);color:#fff}.itemBlock{border-color:#b78b41}.itemBlock strong{color:#ffde79}#hint{position:absolute;left:50%;top:23%;transform:translate(-50%,-50%);background:#04172bcf;border:1px solid #6bc9e8;color:#fff;font-size:clamp(17px,4vw,33px);font-weight:950;border-radius:12px;padding:12px 19px;text-align:center;opacity:0;transition:opacity .15s;white-space:nowrap}#hint.show{opacity:1}#controls{position:fixed;z-index:5;bottom:max(10px,env(safe-area-inset-bottom));left:10px;right:10px;display:none;pointer-events:none;justify-content:space-between;gap:10px}.ctrlGroup{display:flex;align-items:end;gap:8px;pointer-events:none}.control{border:2px solid #b1d7ef;background:linear-gradient(155deg,#214666d9,#07192de6);color:#fff;box-shadow:inset 0 1px 8px #ffffff25,0 4px 0 #010711bd;border-radius:18px;width:clamp(52px,12vw,76px);height:clamp(56px,14vw,81px);font-size:28px;font-weight:950;touch-action:none;pointer-events:auto;display:flex;align-items:center;justify-content:center}.control.small{font-size:14px;width:clamp(56px,12vw,72px);color:#ffdb7c}.control.active{background:#eabf52;color:#0a1c28;transform:translateY(3px);box-shadow:0 1px #010711}.hudBottom{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);font-size:10px;white-space:nowrap;color:#e3f5ff;background:#071c30bd;padding:5px 10px;border-radius:8px}#pauseBtn{pointer-events:auto;position:absolute;right:9px;top:calc(63px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:8px 13px}#mini{position:absolute;top:calc(70px + env(safe-area-inset-top));left:10px;width:140px;height:90px;background:#071b2acb;border:1px solid #417fa8;border-radius:8px}#orientation{display:none;position:fixed;inset:auto 20px 100px;z-index:3;text-align:center;color:#f5f9ff;font-size:11px;opacity:.8}#muteBtn{pointer-events:auto;position:absolute;right:9px;top:calc(101px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:7px 11px}@media(orientation:portrait){#mini{width:96px;height:64px;top:calc(68px + env(safe-area-inset-top))}#pauseBtn{top:calc(68px + env(safe-area-inset-top))}#muteBtn{top:calc(105px + env(safe-area-inset-top))}#orientation{display:block}.hudBottom{bottom:99px;font-size:9px}.control{height:62px;width:58px}.control.small{width:57px}}@media(max-height:500px){.panel{padding:15px}.sub{margin:7px 0}.menu-row{margin-top:8px}.settings{margin-top:8px}.note{margin-top:9px}.control{height:58px}.hudBottom{display:none}#mini{top:calc(58px + env(safe-area-inset-top))}}
 
@@ -899,6 +899,33 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
  #screen.v11-screen .v11-options .retro-option:focus-visible::before{animation:none!important;transform:translateY(-50%);}
 }
 </style>
+
+<style id="ttr-v64-icons-consistency">
+/* All SEVEN mode/navigation glyphs obey the same foreground palette, contrast and dimensions. */
+#screen.v11-screen .v11-options #garageBtn:not(.selected),
+#screen.v11-screen .v11-options #settingsBtn:not(.selected){color:#fff0b4!important;}
+#screen.v11-screen .v11-options #garageBtn.selected,
+#screen.v11-screen .v11-options #settingsBtn.selected{color:#152451!important;}
+#screen.v11-screen .v11-options #garageBtn::after,
+#screen.v11-screen .v11-options #settingsBtn::after{
+  content:""!important;background-color:currentColor!important;opacity:.95!important;
+  width:clamp(18px,3.9vh,25px)!important;height:clamp(18px,3.9vh,25px)!important;
+  mask-repeat:no-repeat;mask-position:center;mask-size:contain;
+  -webkit-mask-repeat:no-repeat;-webkit-mask-position:center;-webkit-mask-size:contain;
+}
+#screen.v11-screen .v11-options #garageBtn::after{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m5%2015%201.5-6a2%202%200%200%201%202-1.5h7a2%202%200%200%201%202%201.5L19%2015%22%2F%3E%3Cpath%20d%3D%22M4%2015h16v5H4zM7%2020v2m10-2v2M8%2011h8%22%2F%3E%3Cpath%20d%3D%22M7.2%2017.5h.8m8%200h.8%22%2F%3E%3C%2Fsvg%3E")!important;
+  mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m5%2015%201.5-6a2%202%200%200%201%202-1.5h7a2%202%200%200%201%202%201.5L19%2015%22%2F%3E%3Cpath%20d%3D%22M4%2015h16v5H4zM7%2020v2m10-2v2M8%2011h8%22%2F%3E%3Cpath%20d%3D%22M7.2%2017.5h.8m8%200h.8%22%2F%3E%3C%2Fsvg%3E")!important;
+}
+#screen.v11-screen .v11-options #settingsBtn::after{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10%202h4l.5%202.1%202%201.1%202-.7%202%203.5-1.5%201.6v2.8l1.5%201.6-2%203.5-2-.7-2%201.1L14%2020h-4l-.5-2.1-2-1.1-2%20.7-2-3.5L5%2012.4V9.6L3.5%208l2-3.5%202%20.7%202-1.1z%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2211%22%20r%3D%223%22%2F%3E%3C%2Fsvg%3E")!important;
+  mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10%202h4l.5%202.1%202%201.1%202-.7%202%203.5-1.5%201.6v2.8l1.5%201.6-2%203.5-2-.7-2%201.1L14%2020h-4l-.5-2.1-2-1.1-2%20.7-2-3.5L5%2012.4V9.6L3.5%208l2-3.5%202%20.7%202-1.1z%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2211%22%20r%3D%223%22%2F%3E%3C%2Fsvg%3E")!important;
+}
+@media(max-width:620px) and (orientation:landscape){
+  #screen.v11-screen .v11-options #garageBtn::after,
+  #screen.v11-screen .v11-options #settingsBtn::after{width:18px!important;height:18px!important;}
+}
+</style>
 </head>
 <body>
 <canvas id="game" aria-label="Circuito Colazione Turbo"></canvas><section id="onlineModal" hidden aria-label="Online: sale reali" role="dialog" aria-modal="true"><div class="online-panel">
@@ -955,7 +982,7 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
    
   </aside>
  </div>
- <footer class="v11-foot"><div class="v11-footer-btns"><button class="mini-btn" id="langBtn" data-i18n="changeLang">LINGUA</button><button class="mini-btn" id="menuMute" data-i18n="audioOn">AUDIO ON</button><button class="mini-btn" id="audioTest" data-i18n="testSound">PROVA AUDIO</button></div><span id="audioStatus" role="status" aria-live="polite" style="display:none"></span><span class="v11-version">v0.13.6.63</span></footer>
+ <footer class="v11-foot"><div class="v11-footer-btns"><button class="mini-btn" id="langBtn" data-i18n="changeLang">LINGUA</button><button class="mini-btn" id="menuMute" data-i18n="audioOn">AUDIO ON</button><button class="mini-btn" id="audioTest" data-i18n="testSound">PROVA AUDIO</button></div><span id="audioStatus" role="status" aria-live="polite" style="display:none"></span><span class="v11-version">v0.13.6.64</span></footer>
 </div>
 <details class="v11-settings" id="retroSettings"><summary data-i18n="settings">OPZIONI</summary>
  <div class="v11-settings-card"><div class="v11-settings-head"><b data-i18n="settings">OPZIONI</b><button id="closeSettings" type="button" aria-label="Chiudi">✕</button></div>
@@ -1322,6 +1349,16 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
   }
   function oilHit(car,oldX,oldY,spot){
     if(!car||!spot||car.jump>0||car.id===spot.owner)return false;
+    if(spot.type==='milk_cereal_spill'){
+      // Rotated swept contact in puddle space: no invisible circular hitbox.
+      const a=-(spot.angle||0),co=Math.cos(a),si=Math.sin(a),
+        rx=(spot.rx||spot.r)*.9+(car.width||36)*.34,
+        ry=(spot.ry||spot.r*.65)*.9+(car.width||36)*.34;
+      const transform=(x,y)=>({x:((x-spot.x)*co-(y-spot.y)*si)/rx,
+                                  y:((x-spot.x)*si+(y-spot.y)*co)/ry});
+      const before=transform(oldX,oldY),after=transform(car.x,car.y);
+      return segmentPointDistance(before.x,before.y,after.x,after.y,0,0)<=1;
+    }
     const radius=(spot.r||31)+(car.width||36)*.24;
     return segmentPointDistance(oldX,oldY,car.x,car.y,spot.x,spot.y)<=radius;
   }
@@ -2194,22 +2231,17 @@ function worldInit(){
   // Removed confusing spiral/cereal decoration at the end of the second bend.
   addProp(.512,'orange',163,49,true);    // Orange Jump background
   const op=trackPoint(.502),oa=tangent(.502);props.push({type:'orange_bump',x:op.x+Math.sin(oa)*32,y:op.y-Math.cos(oa)*32,r:29,solid:true,jump:false,interactive:true});
-  // v0.13.6.63 — upright cereal bowl just ahead of the start, with a natural
-  // asymmetrical milk overflow: a small left branch and a long right branch.
-  // The tabletop/crumb lane is unchanged. All patches remain outside y≈1109.
-  props.push({type:'milk_cereal_cup',x:570,y:927,r:75,solid:false,scenery:true,interactive:false});
+  // v0.13.6.64: upright physical bowl; TWO irregular, rounded-edge milk stains.
+  // Left stain is small; right stain is elongated and extends further from the bowl.
+  // Neither milk puddle is an occluding sprite or a solid obstacle.
+  props.push({type:'milk_cereal_cup',x:570,y:927,r:73,solid:true,scenery:false,interactive:true,tall:true});
   const cerealPatches=[
-    // Left: much smaller than the right-hand spill.
-    {x:507,y:1000,r:24,angle:-.26},{x:470,y:1019,r:18,angle:.23},
-    // Right: connected, irregular lobes, not four round stains.
-    {x:624,y:1003,r:29,angle:.18},{x:667,y:1021,r:34,angle:-.24},
-    {x:712,y:1029,r:33,angle:.19},{x:756,y:1021,r:38,angle:-.17},
-    {x:792,y:1041,r:28,angle:.31}
+    {x:490,y:1016,rx:53,ry:28,angle:-.10,spillShape:'left'},
+    {x:690,y:1028,rx:117,ry:37,angle:.07,spillShape:'right'}
   ];
   for(const p of cerealPatches){
-    const spot={...p,type:'milk_cereal_spill',owner:-1,solid:false,scenery:true,interactive:false};
-    // Preserve a clean racing lane; impact with an off-road stain uses oil traction.
-    if(nearestCourse(spot,points).distance < LANE_HALF+spot.r+21)continue;
+    const spot={...p,r:Math.max(p.rx,p.ry),type:'milk_cereal_spill',owner:-1,
+      solid:false,scenery:true,interactive:false};
     milkCerealSpills.push(spot);props.push(spot);
   }
   // Tipped jar attached to the jam spill, not a standing jar floating elsewhere.
@@ -2340,38 +2372,45 @@ function paintWorld(){const ctx=trackCtx,W=WORLD_W,H=WORLD_H;
 
 // The milk is drawn from smoothly joined asymmetric lobes, not circles.
 // Rotation and deterministic waviness make the scattered splashes look poured.
-function milkOrganicPath(ctx,r,seed){
- const lobes=20,pts=[];
- for(let i=0;i<lobes;i++){
-  const a=i*Math.PI*2/lobes;
-  const wave=1+.13*Math.sin(a*3+seed)+.095*Math.sin(a*5-seed*.7)+.07*Math.cos(a*7+seed*.4);
-  pts.push({x:Math.cos(a)*r*1.20*wave,y:Math.sin(a)*r*.69*wave});
- }
- const first=pts[0],last=pts[pts.length-1];
- ctx.beginPath();ctx.moveTo((first.x+last.x)/2,(first.y+last.y)/2);
- for(let i=0;i<pts.length;i++){
-  const p=pts[i],q=pts[(i+1)%pts.length];
+function milkOrganicPath(ctx,rx,ry,shape){
+ // Intentional uneven silhouette with rounded corners (no repeated circles or identical outlines).
+ const left=[
+  [.86,-.36],[1,.02],[.75,.32],[.37,.42],[.17,.84],[-.17,.63],
+  [-.43,.48],[-.99,.38],[-1.04,-.05],[-.68,-.25],[-.81,-.60],[-.27,-.78],[.11,-.57],[.48,-.54]
+ ];
+ const right=[
+  [1.02,-.25],[.90,.18],[.70,.38],[.43,.28],[.22,.74],[-.04,.56],
+  [-.30,.43],[-.53,.69],[-.70,.25],[-1.02,.32],[-1.07,-.14],
+  [-.82,-.28],[-.62,-.73],[-.35,-.46],[-.08,-.79],[.17,-.46],
+  [.46,-.64],[.74,-.32]
+ ];
+ const verts=(shape==='left'?left:right).map(([x,y])=>({x:x*rx,y:y*ry}));
+ const last=verts[verts.length-1],first=verts[0];
+ ctx.beginPath();ctx.moveTo((last.x+first.x)/2,(last.y+first.y)/2);
+ for(let i=0;i<verts.length;i++){
+  const p=verts[i],q=verts[(i+1)%verts.length];
   ctx.quadraticCurveTo(p.x,p.y,(p.x+q.x)/2,(p.y+q.y)/2);
  }
  ctx.closePath();
 }
 function drawMilkCerealSpill(ctx,o){
  ctx.save();ctx.translate(o.x,o.y);ctx.rotate(o.angle||0);
- const r=o.r,seed=(o.x*.013+o.y*.007);
- ctx.translate(2,4);milkOrganicPath(ctx,r,seed);
- ctx.fillStyle='#644d3f4a';ctx.fill();ctx.translate(-2,-4);
- milkOrganicPath(ctx,r,seed);
- ctx.fillStyle='#fff4dd';ctx.fill();ctx.strokeStyle='#e0cbaa';ctx.lineWidth=1.7;ctx.stroke();
- // Semi-transparent gloss following the same uneven outline, never an oval decal.
- ctx.save();ctx.translate(-r*.11,-r*.13);ctx.scale(.78,.61);
- milkOrganicPath(ctx,r,seed);ctx.fillStyle='#ffffff8a';ctx.fill();ctx.restore();
- for(let i=0;i<8;i++){
-  const a=(i*2.39996+seed),dr=.27+.48*((i*7%9)/8),x=Math.cos(a)*r*dr,y=Math.sin(a)*r*dr*.64;
+ const rx=o.rx||o.r,ry=o.ry||o.r*.7,shape=o.spillShape||'left';
+ ctx.translate(2,3);milkOrganicPath(ctx,rx,ry,shape);
+ ctx.fillStyle='#5b463941';ctx.fill();ctx.translate(-2,-3);
+ milkOrganicPath(ctx,rx,ry,shape);
+ ctx.fillStyle='#fff3da';ctx.fill();ctx.strokeStyle='#e3cba8';ctx.lineWidth=1.8;ctx.stroke();
+ // Translucent gloss is small and cannot hide the vehicle (decals draw beneath cars).
+ ctx.save();ctx.translate(-rx*.09,-ry*.15);ctx.scale(.86,.65);
+ milkOrganicPath(ctx,rx,ry,shape);ctx.fillStyle='#ffffff48';ctx.fill();ctx.restore();
+ const pieces=shape==='left'?7:15;
+ for(let i=0;i<pieces;i++){
+  const a=i*2.3999632+(shape==='left'?.7:.25),
+   q=.17+.53*((i*7%13)/12),x=Math.cos(a)*rx*q,y=Math.sin(a)*ry*q;
   ctx.save();ctx.translate(x,y);ctx.rotate(a*.35);
   ctx.fillStyle=i%3===0?'#ba853e':i%3===1?'#d9ab5b':'#edc986';
-  ctx.beginPath();ctx.moveTo(-3.3,-3);ctx.quadraticCurveTo(2.2,-5.2,5.4,-1.2);
-  ctx.quadraticCurveTo(6.5,3.7,0,4.1);ctx.quadraticCurveTo(-5.3,2.6,-3.3,-3);ctx.fill();
-  ctx.strokeStyle='#95612b';ctx.lineWidth=.8;ctx.stroke();ctx.restore();
+  ctx.beginPath();ctx.moveTo(-3.2,-2.6);ctx.quadraticCurveTo(2.1,-5,5.1,-1.1);
+  ctx.quadraticCurveTo(6,3.5,0,4);ctx.quadraticCurveTo(-5,2.5,-3.2,-2.6);ctx.fill();ctx.restore();
  }
  ctx.restore();
 }
@@ -2452,6 +2491,12 @@ function drawObstacle(ctx,o){
 // A knife near the jam is a low, visible obstacle. A fast, centred crossing
 // triggers a short hop over the sticky patch; only the knife and ramp launch cars.
 function contactWithProp(c,o,previous=null){
+  // This is a full-height ceramic obstacle, not a visual-only milk effect.
+  if(o.type==='milk_cereal_cup'&&o.solid&&c.jump>0){
+    if(K.segmentCircle(previous||c,c,o,(o.r||70)+(c.width||36)*.42)){
+      c.jump=0;c.jumpTotal=0;c.jumpCd=Math.max(c.jumpCd,.4);
+    }else return false;
+  }
  // Orange rind remains physical even on an airborne contact: prevent phasing through.
  if((o.type==='orange_bump'||(o.type==='orange'&&o.solid))&&c.jump>0){
    const from=previous||c;
@@ -3160,8 +3205,8 @@ const TTRShowroomStarts=Object.freeze({scatto:0,tuono:19,polvere:0,lampo:0,aero:
 // v0.13.6.61 — un solo renderer 2D del modello Scatto GT per ogni anteprima.
 // Il foglio 192-frame originale resta la fonte unica per menu e garage;
 // nessun filtro di luce/ombra specifico per modello, nessun falso shadow layer.
-const TTRShowroom60=Object.freeze({version:'0.13.6.63',reference:'scatto',columns:12,frames:192,
-  rotationFramesPerSecond:26.4,menuCycleSeconds:3.35,hopPixels:44,drivePixels:38,
+const TTRShowroom60=Object.freeze({version:'0.13.6.64',reference:'scatto',columns:12,frames:192,
+  rotationFramesPerSecond:26.4,menuCycleSeconds:2.9,hopPixels:66,drivePixels:33,
   contactShadows:false,cssStageAnimation:false,source:'approved-192-frame-turntables'});
 window.TTRShowroomPresentation=TTRShowroom60;
 const TTRShowroomFrameMetrics=Object.create(null);
@@ -3201,12 +3246,12 @@ function drawShowroom(canvas,index,view='menu'){
    const smooth=u=>{u=Math.max(0,Math.min(1,u));return u*u*(3-2*u)};
    // Accelerate, execute one clearly visible arcade hop, land and settle.
    // Values are in the fixed 520x300 preview canvas; the garage is untouched.
-   if(phase>=.12&&phase<.58)drive=smooth((phase-.12)/.46);
-   else if(phase>=.58&&phase<1.54)drive=1;
-   else if(phase>=1.54&&phase<2.03)drive=1-smooth((phase-1.54)/.49);
-   // Strong but brief takeoff / landing: clear on iPhone in landscape, no idle levitation.
-   if(phase>=.68&&phase<1.55)hop=TTRShowroom60.hopPixels*Math.sin(Math.PI*(phase-.68)/.87);
-   else if(phase>=1.55&&phase<1.73)hop=4*Math.sin(Math.PI*(phase-1.55)/.18);
+   if(phase>=.13&&phase<.50)drive=smooth((phase-.13)/.37);
+   else if(phase>=.50&&phase<1.45)drive=1;
+   else if(phase>=1.45&&phase<1.95)drive=1-smooth((phase-1.45)/.50);
+    // Clearly legible launch at actual canvas resolution; NO permanent floating.
+   if(phase>=.55&&phase<1.51)hop=TTRShowroom60.hopPixels*Math.sin(Math.PI*(phase-.55)/.96);
+   else if(phase>=1.51&&phase<1.74)hop=6*Math.sin(Math.PI*(phase-1.51)/.23);
  }
  ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
  if(valid){
@@ -3458,8 +3503,10 @@ function render(){const ratio=Math.min(race?.mode==='online'&&onlineSession&&!on
  if(race){race.oils.forEach(o=>renderOil(g,o));race.pickups.forEach(p=>drawBox(g,p));
   // Ramp must always be BELOW the flying vehicle; otherwise the bread sprite masks the jump.
   const visibleProp=o=>Math.abs(o.x-camX)<halfW+145&&Math.abs(o.y-camY)<halfH+145;
-  props.filter(o=>o.type==='ramp'&&visibleProp(o)).forEach(o=>drawObstacle(g,o));
-  [...props.filter(o=>o.type!=='ramp'&&visibleProp(o)).map(o=>({y:o.y,prop:o})),...race.cars.filter(c=>!c.eliminated&&c.jump<=0).map(c=>({y:c.y,car:c}))].sort((a,b)=>a.y-b.y).forEach(e=>e.prop?drawObstacle(g,e.prop):carSprite(g,e.car));
+  // Floor spills are decals below all four wheels, irrespective of their y-sort position.
+   props.filter(o=>o.type==='milk_cereal_spill'&&visibleProp(o)).forEach(o=>drawObstacle(g,o));
+   props.filter(o=>o.type==='ramp'&&visibleProp(o)).forEach(o=>drawObstacle(g,o));
+   [...props.filter(o=>o.type!=='ramp'&&o.type!=='milk_cereal_spill'&&visibleProp(o)).map(o=>({y:o.y,prop:o})),...race.cars.filter(c=>!c.eliminated&&c.jump<=0).map(c=>({y:c.y,car:c}))].sort((a,b)=>a.y-b.y).forEach(e=>e.prop?drawObstacle(g,e.prop):carSprite(g,e.car));
   // Flying cars are always in foreground; ground shadow remains at real collision position.
   race.cars.filter(c=>!c.eliminated&&c.jump>0).forEach(c=>carSprite(g,c));
  for(const c of race.cars){if(!c.eliminated&&c.claw>0&&c.clawTarget)drawClawCable(g,c,c.clawTarget);}
@@ -3486,6 +3533,18 @@ window.TTROnlineDebug={state:()=>onlineSession?{...onlineSession,connected:onlin
 window.TTREliminationDebug={state:()=>race?.elim?{mode:race.mode,round:race.elim.round,state:race.elim.state,points:[...race.elim.points],goal:race.elim.goal,active:eliminationActive().map(c=>c.id),progress:race.cars.map(c=>c.elimDistance||0)}:null,knockOut:(id)=>{if(race?.mode!=='elimination')return false;return knockOutElimination(race.cars[id]);},award:(id)=>{if(race?.mode!=='elimination')return false;return awardEliminationPoint(race.cars[id]);}};
 window.TTRDebug={
  getMenuClock:()=>({clock,phase:clock%TTRShowroom60.menuCycleSeconds,menuVisible:!$('screen').hidden}),
+ testMilkCupCollision:()=>{
+    const bowl=props.find(o=>o.type==='milk_cereal_cup');if(!bowl)return {pass:false,reason:'cup not found'};
+    const makeCar=(jump)=>({x:bowl.x-60,y:bowl.y,a:0,speed:105,width:36,length:62,
+       jump,jumpTotal:jump,jumpCd:0,hitVX:0,hitVY:0});
+    const grounded=makeCar(0),airborne=makeCar(.5);
+    const old={x:bowl.x-105,y:bowl.y};
+    const groundHit=contactWithProp(grounded,bowl,old);
+    const airHit=contactWithProp(airborne,bowl,old);
+    return {pass:!!(bowl.solid&&groundHit&&airHit&&airborne.jump===0),
+      solid:bowl.solid,groundHit,airHit,airborneJumpAfter:airborne.jump,
+      groundSeparation:Math.hypot(grounded.x-bowl.x,grounded.y-bowl.y)};
+  },
  testOrangeCollision:()=>props.filter(o=>o.type==='orange'||o.type==='orange_bump').map(o=>{
    const c={x:o.x,y:o.y,a:0,speed:150,width:36,length:64,hitVX:0,hitVY:0,jump:.2,jumpTotal:.2,jumpCd:0};
    const hit=contactWithProp(c,o,{x:o.x-35,y:o.y});
@@ -3499,8 +3558,8 @@ window.TTRDebug={
    ctx.restore();return canvas.toDataURL('image/png');
  },
  testMilkSlip:()=>{
-   if(!race||milkCerealSpills.length<3)return false;
-   const c=race.player,o=milkCerealSpills[2];c.x=o.x;c.y=o.y;c.speed=105;c.jump=0;c.slip=0;c.oilCooldown=0;c.oilSpin=0;
+   if(!race||milkCerealSpills.length<2)return false;
+   const c=race.player,o=milkCerealSpills[1];c.x=o.x;c.y=o.y;c.speed=105;c.jump=0;c.slip=0;c.oilCooldown=0;c.oilSpin=0;
    c.respawnGrace=2;race.countdown=0;return true;
  },
  testImpactEjection:()=>{
@@ -3539,7 +3598,7 @@ window.TTRDebug={
  testOilPlayer:()=>{if(!race||race.cars.length<2)return false;const c=race.player,q=trackPoint(.32);c.x=q.x;c.y=q.y;c.a=tangent(.32);c.speed=120;c.jump=0;c.slip=0;c.skidVX=0;c.skidVY=0;c.oilCooldown=0;c.bridgeMissActive=false;c.bridgeMissPenalty=0;c.bridgeMissGrace=0;c.offtrack=false;c.offtrackEntry=null;c.respawnGrace=0;c.auditP=.32;c.auditTravel=0;c.auditCleanTime=0;c.p=.32;c.lastP=.32;c.shortcutRespawns=0;c.oilSpin=0;
  c.lastValidPosition={x:c.x,y:c.y,p:.32,a:c.a,speed:60,laps:c.lapsCompleted,flags:c.flags.slice()};
  race.countdown=0;race.oils=[{x:c.x,y:c.y,r:34,t:9,owner:1,phase:0}];return true;},
- getCerealSpills:()=>milkCerealSpills.map(p=>({x:p.x,y:p.y,r:p.r,roadDistance:nearestCourse(p,points).distance})),
+ getCerealSpills:()=>milkCerealSpills.map(p=>({x:p.x,y:p.y,rx:p.rx,ry:p.ry,shape:p.spillShape,roadDistance:nearestCourse(p,points).distance})),
  getOrangeRind:()=>props.filter(p=>p.type==='orange_bump').map(p=>({x:p.x,y:p.y,r:p.r,solid:p.solid,jump:p.jump})),
  getTrackMeta:()=>({jamPatch,courseYShift:K.COURSE_Y_SHIFT,crumbCount:K.crumbMarkers().length,worldW:WORLD_W,worldH:WORLD_H,length:TRACK_LENGTH,sections:sectionNames,sectionRanges,shortcutStart:shortcutFrom,shortcutEnd:shortcutTo,shortcut:shortcutSamples.map(q=>({x:q.x,y:q.y}))}),testEnterShortcut:()=>{if(!race)return false;const c=race.player,pt=shortcutPoint(.15),q=shortcutPoint(.19);c.x=pt.x;c.y=pt.y;c.a=Math.atan2(q.y-pt.y,q.x-pt.x);c.speed=160;c.respawnGrace=0;c.offtrack=false;c.offtrackEntry=null;race.countdown=0;return true;},teleportForCamera:(phase)=>{if(!race)return false;const c=race.player,p=trackPoint(phase);c.x=p.x;c.y=p.y;c.a=tangent(phase);c.speed=0;c.hitVX=c.hitVY=0;c.offtrack=false;return true;},getCamera:()=>({x:camX,y:camY,scale,viewportWidth:sw/scale,viewportHeight:sh/scale}),
  testFinishInnerLine:(offset=110)=>{if(!race)return false;const c=race.player,pt=trackPoint(0),a=tangent(0),nx=-Math.sin(a),ny=Math.cos(a),fx=Math.cos(a),fy=Math.sin(a);c.x=pt.x-fx*17+nx*offset;c.y=pt.y-fy*17+ny*offset;c.a=a;c.speed=160;c.flags=[true,true,true];c.lapGateBlocked=false;c.offtrack=false;c.respawnGrace=0;c.lastP=.966;c.p=.966;c.offtrackEntry=null;race.countdown=0;return true;},
