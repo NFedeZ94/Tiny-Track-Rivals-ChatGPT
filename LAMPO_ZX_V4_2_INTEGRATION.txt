@@ -1,1 +1,5 @@
-Lampo ZX V4.2 visual integration. Replaces lampo, lampo_showroom and lampo_turntable inline images. Original vehicle parameters, hitboxes, online code and all other vehicles unchanged. Source GLBs in separate archive.
+TINY TRACK RIVALS v0.13.6.53 — CAMERA & AVVIO GARA
+- Lampo ZX V4.2 GLB invariato; nuova turntable 192 viste, elevazione 22° / orbita orizzontale.
+- Fix export/import ttrCalibratedProfile per creare auto in Gara Veloce e Eliminazione.
+- Nessun cambiamento a fisica, statistiche, hitbox e altri veicoli.
+- Build offline pronta per pubblicazione manuale; NON pubblicata online.

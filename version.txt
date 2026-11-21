@@ -1,2 +1,1 @@
-0.13.6.51
-Lampo ZX V4.2 integrated visual assets (garage/race); Tuono V8 v11 preserved
+v0.13.6.53 — Lampo ZX V4.2: garage camera corrected; race initialization repaired
