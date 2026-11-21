@@ -1,0 +1,12 @@
+TINY TRACK RIVALS — v0.13.6.54 · CORREZIONI LAMPO E GAMEPLAY
+
+BASE: v0.13.6.53 (backup integrale non modificato).
+Lamp ZX V4.2: vera vista di gara ortografica dall’alto (GLB RACE originale); showroom ritagliato e luci uniformate; turntable 192 viste V4.2 originali uniformate. Varianti gara riallineate allo stesso modello.
+Eliminazione: camera senza ritardo artificiale di switch sul primo, inseguimento rapido se fuori quadro; distacco minimo 320 unità + separazione minima 175 + 0,55 s continuativi prima di escludere l’ultimo. Mai eliminare la vettura in testa per camera lag.
+Fuori pista: rientro autonomo con tolleranza, nessun respawn per un modesto taglio esterno; resta la verifica di scorciatoie importanti e il vero bordo del tavolo.
+Collisioni: singolo impulso per contatto SAT, massa/velocità/angolo preservati, rimbalzo e imbardata limitati.
+Colazione Turbo: tips rampa sempre visibili nel caricamento; dopo carica si preme AVVIA GARA. Le stringhe sono localizzate in IT/EN/ES.
+
+TEST: controllare grafica e FPS sui due telefoni, collisioni frontali/laterali, rientro in curva e passaggi di leadership in Eliminazione. Online Beta Render non toccato.
+
+PER PUBBLICARE: estrai il file index.html alla radice di NFedeZ94/Tiny-Track-Rivals-ChatGPT sostituendo esclusivamente index.html, carica version.txt, conserva gli altri asset del repository e verifica Pages dopo deploy. Il file e’ autonomo e puo’ essere aperto localmente.
