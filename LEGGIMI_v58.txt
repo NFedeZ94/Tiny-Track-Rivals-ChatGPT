@@ -1,0 +1,12 @@
+TINY TRACK RIVALS — v0.13.6.58 / LAMPO ZX, UNIFICAZIONE STILISTICA
+
+Base conservata: v0.13.6.57 ANTEPRIMA.
+Modificati soltanto i fotogrammi precalcolati del turntable di Lampo ZX (192 angoli) e la miniatura showroom di fallback.
+Il gioco richiama la stessa sequenza per menu e garage: non è un filtro al canvas, e non è una fotografia statica.
+Ricalibrazione mirata alle tonalità verde lime: luminosità/tonalità per carrozzeria da modellino arcade, ombre di forma mantenute; vetri, gomme, cerchi, ombre trasparenti e geometria alpha non modificati.
+Sprite gara dall'alto, mesh GLB V4.2 originale, Scatto, Tuono, Polvere, IA, fisica, audio, online e altre schermate non modificati.
+Sono incluse immagini di confronto ed il sorgente della trasformazione per rigenerare gli asset senza lavorazioni manuali distruttive.
+
+STATO: ANTEPRIMA DA VALIDARE ARTISTICAMENTE. Non ancora pubblicata sul sito esterno o testata su Safari iPhone reale.
+Il pacchetto mantiene la struttura minima del precedente zip (index.html, version.txt, README).
+Non sovrascrivere eventuali file di manifest e icone del sito durante una pubblicazione.
