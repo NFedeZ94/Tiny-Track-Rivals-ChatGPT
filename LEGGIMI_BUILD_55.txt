@@ -1,7 +1,0 @@
-TINY TRACK RIVALS v0.13.6.55 — LAMPO SHOWROOM / ENGINE AUDIO
-
-Base v0.13.6.54 preservata senza modificare top-down sprite, camera Eliminazione, collisioni, tolleranza fuoripista, online o fisica.
-LAMPO: Garage + menu prendono le immagini dal medesimo atlante GLB V4.2 a 192 frame. In menu viene usata l'inquadratura iniziale anteriore tre quarti; in garage la rotazione parte esattamente dallo stesso frame. Rotazione regolare 26.4 frame/s, scala contenuta per evitare tagli.
-AUDIO: 5 profili motore re-equalizzati (sintesi dolce, registri/armoniche distinti, filtro più chiuso, gain bus minore, compressione dolce e transizioni senza scatti). Volumi e interruttori originali conservati. Test d'ascolto soggettivo consigliato su iPhone.
-Verifica manuale: seleziona Lampo nel menu, entra nel Garage, controlla frame iniziale e giro 360, poi avvia gara e controlla che la vista dall'alto non sia mutata. Prova accelerazioni, boost, freno con audio iPhone e cuffie.
-Pubblicazione: sostituire index.html e version.txt nella radice GitHub Pages, conservare gli altri asset; questo ZIP è pronto per il caricamento ma non è pubblicato automaticamente.
