@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1a2e"><meta name="ttr-build" content="v0.13.6.64"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tiny Track Rivals"><meta name="application-name" content="Tiny Track Rivals"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><link rel="manifest" href="manifest.webmanifest"><title>Tiny Track Rivals — Colazione Turbo</title><style>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1a2e"><meta name="ttr-build" content="v0.13.6.65"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tiny Track Rivals"><meta name="application-name" content="Tiny Track Rivals"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><link rel="manifest" href="manifest.webmanifest"><title>Tiny Track Rivals — Colazione Turbo</title><style>
 
 :root{color-scheme:dark;--cyan:#60d9ff;--yellow:#ffd55d;--ink:#071326;--line:#345577;--orange:#f39b43}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#081324;color:#f0f7ff;font-family:system-ui,-apple-system,'Arial Black',sans-serif;touch-action:none;user-select:none}#game{position:fixed;inset:0;width:100vw;height:100dvh;display:block;background:#7a5842}.screen{position:absolute;inset:0;z-index:8;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,rgba(3,10,24,.94),rgba(8,36,62,.84)),repeating-linear-gradient(45deg,#061b2b 0 35px,#122b43 35px 70px);padding:12px;overflow:auto;touch-action:pan-y}.panel{width:min(840px,100%);border:2px solid #5092bc;border-radius:22px;background:linear-gradient(170deg,#162f4e,#0a1a30 80%);box-shadow:0 18px 70px #000a,inset 0 0 35px #23688d22;padding:clamp(18px,4vw,40px);max-height:calc(100dvh - 24px);overflow-y:auto}.panel.resultsPanel{width:min(760px,100%);padding:clamp(16px,3vw,26px)}.panel.resultsPanel.compact{width:min(800px,100%);padding:16px 18px;overflow:hidden}.eyebrow{font-size:11px;letter-spacing:.2em;color:#86dfff;font-weight:850;margin:0 0 10px;text-transform:uppercase}.logo{font-weight:1000;font-style:italic;font-size:clamp(35px,8vw,83px);letter-spacing:-.055em;line-height:.94;color:#ffd054;text-shadow:3px 4px 0 #9f3c24,7px 8px 0 #06111e}.logo span{display:block;color:#fff;font-size:.48em;letter-spacing:.08em;text-shadow:3px 4px 0 #385a76}.sub{color:#bed1e2;line-height:1.45;font-size:14px;max-width:680px;margin:16px 0 22px}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.chip{padding:7px 10px;border-radius:99px;border:1px solid #446b86;background:#102e4b;color:#c8e2f8;font-size:12px;font-weight:700}.menu-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:20px}.resultsPanel .menu-row{margin-top:14px}.btn{touch-action:manipulation;border:2px solid #eccd76;border-radius:13px;background:linear-gradient(#fff3a5,#f5b73f);box-shadow:0 4px 0 #ab5d1f;color:#17203a;font-size:15px;font-weight:950;padding:13px 22px;cursor:pointer;text-align:center;min-height:48px}.btn.secondary{background:linear-gradient(#20466a,#123250);color:#e5f5ff;border-color:#5293b8;box-shadow:0 4px 0 #07182b}.btn:active{transform:translateY(3px);box-shadow:none}.settings{display:flex;flex-wrap:wrap;gap:14px;margin-top:19px}.settings label{display:flex;flex-direction:column;gap:5px;color:#add7ef;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.settings select{font-size:15px;background:#102943;color:#fff;border:1px solid #497ca2;padding:10px;border-radius:9px;min-width:130px}.note{font-size:12px;color:#a9c1d2;line-height:1.55;margin:17px 0 0}.resultTitle{font-size:clamp(28px,5vw,45px);font-weight:950;color:#ffe17d;margin:0 0 14px}.results{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}.results td{border-bottom:1px solid #3b5972;padding:8px 4px;vertical-align:middle}.results tr.me{color:#ffe395;font-weight:850}.results.compact{font-size:12px}.results.compact td{padding:5px 3px}.results td:first-child{width:44px}.resultSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin:10px 0 14px}.resultCard{border:1px solid #36617d;background:#0b1f36;border-radius:12px;padding:8px 10px}.resultCard b{display:block;color:#8fe5fd;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}.variantDot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:7px;vertical-align:-1px;border:1px solid #ffffff99;box-shadow:0 0 0 1px #0a1325}#hud{position:fixed;inset:0;pointer-events:none;z-index:4;display:none}.hudTop{position:absolute;left:8px;right:8px;top:max(7px,env(safe-area-inset-top));display:flex;align-items:flex-start;justify-content:space-between;gap:5px}.statBlock{border:1px solid #3f829e;background:#071831df;border-radius:10px;padding:8px 11px;box-shadow:0 3px 0 #0008;min-width:82px}.statBlock small{font-size:9px;display:block;color:#8ce3ff;font-weight:850;letter-spacing:.08em}.statBlock strong{font-size:clamp(15px,2.8vw,23px);color:#fff}.itemBlock{border-color:#b78b41}.itemBlock strong{color:#ffde79}#hint{position:absolute;left:50%;top:23%;transform:translate(-50%,-50%);background:#04172bcf;border:1px solid #6bc9e8;color:#fff;font-size:clamp(17px,4vw,33px);font-weight:950;border-radius:12px;padding:12px 19px;text-align:center;opacity:0;transition:opacity .15s;white-space:nowrap}#hint.show{opacity:1}#controls{position:fixed;z-index:5;bottom:max(10px,env(safe-area-inset-bottom));left:10px;right:10px;display:none;pointer-events:none;justify-content:space-between;gap:10px}.ctrlGroup{display:flex;align-items:end;gap:8px;pointer-events:none}.control{border:2px solid #b1d7ef;background:linear-gradient(155deg,#214666d9,#07192de6);color:#fff;box-shadow:inset 0 1px 8px #ffffff25,0 4px 0 #010711bd;border-radius:18px;width:clamp(52px,12vw,76px);height:clamp(56px,14vw,81px);font-size:28px;font-weight:950;touch-action:none;pointer-events:auto;display:flex;align-items:center;justify-content:center}.control.small{font-size:14px;width:clamp(56px,12vw,72px);color:#ffdb7c}.control.active{background:#eabf52;color:#0a1c28;transform:translateY(3px);box-shadow:0 1px #010711}.hudBottom{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);font-size:10px;white-space:nowrap;color:#e3f5ff;background:#071c30bd;padding:5px 10px;border-radius:8px}#pauseBtn{pointer-events:auto;position:absolute;right:9px;top:calc(63px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:8px 13px}#mini{position:absolute;top:calc(70px + env(safe-area-inset-top));left:10px;width:140px;height:90px;background:#071b2acb;border:1px solid #417fa8;border-radius:8px}#orientation{display:none;position:fixed;inset:auto 20px 100px;z-index:3;text-align:center;color:#f5f9ff;font-size:11px;opacity:.8}#muteBtn{pointer-events:auto;position:absolute;right:9px;top:calc(101px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:7px 11px}@media(orientation:portrait){#mini{width:96px;height:64px;top:calc(68px + env(safe-area-inset-top))}#pauseBtn{top:calc(68px + env(safe-area-inset-top))}#muteBtn{top:calc(105px + env(safe-area-inset-top))}#orientation{display:block}.hudBottom{bottom:99px;font-size:9px}.control{height:62px;width:58px}.control.small{width:57px}}@media(max-height:500px){.panel{padding:15px}.sub{margin:7px 0}.menu-row{margin-top:8px}.settings{margin-top:8px}.note{margin-top:9px}.control{height:58px}.hudBottom{display:none}#mini{top:calc(58px + env(safe-area-inset-top))}}
 
@@ -926,6 +926,88 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
   #screen.v11-screen .v11-options #settingsBtn::after{width:18px!important;height:18px!important;}
 }
 </style>
+
+<style id="ttr-v65-menu-alignment-pointer">
+/* v0.13.6.65 -- unified seven-glyph alignment and restored early-retro menu selector.
+   The in-game selection line is part of the button border; leave >=6px visual clearance. */
+#screen.v11-screen .v11-options .retro-option {
+  position:relative;
+  box-sizing:border-box;
+  padding-right:clamp(36px,5.4vw,46px)!important;
+}
+#screen.v11-screen .v11-options .retro-option::after,
+#screen.v11-screen .v11-options #garageBtn::after,
+#screen.v11-screen .v11-options #settingsBtn::after {
+  content:""!important;
+  position:absolute!important;
+  display:block!important;
+  box-sizing:border-box!important;
+  width:clamp(14px,3.6vh,19px)!important;
+  height:clamp(14px,3.6vh,19px)!important;
+  top:calc(50% - 1px)!important;
+  right:clamp(10px,1.45vw,14px)!important;
+  bottom:auto!important;
+  left:auto!important;
+  transform:translateY(-50%)!important;
+  margin:0!important;
+  padding:0!important;
+  opacity:1!important;
+  background-color:currentColor!important;
+  background-position:center!important;
+  -webkit-mask-position:center center!important;
+  mask-position:center center!important;
+  -webkit-mask-size:contain!important;
+  mask-size:contain!important;
+  -webkit-mask-repeat:no-repeat!important;
+  mask-repeat:no-repeat!important;
+  pointer-events:none;
+  animation:none!important;
+}
+/* Original triangular cursor from the older retro menu, replacing v62's thin ➜ glyph.
+   Movement belongs ONLY to the cursor, not to the selection button. */
+#screen.v11-screen .v11-options .retro-option::before {
+  content:'▶'!important;
+  position:absolute!important;
+  display:none!important;
+  left:7px!important;
+  right:auto!important;
+  top:calc(50% - 1px)!important;
+  font-family:Impact,'Arial Black',sans-serif!important;
+  font-style:normal!important;
+  font-size:clamp(13px,3.6vh,17px)!important;
+  font-weight:900!important;
+  line-height:1!important;
+  color:currentColor!important;
+  text-shadow:none!important;
+  opacity:1!important;
+  transform:translate3d(0,-50%,0);
+  animation:none!important;
+  pointer-events:none;
+}
+#screen.v11-screen .v11-options .retro-option.selected::before,
+#screen.v11-screen .v11-options .retro-option:focus-visible::before {
+  display:block!important;
+  animation:ttrV65RetroPointer .55s steps(2,end) infinite!important;
+}
+@keyframes ttrV65RetroPointer {
+  0%,100% {transform:translate3d(0,-50%,0)}
+  50% {transform:translate3d(3px,-50%,0)}
+}
+@media (max-width:620px) and (orientation:landscape) {
+  #screen.v11-screen .v11-options .retro-option {padding-right:29px!important}
+  #screen.v11-screen .v11-options .retro-option::after,
+  #screen.v11-screen .v11-options #garageBtn::after,
+  #screen.v11-screen .v11-options #settingsBtn::after {
+    width:14px!important;height:14px!important;right:8px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  #screen.v11-screen .v11-options .retro-option.selected::before,
+  #screen.v11-screen .v11-options .retro-option:focus-visible::before {
+    animation:none!important;
+  }
+}
+</style>
 </head>
 <body>
 <canvas id="game" aria-label="Circuito Colazione Turbo"></canvas><section id="onlineModal" hidden aria-label="Online: sale reali" role="dialog" aria-modal="true"><div class="online-panel">
@@ -982,7 +1064,7 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
    
   </aside>
  </div>
- <footer class="v11-foot"><div class="v11-footer-btns"><button class="mini-btn" id="langBtn" data-i18n="changeLang">LINGUA</button><button class="mini-btn" id="menuMute" data-i18n="audioOn">AUDIO ON</button><button class="mini-btn" id="audioTest" data-i18n="testSound">PROVA AUDIO</button></div><span id="audioStatus" role="status" aria-live="polite" style="display:none"></span><span class="v11-version">v0.13.6.64</span></footer>
+ <footer class="v11-foot"><div class="v11-footer-btns"><button class="mini-btn" id="langBtn" data-i18n="changeLang">LINGUA</button><button class="mini-btn" id="menuMute" data-i18n="audioOn">AUDIO ON</button><button class="mini-btn" id="audioTest" data-i18n="testSound">PROVA AUDIO</button></div><span id="audioStatus" role="status" aria-live="polite" style="display:none"></span><span class="v11-version">v0.13.6.65</span></footer>
 </div>
 <details class="v11-settings" id="retroSettings"><summary data-i18n="settings">OPZIONI</summary>
  <div class="v11-settings-card"><div class="v11-settings-head"><b data-i18n="settings">OPZIONI</b><button id="closeSettings" type="button" aria-label="Chiudi">✕</button></div>
@@ -2231,7 +2313,7 @@ function worldInit(){
   // Removed confusing spiral/cereal decoration at the end of the second bend.
   addProp(.512,'orange',163,49,true);    // Orange Jump background
   const op=trackPoint(.502),oa=tangent(.502);props.push({type:'orange_bump',x:op.x+Math.sin(oa)*32,y:op.y-Math.cos(oa)*32,r:29,solid:true,jump:false,interactive:true});
-  // v0.13.6.64: upright physical bowl; TWO irregular, rounded-edge milk stains.
+  // v0.13.6.65: upright physical bowl; TWO irregular, rounded-edge milk stains.
   // Left stain is small; right stain is elongated and extends further from the bowl.
   // Neither milk puddle is an occluding sprite or a solid obstacle.
   props.push({type:'milk_cereal_cup',x:570,y:927,r:73,solid:true,scenery:false,interactive:true,tall:true});
@@ -3205,7 +3287,7 @@ const TTRShowroomStarts=Object.freeze({scatto:0,tuono:19,polvere:0,lampo:0,aero:
 // v0.13.6.61 — un solo renderer 2D del modello Scatto GT per ogni anteprima.
 // Il foglio 192-frame originale resta la fonte unica per menu e garage;
 // nessun filtro di luce/ombra specifico per modello, nessun falso shadow layer.
-const TTRShowroom60=Object.freeze({version:'0.13.6.64',reference:'scatto',columns:12,frames:192,
+const TTRShowroom60=Object.freeze({version:'0.13.6.65',reference:'scatto',columns:12,frames:192,
   rotationFramesPerSecond:26.4,menuCycleSeconds:2.9,hopPixels:66,drivePixels:33,
   contactShadows:false,cssStageAnimation:false,source:'approved-192-frame-turntables'});
 window.TTRShowroomPresentation=TTRShowroom60;
