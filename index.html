@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1a2e"><meta name="ttr-build" content="v0.13.6.67"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tiny Track Rivals"><meta name="application-name" content="Tiny Track Rivals"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><link rel="manifest" href="manifest.webmanifest"><title>Tiny Track Rivals — Colazione Turbo</title><style>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1a2e"><meta name="ttr-build" content="v0.13.6.68"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tiny Track Rivals"><meta name="application-name" content="Tiny Track Rivals"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><link rel="manifest" href="manifest.webmanifest"><title>Tiny Track Rivals — Colazione Turbo</title><style>
 
 :root{color-scheme:dark;--cyan:#60d9ff;--yellow:#ffd55d;--ink:#071326;--line:#345577;--orange:#f39b43}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#081324;color:#f0f7ff;font-family:system-ui,-apple-system,'Arial Black',sans-serif;touch-action:none;user-select:none}#game{position:fixed;inset:0;width:100vw;height:100dvh;display:block;background:#7a5842}.screen{position:absolute;inset:0;z-index:8;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,rgba(3,10,24,.94),rgba(8,36,62,.84)),repeating-linear-gradient(45deg,#061b2b 0 35px,#122b43 35px 70px);padding:12px;overflow:auto;touch-action:pan-y}.panel{width:min(840px,100%);border:2px solid #5092bc;border-radius:22px;background:linear-gradient(170deg,#162f4e,#0a1a30 80%);box-shadow:0 18px 70px #000a,inset 0 0 35px #23688d22;padding:clamp(18px,4vw,40px);max-height:calc(100dvh - 24px);overflow-y:auto}.panel.resultsPanel{width:min(760px,100%);padding:clamp(16px,3vw,26px)}.panel.resultsPanel.compact{width:min(800px,100%);padding:16px 18px;overflow:hidden}.eyebrow{font-size:11px;letter-spacing:.2em;color:#86dfff;font-weight:850;margin:0 0 10px;text-transform:uppercase}.logo{font-weight:1000;font-style:italic;font-size:clamp(35px,8vw,83px);letter-spacing:-.055em;line-height:.94;color:#ffd054;text-shadow:3px 4px 0 #9f3c24,7px 8px 0 #06111e}.logo span{display:block;color:#fff;font-size:.48em;letter-spacing:.08em;text-shadow:3px 4px 0 #385a76}.sub{color:#bed1e2;line-height:1.45;font-size:14px;max-width:680px;margin:16px 0 22px}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.chip{padding:7px 10px;border-radius:99px;border:1px solid #446b86;background:#102e4b;color:#c8e2f8;font-size:12px;font-weight:700}.menu-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:20px}.resultsPanel .menu-row{margin-top:14px}.btn{touch-action:manipulation;border:2px solid #eccd76;border-radius:13px;background:linear-gradient(#fff3a5,#f5b73f);box-shadow:0 4px 0 #ab5d1f;color:#17203a;font-size:15px;font-weight:950;padding:13px 22px;cursor:pointer;text-align:center;min-height:48px}.btn.secondary{background:linear-gradient(#20466a,#123250);color:#e5f5ff;border-color:#5293b8;box-shadow:0 4px 0 #07182b}.btn:active{transform:translateY(3px);box-shadow:none}.settings{display:flex;flex-wrap:wrap;gap:14px;margin-top:19px}.settings label{display:flex;flex-direction:column;gap:5px;color:#add7ef;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.settings select{font-size:15px;background:#102943;color:#fff;border:1px solid #497ca2;padding:10px;border-radius:9px;min-width:130px}.note{font-size:12px;color:#a9c1d2;line-height:1.55;margin:17px 0 0}.resultTitle{font-size:clamp(28px,5vw,45px);font-weight:950;color:#ffe17d;margin:0 0 14px}.results{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}.results td{border-bottom:1px solid #3b5972;padding:8px 4px;vertical-align:middle}.results tr.me{color:#ffe395;font-weight:850}.results.compact{font-size:12px}.results.compact td{padding:5px 3px}.results td:first-child{width:44px}.resultSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin:10px 0 14px}.resultCard{border:1px solid #36617d;background:#0b1f36;border-radius:12px;padding:8px 10px}.resultCard b{display:block;color:#8fe5fd;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}.variantDot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:7px;vertical-align:-1px;border:1px solid #ffffff99;box-shadow:0 0 0 1px #0a1325}#hud{position:fixed;inset:0;pointer-events:none;z-index:4;display:none}.hudTop{position:absolute;left:8px;right:8px;top:max(7px,env(safe-area-inset-top));display:flex;align-items:flex-start;justify-content:space-between;gap:5px}.statBlock{border:1px solid #3f829e;background:#071831df;border-radius:10px;padding:8px 11px;box-shadow:0 3px 0 #0008;min-width:82px}.statBlock small{font-size:9px;display:block;color:#8ce3ff;font-weight:850;letter-spacing:.08em}.statBlock strong{font-size:clamp(15px,2.8vw,23px);color:#fff}.itemBlock{border-color:#b78b41}.itemBlock strong{color:#ffde79}#hint{position:absolute;left:50%;top:23%;transform:translate(-50%,-50%);background:#04172bcf;border:1px solid #6bc9e8;color:#fff;font-size:clamp(17px,4vw,33px);font-weight:950;border-radius:12px;padding:12px 19px;text-align:center;opacity:0;transition:opacity .15s;white-space:nowrap}#hint.show{opacity:1}#controls{position:fixed;z-index:5;bottom:max(10px,env(safe-area-inset-bottom));left:10px;right:10px;display:none;pointer-events:none;justify-content:space-between;gap:10px}.ctrlGroup{display:flex;align-items:end;gap:8px;pointer-events:none}.control{border:2px solid #b1d7ef;background:linear-gradient(155deg,#214666d9,#07192de6);color:#fff;box-shadow:inset 0 1px 8px #ffffff25,0 4px 0 #010711bd;border-radius:18px;width:clamp(52px,12vw,76px);height:clamp(56px,14vw,81px);font-size:28px;font-weight:950;touch-action:none;pointer-events:auto;display:flex;align-items:center;justify-content:center}.control.small{font-size:14px;width:clamp(56px,12vw,72px);color:#ffdb7c}.control.active{background:#eabf52;color:#0a1c28;transform:translateY(3px);box-shadow:0 1px #010711}.hudBottom{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);font-size:10px;white-space:nowrap;color:#e3f5ff;background:#071c30bd;padding:5px 10px;border-radius:8px}#pauseBtn{pointer-events:auto;position:absolute;right:9px;top:calc(63px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:8px 13px}#mini{position:absolute;top:calc(70px + env(safe-area-inset-top));left:10px;width:140px;height:90px;background:#071b2acb;border:1px solid #417fa8;border-radius:8px}#orientation{display:none;position:fixed;inset:auto 20px 100px;z-index:3;text-align:center;color:#f5f9ff;font-size:11px;opacity:.8}#muteBtn{pointer-events:auto;position:absolute;right:9px;top:calc(101px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:7px 11px}@media(orientation:portrait){#mini{width:96px;height:64px;top:calc(68px + env(safe-area-inset-top))}#pauseBtn{top:calc(68px + env(safe-area-inset-top))}#muteBtn{top:calc(105px + env(safe-area-inset-top))}#orientation{display:block}.hudBottom{bottom:99px;font-size:9px}.control{height:62px;width:58px}.control.small{width:57px}}@media(max-height:500px){.panel{padding:15px}.sub{margin:7px 0}.menu-row{margin-top:8px}.settings{margin-top:8px}.note{margin-top:9px}.control{height:58px}.hudBottom{display:none}#mini{top:calc(58px + env(safe-area-inset-top))}}
 
@@ -928,7 +928,7 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
 </style>
 
 <style id="ttr-v65-menu-alignment-pointer">
-/* v0.13.6.67 -- unified seven-glyph alignment and restored early-retro menu selector.
+/* v0.13.6.68 -- unified seven-glyph alignment and restored early-retro menu selector.
    The in-game selection line is part of the button border; leave >=6px visual clearance. */
 #screen.v11-screen .v11-options .retro-option {
   position:relative;
@@ -1010,7 +1010,7 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
 </style>
 
 <style id="ttr-v66-menu-settings-cursor">
-/* v0.13.6.67: six modes + garage remain; Settings is alone in the bottom bar. */
+/* v0.13.6.68: six modes + garage remain; Settings is alone in the bottom bar. */
 #screen.v11-screen .v11-options{gap:clamp(4px,1.65vh,8px);}
 #screen.v11-screen .v11-options .retro-option{padding-left:clamp(33px,4vw,40px)!important;}
 #screen.v11-screen .v11-foot .ttr-settings-launch{display:inline-flex;align-items:center;gap:7px;min-height:23px;padding:2px 11px;letter-spacing:.085em;border-color:#ffe8a4;background:linear-gradient(#344586,#18275e);color:#fff1ac;font-size:clamp(10px,2.2vh,14px);}
@@ -1099,6 +1099,50 @@ body #raceConfig .ttr-mode-config-actions{display:flex;justify-content:space-bet
 #languageScreen .language-options{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-height:54dvh;overflow-y:auto;}
 #languageScreen .language-btn{flex:0 1 170px;min-width:128px;}
 </style>
+
+<style id="ttr-v68-track-selection">
+/* v68: Two-step race setup: track -> mode-specific options. Consistent approved selector. */
+#trackSelect[hidden]{display:none!important}
+body #trackSelect:not([hidden]){position:fixed;inset:0;z-index:81;display:flex;align-items:center;justify-content:center;padding:max(6px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));background:rgba(2,8,29,.94);}
+#trackSelect .ttr-track-panel{width:min(1040px,98vw);height:min(520px,95dvh);display:flex;flex-direction:column;gap:7px;min-height:0;border:3px solid #ffe6a0;background:linear-gradient(146deg,#344b95,#0d1a49);color:#f5f4fa;box-shadow:0 9px 32px #000b;padding:clamp(8px,1.5vh,14px);box-sizing:border-box;}
+#trackSelect .ttr-track-head{display:flex;gap:10px;align-items:center;justify-content:space-between;flex:none;min-height:34px;}
+#trackSelect .ttr-track-head h2{font:900 clamp(17px,4.6vh,29px)/1 Impact,Arial,sans-serif;letter-spacing:.07em;color:#ffdf81;margin:0;}
+#trackSelect .ttr-track-subtitle{font:700 clamp(9px,2.3vh,12px)/1.2 system-ui,sans-serif;color:#c4e6f7;}
+#trackSelect .ttr-track-dismiss{flex:none;min-width:36px;height:30px;background:#152353;border:2px solid #c3d8ff;color:#fff4c1;font:900 20px Arial;cursor:pointer;}
+#trackSelect .ttr-track-body{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(205px,1fr);gap:9px;flex:1;min-height:0;}
+#trackSelect .ttr-track-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;align-content:start;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:2px;min-height:0;}
+#trackSelect .ttr-track-card{display:flex;align-items:center;gap:7px;text-align:left;min-width:0;min-height:57px;padding:5px 7px;border:2px solid #698eb7;background:#172c5e;color:#f5f3ee;border-radius:4px;font:800 clamp(10px,2.3vh,13px) system-ui,sans-serif;cursor:pointer;}
+#trackSelect .ttr-track-card.is-selected{background:#ffdc86;color:#162753;border-color:#fff4c1;box-shadow:0 0 0 1px #ffdc86;}
+#trackSelect .ttr-track-card:disabled{opacity:.58;cursor:not-allowed;background:#182445;border-color:#5e6e8e;color:#c8d5e4;}
+#trackSelect .ttr-track-card canvas,#trackSelect .ttr-track-empty{display:block;flex:none;width:clamp(54px,8.4vw,83px);height:43px;border-radius:2px;background:#0a1736;border:1px solid #657ca7;}
+#trackSelect .ttr-track-empty{font-size:17px;text-align:center;line-height:41px;color:#8392b6;}
+#trackSelect .ttr-track-card span.ttr-track-info{min-width:0;display:flex;flex-direction:column;gap:3px;}
+#trackSelect .ttr-track-card b{font-size:clamp(10px,2.3vh,13px);line-height:1.05;}
+#trackSelect .ttr-track-card small{font-size:clamp(8px,1.7vh,10px);font-weight:850;letter-spacing:.04em;}
+#trackSelect .ttr-track-preview{border:2px solid #6184b5;background:#0b1b40;padding:8px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;min-width:0;min-height:0;}
+#trackSelect .ttr-track-preview h3{margin:0;font:900 clamp(14px,3vh,20px) Impact,Arial,sans-serif;color:#ffdf81;text-align:center;letter-spacing:.05em;}
+#trackSelect .ttr-track-preview canvas{display:block;width:100%;max-height:56%;aspect-ratio:440/260;object-fit:contain;background:#09142d;border:1px solid #466c91;}
+#trackSelect .ttr-track-preview p{color:#d1e1ee;font:700 clamp(9px,2vh,12px)/1.25 system-ui,sans-serif;margin:0;text-align:center;}
+#trackSelect .ttr-track-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;flex:none;min-height:34px;}
+#trackSelect .ttr-track-bottom button{min-height:33px;border:2px solid #ecdbab;background:#243973;color:#ffe8aa;font:900 clamp(11px,2.6vh,15px) Impact,Arial,sans-serif;padding:5px 12px;cursor:pointer;}
+#trackSelect .ttr-track-bottom .ttr-track-continue{background:#ffe5a5;color:#142447;min-width:160px;}
+/* Same SVG, dimensions, translation and animation as selected options on the main menu. */
+#raceConfig #raceConfigStart,#loadingTrack #ttrLaunchRace,#trackSelect #trackSelectNext{position:relative!important;padding-left:clamp(33px,5.5vw,46px)!important;}
+#raceConfig #raceConfigStart::before,#loadingTrack #ttrLaunchRace::before,#trackSelect #trackSelectNext::before{
+ content:'';position:absolute;left:clamp(5px,.85vw,10px);top:50%;width:clamp(17px,3.9vh,28px);height:clamp(17px,3.9vh,28px);
+ background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2036%2036%22%3E%3Cpath%20d%3D%22M9.6%205.2c-2.3-1.4-5.1.2-5.1%203v19.6c0%202.9%202.8%204.5%205.2%203.1l19.1-10c2.6-1.5%202.6-4.2%200-5.7L9.6%205.2z%22%20fill%3D%22%2310214e%22%20stroke%3D%22%2310214e%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");background-size:100% 100%;background-repeat:no-repeat;background-position:center;
+ transform:translate3d(0,-50%,0);animation:ttrV67Selector .78s ease-in-out infinite;pointer-events:none;
+}
+#trackSelect #trackSelectNext:disabled{opacity:.5;cursor:not-allowed;}
+#trackSelect #trackSelectNext:disabled::before{animation:none;}
+#raceConfig .ttr-selected-track{border:1px solid #728ebe;background:#10214e;color:#ffdea5;padding:7px 10px;font:900 12px system-ui,sans-serif;margin:0 0 9px;}
+#careerCircuitCatalog{display:grid;grid-template-columns:1fr 1fr;gap:3px 8px;max-height:110px;overflow-y:auto;margin-top:5px;}
+#careerCircuitCatalog .ttr-career-circuit{font:750 10px system-ui,sans-serif;color:#bfcfea;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#careerCircuitCatalog .ttr-career-circuit.ready{color:#ffe18d;}
+@media(max-width:700px){#trackSelect .ttr-track-body{grid-template-columns:minmax(0,1.35fr) minmax(150px,1fr);gap:6px;}#trackSelect .ttr-track-grid{grid-template-columns:1fr;}#trackSelect .ttr-track-panel{padding:6px;gap:4px;}#trackSelect .ttr-track-card{min-height:48px;padding:3px 5px;}#trackSelect .ttr-track-card canvas,#trackSelect .ttr-track-empty{width:51px;height:36px;line-height:35px;}#trackSelect .ttr-track-preview{padding:4px;}}
+@media(orientation:portrait){#trackSelect .ttr-track-body{grid-template-columns:1fr;grid-template-rows:minmax(110px,35%) minmax(0,1fr);}#trackSelect .ttr-track-grid{grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr));}#trackSelect .ttr-track-preview{grid-row:1;}#trackSelect .ttr-track-preview canvas{width:65%;max-height:60%;}#trackSelect .ttr-track-card{min-height:50px;}#trackSelect .ttr-track-subtitle{font-size:9px;}}
+@media(prefers-reduced-motion:reduce){#raceConfig #raceConfigStart::before,#loadingTrack #ttrLaunchRace::before,#trackSelect #trackSelectNext::before{animation:none;}}
+</style>
 </head>
 <body>
 <canvas id="game" aria-label="Circuito Colazione Turbo"></canvas><section id="onlineModal" hidden aria-label="Online: sale reali" role="dialog" aria-modal="true"><div class="online-panel">
@@ -1126,7 +1170,7 @@ body #raceConfig .ttr-mode-config-actions{display:flex;justify-content:space-bet
   <div class="circuit-load-head"><div><span class="circuit-load-kicker">TINY TRACK RIVALS <b>· CIRCUITO 01 / 12</b></span><h2 id="loadingTrackName">COLAZIONE TURBO</h2><p id="loadingMode">GARA VELOCE</p></div><div class="load-powerups" id="loadingPowerups" aria-label="Power-up disponibili nel circuito"></div></div>
   <div class="circuit-load-content"><div class="circuit-load-side"><div class="circuit-map-label">MAPPA DEL CIRCUITO</div><canvas id="loadingCircuitMap" width="360" height="220" aria-label="Tracciato, rampa e scatoletta power-up"></canvas><div class="circuit-load-key"><span>● PARTENZA</span><span>◆ POWER-UP</span><span>▰ RAMPA</span></div></div></div>
   <div id="ttrCircuitTip" class="ttr-circuit-tip" role="note"><b>💡 CONSIGLIO DI GARA</b><span id="ttrRampTip">La rampa sul toast è una scorciatoia: prendila con la giusta traiettoria per guadagnare secondi. Se sbagli l'atterraggio, perderai velocità!</span></div>
-   <div class="circuit-load-bottom"><span id="loadingStateLabel" data-i18n="loading">CARICAMENTO CIRCUITO...</span><div class="circuit-load-bar"><div id="loadingRaceFill"></div></div><button id="ttrLaunchRace" type="button" class="btn ttr-launch-race" hidden>▶ AVVIA GARA</button></div>
+   <div class="circuit-load-bottom"><span id="loadingStateLabel" data-i18n="loading">CARICAMENTO CIRCUITO...</span><div class="circuit-load-bar"><div id="loadingRaceFill"></div></div><button id="ttrLaunchRace" type="button" class="btn ttr-launch-race" hidden>AVVIA GARA</button></div>
  </div>
 </section>
 <section id="languageScreen" class="screen" hidden><div class="panel lang-panel"><div class="flag-tape"></div><div class="logo-mark small-logo"><span class="logo-tiny">TINY TRACK</span><span class="logo-rivals">RIVALS</span></div><p class="eyebrow">SELECT LANGUAGE · SELEZIONA LA LINGUA · ELIGE TU IDIOMA</p><h1 class="lang-head">Scegli la tua lingua</h1><div class="language-options"><button class="btn language-btn" data-lang="it">🇮🇹 ITALIANO</button><button class="btn language-btn" data-lang="en">🇬🇧 ENGLISH</button><button class="btn language-btn" data-lang="es">🇪🇸 ESPAÑOL</button><button class="btn language-btn" data-lang="de">🇩🇪 DEUTSCH</button><button class="btn language-btn" data-lang="fr">🇫🇷 FRANÇAIS</button><button class="btn language-btn" data-lang="pt">🇵🇹 PORTUGUÊS</button></div></div></section>
@@ -1154,7 +1198,7 @@ body #raceConfig .ttr-mode-config-actions{display:flex;justify-content:space-bet
    
   </aside>
  </div>
- <footer class="v11-foot"><div class="v11-footer-btns"><button class="mini-btn ttr-settings-launch" id="settingsBtn" type="button" aria-controls="retroSettings" aria-haspopup="dialog"><span class="ttr-settings-gear" aria-hidden="true">⚙︎</span><span data-i18n="settings">IMPOSTAZIONI</span></button></div><span class="v11-version">v0.13.6.67</span></footer>
+ <footer class="v11-foot"><div class="v11-footer-btns"><button class="mini-btn ttr-settings-launch" id="settingsBtn" type="button" aria-controls="retroSettings" aria-haspopup="dialog"><span class="ttr-settings-gear" aria-hidden="true">⚙︎</span><span data-i18n="settings">IMPOSTAZIONI</span></button></div><span class="v11-version">v0.13.6.68</span></footer>
 </div>
 <details class="v11-settings" id="retroSettings" role="dialog" aria-modal="true" aria-label="Impostazioni"><summary data-i18n="settings">IMPOSTAZIONI</summary>
  <div class="v11-settings-card"><div class="v11-settings-head"><b data-i18n="settings">IMPOSTAZIONI</b><button id="closeSettings" type="button" aria-label="Chiudi">✕</button></div>
@@ -1169,17 +1213,28 @@ body #raceConfig .ttr-mode-config-actions{display:flex;justify-content:space-bet
  <label><span data-i18n="volumeEngine">Motori</span><input id="volEngine" type="range" min="0" max="100" value="54"></label>
  <label><span data-i18n="volumeEffects">Effetti</span><input id="volEffects" type="range" min="0" max="100" value="70"></label></div></div>
  </details>
+
+<section id="trackSelect" role="dialog" aria-modal="true" aria-labelledby="trackSelectTitle" hidden>
+ <div class="ttr-track-panel">
+  <header class="ttr-track-head"><div><h2 id="trackSelectTitle">SCEGLI IL CIRCUITO</h2><div id="trackSelectSubtitle" class="ttr-track-subtitle">GARA VELOCE · 1 GIOCABILE / 12 PREVISTI</div></div><button class="ttr-track-dismiss" id="trackSelectClose" type="button" aria-label="Chiudi">×</button></header>
+  <div class="ttr-track-body">
+   <div id="trackSelectGrid" class="ttr-track-grid" role="group" aria-label="Catalogo tracciati"></div>
+   <aside class="ttr-track-preview"><h3 id="trackSelectSelected">COLAZIONE TURBO</h3><canvas id="trackSelectMap" width="440" height="260" aria-label="Minimappa reale del circuito selezionato"></canvas><p id="trackSelectInfo">Pista disponibile · power-up su tutto il percorso</p></aside>
+  </div>
+  <div class="ttr-track-bottom"><button type="button" id="trackSelectBack">← INDIETRO</button><button type="button" class="ttr-track-continue" id="trackSelectNext">CONTINUA</button></div>
+ </div>
+</section>
 <section id="raceConfig" class="ttr-mode-config" role="dialog" aria-modal="true" aria-labelledby="raceConfigTitle" hidden>
  <div class="ttr-mode-config-card">
   <header class="ttr-mode-config-head"><h2 id="raceConfigTitle" data-i18n="quickRace">GARA VELOCE</h2><button type="button" id="raceConfigClose" aria-label="Chiudi">✕</button></header>
-  <p class="ttr-mode-config-tip" data-i18n="raceSettingsIntro">Regola la gara e poi vai in pista. L'auto si sceglie nel Garage.</p>
+  <p id="raceSelectedTrack" class="ttr-selected-track">01 · COLAZIONE TURBO</p><p class="ttr-mode-config-tip" data-i18n="raceSettingsIntro">Regola la gara e poi vai in pista. L'auto si sceglie nel Garage.</p>
   <div class="ttr-mode-fields">
    <label><span data-i18n="racers">Concorrenti</span><select id="racers"><option value="4">4</option><option value="6">6</option><option value="8">8</option></select></label>
    <label><span data-i18n="difficulty">Difficoltà CPU</span><select id="difficulty"><option value="0.8" data-i18n="easy">Facile</option><option value="1" data-i18n="medium">Media</option><option value="1.13" data-i18n="hard">Difficile</option></select></label>
    <label><span data-i18n="accel">Accelerazione</span><select id="auto"><option value="1" data-i18n="automatic">Automatica</option><option value="0" data-i18n="manual">Manuale</option></select></label>
    <label id="eliminationGoalField"><span data-i18n="eliminationGoal">Punti per vincere</span><select id="elimGoal"><option value="3">3</option><option value="5">5</option><option value="7">7</option></select></label>
   </div>
-  <div class="ttr-mode-config-actions"><button type="button" id="raceConfigCancel" data-i18n="back">← INDIETRO</button><button type="button" id="raceConfigStart" data-i18n="startConfiguredRace">▶ INIZIA GARA</button></div>
+  <div class="ttr-mode-config-actions"><button type="button" id="raceConfigCancel" data-i18n="back">← INDIETRO</button><button type="button" id="raceConfigStart" data-i18n="startConfiguredRace">AVVIA GARA</button></div>
  </div>
 </section>
 </section>
@@ -1188,7 +1243,7 @@ body #raceConfig .ttr-mode-config-actions{display:flex;justify-content:space-bet
  <p class="career-sub">Avanza con le missioni, conquista nuovi veicoli e prepara il tuo garage per i prossimi circuiti.</p>
  <div class="career-layout"><aside class="career-overview">
  <div class="career-block"><h3>IL TUO PROGRESSO</h3><div class="career-stats"><div class="career-stat"><strong id="careerOwned">4 / 20</strong><small>AUTO OTTENUTE</small></div><div class="career-stat"><strong id="careerWins">0</strong><small>VITTORIE</small></div><div class="career-stat"><strong id="careerFinishes">0</strong><small>GARE FINITE</small></div></div></div>
- <div class="career-block"><h3>CIRCUITI · 01/12</h3><div class="career-available"><b>☕ Colazione Turbo</b><span class="career-tag">GIOCABILE</span></div><p class="career-dim">Gli altri 11 circuiti arriveranno progressivamente. Non sono ancora selezionabili.</p></div>
+ <div class="career-block"><h3>CIRCUITI · 01/12</h3><div class="career-available"><b>☕ Colazione Turbo</b><span class="career-tag">GIOCABILE</span></div><p class="career-dim">Gli altri 11 circuiti sono in sviluppo e non ancora selezionabili.</p><div id="careerCircuitCatalog" aria-label="Tutti i 12 circuiti della stagione iniziale"></div></div>
  <div class="career-block"><h3>SCENDI IN PISTA</h3><label for="careerVehicle" class="career-dim">Scegli un'auto disponibile</label><select id="careerVehicle" class="career-select" aria-label="Auto per la Carriera"></select><button id="careerPlay" class="career-btn" type="button" style="width:100%;margin-top:9px">▶ INIZIA GARA CARRIERA</button><p class="career-hint">36 medaglie · 12 circuiti · tre prove per circuito. Le piste non ancora realizzate restano bloccate.</p></div>
  <p id="careerSaveNote" class="career-hint" role="status"></p>
  </aside><section class="career-missions"><h3>PROSSIMI OBIETTIVI</h3><div id="careerNextList" class="career-list" aria-live="polite"></div><button type="button" id="careerAllMissions" class="career-btn secondary">VEDI TUTTE LE MISSIONI</button></section></div>
@@ -1667,7 +1722,7 @@ it:{elimination:'ELIMINAZIONE',eliminationGoal:'Punti per vincere · test',victo
 en:{elimination:'ELIMINATION',eliminationGoal:'Points to win · test',victory:'VICTORY!',podium:'PODIUM',shortcutPenalty:'TRACK CUT · RESPAWN PENALTY',pauseTitle:'RACE PAUSED',pauseAudio:'♫ ADJUST AUDIO',resume:'▶ RESUME',restart:'↻ RESTART',exitRace:'⌂ EXIT RACE',tapToStart:'TAP TO START',testSound:'▶ TEST SOUND',volumeMaster:'Master volume',volumeMusic:'Music',volumeEngine:'Engines',volumeEffects:'Effects',audioReady:'SOUND ON',audioBlocked:'TAP TEST SOUND',audioUnavailable:'SOUND UNAVAILABLE',loading:'LOADING TRACK...',loadingTip:'STEER, BRAKE AND USE POWER-UPS!',eyebrow:'TINY CARS ARCADE · DEMO 0.11.1',trackName:'BREAKFAST TURBO',tagline:'Small cars. Huge rivalries.',chooseMode:'CHOOSE A MODE',quickRace:'QUICK RACE',timeTrial:'TIME TRIAL',garage:'GARAGE',settings:'SETTINGS',raceSettings:'RACE SETTINGS',vehicle:'Vehicle',racers:'Racers',difficulty:'CPU difficulty',easy:'Easy',medium:'Medium',hard:'Hard',accel:'Acceleration',automatic:'Automatic',manual:'Manual',changeLang:'🌐 LANGUAGE',audioOn:'♫ SOUND ON',audioOff:'♫ SOUND OFF',garageTitle:'YOUR GARAGE',back:'← BACK',availableCars:'AVAILABLE CARS',newModelsTitle:'EARLY STUDIES · NOT PLAYABLE',futureCars:'15 UNLOCKABLE VEHICLES',comingSoon:'Coming in Career mode',selectCar:'✓ SELECT CAR',position:'POSITION',lap:'LAP',time:'TIME',powerup:'POWER-UP',rotate:'ROTATE YOUR PHONE',landscapeHelp:'Tiny Track Rivals requires landscape orientation.',brake:'BRAKE',gas:'GAS',jump:'JUMP',speed:'SPEED',acceleration:'ACCELERATION',handling:'HANDLING',mass:'WEIGHT',selected:'SELECTED',scattoDesc:'90s European hot hatch: agile, balanced, rectangular headlights and a small spoiler.',tuonoDesc:'Muscular V8: long hood, wide stance and throaty engine.',polvereDesc:'Off-road buggy: knobby tires, roll cage and spare wheel.',lampoDesc:'90s Japanese sports car: flush pop-up lights and a low rear wing.',aeroDesc:'Orange European supercar: deep side intakes, sharp front lights and tall rear wing.',finish:'FINISH',trialDone:'TIME TRIAL COMPLETE',place:'PLACE',yourTime:'Time',recordNew:'New personal best!',recordOld:'Previous record',saveUnavailable:'Local storage unavailable',you:'you',racing:'Racing',again:'RACE AGAIN',menu:'MENU',results:'RESULTS',demoNote:'Career is available from the menu. More tracks are in development.',go:'GO!',lapNotice:'LAP',pickupNotice:'POWER-UP COLLECTED',oilNotice:'OIL DROPPED',clawNotice:'CLAW ATTACHED!',noClaw:'CLAW: NO TARGET',pauseNotice:'PAUSED · press Ⅱ to resume'},
 es:{elimination:'ELIMINACIÓN',eliminationGoal:'Puntos para ganar · prueba',victory:'¡VICTORIA!',podium:'PODIO',shortcutPenalty:'ATAJO DE PISTA · PENALIZACIÓN',pauseTitle:'CARRERA EN PAUSA',pauseAudio:'♫ AJUSTAR AUDIO',resume:'▶ CONTINUAR',restart:'↻ REINICIAR',exitRace:'⌂ SALIR DE LA CARRERA',tapToStart:'TOCA PARA EMPEZAR',testSound:'▶ PROBAR SONIDO',volumeMaster:'Volumen general',volumeMusic:'Música',volumeEngine:'Motores',volumeEffects:'Efectos',audioReady:'SONIDO ACTIVO',audioBlocked:'TOCA PROBAR SONIDO',audioUnavailable:'SONIDO NO DISPONIBLE',loading:'CARGANDO CIRCUITO...',loadingTip:'¡GIRA, FRENA Y USA LOS POTENCIADORES!',eyebrow:'ARCADE DE COCHES MINIATURA · DEMO 0.11.1',trackName:'DESAYUNO TURBO',tagline:'Coches pequeños. Grandes desafíos.',chooseMode:'ELIGE UN MODO',quickRace:'CARRERA RÁPIDA',timeTrial:'CONTRARRELOJ',garage:'GARAJE',settings:'AJUSTES',raceSettings:'AJUSTES DE CARRERA',vehicle:'Coche',racers:'Pilotos',difficulty:'Dificultad CPU',easy:'Fácil',medium:'Media',hard:'Difícil',accel:'Aceleración',automatic:'Automática',manual:'Manual',changeLang:'🌐 IDIOMA',audioOn:'♫ SONIDO SÍ',audioOff:'♫ SONIDO NO',garageTitle:'TU GARAJE',back:'← VOLVER',availableCars:'COCHES DISPONIBLES',newModelsTitle:'PRIMEROS BOCETOS · NO JUGABLES',futureCars:'15 VEHÍCULOS DESBLOQUEABLES',comingSoon:'En desarrollo para Carrera',selectCar:'✓ ELEGIR COCHE',position:'POSICIÓN',lap:'VUELTA',time:'TIEMPO',powerup:'POTENCIADOR',rotate:'GIRA EL TELÉFONO',landscapeHelp:'Tiny Track Rivals se juega en horizontal.',brake:'FRENO',gas:'GAS',jump:'SALTO',speed:'VELOCIDAD',acceleration:'ACELERACIÓN',handling:'GIRO',mass:'PESO',selected:'SELECCIONADO',scattoDesc:'Compacto deportivo europeo de los 90: ágil, equilibrado y con alerón discreto.',tuonoDesc:'Muscle car V8: capó largo, carrocería ancha y motor potente.',polvereDesc:'Buggy todoterreno: neumáticos grandes, jaula y rueda de repuesto.',lampoDesc:'Deportivo japonés de los 90: faros retráctiles cerrados y alerón bajo.',aeroDesc:'Superdeportivo europeo naranja: entradas de aire y gran alerón trasero.',finish:'META',trialDone:'CONTRARRELOJ COMPLETADO',place:'PUESTO',yourTime:'Tiempo',recordNew:'¡Nuevo récord personal!',recordOld:'Récord anterior',saveUnavailable:'No se puede guardar',you:'tú',racing:'En carrera',again:'REPETIR',menu:'MENÚ',results:'RESULTADOS',demoNote:'Carrera disponible en el menú. Nuevos circuitos en desarrollo.',go:'¡YA!',lapNotice:'VUELTA',pickupNotice:'¡POTENCIADOR!',oilNotice:'ACEITE SOLTADO',clawNotice:'¡PINZA ENGANCHADA!',noClaw:'PINZA: SIN OBJETIVO',pauseNotice:'PAUSA · pulsa Ⅱ para continuar'}};
 
-// v0.13.6.67 — complete common UI dictionaries for six languages.
+// v0.13.6.68 — complete common UI dictionaries for six languages.
 dict.it=Object.assign(dict.it,{"raceSettingsIntro":"Regola la gara e poi vai in pista. L’auto si sceglie nel Garage.","startConfiguredRace":"▶ INIZIA GARA"});
 dict.en=Object.assign(dict.en,{"raceSettingsIntro":"Configure your race, then hit the track. Choose your car in the Garage.","startConfiguredRace":"▶ START RACE"});
 dict.es=Object.assign(dict.es,{"raceSettingsIntro":"Configura la carrera y sal a la pista. Elige el coche en el Garaje.","startConfiguredRace":"▶ EMPEZAR CARRERA"});
@@ -2425,7 +2480,7 @@ function worldInit(){
   // Removed confusing spiral/cereal decoration at the end of the second bend.
   addProp(.512,'orange',163,49,true);    // Orange Jump background
   const op=trackPoint(.502),oa=tangent(.502);props.push({type:'orange_bump',x:op.x+Math.sin(oa)*32,y:op.y-Math.cos(oa)*32,r:29,solid:true,jump:false,interactive:true});
-  // v0.13.6.67: upright physical bowl; TWO irregular, rounded-edge milk stains.
+  // v0.13.6.68: upright physical bowl; TWO irregular, rounded-edge milk stains.
   // Left stain is small; right stain is elongated and extends further from the bowl.
   // Neither milk puddle is an occluding sprite or a solid obstacle.
   props.push({type:'milk_cereal_cup',x:570,y:927,r:73,solid:true,scenery:false,interactive:true,tall:true});
@@ -2941,7 +2996,7 @@ function openCircuitLoading(mode){
    es:'La rampa de la tostada es un atajo: alinéate bien para ahorrar segundos. ¡Un mal aterrizaje te hará perder velocidad!'
   };
   $('ttrRampTip').textContent=tipByLanguage[I18N.getLang()]||tipByLanguage.it;
-  const startLabel=I18N.getLang()==='en'?'▶ START RACE':I18N.getLang()==='es'?'▶ INICIAR CARRERA':'▶ AVVIA GARA';
+  const startLabel=I18N.getLang()==='en'?'START RACE':I18N.getLang()==='es'?'INICIAR CARRERA':'AVVIA GARA';
   startButton.textContent=startLabel;
   startButton.onclick=()=>{if(token!==loadingToken||startButton.disabled)return;startButton.disabled=true;wrap.hidden=true;initRace(mode);};
  race=null;syncAudio();wrap.hidden=false;$('screen').hidden=true;$('screen').style.display='none';$('garageScreen').hidden=true;if($('careerScreen'))$('careerScreen').hidden=true;if($('careerMissionsScreen'))$('careerMissionsScreen').hidden=true;
@@ -3377,14 +3432,94 @@ function showResults(){
 const I18N=window.TTRI18N;
 const t=I18N.t;
 let selectedCar=0,garagePreview=0,menuTimer=null,menuStep=0,lastShowroomDraw=0,garageRotationOrigin=0;
+
+// v0.13.6.68 — Canonical first-season circuit catalog. Locked tracks have no driving geometry,
+// so they may be previewed in text but are NEVER passed into initRace or misrepresented as playable.
+const TTRCircuitCatalog=Object.freeze([
+ {id:'colazione-turbo',name:'Colazione Turbo',scene:'colazione',ready:true},
+ {id:'desk-drift',name:'Desk Drift',scene:null,ready:false},
+ {id:'box-di-biliardo',name:'Box di Biliardo',scene:null,ready:false},
+ {id:'bagno-sprint',name:'Bagno Sprint',scene:null,ready:false},
+ {id:'garage-grid',name:'Garage Grid',scene:null,ready:false},
+ {id:'giardino-mini-gp',name:'Giardino Mini GP',scene:null,ready:false},
+ {id:'market-rush',name:'Market Rush',scene:null,ready:false},
+ {id:'sofa-loop',name:'Sofa Loop',scene:null,ready:false},
+ {id:'playroom-panic',name:'Playroom Panic',scene:null,ready:false},
+ {id:'laundry-slide',name:'Laundry Slide',scene:null,ready:false},
+ {id:'terrazza-veloce',name:'Terrazza Veloce',scene:null,ready:false},
+ {id:'lab-finale',name:'Lab Finale',scene:null,ready:false}
+].map((v,i)=>Object.freeze({...v,index:i+1})));
+window.TTRTrackCatalog=TTRCircuitCatalog;
+let activeTrackMode=null, selectedTrackId='colazione-turbo';
+const TTRTrackCopy=Object.freeze({
+ it:{title:'SCEGLI IL CIRCUITO',ready:'GIOCABILE',locked:'IN SVILUPPO',info:'Minimappa reale · Power-up su tutto il tracciato',back:'← INDIETRO',continue:'CONTINUA',launch:'AVVIA GARA',lockedInfo:'Tracciato in sviluppo · minimappa non ancora disponibile'},
+ en:{title:'CHOOSE A TRACK',ready:'PLAYABLE',locked:'IN DEVELOPMENT',info:'Actual course map · Power-ups throughout',back:'← BACK',continue:'CONTINUE',launch:'START RACE',lockedInfo:'Track in development · no course map yet'},
+ es:{title:'ELIGE EL CIRCUITO',ready:'JUGABLE',locked:'EN DESARROLLO',info:'Minimapa real · Potenciadores en todo el circuito',back:'← VOLVER',continue:'CONTINUAR',launch:'INICIAR CARRERA',lockedInfo:'Circuito en desarrollo · minimapa pendiente'},
+ de:{title:'STRECKE WÄHLEN',ready:'SPIELBAR',locked:'IN ENTWICKLUNG',info:'Echte Streckenkarte · Power-ups auf der Strecke',back:'← ZURÜCK',continue:'WEITER',launch:'RENNEN STARTEN',lockedInfo:'Strecke in Entwicklung · noch keine Streckenkarte'},
+ fr:{title:'CHOISIR UN CIRCUIT',ready:'JOUABLE',locked:'EN DÉVELOPPEMENT',info:'Vraie carte · Bonus sur tout le parcours',back:'← RETOUR',continue:'CONTINUER',launch:'LANCER LA COURSE',lockedInfo:'Circuit en développement · carte non disponible'},
+ pt:{title:'ESCOLHER PISTA',ready:'JOGÁVEL',locked:'EM DESENVOLVIMENTO',info:'Minimapa real · Itens em toda a pista',back:'← VOLTAR',continue:'CONTINUAR',launch:'INICIAR CORRIDA',lockedInfo:'Pista em desenvolvimento · minimapa indisponível'}
+});
+function TTRDrawActualMinimap(canvas){
+ if(!canvas||!Array.isArray(points)||!points.length)return;
+ const ctx=canvas.getContext('2d');if(!ctx)return;
+ const W=canvas.width,H=canvas.height;ctx.clearRect(0,0,W,H);
+ ctx.fillStyle='#091a39';ctx.fillRect(0,0,W,H);
+ const x0=Math.min(...points.map(p=>p.x)),x1=Math.max(...points.map(p=>p.x));
+ const y0=Math.min(...points.map(p=>p.y)),y1=Math.max(...points.map(p=>p.y));
+ const k=Math.min((W-30)/Math.max(1,x1-x0),(H-24)/Math.max(1,y1-y0));
+ ctx.save();ctx.translate(W/2,H/2);ctx.scale(k,k);ctx.translate(-(x0+x1)/2,-(y0+y1)/2);
+ ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();
+ ctx.strokeStyle='#274f86';ctx.lineWidth=85;ctx.stroke();ctx.strokeStyle='#f2d78e';ctx.lineWidth=23;ctx.stroke();
+ const start=trackPoint(0);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(start.x,start.y,38,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#132f53';ctx.beginPath();ctx.arc(start.x,start.y,19,0,Math.PI*2);ctx.fill();ctx.restore();
+}
+function TTRPaintCareerTracks(){const root=$('careerCircuitCatalog');if(!root)return;root.replaceChildren();TTRCircuitCatalog.forEach(c=>{const label=document.createElement('span');label.className='ttr-career-circuit'+(c.ready?' ready':'');label.textContent=String(c.index).padStart(2,'0')+' · '+c.name+(c.ready?' ✓':' 🔒');root.append(label);});}
+TTRPaintCareerTracks();
+function TTROpenTrackSelect(mode){
+ if(!TTRModeConfigs[mode])return;TTRCloseRaceConfig(false);activeTrackMode=mode;
+ selectedTrackId='colazione-turbo';const copy=TTRTrackCopy[I18N.getLang()]||TTRTrackCopy.it;
+ const panel=$('trackSelect'),grid=$('trackSelectGrid');if(!panel||!grid)return;
+ $('trackSelectTitle').textContent=copy.title;
+ $('trackSelectSubtitle').textContent=t(mode==='race'?'quickRace':'elimination')+' · 1 / '+TTRCircuitCatalog.length+' '+copy.ready;
+ $('trackSelectBack').textContent=copy.back;$('trackSelectNext').textContent=copy.continue;
+ grid.replaceChildren();
+ TTRCircuitCatalog.forEach((c)=>{
+  const btn=document.createElement('button');btn.type='button';btn.className='ttr-track-card'+(c.id===selectedTrackId?' is-selected':'');btn.dataset.track=c.id;
+  btn.disabled=!c.ready;btn.setAttribute('aria-label',String(c.index).padStart(2,'0')+' · '+c.name+' · '+(c.ready?copy.ready:copy.locked));
+  if(c.ready){const map=document.createElement('canvas');map.width=180;map.height=94;map.setAttribute('aria-hidden','true');btn.append(map);TTRDrawActualMinimap(map);}
+  else{const blank=document.createElement('span');blank.className='ttr-track-empty';blank.textContent='🔒';blank.setAttribute('aria-hidden','true');btn.append(blank);}
+  const labels=document.createElement('span');labels.className='ttr-track-info';const title=document.createElement('b');title.textContent=String(c.index).padStart(2,'0')+' · '+c.name;
+  const status=document.createElement('small');status.textContent=c.ready?copy.ready:copy.locked;labels.append(title,status);btn.append(labels);
+  if(c.ready)btn.addEventListener('click',()=>{selectedTrackId=c.id;grid.querySelectorAll('button').forEach(e=>e.classList.toggle('is-selected',e.dataset.track===c.id));TTRUpdateTrackPreview();SND.sfx('select');});grid.append(btn);
+ });
+ TTRUpdateTrackPreview();panel.hidden=false;grid.querySelector('.is-selected')?.focus();SND.sfx('select');
+}
+function TTRUpdateTrackPreview(){const c=TTRCircuitCatalog.find(t=>t.id===selectedTrackId);const copy=TTRTrackCopy[I18N.getLang()]||TTRTrackCopy.it;if(!c)return;
+ $('trackSelectSelected').textContent=String(c.index).padStart(2,'0')+' · '+c.name.toUpperCase();$('trackSelectInfo').textContent=c.ready?copy.info:copy.lockedInfo;
+ if(c.ready)TTRDrawActualMinimap($('trackSelectMap'));
+ $('trackSelectNext').disabled=!c.ready;
+}
+function TTRCloseTrackSelect(){const panel=$('trackSelect');if(panel)panel.hidden=true;activeTrackMode=null;}
+function TTRAdvanceTrackSelect(){const c=TTRCircuitCatalog.find(t=>t.id===selectedTrackId);if(!activeTrackMode||!c?.ready||!c.scene)return;
+ const mode=activeTrackMode;TTRCloseTrackSelect();TTROpenRaceConfig(mode);
+}
 // v67: separate persistent race configurations; never mix with global language/audio settings.
 const TTRModeDefaults=Object.freeze({race:Object.freeze({racers:'4',difficulty:'1',auto:'1',elimGoal:'5'}),elimination:Object.freeze({racers:'4',difficulty:'1',auto:'1',elimGoal:'5'})});
 let TTRModeConfigs={race:{...TTRModeDefaults.race},elimination:{...TTRModeDefaults.elimination}},activeConfigMode=null;
 try{const saved=JSON.parse(localStorage.getItem('ttr_mode_config_v67')||'null');if(saved&&typeof saved==='object')for(const m of ['race','elimination'])if(saved[m])for(const k of Object.keys(TTRModeDefaults[m])){const val=String(saved[m][k]);if(({racers:['4','6','8'],difficulty:['0.8','1','1.13'],auto:['0','1'],elimGoal:['3','5','7']})[k].includes(val))TTRModeConfigs[m][k]=val;}}catch(_){}
 function TTRCareerDifficulty(){const state=window.TTRCareer?.getState?.()||{};const wins=Math.max(0,Number(state.wins)||0),medals=window.TTRCareerCore?.medalCount?.(state)||0;return Math.min(1.13,.88+Math.min(7,wins)*.028+Math.min(10,medals)*.007);}
-function TTRCloseRaceConfig(){const panel=$('raceConfig');if(panel)panel.hidden=true;activeConfigMode=null;}
-function TTROpenRaceConfig(mode){if(!TTRModeConfigs[mode])return;activeConfigMode=mode;const panel=$('raceConfig'),cfg=TTRModeConfigs[mode];if(!panel)return;for(const name of ['racers','difficulty','auto','elimGoal'])$(name).value=cfg[name];$('eliminationGoalField').hidden=mode!=='elimination';const title=$('raceConfigTitle');title.dataset.i18n=mode==='race'?'quickRace':'elimination';I18N.apply();panel.hidden=false;$('raceConfigStart').focus();SND.sfx('select');}
-function TTRStartConfiguredRace(){const mode=activeConfigMode;if(!TTRModeConfigs[mode])return;const cfg={};for(const name of ['racers','difficulty','auto','elimGoal'])cfg[name]=$(name).value;TTRModeConfigs[mode]=cfg;try{localStorage.setItem('ttr_mode_config_v67',JSON.stringify(TTRModeConfigs));}catch(_){}TTRCloseRaceConfig();SND.unlock();stopMenuMusic();openCircuitLoading(mode);}
+function TTRCloseRaceConfig(returnToTracks=false){const mode=activeConfigMode;const panel=$('raceConfig');if(panel)panel.hidden=true;activeConfigMode=null;if(returnToTracks&&mode)TTROpenTrackSelect(mode);}
+function TTROpenRaceConfig(mode){if(!TTRModeConfigs[mode])return;const chosen=TTRCircuitCatalog.find(c=>c.id===selectedTrackId);if(!chosen?.ready||!chosen.scene)return;
+ activeConfigMode=mode;const panel=$('raceConfig'),cfg=TTRModeConfigs[mode];if(!panel)return;
+ for(const name of ['racers','difficulty','auto','elimGoal'])$(name).value=cfg[name];$('eliminationGoalField').hidden=mode!=='elimination';
+ const title=$('raceConfigTitle');title.dataset.i18n=mode==='race'?'quickRace':'elimination';I18N.apply();
+ $('raceSelectedTrack').textContent=String(chosen.index).padStart(2,'0')+' · '+chosen.name.toUpperCase();
+ const copy=TTRTrackCopy[I18N.getLang()]||TTRTrackCopy.it;const start=$('raceConfigStart');start.removeAttribute('data-i18n');start.textContent=copy.launch;
+ panel.hidden=false;start.focus();SND.sfx('select');}
+function TTRStartConfiguredRace(){const mode=activeConfigMode;const track=TTRCircuitCatalog.find(c=>c.id===selectedTrackId);if(!TTRModeConfigs[mode]||!track?.ready||!track.scene)return;
+ const cfg={};for(const name of ['racers','difficulty','auto','elimGoal'])cfg[name]=$(name).value;TTRModeConfigs[mode]=cfg;
+ try{localStorage.setItem('ttr_mode_config_v67',JSON.stringify(TTRModeConfigs));}catch(_){}
+ TTRCloseRaceConfig(false);SND.unlock();stopMenuMusic();openCircuitLoading(mode);}
 
 try{selectedCar=+localStorage.getItem('ttr_selected_car')||0;}catch(e){}selectedCar=clamp(selectedCar,0,profiles.length-1);
 const initialMenu=$('screen').innerHTML;
@@ -3392,7 +3527,7 @@ function mainMenu(){
  if(onlineSession)onlineQuit();
  if(resultsMusicTimer!==null){clearTimeout(resultsMusicTimer);resultsMusicTimer=null;}
  loadingToken++;$('loadingTrack').hidden=true;race=null;releaseAllControls();hideEliminationUI();$('pauseOverlay').hidden=true;syncAudio();$('garageScreen').hidden=true;$('languageScreen').hidden=true;if($('careerScreen'))$('careerScreen').hidden=true;if($('careerMissionsScreen'))$('careerMissionsScreen').hidden=true;
- const oldSettings=$('retroSettings');if(oldSettings)oldSettings.remove();const oldRaceConfig=$('raceConfig');if(oldRaceConfig)oldRaceConfig.remove();
+ const oldSettings=$('retroSettings');if(oldSettings)oldSettings.remove();const oldRaceConfig=$('raceConfig');if(oldRaceConfig)oldRaceConfig.remove();const oldTrackSelect=$('trackSelect');if(oldTrackSelect)oldTrackSelect.remove();
  $('screen').innerHTML=initialMenu;$('screen').hidden=false;$('screen').style.display='flex';$('controls').style.display='none';$('hud').style.display='none';
  I18N.apply();wireMenu();startMenuMusic();refreshAudioUI();if($('menuCarName'))$('menuCarName').textContent=profiles[selectedCar].name.toUpperCase();drawShowroom($('menuCar'),selectedCar,'menu');
 }
@@ -3514,12 +3649,13 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
 function wireMenu(){
  // A transformed menu creates a non-viewport containing block for fixed dialogs.
  // Move Options to document.body, so the overlay is genuinely viewport-sized on iPhone.
- const settingsDialog=$('retroSettings');if(settingsDialog&&settingsDialog.parentNode!==document.body)document.body.appendChild(settingsDialog);const configDialog=$('raceConfig');if(configDialog&&configDialog.parentNode!==document.body)document.body.appendChild(configDialog);
+ const settingsDialog=$('retroSettings');if(settingsDialog&&settingsDialog.parentNode!==document.body)document.body.appendChild(settingsDialog);const configDialog=$('raceConfig');if(configDialog&&configDialog.parentNode!==document.body)document.body.appendChild(configDialog);const trackDialog=$('trackSelect');if(trackDialog&&trackDialog.parentNode!==document.body)document.body.appendChild(trackDialog);
  const r=$('raceBtn'),trial=$('trialBtn'),garage=$('garageBtn'),mute=$('menuMute');
  const careerBtn=$('careerBtn');if(careerBtn)careerBtn.onclick=()=>{SND.unlock();window.TTRCareer?.open();};
-  if(r)r.onclick=()=>{SND.unlock();TTROpenRaceConfig('race')};if(trial)trial.onclick=()=>{SND.unlock();stopMenuMusic();openCircuitLoading('trial')};const onlineBtn=$('onlineBtn');if(onlineBtn)onlineBtn.onclick=()=>{SND.unlock();onlineOpenPanel();};const eliminationBtn=$('eliminationBtn');if(eliminationBtn)eliminationBtn.onclick=()=>{SND.unlock();TTROpenRaceConfig('elimination')};
+  if(r)r.onclick=()=>{SND.unlock();TTROpenTrackSelect('race')};if(trial)trial.onclick=()=>{SND.unlock();stopMenuMusic();openCircuitLoading('trial')};const onlineBtn=$('onlineBtn');if(onlineBtn)onlineBtn.onclick=()=>{SND.unlock();onlineOpenPanel();};const eliminationBtn=$('eliminationBtn');if(eliminationBtn)eliminationBtn.onclick=()=>{SND.unlock();TTROpenTrackSelect('elimination')};
  if(garage)garage.onclick=()=>{SND.unlock().then(ok=>{if(ok)SND.music('garage')});showGarage();};
- if($('raceConfigStart'))$('raceConfigStart').onclick=TTRStartConfiguredRace;for(const id of ['raceConfigCancel','raceConfigClose'])if($(id))$(id).onclick=()=>{TTRCloseRaceConfig();$('raceBtn')?.focus();};if(configDialog){configDialog.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();TTRCloseRaceConfig();}});configDialog.addEventListener('click',e=>{if(e.target===configDialog)TTRCloseRaceConfig();});}
+ if($('raceConfigStart'))$('raceConfigStart').onclick=TTRStartConfiguredRace;for(const id of ['raceConfigCancel','raceConfigClose'])if($(id))$(id).onclick=()=>TTRCloseRaceConfig(true);if(configDialog){configDialog.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();TTRCloseRaceConfig(true);}});configDialog.addEventListener('click',e=>{if(e.target===configDialog)TTRCloseRaceConfig(true);});}
+  if($('trackSelectNext'))$('trackSelectNext').onclick=TTRAdvanceTrackSelect;for(const id of ['trackSelectClose','trackSelectBack'])if($(id))$(id).onclick=()=>{const mode=activeTrackMode;TTRCloseTrackSelect();$('screen').querySelector(mode==='elimination'?'#eliminationBtn':'#raceBtn')?.focus();};if(trackDialog){trackDialog.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();TTRCloseTrackSelect();}});trackDialog.addEventListener('click',e=>{if(e.target===trackDialog)TTRCloseTrackSelect();});}
   const setting=$('settingsBtn');if(setting)setting.onclick=()=>{const panel=$('retroSettings');panel.open=true;const selector=$('settingsLanguage');if(selector)selector.value=I18N.getLang();SND.sfx('select');};
   const settingsLanguage=$('settingsLanguage');if(settingsLanguage){settingsLanguage.value=I18N.getLang();settingsLanguage.onchange=()=>{I18N.setLang(settingsLanguage.value);refreshAudioUI();};}
   if(settingsDialog){settingsDialog.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();settingsDialog.open=false;setting?.focus();}});settingsDialog.addEventListener('click',event=>{if(event.target===settingsDialog){settingsDialog.open=false;setting?.focus();}});}
