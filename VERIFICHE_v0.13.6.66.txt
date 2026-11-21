@@ -1,0 +1,28 @@
+TINY TRACK RIVALS — v0.13.6.66 — MENU / IMPOSTAZIONI
+Base verificata: v0.13.6.65, senza ricostruire auto, pista o gameplay.
+
+MODIFICHE
+- OPZIONI rimosso dall'elenco di modalità; IMPOSTAZIONI collocato nella barra inferiore.
+- Lingua IT/EN/ES, interruttore audio, prova audio e quattro volumi nello stesso pannello.
+- Freccia resa come puntatore retro a cursore del mouse (ricostruzione grafica in SVG), con movimento proprio.
+- Saltello breve e accelerazione in menu conservati (66 px sul canvas 520x300).
+- Conservati modalità, garage, audio/online, veicoli, collisioni, PWA asset esistenti.
+
+COLLAUDO AUTOMATICO
+- Chromium headless: 932x430, 740x360, 667x375.
+- Pulsanti e pannello, cambio lingua, toggle audio, prova audio e chiusura: PASS.
+- Canvas: fasi animate differenti, asset Scatto caricati: PASS.
+- Errori JS rilevati: 0. Script analizzati con node --check: PASS.
+- Hash SHA256 di tutti i payload base64 incorporati: IDENTICI alla v65.
+- Non testato fisicamente su Safari iOS/Android; non pubblicato su GitHub.
+
+INSTALLAZIONE GITHUB PAGES
+1. Esegui backup dell'index.html presente sul repository.
+2. Carica index.html dallo ZIP nella radice del repository.
+3. Mantieni invariati manifest.webmanifest, icone, service worker e altri file già presenti.
+4. Facoltativo: carica version.txt nella radice.
+5. Verifica la scritta v0.13.6.66 in basso a destra e ricarica senza cache se necessario.
+
+NOTA SULLA FRECCIA
+Nei sorgenti recuperati, la v65 usa il triangolo ▶, mentre la v62-v64 usa la freccia ➜.
+Il cursore stile mouse richiesto è una ricostruzione retro e non un asset storico verificato byte-per-byte.
