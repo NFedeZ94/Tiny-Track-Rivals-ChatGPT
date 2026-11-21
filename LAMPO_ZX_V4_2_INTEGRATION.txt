@@ -1,0 +1,1 @@
+Lampo ZX V4.2 visual integration. Replaces lampo, lampo_showroom and lampo_turntable inline images. Original vehicle parameters, hitboxes, online code and all other vehicles unchanged. Source GLBs in separate archive.
