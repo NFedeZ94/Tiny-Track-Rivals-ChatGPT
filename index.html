@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1a2e"><meta name="ttr-build" content="v0.13.6.54"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tiny Track Rivals"><meta name="application-name" content="Tiny Track Rivals"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><link rel="manifest" href="manifest.webmanifest"><title>Tiny Track Rivals — Colazione Turbo</title><style>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1a2e"><meta name="ttr-build" content="v0.13.6.55"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tiny Track Rivals"><meta name="application-name" content="Tiny Track Rivals"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><link rel="manifest" href="manifest.webmanifest"><title>Tiny Track Rivals — Colazione Turbo</title><style>
 
 :root{color-scheme:dark;--cyan:#60d9ff;--yellow:#ffd55d;--ink:#071326;--line:#345577;--orange:#f39b43}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#081324;color:#f0f7ff;font-family:system-ui,-apple-system,'Arial Black',sans-serif;touch-action:none;user-select:none}#game{position:fixed;inset:0;width:100vw;height:100dvh;display:block;background:#7a5842}.screen{position:absolute;inset:0;z-index:8;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,rgba(3,10,24,.94),rgba(8,36,62,.84)),repeating-linear-gradient(45deg,#061b2b 0 35px,#122b43 35px 70px);padding:12px;overflow:auto;touch-action:pan-y}.panel{width:min(840px,100%);border:2px solid #5092bc;border-radius:22px;background:linear-gradient(170deg,#162f4e,#0a1a30 80%);box-shadow:0 18px 70px #000a,inset 0 0 35px #23688d22;padding:clamp(18px,4vw,40px);max-height:calc(100dvh - 24px);overflow-y:auto}.panel.resultsPanel{width:min(760px,100%);padding:clamp(16px,3vw,26px)}.panel.resultsPanel.compact{width:min(800px,100%);padding:16px 18px;overflow:hidden}.eyebrow{font-size:11px;letter-spacing:.2em;color:#86dfff;font-weight:850;margin:0 0 10px;text-transform:uppercase}.logo{font-weight:1000;font-style:italic;font-size:clamp(35px,8vw,83px);letter-spacing:-.055em;line-height:.94;color:#ffd054;text-shadow:3px 4px 0 #9f3c24,7px 8px 0 #06111e}.logo span{display:block;color:#fff;font-size:.48em;letter-spacing:.08em;text-shadow:3px 4px 0 #385a76}.sub{color:#bed1e2;line-height:1.45;font-size:14px;max-width:680px;margin:16px 0 22px}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.chip{padding:7px 10px;border-radius:99px;border:1px solid #446b86;background:#102e4b;color:#c8e2f8;font-size:12px;font-weight:700}.menu-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:20px}.resultsPanel .menu-row{margin-top:14px}.btn{touch-action:manipulation;border:2px solid #eccd76;border-radius:13px;background:linear-gradient(#fff3a5,#f5b73f);box-shadow:0 4px 0 #ab5d1f;color:#17203a;font-size:15px;font-weight:950;padding:13px 22px;cursor:pointer;text-align:center;min-height:48px}.btn.secondary{background:linear-gradient(#20466a,#123250);color:#e5f5ff;border-color:#5293b8;box-shadow:0 4px 0 #07182b}.btn:active{transform:translateY(3px);box-shadow:none}.settings{display:flex;flex-wrap:wrap;gap:14px;margin-top:19px}.settings label{display:flex;flex-direction:column;gap:5px;color:#add7ef;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.settings select{font-size:15px;background:#102943;color:#fff;border:1px solid #497ca2;padding:10px;border-radius:9px;min-width:130px}.note{font-size:12px;color:#a9c1d2;line-height:1.55;margin:17px 0 0}.resultTitle{font-size:clamp(28px,5vw,45px);font-weight:950;color:#ffe17d;margin:0 0 14px}.results{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}.results td{border-bottom:1px solid #3b5972;padding:8px 4px;vertical-align:middle}.results tr.me{color:#ffe395;font-weight:850}.results.compact{font-size:12px}.results.compact td{padding:5px 3px}.results td:first-child{width:44px}.resultSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin:10px 0 14px}.resultCard{border:1px solid #36617d;background:#0b1f36;border-radius:12px;padding:8px 10px}.resultCard b{display:block;color:#8fe5fd;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}.variantDot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:7px;vertical-align:-1px;border:1px solid #ffffff99;box-shadow:0 0 0 1px #0a1325}#hud{position:fixed;inset:0;pointer-events:none;z-index:4;display:none}.hudTop{position:absolute;left:8px;right:8px;top:max(7px,env(safe-area-inset-top));display:flex;align-items:flex-start;justify-content:space-between;gap:5px}.statBlock{border:1px solid #3f829e;background:#071831df;border-radius:10px;padding:8px 11px;box-shadow:0 3px 0 #0008;min-width:82px}.statBlock small{font-size:9px;display:block;color:#8ce3ff;font-weight:850;letter-spacing:.08em}.statBlock strong{font-size:clamp(15px,2.8vw,23px);color:#fff}.itemBlock{border-color:#b78b41}.itemBlock strong{color:#ffde79}#hint{position:absolute;left:50%;top:23%;transform:translate(-50%,-50%);background:#04172bcf;border:1px solid #6bc9e8;color:#fff;font-size:clamp(17px,4vw,33px);font-weight:950;border-radius:12px;padding:12px 19px;text-align:center;opacity:0;transition:opacity .15s;white-space:nowrap}#hint.show{opacity:1}#controls{position:fixed;z-index:5;bottom:max(10px,env(safe-area-inset-bottom));left:10px;right:10px;display:none;pointer-events:none;justify-content:space-between;gap:10px}.ctrlGroup{display:flex;align-items:end;gap:8px;pointer-events:none}.control{border:2px solid #b1d7ef;background:linear-gradient(155deg,#214666d9,#07192de6);color:#fff;box-shadow:inset 0 1px 8px #ffffff25,0 4px 0 #010711bd;border-radius:18px;width:clamp(52px,12vw,76px);height:clamp(56px,14vw,81px);font-size:28px;font-weight:950;touch-action:none;pointer-events:auto;display:flex;align-items:center;justify-content:center}.control.small{font-size:14px;width:clamp(56px,12vw,72px);color:#ffdb7c}.control.active{background:#eabf52;color:#0a1c28;transform:translateY(3px);box-shadow:0 1px #010711}.hudBottom{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);font-size:10px;white-space:nowrap;color:#e3f5ff;background:#071c30bd;padding:5px 10px;border-radius:8px}#pauseBtn{pointer-events:auto;position:absolute;right:9px;top:calc(63px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:8px 13px}#mini{position:absolute;top:calc(70px + env(safe-area-inset-top));left:10px;width:140px;height:90px;background:#071b2acb;border:1px solid #417fa8;border-radius:8px}#orientation{display:none;position:fixed;inset:auto 20px 100px;z-index:3;text-align:center;color:#f5f9ff;font-size:11px;opacity:.8}#muteBtn{pointer-events:auto;position:absolute;right:9px;top:calc(101px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:7px 11px}@media(orientation:portrait){#mini{width:96px;height:64px;top:calc(68px + env(safe-area-inset-top))}#pauseBtn{top:calc(68px + env(safe-area-inset-top))}#muteBtn{top:calc(105px + env(safe-area-inset-top))}#orientation{display:block}.hudBottom{bottom:99px;font-size:9px}.control{height:62px;width:58px}.control.small{width:57px}}@media(max-height:500px){.panel{padding:15px}.sub{margin:7px 0}.menu-row{margin-top:8px}.settings{margin-top:8px}.note{margin-top:9px}.control{height:58px}.hudBottom{display:none}#mini{top:calc(58px + env(safe-area-inset-top))}}
 
@@ -1510,6 +1510,7 @@ const promises=names.map(name=>new Promise(resolve=>{
 const ready=Promise.all(promises);
 // v0.13.6.34: visual-only race scale, measured from the opaque footprint of each top-down sprite.
 // No modifications to physics widths/lengths, track, or GLB meshes.
+window.TTRArtRevision='LampoV42-Unified-v55';
 const spriteVisualScale=Object.freeze({scatto:.70034,tuono:1,polvere:0.78634,lampo:0.8765,aero:0.841});
 const has=name=>status[name]==='ready';
 const draw=(ctx,name,x,y,w,h)=>{if(!has(name))return false;ctx.drawImage(images[name],x,y,w,h);return true;};
@@ -1583,32 +1584,39 @@ root.TTRAssets={images,status,ready,has,draw,drawVehicle};
   const AC=root.AudioContext||root.webkitAudioContext;
   const settings={master:.76,music:.52,engine:.54,effects:.70,muted:false};
   try{const saved=JSON.parse(localStorage.getItem('ttr_audio_settings')||'{}');for(const k of Object.keys(settings))if(typeof saved[k]===typeof settings[k])settings[k]=saved[k];}catch(_){}
-  let ctx=null,master=null,musicBus=null,engineBus=null,fxBus=null,engine=null,analyser=null,mode='silent',seqTimer=null,seqIndex=0,sequenceToken=0,lastError='',lastSound='',unlocked=false,vehicleId='scatto';
+  let ctx=null,master=null,musicBus=null,engineBus=null,fxBus=null,engine=null,analyser=null,mode='silent',seqTimer=null,seqIndex=0,sequenceToken=0,lastError='',lastSound='',unlocked=false,vehicleId='';
   const frequencies={C3:130.81,D3:146.83,E3:164.81,F3:174.61,G3:196,A3:220,B3:246.94,C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,F5:698.46,G5:783.99,A5:880,B5:987.77,C6:1046.5,D6:1174.66,E6:1318.51};
   // Smooth arcade engine signatures: distinct vehicles, no abrasive sawtooth drone.
+  // v0.13.6.55: comfortable differentiated engine families.
+  // Character lives in fundamental/sub balance, filter sweep and rhythmic modulation,
+  // never in a permanently exposed square/sawtooth overtone at full speed.
   const vehicleTones={
-    // Four distinct timbres: buzzy high-rev hatch, deep V8 burble, gritty buggy, turbine sport.
-    scatto:{type:'triangle',sub:'sine',harm:'square',base:102,range:182,filter:1760,cut:1220,mix:.18,submix:.042,harmmix:.088,detune:1},
-    tuono:{type:'sawtooth',sub:'sine',harm:'triangle',base:74,range:142,filter:1360,cut:1120,mix:.22,submix:.056,harmmix:.078,detune:-3},
-    polvere:{type:'square',sub:'sine',harm:'triangle',base:92,range:148,filter:1420,cut:1080,mix:.145,submix:.05,harmmix:.074,detune:2},
-    lampo:{type:'triangle',sub:'sine',harm:'sawtooth',base:128,range:240,filter:1980,cut:1040,mix:.205,submix:.036,harmmix:.063,detune:2},
-    aero:{type:'sawtooth',sub:'sine',harm:'triangle',base:115,range:235,filter:1900,cut:1080,mix:.175,submix:.038,harmmix:.057,detune:1}
+    // nimble and bright four-cylinder: lively but soft upper harmonics
+    scatto:{type:'triangle',sub:'sine',harm:'triangle',base:96,range:143,filter:720,cut:460,mix:.165,submix:.065,harmmix:.026,detune:1,flutter:.008,flutterHz:7.0,ratio:1.98},
+    // deep relaxed V8: low register and soft, slow firing-order burble
+    tuono:{type:'triangle',sub:'sine',harm:'sine',base:67,range:106,filter:570,cut:410,mix:.153,submix:.115,harmmix:.015,detune:-2,flutter:.024,flutterHz:5.1,ratio:1.5},
+    // gravelly buggy: textured but not abrasive, low-mid pulsation
+    polvere:{type:'triangle',sub:'sine',harm:'triangle',base:84,range:123,filter:640,cut:390,mix:.165,submix:.084,harmmix:.023,detune:1,flutter:.017,flutterHz:8.4,ratio:1.64},
+    // Japanese 90s sports: clean and progressively rising pitch, not shrill
+    lampo:{type:'triangle',sub:'sine',harm:'triangle',base:111,range:161,filter:790,cut:480,mix:.167,submix:.046,harmmix:.022,detune:2,flutter:.006,flutterHz:9.0,ratio:2.15},
+    // European naturally-aspirated GT: smooth airy crescendo, mid-high register
+    aero:{type:'triangle',sub:'sine',harm:'sine',base:101,range:157,filter:720,cut:470,mix:.159,submix:.058,harmmix:.019,detune:0,flutter:.004,flutterHz:6.7,ratio:2.1}
   };
   function persist(){try{localStorage.setItem('ttr_audio_settings',JSON.stringify(settings));}catch(_){}}
   function gainNode(value,destination){const g=ctx.createGain();g.gain.value=value;g.connect(destination);return g;}
   function initialize(){if(ctx||!AC)return !!ctx;
     try{
-      ctx=new AC();const compressor=ctx.createDynamicsCompressor();compressor.threshold.value=-11;compressor.knee.value=12;compressor.ratio.value=3;compressor.attack.value=.008;compressor.release.value=.17;
+      ctx=new AC();const compressor=ctx.createDynamicsCompressor();compressor.threshold.value=-17;compressor.knee.value=18;compressor.ratio.value=2.5;compressor.attack.value=.018;compressor.release.value=.22;
       master=gainNode(settings.muted?0:settings.master,compressor);analyser=ctx.createAnalyser();analyser.fftSize=512;compressor.connect(analyser);analyser.connect(ctx.destination);
-      musicBus=gainNode(settings.music*.48,master);engineBus=gainNode(settings.engine*.82,master);fxBus=gainNode(settings.effects*.55,master);
-      const mix=gainNode(.0,engineBus),filter=ctx.createBiquadFilter(),highpass=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=1540;filter.Q.value=.52;highpass.type='highpass';highpass.frequency.value=128;filter.connect(highpass);highpass.connect(mix);
+      musicBus=gainNode(settings.music*.48,master);engineBus=gainNode(settings.engine*.68,master);fxBus=gainNode(settings.effects*.55,master);
+      const mix=gainNode(.0,engineBus),filter=ctx.createBiquadFilter(),highpass=ctx.createBiquadFilter();filter.type='lowpass';filter.frequency.value=900;filter.Q.value=.55;highpass.type='highpass';highpass.frequency.value=54;filter.connect(highpass);highpass.connect(mix);
       const osc=ctx.createOscillator(),sub=ctx.createOscillator(),harm=ctx.createOscillator();osc.type='sawtooth';sub.type='sine';harm.type='triangle';osc.frequency.value=96;sub.frequency.value=48;harm.frequency.value=192;
-      const mainGain=gainNode(.19,filter),subGain=gainNode(.065,filter),harmGain=gainNode(.095,filter);osc.connect(mainGain);sub.connect(subGain);harm.connect(harmGain);osc.start();sub.start();harm.start();
+      const mainGain=gainNode(.16,filter),subGain=gainNode(.06,filter),harmGain=gainNode(.02,filter);osc.connect(mainGain);sub.connect(subGain);harm.connect(harmGain);osc.start();sub.start();harm.start();
       engine={osc,sub,harm,mix,filter,highpass,mainGain,subGain,harmGain,filteredRpm:0,lastSync:ctx.currentTime};
       return true;
     }catch(e){lastError=String(e);return false;}
   }
-  function setLevels(){if(!ctx)return;const at=ctx.currentTime;master.gain.setTargetAtTime(settings.muted?0:settings.master,at,.025);musicBus.gain.setTargetAtTime(settings.music*.48,at,.04);engineBus.gain.setTargetAtTime(settings.engine*.82,at,.06);fxBus.gain.setTargetAtTime(settings.effects*.55,at,.04);}
+  function setLevels(){if(!ctx)return;const at=ctx.currentTime;master.gain.setTargetAtTime(settings.muted?0:settings.master,at,.025);musicBus.gain.setTargetAtTime(settings.music*.48,at,.04);engineBus.gain.setTargetAtTime(settings.engine*.68,at,.08);fxBus.gain.setTargetAtTime(settings.effects*.55,at,.04);}
   function unlock(){if(!initialize())return Promise.resolve(false);
     // Call from a genuine click/touch handler; resume() must be synchronous with the gesture.
     const p=ctx.resume();
@@ -1624,7 +1632,7 @@ root.TTRAssets={images,status,ready,has,draw,drawVehicle};
   }
   function sfx(kind){if(!ctx||ctx.state!=='running'||settings.muted)return;lastSound=kind;const at=ctx.currentTime;
     if(kind==='pickup'){tone(710,.13,.31,'sine',fxBus,at,1050);tone(1110,.19,.19,'triangle',fxBus,at+.06,1500);}
-    else if(kind==='turbo'){tone(290,.31,.34,'sawtooth',fxBus,at,870);tone(660,.24,.16,'triangle',fxBus,at+.05,980);}
+    else if(kind==='turbo'){tone(290,.31,.24,'triangle',fxBus,at,870);tone(660,.24,.16,'triangle',fxBus,at+.05,980);}
     else if(kind==='oil'){tone(180,.20,.25,'triangle',fxBus,at,75);}
     else if(kind==='oilSkid'){tone(290,.28,.25,'sawtooth',fxBus,at,95);tone(430,.25,.10,'triangle',fxBus,at+.07,145);}
     else if(kind==='claw'){tone(410,.15,.24,'square',fxBus,at,280);tone(540,.16,.17,'triangle',fxBus,at+.11,710);}
@@ -1716,7 +1724,7 @@ root.TTRAssets={images,status,ready,has,draw,drawVehicle};
       starterNoise(t,.060,.11+i*.012,290+i*55);
     }
     starterNoise(at+.385,.11,.11,470);
-    rev('sawtooth',at+.36,1.35,76,147,90,.18,850);        // Tuono-style deep rumble
+    rev('triangle',at+.36,1.35,76,147,90,.16,740);        // Tuono-style deep rumble
     rev('triangle',at+.74,1.15,131,258,153,.24,1540);  // Lampo-style bright acceleration
     tone(580,.06,.046,'triangle',fxBus,at+.40,290);      // tiny starter disengagement click
     return true;
@@ -1738,12 +1746,13 @@ root.TTRAssets={images,status,ready,has,draw,drawVehicle};
     const boost=car?.boost>0;
     const freq=profile.base+profile.range*Math.pow(rpm,.92)+(boost?22:0);
     engine.osc.frequency.setTargetAtTime(freq,at,.24);
-    engine.sub.frequency.setTargetAtTime(freq*.5,at,.23);engine.harm.frequency.setTargetAtTime(freq*2,at,.19);
+    engine.sub.frequency.setTargetAtTime(freq*.5,at,.23);engine.harm.frequency.setTargetAtTime(freq*(profile.ratio||2),at,.24);
     engine.filter.frequency.setTargetAtTime(profile.filter+profile.cut*rpm,at,.17);
-    engine.mainGain.gain.setTargetAtTime(profile.mix,at,.22);
+    const pulse=1+(profile.flutter||0)*Math.sin(at*Math.PI*2*(profile.flutterHz||7))*(.4+.6*rpm);
+    engine.mainGain.gain.setTargetAtTime(profile.mix*pulse,at,.14);
     engine.subGain.gain.setTargetAtTime(profile.submix,at,.19);engine.harmGain.gain.setTargetAtTime(profile.harmmix,at,.18);
     // Audible but controlled engine bed: volume remains separate from music/effects.
-    engine.mix.gain.setTargetAtTime(playing&&!settings.muted?.31+rpm*.17+(boost?.04:0):0,at,.07);
+    engine.mix.gain.setTargetAtTime(playing&&!settings.muted?.26+rpm*.105+(boost?.018:0):0,at,.12);
   }
   const tunes={
     menu:{bpm:126,lead:['E5','G5','A5','G5','E5','D5','C5','D5','E5','G5','B5','A5','G5','E5','D5','C5'],bass:['C3','C3','G3','G3','A3','A3','G3','G3','F3','F3','G3','G3','C3','C3','G3','G3']},
@@ -2933,7 +2942,7 @@ function showResults(){
 }
 const I18N=window.TTRI18N;
 const t=I18N.t;
-let selectedCar=0,garagePreview=0,menuTimer=null,menuStep=0,lastShowroomDraw=0;
+let selectedCar=0,garagePreview=0,menuTimer=null,menuStep=0,lastShowroomDraw=0,garageRotationOrigin=0;
 try{selectedCar=+localStorage.getItem('ttr_selected_car')||0;}catch(e){}selectedCar=clamp(selectedCar,0,profiles.length-1);
 const initialMenu=$('screen').innerHTML;
 function mainMenu(){
@@ -2962,21 +2971,23 @@ function drawShowroom(canvas,index,view='menu'){
  const isScatto=raceKey==='scatto';
  const modelView=window.TTRAssets?.images[raceKey+'_showroom'];
  const turntable=window.TTRAssets?.images[raceKey+'_turntable'];
- const hasTurntable=view==='garage' && turntable?.complete && turntable.naturalWidth && (raceKey==='tuono'||raceKey==='scatto'||raceKey==='polvere'||raceKey==='lampo'||raceKey==='aero');
+ const hasTurntable=turntable?.complete && turntable.naturalWidth && (view==='garage'||raceKey==='lampo') && (raceKey==='tuono'||raceKey==='scatto'||raceKey==='polvere'||raceKey==='lampo'||raceKey==='aero');
  const pic=(modelView?.complete&&modelView.naturalWidth?modelView:null)||window.TTRAssets?.images[raceKey];
  if(hasTurntable){
    const cols=12, rows=16, count=192;
    const sw=Math.floor(turntable.naturalWidth/cols), sh=Math.floor(turntable.naturalHeight/rows);
-   const rotationRate=raceKey==='lampo'?14:26.4;
-    const exact=((clock*rotationRate)%count+count)%count;
+   const rotationRate=26.4;
+   // Lampo uses the same 3D source in menu and garage. On entering the garage
+   // the initial 3/4 camera is the exact same angle as the menu selection.
+   const exact=view==='menu'?0:((((clock-garageRotationOrigin)*rotationRate)%count+count)%count);
    const frame=Math.floor(exact); // 192 distinct views; no blending ghosts
    const sx=(frame%cols)*sw, sy=Math.floor(frame/cols)*sh;
    const ratio=sw/sh;
-   const targetW=w*.97, targetH=h*(raceKey==='polvere'?.92:.96);
+   const targetW=(raceKey==='lampo'?(view==='menu'?w*.86:w*.90):w*.97), targetH=h*(raceKey==='polvere'?.92:.96);
    // Same visual-area targets as race: Polvere closer to Scatto; Lampo closer to Tuono.
-   const garageScale=raceKey==='polvere'?.86:raceKey==='lampo'?1.0:raceKey==='aero'?.87:1;
+   const garageScale=raceKey==='polvere'?.86:raceKey==='lampo'?.94:raceKey==='aero'?.87:1;
    const imageWidth=Math.min(targetW,targetH*ratio)*garageScale,imageHeight=imageWidth/ratio;
-   ctx.save();ctx.translate(w*.5,h*.54);
+   ctx.save();ctx.translate(w*.5,view==='menu'?h*.52:h*.54);
    ctx.drawImage(turntable,sx,sy,sw,sh,-imageWidth/2,-imageHeight/2,imageWidth,imageHeight);
    ctx.restore();
  } else if(pic?.complete&&pic.naturalWidth){
@@ -2996,7 +3007,7 @@ function drawShowroom(canvas,index,view='menu'){
 
 function showGarage(){
  stopMenuMusic();SND.music('garage');$('screen').hidden=true;$('screen').style.display='none';$('garageScreen').hidden=false;
- garagePreview=selectedCar;refreshGarage();ping(650,.10,.13);
+ garagePreview=selectedCar;garageRotationOrigin=clock;refreshGarage();ping(650,.10,.13);
 }
 window.TTRVehicleDesignStats=Object.freeze({"scatto":[6,7,7,7,5,7],"tuono":[7,8,5,6,8,6],"polvere":[6,7,8,8,6,7],"lampo":[8,7,8,7,4,5],"aero":[9,8,7,8,4,5],"enduro":[8,7,9,9,3,6],"brezza":[7,8,10,8,2,5],"volt":[9,10,6,7,4,5],"roccia":[6,6,5,7,9,9],"martello":[6,7,5,6,10,7],"turbovan":[6,7,6,7,8,7],"titan":[5,6,6,9,9,8],"hotflash":[8,10,5,5,7,5],"metrocab":[6,7,7,7,6,7],"interceptor":[7,8,7,7,8,6],"retrosprint":[7,6,8,8,5,6],"apex":[10,9,10,9,2,3],"tempesta":[8,9,9,7,5,5],"neon":[10,10,4,5,3,3],"behemoth":[5,6,3,5,10,10]});
 function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='function')window.TTRUpdateGarageCollectionCount();const p=profiles[garagePreview];$('garageName').textContent=p.name;
@@ -3009,7 +3020,7 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
  $('garageBars').setAttribute('aria-label',garageDesignSource); $('garageBars').innerHTML=stats.map(([label,raw])=>{const value=Math.max(0,Math.min(10,Number(raw)||0));return `<div class="garage-stats"><span class="garage-stat-label">${label}</span><div class="rail" role="meter" aria-label="${label}" aria-valuemin="0" aria-valuemax="10" aria-valuenow="${value}">${Array.from({length:10},(_,i)=>`<i class="${i<value?'filled':''}"></i>`).join('')}</div><b class="garage-stat-value">${value}/10</b></div>`}).join('');
  $('garageChoices').innerHTML=profiles.map((q,i)=>`<button class="car-choice ${i===garagePreview?'active':''}" data-car="${i}"><img class="car-choice-preview" data-image="${q.id}" alt="" aria-hidden="true"><span class="car-choice-info"><b>${String(i+1).padStart(2,'0')} · ${q.name}</b><small>${q.id===profiles[selectedCar].id?t('selected'):['HOT HATCH','V8','BUGGY','SPORT','SUPERCAR · TEST'][i]}</small></span></button>`).join('');
  document.querySelectorAll('.car-choice-preview').forEach(el=>{const car=el.dataset.image.replace('_showroom','');const pic=window.TTRAssets?.images[car+'_showroom']||window.TTRAssets?.images[car];if(pic?.src)el.src=pic.src;});
- document.querySelectorAll('[data-car]').forEach(el=>el.onclick=()=>{garagePreview=+el.dataset.car;ping(640,.08,.07);refreshGarage();});
+ document.querySelectorAll('[data-car]').forEach(el=>el.onclick=()=>{garagePreview=+el.dataset.car;garageRotationOrigin=clock;ping(640,.08,.07);refreshGarage();});
  const artCard=$('garageCanon');if(artCard){
    const pic=profiles[garagePreview].id+'_concept_views';
    const asset=window.TTRAssets?.images[pic];
@@ -3503,5 +3514,5 @@ window.TTRLegendsEvaluate=({wins={},medals={}}={})=>{
 };
 })();
 </script>
-<script id="ttr-v54-audit">window.TTRPatch54=Object.freeze({version:'0.13.6.54',vehicle:'Lampo ZX',vehicleSource:'V4.2_RACE_GLb',topView:'orthographic_90deg',garageSource:'V4.2_192frames',raceArtOnly:true,onlineBetaServerChanged:false,changes:['camera_leader','elimination_trail_guard','collision_impulse','offtrack_return_grace','ramp_tip','explicit_launch']});</script>
+<script id="ttr-v54-audit">window.TTRPatch54=Object.freeze({version:'0.13.6.55',vehicle:'Lampo ZX',vehicleSource:'V4.2_RACE_GLb',topView:'orthographic_90deg',garageSource:'V4.2_192frames',raceArtOnly:true,onlineBetaServerChanged:false,changes:['camera_leader','elimination_trail_guard','collision_impulse','offtrack_return_grace','ramp_tip','explicit_launch']});</script>
 </body></html>
