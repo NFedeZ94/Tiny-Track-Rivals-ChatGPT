@@ -740,7 +740,7 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
 #garageScreen .garage-stage,#garageScreen .garage-list{min-width:0;min-height:0;overflow:hidden}
 #garageScreen .garage-header{min-height:0}
 #garageScreen .garage-header h2{font-size:clamp(16px,3.3vw,26px)!important}
-#garageScreen #garageCanvas{height:clamp(70px,25dvh,150px)!important}
+#garageScreen #garageCanvas{height:clamp(110px,43dvh,265px)!important}
 #garageScreen .car-choice-list{gap:3px!important}
 #garageScreen .car-choice{min-height:clamp(28px,8.7dvh,42px)!important}
 #garageScreen .garage-specs p{display:none!important}
@@ -769,6 +769,22 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
 #hud.hud-elimination .hudTop .statBlock:has(#position),#hud.hud-elimination .hudTop .statBlock:has(#lap){display:flex!important}
 #hud.hud-elimination .hudTop .statBlock:has(#time){display:none!important}
 @media(max-height:390px) and (orientation:landscape){#garageScreen .garage-header .eyebrow{display:none}#garageScreen #garageCanvas{height:23dvh!important}#careerScreen .career-mission-desc{display:none!important}#careerScreen .career-mission{padding:3px!important}#careerScreen .career-state{margin-top:1px!important}#elimBoard{top:max(49px,calc(env(safe-area-inset-top) + 43px))!important}}
+</style><style id="ttr-v42-garage-layout">
+#garageScreen .garage-panel{display:flex!important;flex-direction:column!important;gap:4px!important}
+#garageScreen .garage-header{display:flex!important;flex:0 0 auto!important;align-items:center!important;justify-content:space-between!important;gap:6px!important;min-height:34px!important;position:relative!important;z-index:3!important;padding:0 4px 4px!important;border-bottom:1px solid #587c9a!important}
+#garageScreen .garage-header h2{margin:0!important;flex:1 1 auto!important;min-width:0!important;font-size:clamp(15px,2.9vw,25px)!important}
+#garageScreen .garage-header button{position:static!important;transform:none!important;flex:0 0 auto!important;margin:0!important;max-width:38%!important;white-space:nowrap!important;font-size:clamp(9px,1.35vw,12px)!important;padding:5px 7px!important;min-height:28px!important}
+#garageScreen .garage-layout{flex:1!important;height:auto!important;min-height:0!important;grid-template-columns:minmax(0,1.03fr) minmax(0,1.42fr)!important;margin-top:0!important;gap:7px!important}
+#garageScreen .garage-stage{display:flex!important;flex-direction:column!important;padding:5px!important;min-height:0!important}
+#garageScreen #garageCanvas{height:clamp(110px,43dvh,265px)!important;flex:1 1 auto!important;min-height:0!important;object-fit:contain!important}
+#garageScreen .garage-specs{flex:0 0 auto!important;max-height:65px!important;overflow:hidden!important}
+#garageScreen .garage-specs h3{font-size:clamp(12px,2.2vw,17px)!important;margin:2px 0!important}
+#garageScreen .garage-stats{margin:1px 0!important;font-size:9px!important;grid-template-columns:65px 1fr 16px!important}
+#garageScreen .garage-list{min-height:0!important;overflow:auto!important;overscroll-behavior:contain!important;gap:3px!important}
+#garageScreen .car-choice-list{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:4px!important}
+#garageScreen .car-choice{min-height:33px!important;padding:3px!important}
+#garageScreen .car-choice-preview{max-height:32px!important}
+@media(max-height:420px) and (orientation:landscape){#garageScreen .garage-specs{max-height:54px!important}#garageScreen .garage-header{min-height:29px!important}}
 </style></head>
 <body>
 <canvas id="game" aria-label="Circuito Colazione Turbo"></canvas><section id="onlineModal" hidden aria-label="Online: sale reali" role="dialog" aria-modal="true"><div class="online-panel">
@@ -1699,6 +1715,7 @@ const K=window.TTRCore,{clamp,mod,angleDiff,distance,trackPoint,tangent,nearestT
 const $=id=>document.getElementById(id);
 const canvas=$('game'),g=canvas.getContext('2d',{alpha:false}),mini=$('mini'),mg=mini.getContext('2d');
 let sw=0,sh=0,dpr=0,scale=1,camX=WORLD_W/2,camY=WORLD_H/2,world=null;
+let elimCameraId=null,elimCameraProgress=0,renderDelta=1/60;
 let race=null,lastRaceSettings=null,frameTime=performance.now(),clock=0,lastHint=0,hint='',resultsMusicTimer=null;
 const SND=window.TTRSound;
 const points=Array.from({length:520},(_,i)=>trackPoint(i/520));
@@ -2241,7 +2258,7 @@ function effectText(x,y,s,color='#fff'){if(!race)return;race.effects.push({x,y,t
 // ELIMINAZIONE PROTOTIPO v0.1 — not canonical rules.
 // The master design bible (2026-11-17) confirms points, jingle, side flip and a longer final victory,
 // but explicitly says exact scoring/win conditions must be recovered before declaring them canonical.
-const ELIM_RULES_TEST={defaultGoal:5,minimumRoundSeconds:6,trailGap:380,physicalSeparation:175,sustainedTrailSeconds:1.8,respawnProtectionSeconds:2.5,edgeMargin:38};
+const ELIM_RULES_TEST={defaultGoal:5,minimumRoundSeconds:6,trailGap:380,physicalSeparation:175,sustainedTrailSeconds:.35,respawnProtectionSeconds:2.5,edgeMargin:12};
 const elimBoard=document.createElement('div');elimBoard.id='elimBoard';elimBoard.setAttribute('aria-label','Punteggi Eliminazione');document.body.appendChild(elimBoard);
 const elimBanner=document.createElement('div');elimBanner.id='elimBanner';elimBanner.innerHTML='<div class="elim-message"><strong id="elimBannerTitle">PUNTO!</strong><span id="elimBannerSub"></span></div>';document.body.appendChild(elimBanner);
 function hideEliminationUI(){elimBoard.style.display='none';elimBanner.style.display='none';$('hud')?.classList.remove('hud-elimination');}
@@ -2279,7 +2296,7 @@ function eliminationNewRound(){
   const keep={variantAccent:c.variantAccent,variantLabel:c.variantLabel,variantSprite:c.variantSprite};
   Object.assign(c,fresh,keep);c.eliminated=false;c.elimDistance=0;c.elimPrevP=c.p;c.elimLag=0;c.elimProtection=0;c.elimCelebration=0;
  });
- camX=race.player.x;camY=race.player.y;elimBanner.style.display='none';refreshEliminationBoard();
+ camX=race.player.x;camY=race.player.y;elimCameraId=null;elimCameraProgress=0;elimBanner.style.display='none';refreshEliminationBoard();
  showHint(`ELIMINAZIONE · MANCHE ${e.round}`,1.4);hud();
 }
 function eliminationProgressUpdate(c,pr,dt){
@@ -2292,14 +2309,19 @@ function eliminationProgressUpdate(c,pr,dt){
 }
 // A point is awarded only after every rival has genuinely left the leader's visible camera
 // for a sustained interval. Progress alone and recoveries never knock a car out.
-function eliminationViewBounds(leader){
- const width=innerWidth||sw||844,height=innerHeight||sh||390;
- const zoom=width<height?Math.min(.85,Math.max(.60,height/620)):Math.min(.86,Math.max(.59,Math.min(width/1140,height/540)));
- const look=race.countdown<=0?85:0;
- const halfW=width/(2*zoom),halfH=height/(2*zoom);
- const x=halfW>=WORLD_W/2?WORLD_W/2:clamp(leader.x+Math.cos(leader.a)*look,halfW,WORLD_W-halfW);
- const y=halfH>=WORLD_H/2?WORLD_H/2:clamp(leader.y+Math.sin(leader.a)*look,halfH,WORLD_H-halfH);
- return {x,y,halfW,halfH};
+function eliminationViewBounds(){
+ // Use the ACTUAL camera and zoom used by the renderer, not a second prediction.
+ const zoom=scale||.65;
+ return {x:camX,y:camY,halfW:(sw||innerWidth)/(2*zoom),halfH:(sh||innerHeight)/(2*zoom)};
+}
+function eliminationCameraLeader(){
+ const active=eliminationActive();if(!active.length)return race.player;
+ const leader=active.reduce((a,b)=>(a.elimDistance||0)>=(b.elimDistance||0)?a:b);
+ const current=active.find(c=>c.id===elimCameraId);
+ if(!current){elimCameraId=leader.id;elimCameraProgress=leader.elimDistance||0;return leader;}
+ // Do not switch on tiny progress fluctuations: avoid camera jitter and heavy redraws.
+ if(leader.id!==current.id&&(leader.elimDistance||0)-(current.elimDistance||0)>65){elimCameraId=leader.id;return leader;}
+ return current;
 }
 function eliminationEvaluate(dt){
  const e=race.elim;if(e.state!=='race'||race.countdown>0)return;
@@ -2309,14 +2331,14 @@ function eliminationEvaluate(dt){
  if(active.length===0){eliminationNewRound();return;}
  if(e.roundTime<ELIM_RULES_TEST.minimumRoundSeconds)return;
  const leader=active.reduce((a,b)=>(a.elimDistance||0)>(b.elimDistance||0)?a:b);
- const view=eliminationViewBounds(leader),margin=ELIM_RULES_TEST.edgeMargin;
+ const view=eliminationViewBounds(),margin=ELIM_RULES_TEST.edgeMargin;
  for(const c of active){
   c.elimProtection=Math.max(0,(c.elimProtection||0)-dt);
   if(c===leader){c.elimLag=0;continue;}
   const behind=(leader.elimDistance||0)-(c.elimDistance||0);
   const physical=Math.hypot(leader.x-c.x,leader.y-c.y);
   const outside=Math.abs(c.x-view.x)>view.halfW+margin||Math.abs(c.y-view.y)>view.halfH+margin;
-  const qualifies=behind>ELIM_RULES_TEST.trailGap&&physical>ELIM_RULES_TEST.physicalSeparation&&outside&&
+  const qualifies=behind>55&&physical>90&&outside&&
    !(c.respawnGrace>0)&&!(c.elimProtection>0)&&!(c.tableFalling>0)&&
    !(c.impactGrace>0)&&!(c.bridgeMissGrace>0)&&!(c.bridgeMissActive);
   c.elimLag=qualifies?(c.elimLag||0)+dt:Math.max(0,(c.elimLag||0)-dt*3);
@@ -2864,7 +2886,7 @@ function showGarage(){
  stopMenuMusic();SND.music('garage');$('screen').hidden=true;$('screen').style.display='none';$('garageScreen').hidden=false;
  garagePreview=selectedCar;refreshGarage();ping(650,.10,.13);
 }
-function refreshGarage(){const p=profiles[garagePreview];$('garageName').textContent=p.name;
+function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='function')window.TTRUpdateGarageCollectionCount();const p=profiles[garagePreview];$('garageName').textContent=p.name;
  $('garageDesc').textContent=t(p.id+'Desc');
  const stats=[['speed',Math.round(p.max/30)],['acceleration',Math.round(p.acc/24)],['handling',Math.round(p.turn*3)],['mass',Math.round(p.mass*6)]];
  $('garageBars').innerHTML=stats.map(([label,value])=>`<div class="garage-stats"><span>${t(label)}</span><div class="rail"><b style="width:${Math.min(100,value*10)}%"></b></div><b>${value}</b></div>`).join('');
@@ -3057,13 +3079,13 @@ for(const c of race.cars){mg.fillStyle=c===race.player?'#ffdc76':'#ff766f';mg.be
 function render(){const ratio=Math.min(race?.mode==='online'&&onlineSession&&!onlineSession.host?1.38:1.65,devicePixelRatio||1);if(sw!==innerWidth||sh!==innerHeight||dpr!==ratio){sw=innerWidth;sh=innerHeight;dpr=ratio;canvas.width=Math.ceil(sw*dpr);canvas.height=Math.ceil(sh*dpr);}g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#6e4a37';g.fillRect(0,0,sw,sh);
  // Real follow camera: the circuit extends beyond the mobile viewport.
  // Keep the player just behind centre, giving sight of the upcoming corner.
- const player=race?.mode==='elimination'?(race.elim.state==='celebration'?race.cars[race.elim.winner]:(eliminationActive().reduce((a,b)=>(!a||(b.elimDistance||0)>(a.elimDistance||0))?b:a,null)||race.player)):race?.player,playerFalling=!!(player&&player.tableFalling>0);
+ const player=race?.mode==='elimination'?(race.elim.state==='celebration'?race.cars[race.elim.winner]:eliminationCameraLeader()):race?.player,playerFalling=!!(player&&player.tableFalling>0);
  const look=player&&race.countdown<=0&&!playerFalling?85:0;
  const targetX=player?player.x+Math.cos(player.a)*look:WORLD_W/2,targetY=player?player.y+Math.sin(player.a)*look:WORLD_H/2;
  scale=sw<sh?Math.min(.85,Math.max(.60,sh/620)):
    Math.min(.86,Math.max(.59,Math.min(sw/1140,sh/540)));
  const halfW=sw/(2*scale),halfH=sh/(2*scale);
- const follow=race?.mode==='elimination'&&!playerFalling?1:(playerFalling?.23:1-Math.exp(-Math.min(.05,(performance.now()-frameTime)/1000+.017)*6.4));
+ const follow=playerFalling?.23:1-Math.exp(-Math.min(.05,renderDelta)* (race?.mode==='elimination'?9.5:6.4));
  camX+=(targetX-camX)*follow;camY+=(targetY-camY)*follow;
  const outerView=playerFalling?105:0;
  camX=halfW>=WORLD_W/2?WORLD_W/2:clamp(camX,halfW-outerView,WORLD_W-halfW+outerView);
@@ -3084,7 +3106,7 @@ function render(){const ratio=Math.min(race?.mode==='online'&&onlineSession&&!on
  if(clock>lastHint&&lastHint!==0){$('hint').classList.remove('show');lastHint=0;}
 }
 function frame(t){
- const dt=Math.min(.04,Math.max(0,(t-frameTime)/1000));frameTime=t;
+ const dt=Math.min(.04,Math.max(0,(t-frameTime)/1000));frameTime=t;renderDelta=dt||1/60;
  onlinePingTick(t);
  if(race){if(race.mode==='online'&&onlineSession&&!onlineSession.host){clock+=dt;onlineGuestStep(dt);}else{update(dt);onlineBroadcast(dt);}render();}
  else {clock+=dt;
@@ -3181,7 +3203,7 @@ window.TTRDebug={
  c.lastValidPosition={x:safe.x,y:safe.y,a:tangent(from),p:from,laps:c.lapsCompleted,flags:c.flags.slice()};
  c.auditP=from;c.auditTravel=350;c.auditCleanTime=0;c.x=pos.x;c.y=pos.y;c.p=from;c.lastP=from;c.a=tangent(to);c.speed=0;c.offtrack=false;c.respawnGrace=0;race.countdown=0;
  const before=c.shortcutRespawns||0;update(1/60);return {before,after:c.shortcutRespawns||0,phase:c.p,expectedPhase:from};
-},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.38',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
+},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.42',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
 })();
 
 
@@ -3202,8 +3224,18 @@ window.TTRVehicleRoster=Object.freeze(vehicles.map(x=>Object.freeze({...x})));
 const $=id=>document.getElementById(id);
 const garage=$('garageScreen');if(!garage)return;
 const hdr=garage.querySelector('.garage-header');if(!hdr)return;
-const open=document.createElement('button');open.id='ttrRosterOpen';open.type='button';open.textContent='▦ COLLEZIONE 20';open.setAttribute('aria-label','Apri il catalogo di tutti e venti i veicoli');
+const open=document.createElement('button');open.id='ttrRosterOpen';open.type='button';open.textContent='▦ COLLEZIONE 5/20';open.setAttribute('aria-label','Apri il catalogo di tutti e venti i veicoli');
 hdr.insertBefore(open,hdr.lastElementChild);
+function updateGarageCollectionCount(){
+ const roster=window.TTRVehicleRoster||[];
+ const unlocked=roster.length?roster.filter(v=>v.availability==='initial'||window.TTRCareer?.isUnlocked(v.id)).length:4;
+ open.textContent=`▦ COLLEZIONE ${unlocked}/20`;
+ open.setAttribute('aria-label',`${unlocked} veicoli sbloccati su 20; apri collezione`);
+}
+window.TTRUpdateGarageCollectionCount=updateGarageCollectionCount;
+updateGarageCollectionCount();
+window.addEventListener('ttr:career-progress',updateGarageCollectionCount);
+
 const modal=document.createElement('div');modal.id='ttrRosterModal';modal.hidden=true;modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');modal.setAttribute('aria-label','Collezione dei 20 veicoli');
 modal.innerHTML=`<div class="ttr-roster-panel"><div class="ttr-roster-head"><div><strong>COLLEZIONE · 20 VEICOLI</strong><div class="ttr-roster-count">4 INIZIALI · 16 SBLOCCABILI · 5 MODELLI GIOCABILI IN PROVA</div></div><button class="ttr-roster-close" id="ttrRosterClose" aria-label="Chiudi collezione">×</button></div><div class="ttr-roster-tabs" id="ttrRosterTabs"><button class="ttr-roster-tab" data-filter="all" aria-pressed="true">TUTTI 20</button><button class="ttr-roster-tab" data-filter="initial" aria-pressed="false">INIZIALI 4</button><button class="ttr-roster-tab" data-filter="unlockable" aria-pressed="false">SBLOCCABILI 16</button><button class="ttr-roster-tab" data-filter="playable" aria-pressed="false">IN PROVA 5</button></div><div class="ttr-roster-body"><div class="ttr-roster-list" id="ttrRosterList"></div><div class="ttr-roster-detail" id="ttrRosterDetail"></div></div><div class="ttr-roster-footer">I veicoli senza GLB non sono ancora giocabili. Le ricompense sono collegate alle medaglie; i modelli non ancora realizzati restano non giocabili.</div></div>`;
 document.body.appendChild(modal);
