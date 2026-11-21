@@ -622,7 +622,7 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
 #onlineModal .room-code{letter-spacing:.16em;font-size:19px;color:#ffe18a;font-weight:900}#onlineModal #onlineMembers{display:flex;gap:5px;flex-wrap:wrap;font-size:11px;margin:8px 0;min-height:18px}
 #onlineModal .online-member{padding:4px 7px;background:#102b42;border:1px solid #557c9b;border-radius:7px}#onlineModal .online-member.ready{border-color:#74d5a1}
 #onlineModal #onlineStatus{font-size:11px;min-height:28px;color:#f9deaf;line-height:1.35;margin:6px 0}
-/* v0.13.6.36: online status is a SINGLE inline HUD chip between POS and GIRO. */
+/* v0.13.6.37: online status is a SINGLE inline HUD chip between POS and GIRO. */
 #hud .hudTop #onlineGameTag{display:none;position:relative;z-index:1;top:auto;left:auto;right:auto;bottom:auto;transform:none;align-self:center;
  flex:0 1 auto;min-width:0;max-width:36%;font:800 10px/1.2 system-ui,sans-serif;letter-spacing:0;
  background:rgba(6,26,45,.75);padding:5px 7px;border:1px solid #70c6d6a3;border-radius:7px;
@@ -1591,6 +1591,12 @@ const controls={left:false,right:false,gas:false,brake:false};
 // TTR Online Phase 1: real WebSocket lobby + relay, simulation on the host device.
 // Not authoritative physics/anti-cheat. Server never receives private chat or location.
 let onlineSocket=null,onlineSession=null,onlineRemoteInputs={},onlineLatest=null,onlineLastSend=0,onlineLastSnapshot=0,onlineFinishDeadline=0;
+// v0.13.6.37: client-side VISUAL prediction and timestamped snapshot interpolation.
+// Authoritative results, collision, pickups, lap count and respawn remain host-owned.
+// No changes required to the existing v0.13.6.35 WebSocket server/protocol.
+const TTR_NET={inputIntervalMs:40,snapshotIntervalMs:50,bufferDelayMs:105,maxExtrapolateMs:55};
+let onlineLastInputSignature='',onlineNetStats={snapshots:0,lastArrival:0,arrivalGapMs:null,jitterMs:null,maxCorrection:0};
+function onlineResetSmooth(){onlineLastInputSignature='';onlineNetStats={snapshots:0,lastArrival:0,arrivalGapMs:null,jitterMs:null,maxCorrection:0};}
 // Independent application RTT over WebSocket, measured client->Render->client.
 // Not an estimate of host simulation latency. Missing replies remain unknown, never 0 ms.
 let onlineRttMs=null,onlinePingSeq=0,onlinePingPending=null,onlineNextPing=0,onlinePingSupported=false;
@@ -1611,7 +1617,7 @@ function onlineStatus(text){const el=$('onlineStatus');if(el)el.textContent=Stri
 function onlineSend(obj){if(onlineSocket?.readyState===WebSocket.OPEN)onlineSocket.send(JSON.stringify(obj));}
 function onlineCloseConnection(){
  const sock=onlineSocket;onlineSocket=null;onlineSession=null;onlineLatest=null;onlineRemoteInputs={};
- onlinePingPending=null;onlineRttMs=null;onlineNextPing=0;onlinePingSupported=false;onlineRttDisplay();
+ onlinePingPending=null;onlineRttMs=null;onlineNextPing=0;onlinePingSupported=false;onlineRttDisplay();onlineResetSmooth();
  if(sock){if(sock.readyState===WebSocket.OPEN)try{sock.send(JSON.stringify({type:'leave'}))}catch(e){};sock.onclose=null;sock.onmessage=null;sock.close();}
  $('onlineGameTag').style.display='none';
 }
@@ -1688,7 +1694,7 @@ function onlineOnMessage(d){
   onlineSession.started=true;onlineSession.members=Array(d.capacity).fill(null);
   for(const m of d.members)onlineSession.members[m.slot]=m;
   onlineSession.capacity=d.capacity;
-  onlineLatest=null;onlineLastSnapshot=0;onlineLastSend=0;
+  onlineLatest=null;onlineLastSnapshot=0;onlineLastSend=0;onlineResetSmooth();
   $('onlineModal').hidden=true;
   $('onlineGameLabel').textContent=`ONLINE · ${onlineSession.code}`;
   $('onlineGameRole').textContent=onlineSession.host?'HOST':'P'+(onlineSession.slot+1);
@@ -1722,40 +1728,122 @@ function onlineHostInput(c){
  const v=onlineRemoteInputs[c.id];
  return v&&performance.now()-v.at<500?{steer:v.steer,gas:v.gas,brake:v.brake}:{steer:0,gas:false,brake:true};
 }
+// Send steering changes at the INPUT EVENT rather than waiting for a future frame.
+// Periodic refresh at 25Hz also recovers when a touch or packet is lost.
+function onlineGuestSendInput(change=false){
+ if(!race||race.mode!=='online'||!onlineSession||onlineSession.host||race.finished||!onlineSocket||onlineSocket.readyState!==WebSocket.OPEN)return;
+ const now=performance.now(),input=onlineLocalInput();
+ const sig=`${input.steer}|${+input.gas}|${+input.brake}`;
+ if(change){if(sig===onlineLastInputSignature||now-onlineLastSend<29)return;}
+ else if(now-onlineLastSend<TTR_NET.inputIntervalMs)return;
+ onlineLastSend=now;onlineLastInputSignature=sig;onlineSend({type:'input',...input});
+}
 function onlineApplySnapshot(state){
  if(!race||race.mode!=='online'||!state||!Array.isArray(state.cars))return;
+ const now=performance.now();
+ if(onlineNetStats.lastArrival){
+  const gap=now-onlineNetStats.lastArrival;
+  onlineNetStats.arrivalGapMs=gap;
+  const delta=Math.abs(gap-TTR_NET.snapshotIntervalMs);
+  onlineNetStats.jitterMs=onlineNetStats.jitterMs==null?delta:(onlineNetStats.jitterMs*.83+delta*.17);
+ }
+ onlineNetStats.lastArrival=now;onlineNetStats.snapshots++;
  onlineLatest=state;race.time=Number(state.time)||0;
  const prevCount=race.countdown;race.countdown=Number(state.countdown)||0;
  if(prevCount>0&&race.countdown<=0)SND.music('race');
  for(const r of state.cars){const c=race.cars[r.i];if(!c)continue;
-  if(c.netX===undefined){c.x=r.x;c.y=r.y;c.a=r.a;}
-  c.netX=r.x;c.netY=r.y;c.netA=r.a;
+  // Invalid or malformed packets must not corrupt the canvas transform.
+  if(!Number.isFinite(r.x)||!Number.isFinite(r.y)||!Number.isFinite(r.a)||!Number.isFinite(r.s))continue;
+  const sample={x:r.x,y:r.y,a:r.a,s:r.s,at:now,steer:r.st||0};
+  const frames=c.netFrames||(c.netFrames=[]),prior=frames.length?frames[frames.length-1]:null;
+  const jumpDistance=prior?Math.hypot(sample.x-prior.x,sample.y-prior.y):0;
+  const elapsed=prior?(now-prior.at)/1000:0;
+  const cutRespawn=(r.sr||0)>(c.shortcutRespawns||0);
+  // A real respawn/teleport must snap immediately, never interpolate across the table.
+  const teleport=cutRespawn||(prior&&jumpDistance>180&&jumpDistance>(Math.max(Math.abs(sample.s),Math.abs(prior.s))*elapsed*1.8+65));
+  if(teleport){frames.length=0;c.netPrediction=null;c.x=sample.x;c.y=sample.y;c.a=sample.a;}
+  if(c.netX===undefined){c.x=sample.x;c.y=sample.y;c.a=sample.a;}
+  frames.push(sample);if(frames.length>12)frames.shift();
+  c.netX=sample.x;c.netY=sample.y;c.netA=sample.a;c.netAt=now;c.netSteer=sample.steer;
   c.speed=r.s;c.p=r.p;c.lastP=r.p;c.lapsCompleted=r.l;c.jump=r.j;c.jumpTotal=r.jt;c.boost=r.bo;
   c.item=r.it;c.done=r.d;c.finishTime=r.ft??null;c.tableFalling=r.tf;c.tableSpin=r.ts;c.tableFallImpact=r.tfi;
   c.oilSpin=r.os;c.oilSpinDir=r.od;c.wheelPhase=r.wp;c.hitYaw=r.hy;c.steer=r.st;c.skidVX=r.svx;c.skidVY=r.svy;
-  if(c===race.player && r.sr>(c.shortcutRespawns||0) && r.pe==='junction-cut')showHint(t('shortcutPenalty'),1.35);
+  if(c===race.player && cutRespawn && r.pe==='junction-cut')showHint(t('shortcutPenalty'),1.35);
   c.shortcutRespawns=r.sr??c.shortcutRespawns??0;c.lastPenaltyReason=r.pe||'';
  }
  if(Array.isArray(state.pickups))race.pickups.forEach((p,i)=>{p.cool=state.pickups[i]??p.cool});
  if(Array.isArray(state.oils))race.oils=state.oils;
  hud();syncAudio();
 }
+function onlineRemotePose(c,now){
+ const frames=c.netFrames;
+ if(!frames||!frames.length)return null;
+ const target=now-TTR_NET.bufferDelayMs;
+ // A delay buffer turns irregular network arrivals into evenly paced animation.
+ while(frames.length>2&&frames[1].at<=target)frames.shift();
+ let left=frames[0],right=frames.length>1?frames[1]:null;
+ if(!right||target<=left.at)return left;
+ if(target<=right.at){
+  const u=clamp((target-left.at)/(right.at-left.at||1),0,1);
+  return {x:left.x+(right.x-left.x)*u,y:left.y+(right.y-left.y)*u,a:left.a+angleDiff(right.a,left.a)*u};
+ }
+ // Never extrapolate indefinitely when packets are lost or Safari is throttled.
+ const last=frames[frames.length-1];
+ const seconds=Math.min(TTR_NET.maxExtrapolateMs,Math.max(0,target-last.at))/1000;
+ return {x:last.x+Math.cos(last.a)*last.s*seconds,y:last.y+Math.sin(last.a)*last.s*seconds,a:last.a};
+}
+function onlinePredictLocal(c,dt,now){
+ // Prediction is a client-side RENDERING AID only. The host sends the true result.
+ const latestAge=now-(c.netAt||now);
+ const ctrl=onlineLocalInput();
+ const pred=c.netPrediction||(c.netPrediction={x:c.netX,y:c.netY,a:c.netA,speed:c.speed});
+ const moving=latestAge<350&&!c.done&&race.countdown<=0&&!(c.tableFalling>0);
+ if(moving){
+  const surface=offTrackDynamics(nearestCourse(pred,points).distance);
+  pred.speed=stepDriveSpeed(pred.speed,ctrl,dt,{max:c.profile.max,acc:c.profile.acc},c.boost>0);
+  if(surface.outside)pred.speed*=Math.max(.93,1-(1-surface.speedFactor)*dt*1.9);
+  const turn=c.profile.turn*(.24+clamp(Math.abs(pred.speed)/160,0,1)*.76)*surface.grip;
+  pred.a+=ctrl.steer*turn*(pred.speed>=0?1:-.7)*dt;
+  pred.x+=Math.cos(pred.a)*pred.speed*dt;
+  pred.y+=Math.sin(pred.a)*pred.speed*dt;
+ }else if(latestAge>=350){pred.speed*=Math.exp(-dt*8);}
+ // The newest server position is old by network transit time. Reconcile towards
+ // a short extrapolation, not the raw (already outdated) last packet.
+ const lead=Math.min(.16,Math.max(.035,(onlineRttMs??95)/2000+.018)+Math.min(.095,Math.max(0,latestAge)/1000));
+ const serverTurn=c.netSteer*c.profile.turn*(.24+clamp(Math.abs(c.speed)/160,0,1)*.76);
+ const expectedAngle=c.netA+serverTurn*lead;
+ const expectedX=c.netX+Math.cos(c.netA+serverTurn*lead*.5)*c.speed*lead;
+ const expectedY=c.netY+Math.sin(c.netA+serverTurn*lead*.5)*c.speed*lead;
+ const error=Math.hypot(expectedX-pred.x,expectedY-pred.y);
+ onlineNetStats.maxCorrection=Math.max(onlineNetStats.maxCorrection,error);
+ if(error>195||!Number.isFinite(error)){
+  pred.x=expectedX;pred.y=expectedY;pred.a=expectedAngle;pred.speed=c.speed;
+ }else{
+  const gain=1-Math.exp(-dt*3.3);
+  pred.x+=(expectedX-pred.x)*gain;pred.y+=(expectedY-pred.y)*gain;
+  // Resist overriding immediate user steering with stale, remotely observed headings.
+  pred.a+=angleDiff(expectedAngle,pred.a)*(1-Math.exp(-dt*1.4));
+  pred.speed+=(c.speed-pred.speed)*(1-Math.exp(-dt*2.0));
+ }
+ c.x=pred.x;c.y=pred.y;c.a=pred.a;
+}
 function onlineGuestStep(dt){
  if(!race||race.mode!=='online')return;
  if(!race.finished){
+  const now=performance.now();
   for(const c of race.cars){
    if(c.netX===undefined)continue;
-   const f=1-Math.exp(-Math.min(dt,.06)*20);
-   c.x+=(c.netX-c.x)*f;c.y+=(c.netY-c.y)*f;
-   c.a+=angleDiff(c.netA,c.a)*f;
+   if(c===race.player){onlinePredictLocal(c,dt,now);continue;}
+   const pose=onlineRemotePose(c,now);if(!pose)continue;
+   c.x=pose.x;c.y=pose.y;c.a=pose.a;
   }
-  if(performance.now()-onlineLastSend>65){onlineLastSend=performance.now();onlineSend({type:'input',...onlineLocalInput()});}
+  onlineGuestSendInput(false);
  }
  syncAudio();
 }
 function onlineBroadcast(dt){
  if(!onlineSession?.host||!race||race.mode!=='online')return;
- if(performance.now()-onlineLastSnapshot<65)return;
+ if(performance.now()-onlineLastSnapshot<TTR_NET.snapshotIntervalMs)return;
  onlineLastSnapshot=performance.now();
  const cars=race.cars.map(c=>({i:c.id,x:+c.x.toFixed(1),y:+c.y.toFixed(1),a:+c.a.toFixed(4),s:+c.speed.toFixed(1),p:c.p,
   l:c.lapsCompleted,j:c.jump,jt:c.jumpTotal,bo:c.boost,it:c.item,d:c.done,ft:c.finishTime,tf:c.tableFalling||0,ts:c.tableSpin||0,tfi:!!c.tableFallImpact,
@@ -2723,7 +2811,8 @@ const ttrTouchOwners=new Map(),ttrPointerOwners=new Map();
 function refreshControls(){for(const k of Object.keys(controls)){
  controls[k]=[...ttrTouchOwners.values(),...ttrPointerOwners.values()].includes(k);
  const el=$(k);if(el)el.classList.toggle('active',controls[k]);
-}}
+ }onlineGuestSendInput(true);
+}
 function releaseAllControls(){ttrTouchOwners.clear();ttrPointerOwners.clear();refreshControls();}
 function bindControl(id,key){const b=$(id);if(!b)return;
  b.setAttribute('draggable','false');b.setAttribute('tabindex','-1');
@@ -2747,7 +2836,7 @@ function bindTap(id,func){const b=$(id);b.setAttribute('draggable','false');b.se
  const off=()=>b.classList.remove('active');b.addEventListener('touchend',off);b.addEventListener('touchcancel',off);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('contextmenu',e=>e.preventDefault());
 }
 bindTap('use',()=>race&&useItem(race.player));
-addEventListener('keydown',e=>{keys[e.code]=true;if(['Space','ArrowLeft','ArrowRight','ArrowDown','ArrowUp'].includes(e.code))e.preventDefault();if(e.repeat)return;if((e.code==='KeyE'||e.code==='Enter')&&race)useItem(race.player);if(e.code==='Escape'&&race?.mode==='online'){onlineQuit();mainMenu();return;}if(e.code==='Escape'&&race)togglePause();});addEventListener('keyup',e=>keys[e.code]=false);addEventListener('blur',()=>{releaseAllControls();for(const k in keys)delete keys[k];});
+addEventListener('keydown',e=>{keys[e.code]=true;onlineGuestSendInput(true);if(['Space','ArrowLeft','ArrowRight','ArrowDown','ArrowUp'].includes(e.code))e.preventDefault();if(e.repeat)return;if((e.code==='KeyE'||e.code==='Enter')&&race)useItem(race.player);if(e.code==='Escape'&&race?.mode==='online'){onlineQuit();mainMenu();return;}if(e.code==='Escape'&&race)togglePause();});addEventListener('keyup',e=>{keys[e.code]=false;onlineGuestSendInput(true)});addEventListener('blur',()=>{releaseAllControls();for(const k in keys)delete keys[k];});
 $('pauseBtn').onclick=()=>{if(race?.mode==='online'){onlineQuit();mainMenu();}else togglePause();};
  const pauseAudio=$('pauseAudio');
  const pauseCard=pauseAudio.closest('.pause-card');
@@ -2824,7 +2913,7 @@ miniBg.beginPath();points.forEach((p,i)=>i?miniBg.lineTo(p.x,p.y):miniBg.moveTo(
 miniBg.strokeStyle='#dce8e9';miniBg.lineWidth=52;miniBg.stroke();miniBg.strokeStyle='#5d778c';miniBg.lineWidth=37;miniBg.stroke();miniBg.restore();
 function renderMini(){if(!race)return;mg.clearRect(0,0,280,180);mg.drawImage(miniBase,0,0);mg.save();mg.translate(140,90);mg.scale(245/WORLD_W,153/WORLD_H);mg.translate(-WORLD_W/2,-WORLD_H/2);
 for(const c of race.cars){mg.fillStyle=c===race.player?'#ffdc76':'#ff766f';mg.beginPath();mg.arc(c.x,c.y,c===race.player?20:14,0,Math.PI*2);mg.fill();}mg.restore();}
-function render(){const ratio=Math.min(1.65,devicePixelRatio||1);if(sw!==innerWidth||sh!==innerHeight||dpr!==ratio){sw=innerWidth;sh=innerHeight;dpr=ratio;canvas.width=Math.ceil(sw*dpr);canvas.height=Math.ceil(sh*dpr);}g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#6e4a37';g.fillRect(0,0,sw,sh);
+function render(){const ratio=Math.min(race?.mode==='online'&&onlineSession&&!onlineSession.host?1.38:1.65,devicePixelRatio||1);if(sw!==innerWidth||sh!==innerHeight||dpr!==ratio){sw=innerWidth;sh=innerHeight;dpr=ratio;canvas.width=Math.ceil(sw*dpr);canvas.height=Math.ceil(sh*dpr);}g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#6e4a37';g.fillRect(0,0,sw,sh);
  // Real follow camera: the circuit extends beyond the mobile viewport.
  // Keep the player just behind centre, giving sight of the upcoming corner.
  const player=race?.mode==='elimination'?(race.elim.state==='celebration'?race.cars[race.elim.winner]:race.player?.eliminated?(eliminationActive()[0]||race.player):race.player):race?.player,playerFalling=!!(player&&player.tableFalling>0);
@@ -2867,7 +2956,7 @@ function frame(t){
  requestAnimationFrame(frame);
 }
 onlineWire();worldInit();window.TTRAssets?.ready.then(()=>{worldInit();if(!$('screen').hidden)drawShowroom($('menuCar'),selectedCar,'menu');if(!$('garageScreen').hidden)drawShowroom($('garageCanvas'),garagePreview,'garage');});wireMenu();boot();requestAnimationFrame(frame);
-window.TTROnlineDebug={state:()=>onlineSession?{...onlineSession,connected:onlineSocket?.readyState===1,raceMode:race?.mode,rttMs:onlineRttMs,latencySupported:onlinePingSupported}:null};
+window.TTROnlineDebug={state:()=>onlineSession?{...onlineSession,connected:onlineSocket?.readyState===1,raceMode:race?.mode,rttMs:onlineRttMs,latencySupported:onlinePingSupported,net:{...onlineNetStats},prediction:!!race?.player?.netPrediction,local:race?.player?{x:race.player.x,y:race.player.y,a:race.player.a,netX:race.player.netX,netY:race.player.netY,netA:race.player.netA}:null,controls:race?.mode==='online'&&!onlineSession.host?onlineLocalInput():null,remoteSteer:onlineSession.host?onlineRemoteInputs[1]?.steer??null:null}:null};
 window.TTREliminationDebug={state:()=>race?.elim?{mode:race.mode,round:race.elim.round,state:race.elim.state,points:[...race.elim.points],goal:race.elim.goal,active:eliminationActive().map(c=>c.id),progress:race.cars.map(c=>c.elimDistance||0)}:null,knockOut:(id)=>{if(race?.mode!=='elimination')return false;return knockOutElimination(race.cars[id]);},award:(id)=>{if(race?.mode!=='elimination')return false;return awardEliminationPoint(race.cars[id]);}};
 window.TTRDebug={
  testImpactEjection:()=>{
@@ -2949,7 +3038,7 @@ window.TTRDebug={
  c.lastValidPosition={x:safe.x,y:safe.y,a:tangent(from),p:from,laps:c.lapsCompleted,flags:c.flags.slice()};
  c.auditP=from;c.auditTravel=350;c.auditCleanTime=0;c.x=pos.x;c.y=pos.y;c.p=from;c.lastP=from;c.a=tangent(to);c.speed=0;c.offtrack=false;c.respawnGrace=0;race.countdown=0;
  const before=c.shortcutRespawns||0;update(1/60);return {before,after:c.shortcutRespawns||0,phase:c.p,expectedPhase:from};
-},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.35',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
+},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.37',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
 })();
 
 
