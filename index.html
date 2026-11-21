@@ -732,6 +732,43 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
 #careerScreen #careerSaveNote{display:none}
 @media(max-height:440px) and (orientation:landscape){#careerScreen .career-header h2{font-size:19px}#careerScreen .career-block h3{font-size:12px;margin-bottom:3px}#careerScreen .career-stat{padding:3px}#careerScreen .career-select{min-height:31px;padding:4px}#careerScreen .career-btn{min-height:32px;padding:4px}#careerScreen .career-hint{display:none}#garageScreen .garage-panel{padding:5px 9px!important}#garageScreen #garageCanvas{height:clamp(115px,32vh,200px)!important}}
 @media(max-width:520px) and (orientation:portrait){#careerScreen .career-layout{grid-template-columns:1fr;overflow:auto}#careerScreen .career-overview{overflow:visible}#careerScreen .career-missions{min-height:150px}#careerMissionsScreen .career-all-list{grid-template-columns:1fr}}
+</style><style id="ttr-v41-layout-and-elimination">
+/* All three menus use the main menu's viewport and identical safe-area geometry. */
+#garageScreen,#careerScreen,#careerMissionsScreen{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-height:100dvh!important;box-sizing:border-box!important;padding:max(5px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(5px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left))!important;overflow:hidden!important;align-items:stretch!important;justify-content:stretch!important;background:linear-gradient(140deg,#161d78,#312477 55%,#15103d)!important}
+#garageScreen .garage-panel,#careerScreen .career-panel,#careerMissionsScreen .career-panel{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;min-height:0!important;box-sizing:border-box!important;overflow:hidden!important;border:3px solid #f1ce72!important;border-radius:4px!important;box-shadow:inset 0 0 0 3px #101d52!important;margin:0!important;padding:clamp(5px,1.6vh,12px)!important}
+#garageScreen .garage-layout{height:calc(100% - 40px);min-height:0;overflow:hidden;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)!important;gap:clamp(5px,1vw,12px)!important;margin-top:3px!important}
+#garageScreen .garage-stage,#garageScreen .garage-list{min-width:0;min-height:0;overflow:hidden}
+#garageScreen .garage-header{min-height:0}
+#garageScreen .garage-header h2{font-size:clamp(16px,3.3vw,26px)!important}
+#garageScreen #garageCanvas{height:clamp(70px,25dvh,150px)!important}
+#garageScreen .car-choice-list{gap:3px!important}
+#garageScreen .car-choice{min-height:clamp(28px,8.7dvh,42px)!important}
+#garageScreen .garage-specs p{display:none!important}
+#careerScreen .career-layout{height:100%;flex:1;min-height:0;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)!important;gap:6px!important;overflow:hidden!important}
+#careerScreen .career-overview{min-height:0;overflow:hidden!important}
+#careerScreen .career-list{min-height:0;overflow:hidden!important;display:grid;grid-template-columns:1fr!important;grid-template-rows:repeat(3,minmax(0,1fr));gap:4px!important}
+#careerScreen .career-mission{min-height:0;overflow:hidden;padding:5px!important}
+#careerScreen .career-mission-icon{min-width:27px!important;width:27px!important;font-size:14px!important}
+#careerScreen .career-mission-desc,#careerScreen .career-state{font-size:9px!important;line-height:1.1}
+#careerScreen .career-mission-top{font-size:10px!important}
+#careerScreen .career-header{padding-bottom:3px!important}
+#careerScreen .career-header h2{font-size:clamp(17px,3.5vw,26px)!important}
+#careerScreen .career-overview>.career-block{padding:5px!important}
+#careerScreen .career-block h3{margin:0 0 3px!important;font-size:12px!important}
+#careerScreen .career-stat{padding:3px!important}
+#careerScreen .career-select,#careerScreen .career-btn{min-height:30px!important;padding:3px 7px!important}
+#careerMissionsScreen .career-all-list{overflow:auto!important;min-height:0!important;flex:1}
+/* The score strip occupies its own lane, between safe-area margins and the pause control. */
+#elimBoard{top:max(57px,calc(env(safe-area-inset-top) + 50px))!important;left:max(24px,calc(env(safe-area-inset-left) + 15px))!important;right:max(24px,calc(env(safe-area-inset-right) + 15px))!important;width:auto!important;max-height:36px!important;display:none;flex-wrap:nowrap!important;gap:clamp(3px,1vw,9px)!important;align-items:center;justify-content:center!important}
+#elimBoard .e-score{display:inline-flex;align-items:center;justify-content:center;gap:3px;min-width:clamp(28px,5vw,50px);padding:3px 5px!important;border:1px solid var(--car-color)!important;border-radius:5px;background:#061a2de0!important;color:#fff!important;font:900 clamp(9px,1.3vw,13px)/1 system-ui,sans-serif}
+#elimBoard .e-color{display:inline-block;width:11px;height:11px;flex:0 0 11px;border-radius:3px;background:var(--car-color);border:1px solid #fff9}
+#elimBoard .e-score.is-me{outline:1px solid #ffe68c}
+#elimBoard .e-score.is-out{opacity:.32}
+#elimBoard .e-score b{font-size:9px;color:#ffe58b}
+#hud.hud-elimination .hudTop{display:flex!important;gap:5px!important;justify-content:flex-start!important}
+#hud.hud-elimination .hudTop .statBlock:has(#position),#hud.hud-elimination .hudTop .statBlock:has(#lap){display:flex!important}
+#hud.hud-elimination .hudTop .statBlock:has(#time){display:none!important}
+@media(max-height:390px) and (orientation:landscape){#garageScreen .garage-header .eyebrow{display:none}#garageScreen #garageCanvas{height:23dvh!important}#careerScreen .career-mission-desc{display:none!important}#careerScreen .career-mission{padding:3px!important}#careerScreen .career-state{margin-top:1px!important}#elimBoard{top:max(49px,calc(env(safe-area-inset-top) + 43px))!important}}
 </style></head>
 <body>
 <canvas id="game" aria-label="Circuito Colazione Turbo"></canvas><section id="onlineModal" hidden aria-label="Online: sale reali" role="dialog" aria-modal="true"><div class="online-panel">
@@ -763,7 +800,7 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
  <div class="v11-main">
   <div class="v11-menu-left"><h2 class="v11-prompt" data-i18n="chooseMode">SCEGLI LA MODALITÀ</h2>
    <nav class="v11-options" aria-label="Opzioni principali">
-    <button id="careerBtn" class="retro-option">CARRIERA · MISSIONI</button>
+    <button id="careerBtn" class="retro-option">CARRIERA</button>
      <button id="raceBtn" class="retro-option selected" data-i18n="quickRace">GARA VELOCE</button>
     <button id="trialBtn" class="retro-option" data-i18n="timeTrial">TIME TRIAL</button>
     <button id="eliminationBtn" class="retro-option" data-i18n="elimination">ELIMINAZIONE</button>
@@ -2204,15 +2241,16 @@ function effectText(x,y,s,color='#fff'){if(!race)return;race.effects.push({x,y,t
 // ELIMINAZIONE PROTOTIPO v0.1 — not canonical rules.
 // The master design bible (2026-11-17) confirms points, jingle, side flip and a longer final victory,
 // but explicitly says exact scoring/win conditions must be recovered before declaring them canonical.
-const ELIM_RULES_TEST={defaultGoal:5,minimumRoundSeconds:6,trailGap:380,physicalSeparation:175,sustainedTrailSeconds:.70};
+const ELIM_RULES_TEST={defaultGoal:5,minimumRoundSeconds:6,trailGap:380,physicalSeparation:175,sustainedTrailSeconds:1.8,respawnProtectionSeconds:2.5,edgeMargin:38};
 const elimBoard=document.createElement('div');elimBoard.id='elimBoard';elimBoard.setAttribute('aria-label','Punteggi Eliminazione');document.body.appendChild(elimBoard);
 const elimBanner=document.createElement('div');elimBanner.id='elimBanner';elimBanner.innerHTML='<div class="elim-message"><strong id="elimBannerTitle">PUNTO!</strong><span id="elimBannerSub"></span></div>';document.body.appendChild(elimBanner);
-function hideEliminationUI(){elimBoard.style.display='none';elimBanner.style.display='none';}
-function elimDisplayName(c){return c.id===0?'TU':`CPU ${c.id}`;}
+function hideEliminationUI(){elimBoard.style.display='none';elimBanner.style.display='none';$('hud')?.classList.remove('hud-elimination');}
+function elimDisplayName(c){return c.id===race?.player?.id?'TU':'';}
+function elimColor(c){return c.variantAccent||c.profile.color||'#82bfe9';}
 function refreshEliminationBoard(){
  if(!race||race.mode!=='elimination'){hideEliminationUI();return;}
  const e=race.elim;elimBoard.style.display='flex';
- elimBoard.innerHTML=race.cars.map(c=>`<span class="e-score ${c.eliminated?'is-out':''} ${c.id===0?'is-me':''}">${elimDisplayName(c)} ${e.points[c.id]}/${e.goal}</span>`).join('');
+ elimBoard.innerHTML=race.cars.map(c=>`<span class="e-score ${c.eliminated?'is-out':''} ${c===race.player?'is-me':''}" title="${c.profile.name} · ${e.points[c.id]} punti" aria-label="${c===race.player?'Tu':c.profile.name}: ${e.points[c.id]} punti" style="--car-color:${elimColor(c)}"><i class="e-color"></i>${c===race.player?'<b>TU</b>':''}<strong>${e.points[c.id]}</strong></span>`).join('');
 }
 function eliminationActive(){return race.cars.filter(c=>!c.eliminated&&!c.done);}
 function knockOutElimination(c,reason='distacco'){
@@ -2239,7 +2277,7 @@ function eliminationNewRound(){
   const profileIndex=profiles.findIndex(pr=>pr.id===c.profile.id);
   const fresh=createCar(i,profileIndex,mod(.005-Math.floor(i/2)*.019,1));
   const keep={variantAccent:c.variantAccent,variantLabel:c.variantLabel,variantSprite:c.variantSprite};
-  Object.assign(c,fresh,keep);c.eliminated=false;c.elimDistance=0;c.elimPrevP=c.p;c.elimLag=0;c.elimCelebration=0;
+  Object.assign(c,fresh,keep);c.eliminated=false;c.elimDistance=0;c.elimPrevP=c.p;c.elimLag=0;c.elimProtection=0;c.elimCelebration=0;
  });
  camX=race.player.x;camY=race.player.y;elimBanner.style.display='none';refreshEliminationBoard();
  showHint(`ELIMINAZIONE · MANCHE ${e.round}`,1.4);hud();
@@ -2252,25 +2290,37 @@ function eliminationProgressUpdate(c,pr,dt){
  if(legal)c.elimDistance=(c.elimDistance||0)+delta;
  c.elimPrevP=pr;
 }
+// A point is awarded only after every rival has genuinely left the leader's visible camera
+// for a sustained interval. Progress alone and recoveries never knock a car out.
+function eliminationViewBounds(leader){
+ const width=innerWidth||sw||844,height=innerHeight||sh||390;
+ const zoom=width<height?Math.min(.85,Math.max(.60,height/620)):Math.min(.86,Math.max(.59,Math.min(width/1140,height/540)));
+ const look=race.countdown<=0?85:0;
+ const halfW=width/(2*zoom),halfH=height/(2*zoom);
+ const x=halfW>=WORLD_W/2?WORLD_W/2:clamp(leader.x+Math.cos(leader.a)*look,halfW,WORLD_W-halfW);
+ const y=halfH>=WORLD_H/2?WORLD_H/2:clamp(leader.y+Math.sin(leader.a)*look,halfH,WORLD_H-halfH);
+ return {x,y,halfW,halfH};
+}
 function eliminationEvaluate(dt){
  const e=race.elim;if(e.state!=='race'||race.countdown>0)return;
  e.roundTime+=dt;
  let active=eliminationActive();
  if(active.length===1){awardEliminationPoint(active[0]);return;}
  if(active.length===0){eliminationNewRound();return;}
- if(active.length<2||e.roundTime<ELIM_RULES_TEST.minimumRoundSeconds)return;
+ if(e.roundTime<ELIM_RULES_TEST.minimumRoundSeconds)return;
  const leader=active.reduce((a,b)=>(a.elimDistance||0)>(b.elimDistance||0)?a:b);
- const threshold=ELIM_RULES_TEST.trailGap;
- // Never eliminate on projected track progress alone: require actual physical separation,
- // a substantial lag and persistence across frames, reducing hairpin false positives.
+ const view=eliminationViewBounds(leader),margin=ELIM_RULES_TEST.edgeMargin;
  for(const c of active){
+  c.elimProtection=Math.max(0,(c.elimProtection||0)-dt);
   if(c===leader){c.elimLag=0;continue;}
   const behind=(leader.elimDistance||0)-(c.elimDistance||0);
-  const dist=Math.hypot(leader.x-c.x,leader.y-c.y);
-  const qualifies=behind>threshold && dist>ELIM_RULES_TEST.physicalSeparation &&
-    !(c.respawnGrace>0)&&!(c.impactGrace>0)&&!(c.bridgeMissGrace>0);
-  c.elimLag=qualifies?(c.elimLag||0)+dt:Math.max(0,(c.elimLag||0)-dt*2);
-  if(c.elimLag>=ELIM_RULES_TEST.sustainedTrailSeconds)knockOutElimination(c,'distacco');
+  const physical=Math.hypot(leader.x-c.x,leader.y-c.y);
+  const outside=Math.abs(c.x-view.x)>view.halfW+margin||Math.abs(c.y-view.y)>view.halfH+margin;
+  const qualifies=behind>ELIM_RULES_TEST.trailGap&&physical>ELIM_RULES_TEST.physicalSeparation&&outside&&
+   !(c.respawnGrace>0)&&!(c.elimProtection>0)&&!(c.tableFalling>0)&&
+   !(c.impactGrace>0)&&!(c.bridgeMissGrace>0)&&!(c.bridgeMissActive);
+  c.elimLag=qualifies?(c.elimLag||0)+dt:Math.max(0,(c.elimLag||0)-dt*3);
+  if(c.elimLag>=ELIM_RULES_TEST.sustainedTrailSeconds)knockOutElimination(c,'fuori schermo');
  }
  active=eliminationActive();if(active.length===1)awardEliminationPoint(active[0]);
 }
@@ -2360,7 +2410,7 @@ function initRace(mode){
  for(let i=0;i<num;i++){const own=mode==='online'&&onlineSession?.members[i];race.cars.push(createCar(i,own?own.car:i===0?pr:i%profiles.length,mod(.005-Math.floor(i/2)*.019,1)));}
  assignDuplicateAccents();
  race.player=race.cars[mode==='online'&&onlineSession?onlineSession.slot:0];
- if(mode==='elimination')race.cars.forEach(c=>{c.eliminated=false;c.elimDistance=0;c.elimPrevP=c.p;c.elimLag=0;c.elimCelebration=0;});
+ if(mode==='elimination')race.cars.forEach(c=>{c.eliminated=false;c.elimDistance=0;c.elimPrevP=c.p;c.elimLag=0;c.elimProtection=0;c.elimCelebration=0;});
  const refLap=TRACK_LENGTH/155;const count=pickupCount(refLap);for(let i=0;i<count;i++){const p=pickupSegments[i],pt=trackPoint(p);race.pickups.push({x:pt.x,y:pt.y,size:22,r:16.5,cool:0,phase:i*1.7,segment:p});}
  for(const k of Object.keys(controls))controls[k]=false;
  $('loadingTrack').hidden=true;$('pauseOverlay').hidden=true;$('screen').hidden=true;$('screen').style.display='none';$('hud').style.display='block';$('controls').style.display='flex';$('gas').style.display=auto?'none':'flex';$('hint').classList.remove('show');
@@ -2368,6 +2418,7 @@ function initRace(mode){
  if(mode==='online'){$('pauseBtn').textContent='ESCI';$('pauseBtn').setAttribute('aria-label','Esci dalla gara online');}else{$('pauseBtn').textContent='Ⅱ';$('pauseBtn').setAttribute('aria-label','Pausa');}
  $('position').parentElement.querySelector('small').textContent=mode==='elimination'?'IN PISTA':t('position');
  $('lap').parentElement.querySelector('small').textContent=mode==='elimination'?'MANCHE':t('lap');
+ $('hud').classList.toggle('hud-elimination',mode==='elimination');
  SND.unlock().then(ok=>{if(ok)SND.sfx('start');});SND.stopMusic();frameTime=performance.now();camX=race.player.x;camY=race.player.y;hud();
 }
 // One recovery path for excessive shortcut, tabletop edge and blocked obstacles.
@@ -2382,6 +2433,7 @@ function recoverCar(c,reason='edge'){
  c.offtrack=false;c.offtrackSeconds=0;c.offtrackEntry=null;c.maxInteriorCut=0;c.onBridge=false;c.bridgeOffSeconds=0;
  c.lapGateBlocked=true;c.respawnGrace=.75;c.stuckAnchor=null;c.obstacleStuckSeconds=0;
  c.stuckTime=0;c.reverseRecovery=0;c.lastObstacleContact=-100;
+ if(race?.mode==='elimination'){c.elimLag=0;c.elimProtection=ELIM_RULES_TEST.respawnProtectionSeconds;c.elimPrevP=p;}
  c.shortcutRespawns=(c.shortcutRespawns||0)+1;c.lastPenaltyReason=reason;c.routeStableP=p;c.routePinch=null;c.routeResolvedNear=null;c.tableFalling=0;c.tableSpin=0;c.tableFallDir=0;c.auditP=p;c.auditTravel=0;c.auditCleanTime=0;c.auditBridge=false;c.auditOutsideTime=0;c.oilSpin=0;c.bridgeLandingActive=false;c.mugApexPassed=safe.mugApexPassed===true||(safe.mugApexPassed===undefined&&p>.32&&p<.93);
  
  if(c===race.player){SND.sfx('respawn');lastHint=0;const h=$('hint');if(h){h.textContent='';h.classList.remove('show');}if(reason==='junction-cut')showHint(t('shortcutPenalty'),1.35);}
@@ -2483,7 +2535,7 @@ function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSes
       race.effects.push({kind:'fallCloud',x:c.x,y:c.y,t:1.05,ttl:1.05});
       if(c===race.player)SND.sfx('fallImpact');
     }
-    if(c.tableFalling<=0){if(race.mode==='elimination'){knockOutElimination(c,'caduta');}else recoverCar(c,'table-fall');}
+    if(c.tableFalling<=0){recoverCar(c,'table-fall');}
     continue;
   }const ctl=inputFor(c),mul=race.mode==='online'&&onlineSession?.members[c.id]?1:(c===race.player?1:race.aiFactor);let vmax=c.profile.max*mul,accelerate=c.profile.acc*mul;
  // Sticky jam has a lasting, measurable slowdown and reduced acceleration.
@@ -3005,13 +3057,13 @@ for(const c of race.cars){mg.fillStyle=c===race.player?'#ffdc76':'#ff766f';mg.be
 function render(){const ratio=Math.min(race?.mode==='online'&&onlineSession&&!onlineSession.host?1.38:1.65,devicePixelRatio||1);if(sw!==innerWidth||sh!==innerHeight||dpr!==ratio){sw=innerWidth;sh=innerHeight;dpr=ratio;canvas.width=Math.ceil(sw*dpr);canvas.height=Math.ceil(sh*dpr);}g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#6e4a37';g.fillRect(0,0,sw,sh);
  // Real follow camera: the circuit extends beyond the mobile viewport.
  // Keep the player just behind centre, giving sight of the upcoming corner.
- const player=race?.mode==='elimination'?(race.elim.state==='celebration'?race.cars[race.elim.winner]:race.player?.eliminated?(eliminationActive()[0]||race.player):race.player):race?.player,playerFalling=!!(player&&player.tableFalling>0);
+ const player=race?.mode==='elimination'?(race.elim.state==='celebration'?race.cars[race.elim.winner]:(eliminationActive().reduce((a,b)=>(!a||(b.elimDistance||0)>(a.elimDistance||0))?b:a,null)||race.player)):race?.player,playerFalling=!!(player&&player.tableFalling>0);
  const look=player&&race.countdown<=0&&!playerFalling?85:0;
  const targetX=player?player.x+Math.cos(player.a)*look:WORLD_W/2,targetY=player?player.y+Math.sin(player.a)*look:WORLD_H/2;
  scale=sw<sh?Math.min(.85,Math.max(.60,sh/620)):
    Math.min(.86,Math.max(.59,Math.min(sw/1140,sh/540)));
  const halfW=sw/(2*scale),halfH=sh/(2*scale);
- const follow=playerFalling?.23:1-Math.exp(-Math.min(.05,(performance.now()-frameTime)/1000+.017)*6.4);
+ const follow=race?.mode==='elimination'&&!playerFalling?1:(playerFalling?.23:1-Math.exp(-Math.min(.05,(performance.now()-frameTime)/1000+.017)*6.4));
  camX+=(targetX-camX)*follow;camY+=(targetY-camY)*follow;
  const outerView=playerFalling?105:0;
  camX=halfW>=WORLD_W/2?WORLD_W/2:clamp(camX,halfW-outerView,WORLD_W-halfW+outerView);
