@@ -1,9 +1,0 @@
-TINY TRACK RIVALS — v0.13.6.65 — PATCH MENU
-Origine: v0.13.6.64. Patch chirurgica (solo CSS del menu + numero versione).
-- Tutte le 7 icone: posizione verticale unificata, dimensioni 14–19px e margine dalla riga inferiore.
-- Restituito il puntatore triangolare ▶ delle vecchie versioni, anziché ➜ di v62; piccola oscillazione orizzontale a scatti.
-- Mantiene colori e forma delle icone presenti in v64, selezione modalità e interazioni.
-- A prefers-reduced-motion il puntatore resta fermo.
-- Non alterati veicoli, circuito, collisioni, macchie, scodella, salterello, audio e online.
-- Anteprima HTML autonoma; ZIP pronto per sovrascrivere index.html del pacchetto GitHub Pages v64.
-- Nessuna pubblicazione effettuata.
