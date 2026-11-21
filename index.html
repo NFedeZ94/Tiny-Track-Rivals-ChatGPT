@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1a2e"><meta name="ttr-build" content="v0.13.6.62"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tiny Track Rivals"><meta name="application-name" content="Tiny Track Rivals"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><link rel="manifest" href="manifest.webmanifest"><title>Tiny Track Rivals — Colazione Turbo</title><style>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1a2e"><meta name="ttr-build" content="v0.13.6.63"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tiny Track Rivals"><meta name="application-name" content="Tiny Track Rivals"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><link rel="manifest" href="manifest.webmanifest"><title>Tiny Track Rivals — Colazione Turbo</title><style>
 
 :root{color-scheme:dark;--cyan:#60d9ff;--yellow:#ffd55d;--ink:#071326;--line:#345577;--orange:#f39b43}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#081324;color:#f0f7ff;font-family:system-ui,-apple-system,'Arial Black',sans-serif;touch-action:none;user-select:none}#game{position:fixed;inset:0;width:100vw;height:100dvh;display:block;background:#7a5842}.screen{position:absolute;inset:0;z-index:8;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,rgba(3,10,24,.94),rgba(8,36,62,.84)),repeating-linear-gradient(45deg,#061b2b 0 35px,#122b43 35px 70px);padding:12px;overflow:auto;touch-action:pan-y}.panel{width:min(840px,100%);border:2px solid #5092bc;border-radius:22px;background:linear-gradient(170deg,#162f4e,#0a1a30 80%);box-shadow:0 18px 70px #000a,inset 0 0 35px #23688d22;padding:clamp(18px,4vw,40px);max-height:calc(100dvh - 24px);overflow-y:auto}.panel.resultsPanel{width:min(760px,100%);padding:clamp(16px,3vw,26px)}.panel.resultsPanel.compact{width:min(800px,100%);padding:16px 18px;overflow:hidden}.eyebrow{font-size:11px;letter-spacing:.2em;color:#86dfff;font-weight:850;margin:0 0 10px;text-transform:uppercase}.logo{font-weight:1000;font-style:italic;font-size:clamp(35px,8vw,83px);letter-spacing:-.055em;line-height:.94;color:#ffd054;text-shadow:3px 4px 0 #9f3c24,7px 8px 0 #06111e}.logo span{display:block;color:#fff;font-size:.48em;letter-spacing:.08em;text-shadow:3px 4px 0 #385a76}.sub{color:#bed1e2;line-height:1.45;font-size:14px;max-width:680px;margin:16px 0 22px}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.chip{padding:7px 10px;border-radius:99px;border:1px solid #446b86;background:#102e4b;color:#c8e2f8;font-size:12px;font-weight:700}.menu-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:20px}.resultsPanel .menu-row{margin-top:14px}.btn{touch-action:manipulation;border:2px solid #eccd76;border-radius:13px;background:linear-gradient(#fff3a5,#f5b73f);box-shadow:0 4px 0 #ab5d1f;color:#17203a;font-size:15px;font-weight:950;padding:13px 22px;cursor:pointer;text-align:center;min-height:48px}.btn.secondary{background:linear-gradient(#20466a,#123250);color:#e5f5ff;border-color:#5293b8;box-shadow:0 4px 0 #07182b}.btn:active{transform:translateY(3px);box-shadow:none}.settings{display:flex;flex-wrap:wrap;gap:14px;margin-top:19px}.settings label{display:flex;flex-direction:column;gap:5px;color:#add7ef;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.settings select{font-size:15px;background:#102943;color:#fff;border:1px solid #497ca2;padding:10px;border-radius:9px;min-width:130px}.note{font-size:12px;color:#a9c1d2;line-height:1.55;margin:17px 0 0}.resultTitle{font-size:clamp(28px,5vw,45px);font-weight:950;color:#ffe17d;margin:0 0 14px}.results{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}.results td{border-bottom:1px solid #3b5972;padding:8px 4px;vertical-align:middle}.results tr.me{color:#ffe395;font-weight:850}.results.compact{font-size:12px}.results.compact td{padding:5px 3px}.results td:first-child{width:44px}.resultSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin:10px 0 14px}.resultCard{border:1px solid #36617d;background:#0b1f36;border-radius:12px;padding:8px 10px}.resultCard b{display:block;color:#8fe5fd;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}.variantDot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:7px;vertical-align:-1px;border:1px solid #ffffff99;box-shadow:0 0 0 1px #0a1325}#hud{position:fixed;inset:0;pointer-events:none;z-index:4;display:none}.hudTop{position:absolute;left:8px;right:8px;top:max(7px,env(safe-area-inset-top));display:flex;align-items:flex-start;justify-content:space-between;gap:5px}.statBlock{border:1px solid #3f829e;background:#071831df;border-radius:10px;padding:8px 11px;box-shadow:0 3px 0 #0008;min-width:82px}.statBlock small{font-size:9px;display:block;color:#8ce3ff;font-weight:850;letter-spacing:.08em}.statBlock strong{font-size:clamp(15px,2.8vw,23px);color:#fff}.itemBlock{border-color:#b78b41}.itemBlock strong{color:#ffde79}#hint{position:absolute;left:50%;top:23%;transform:translate(-50%,-50%);background:#04172bcf;border:1px solid #6bc9e8;color:#fff;font-size:clamp(17px,4vw,33px);font-weight:950;border-radius:12px;padding:12px 19px;text-align:center;opacity:0;transition:opacity .15s;white-space:nowrap}#hint.show{opacity:1}#controls{position:fixed;z-index:5;bottom:max(10px,env(safe-area-inset-bottom));left:10px;right:10px;display:none;pointer-events:none;justify-content:space-between;gap:10px}.ctrlGroup{display:flex;align-items:end;gap:8px;pointer-events:none}.control{border:2px solid #b1d7ef;background:linear-gradient(155deg,#214666d9,#07192de6);color:#fff;box-shadow:inset 0 1px 8px #ffffff25,0 4px 0 #010711bd;border-radius:18px;width:clamp(52px,12vw,76px);height:clamp(56px,14vw,81px);font-size:28px;font-weight:950;touch-action:none;pointer-events:auto;display:flex;align-items:center;justify-content:center}.control.small{font-size:14px;width:clamp(56px,12vw,72px);color:#ffdb7c}.control.active{background:#eabf52;color:#0a1c28;transform:translateY(3px);box-shadow:0 1px #010711}.hudBottom{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);font-size:10px;white-space:nowrap;color:#e3f5ff;background:#071c30bd;padding:5px 10px;border-radius:8px}#pauseBtn{pointer-events:auto;position:absolute;right:9px;top:calc(63px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:8px 13px}#mini{position:absolute;top:calc(70px + env(safe-area-inset-top));left:10px;width:140px;height:90px;background:#071b2acb;border:1px solid #417fa8;border-radius:8px}#orientation{display:none;position:fixed;inset:auto 20px 100px;z-index:3;text-align:center;color:#f5f9ff;font-size:11px;opacity:.8}#muteBtn{pointer-events:auto;position:absolute;right:9px;top:calc(101px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:7px 11px}@media(orientation:portrait){#mini{width:96px;height:64px;top:calc(68px + env(safe-area-inset-top))}#pauseBtn{top:calc(68px + env(safe-area-inset-top))}#muteBtn{top:calc(105px + env(safe-area-inset-top))}#orientation{display:block}.hudBottom{bottom:99px;font-size:9px}.control{height:62px;width:58px}.control.small{width:57px}}@media(max-height:500px){.panel{padding:15px}.sub{margin:7px 0}.menu-row{margin-top:8px}.settings{margin-top:8px}.note{margin-top:9px}.control{height:58px}.hudBottom{display:none}#mini{top:calc(58px + env(safe-area-inset-top))}}
 
@@ -837,12 +837,12 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
 /* v60: garage keeps ONLY the internal 360-degree rotation. */
 #screen.v11-screen #menuCar,#garageScreen #garageCanvas{animation:none!important;transform:none!important;filter:none!important;will-change:auto!important;}
 #garageScreen .garage-stage:before,#screen.v11-screen .v11-car-stage:before{display:none!important;content:none!important;box-shadow:none!important;}
-</style><style id="ttr-v62-menu-icons">
+</style><style id="ttr-v61-menu-icons">
 
-/* v0.13.6.62 — seven consistent retro menu glyphs (CSS mask, no emoji).
-   Apply icons to Career, Quick Race, Time Trial, Elimination, Online, Garage and Options only. */
+/* v0.13.6.61 — five consistent retro menu glyphs (CSS mask, no emoji).
+   Restrict to these five buttons; Garage/Options and all other screens stay unchanged. */
 #screen.v11-screen .v11-options .retro-option{padding-right:clamp(31px,5vw,43px)!important;}
-#screen.v11-screen .v11-options .retro-option:nth-child(-n+7)::after{
+#screen.v11-screen .v11-options .retro-option:nth-child(-n+5)::after{
  content:'';position:absolute;right:clamp(6px,1.5vw,12px);top:50%;
  width:clamp(18px,3.9vh,25px);height:clamp(18px,3.9vh,25px);
  transform:translateY(-50%);display:block;opacity:.95;
@@ -852,11 +852,11 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
  -webkit-mask-size:contain;mask-size:contain;
  filter:none;
 }
-#screen.v11-screen .v11-options .retro-option:nth-child(-n+7):not(.selected){color:#fff0b4;}
-#screen.v11-screen .v11-options .retro-option:nth-child(-n+7).selected{color:#152451;}
+#screen.v11-screen .v11-options .retro-option:nth-child(-n+5):not(.selected){color:#fff0b4;}
+#screen.v11-screen .v11-options .retro-option:nth-child(-n+5).selected{color:#152451;}
 @media(max-width:620px) and (orientation:landscape){
  #screen.v11-screen .v11-options .retro-option{padding-right:28px!important;}
- #screen.v11-screen .v11-options .retro-option:nth-child(-n+7)::after{right:6px;width:18px;height:18px;}
+ #screen.v11-screen .v11-options .retro-option:nth-child(-n+5)::after{right:6px;width:18px;height:18px;}
 }
 @media(prefers-reduced-motion:reduce){
  /* The existing menu canvas renderer handles the preference; no CSS motion here. */
@@ -867,8 +867,37 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
 #screen.v11-screen .v11-options #trialBtn::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2213%22%20r%3D%228%22%2F%3E%3Cpath%20d%3D%22M9%202h6M12%202v3M18.5%206.5%2020%205M12%209v4l-3%202%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2213%22%20r%3D%228%22%2F%3E%3Cpath%20d%3D%22M9%202h6M12%202v3M18.5%206.5%2020%205M12%209v4l-3%202%22%2F%3E%3C%2Fsvg%3E");}
 #screen.v11-screen .v11-options #eliminationBtn::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M7%203h10l4%204v10l-4%204H7l-4-4V7z%22%2F%3E%3Cpath%20d%3D%22m9%209%206%206M15%209l-6%206%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M7%203h10l4%204v10l-4%204H7l-4-4V7z%22%2F%3E%3Cpath%20d%3D%22m9%209%206%206M15%209l-6%206%22%2F%3E%3C%2Fsvg%3E");}
 #screen.v11-screen .v11-options #onlineBtn::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M3%2012h18M12%203c-3%203-4%206-4%209s1%206%204%209M12%203c3%203%204%206%204%209s-1%206-4%209M5%207h14M5%2017h14%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M3%2012h18M12%203c-3%203-4%206-4%209s1%206%204%209M12%203c3%203%204%206%204%209s-1%206-4%209M5%207h14M5%2017h14%22%2F%3E%3C%2Fsvg%3E");}
-#screen.v11-screen .v11-options #garageBtn::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2014l2-5h11l3%205%22%2F%3E%3Cpath%20d%3D%22M6%2014h13v4a2%202%200%200%201-2%202H8a2%202%200%200%201-2-2v-4Z%22%2F%3E%3Ccircle%20cx%3D%228.5%22%20cy%3D%2218%22%20r%3D%221.5%22%20fill%3D%22currentColor%22%20stroke%3D%22none%22%2F%3E%3Ccircle%20cx%3D%2215.5%22%20cy%3D%2218%22%20r%3D%221.5%22%20fill%3D%22currentColor%22%20stroke%3D%22none%22%2F%3E%3Cpath%20d%3D%22M7.5%2014l1-3h6l1.5%203%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2014l2-5h11l3%205%22%2F%3E%3Cpath%20d%3D%22M6%2014h13v4a2%202%200%200%201-2%202H8a2%202%200%200%201-2-2v-4Z%22%2F%3E%3Ccircle%20cx%3D%228.5%22%20cy%3D%2218%22%20r%3D%221.5%22%20fill%3D%22currentColor%22%20stroke%3D%22none%22%2F%3E%3Ccircle%20cx%3D%2215.5%22%20cy%3D%2218%22%20r%3D%221.5%22%20fill%3D%22currentColor%22%20stroke%3D%22none%22%2F%3E%3Cpath%20d%3D%22M7.5%2014l1-3h6l1.5%203%22%2F%3E%3C%2Fsvg%3E");}
-#screen.v11-screen .v11-options #settingsBtn::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.05%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%203l1.3%202.6%202.9.6-.8%202.9%202%202-.8%202.9-2.9.6L12%2021l-1.7-2.4-2.9-.6.8-2.9-2-2%20.8-2.9%202.9-.6L12%203z%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%222.5%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.05%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M12%203l1.3%202.6%202.9.6-.8%202.9%202%202-.8%202.9-2.9.6L12%2021l-1.7-2.4-2.9-.6.8-2.9-2-2%20.8-2.9%202.9-.6L12%203z%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%222.5%22%2F%3E%3C%2Fsvg%3E");}
+
+/* v62: genuine garage shutter and settings gear; same monochrome mask treatment as modes. */
+#screen.v11-screen .v11-options .retro-option:nth-child(n+6)::after{
+ content:'';position:absolute;right:clamp(6px,1.5vw,12px);top:50%;
+ width:clamp(18px,3.9vh,25px);height:clamp(18px,3.9vh,25px);
+ transform:translateY(-50%);display:block;opacity:.95;
+ background-color:currentColor;pointer-events:none;
+ -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+ -webkit-mask-position:center;mask-position:center;
+ -webkit-mask-size:contain;mask-size:contain;
+}
+#screen.v11-screen .v11-options #garageBtn::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.05%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3.5%2021V9L12%203.5%2020.5%209v12%22%2F%3E%3Cpath%20d%3D%22M6%2021V10.5h12V21%22%2F%3E%3Cpath%20d%3D%22M7%2013.5h10M7%2016.5h10M7%2019.5h10%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.05%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3.5%2021V9L12%203.5%2020.5%209v12%22%2F%3E%3Cpath%20d%3D%22M6%2021V10.5h12V21%22%2F%3E%3Cpath%20d%3D%22M7%2013.5h10M7%2016.5h10M7%2019.5h10%22%2F%3E%3C%2Fsvg%3E");}
+#screen.v11-screen .v11-options #settingsBtn::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10%202h4l.6%202.2a8%208%200%200%201%201.9.8l2-1.1%202.8%202.8-1.1%202a8%208%200%200%201%20.8%201.9l2.2.6v4l-2.2.6a8%208%200%200%201-.8%201.9l1.1%202-2.8%202.8-2-1.1a8%208%200%200%201-1.9.8L14%2024h-4l-.6-2.2a8%208%200%200%201-1.9-.8l-2%201.1-2.8-2.8%201.1-2a8%208%200%200%201-.8-1.9L1%2014.8v-4l2.2-.6A8%208%200%200%201%204%208.3l-1.1-2%202.8-2.8%202%201.1a8%208%200%200%201%201.9-.8L10%202Z%22%20transform%3D%22translate%281%20.2%29%20scale%28.91%29%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212.3%22%20r%3D%223.1%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10%202h4l.6%202.2a8%208%200%200%201%201.9.8l2-1.1%202.8%202.8-1.1%202a8%208%200%200%201%20.8%201.9l2.2.6v4l-2.2.6a8%208%200%200%201-.8%201.9l1.1%202-2.8%202.8-2-1.1a8%208%200%200%201-1.9.8L14%2024h-4l-.6-2.2a8%208%200%200%201-1.9-.8l-2%201.1-2.8-2.8%201.1-2a8%208%200%200%201-.8-1.9L1%2014.8v-4l2.2-.6A8%208%200%200%201%204%208.3l-1.1-2%202.8-2.8%202%201.1a8%208%200%200%201%201.9-.8L10%202Z%22%20transform%3D%22translate%281%20.2%29%20scale%28.91%29%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212.3%22%20r%3D%223.1%22%2F%3E%3C%2Fsvg%3E");}
+/* Animate the white selector arrow itself, never the menu text/button. */
+#screen.v11-screen .v11-options .retro-option.selected::before,
+#screen.v11-screen .v11-options .retro-option:focus-visible::before{
+ content:'➜';display:block;left:3px;top:50%;
+ animation:ttrV62SelectorArrow .7s ease-in-out infinite!important;
+ will-change:transform,opacity;
+}
+@keyframes ttrV62SelectorArrow{
+ 0%,100%{transform:translate3d(0,-50%,0) scale(1);opacity:.85}
+ 50%{transform:translate3d(7px,-50%,0) scale(1.09);opacity:1}
+}
+@media(max-width:620px) and (orientation:landscape){
+ #screen.v11-screen .v11-options .retro-option:nth-child(n+6)::after{right:6px;width:18px;height:18px;}
+}
+@media(prefers-reduced-motion:reduce){
+ #screen.v11-screen .v11-options .retro-option.selected::before,
+ #screen.v11-screen .v11-options .retro-option:focus-visible::before{animation:none!important;transform:translateY(-50%);}
+}
 </style>
 </head>
 <body>
@@ -926,7 +955,7 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
    
   </aside>
  </div>
- <footer class="v11-foot"><div class="v11-footer-btns"><button class="mini-btn" id="langBtn" data-i18n="changeLang">LINGUA</button><button class="mini-btn" id="menuMute" data-i18n="audioOn">AUDIO ON</button><button class="mini-btn" id="audioTest" data-i18n="testSound">PROVA AUDIO</button></div><span id="audioStatus" role="status" aria-live="polite" style="display:none"></span><span class="v11-version">v0.13.6.62</span></footer>
+ <footer class="v11-foot"><div class="v11-footer-btns"><button class="mini-btn" id="langBtn" data-i18n="changeLang">LINGUA</button><button class="mini-btn" id="menuMute" data-i18n="audioOn">AUDIO ON</button><button class="mini-btn" id="audioTest" data-i18n="testSound">PROVA AUDIO</button></div><span id="audioStatus" role="status" aria-live="polite" style="display:none"></span><span class="v11-version">v0.13.6.63</span></footer>
 </div>
 <details class="v11-settings" id="retroSettings"><summary data-i18n="settings">OPZIONI</summary>
  <div class="v11-settings-card"><div class="v11-settings-head"><b data-i18n="settings">OPZIONI</b><button id="closeSettings" type="button" aria-label="Chiudi">✕</button></div>
@@ -2145,6 +2174,7 @@ const typeNames={turbo:'TURBO',oil:'OLIO',claw:'PINZA'};
 const track=(()=>{const c=document.createElement('canvas');c.width=WORLD_W;c.height=WORLD_H;return c;})();
 const trackCtx=track.getContext('2d');
 const props=[];
+const milkCerealSpills=[]; // Static environmental hazards. Owner -1 means all cars can slip.
 const knifePhase=.747;
 const stickyAt=trackPoint(.758),stickyAngle=tangent(.758);
 const jamNormal={x:-Math.sin(stickyAngle),y:Math.cos(stickyAngle)};
@@ -2158,12 +2188,30 @@ function route(ctx){ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):
 function addProp(p,t,side,r,solid=true){const at=trackPoint(p),a=tangent(p),nx=-Math.sin(a),ny=Math.cos(a);props.push({x:at.x+nx*side,y:at.y+ny*side,r,type:t,solid});}
 function drawCrumb(ctx,x,y,r,seed){ctx.save();ctx.translate(x,y);ctx.rotate((seed*1.731)%Math.PI);ctx.fillStyle='#472816bd';ctx.beginPath();ctx.ellipse(2,4,r*1.12,r*.69,0,0,Math.PI*2);ctx.fill();drawPoly(ctx,[[-r*.97,-r*.3],[-r*.43,-r*.92],[r*.55,-r*.70],[r,.08],[r*.32,r*.78],[-r*.82,r*.66]],seed%3===0?'#d49448':seed%3===1?'#f2c276':'#b66d2c','#784321',1.15);ctx.strokeStyle='#fff3b8ba';ctx.lineWidth=1.05;ctx.beginPath();ctx.moveTo(-r*.5,-r*.28);ctx.lineTo(r*.28,-r*.54);ctx.stroke();ctx.restore();}
 function worldInit(){
-  props.length=0;
+  props.length=0;milkCerealSpills.length=0;
   // Interactive props are deliberately few: props not marked solid never obstruct racing.
   addProp(.231,'mug',-188,58,true);        // Mug Bend
   // Removed confusing spiral/cereal decoration at the end of the second bend.
-  addProp(.512,'orange',163,49,false);    // Orange Jump background
-  const op=trackPoint(.502),oa=tangent(.502);props.push({type:'orange_bump',x:op.x+Math.sin(oa)*32,y:op.y-Math.cos(oa)*32,r:24,solid:false,jump:true});
+  addProp(.512,'orange',163,49,true);    // Orange Jump background
+  const op=trackPoint(.502),oa=tangent(.502);props.push({type:'orange_bump',x:op.x+Math.sin(oa)*32,y:op.y-Math.cos(oa)*32,r:29,solid:true,jump:false,interactive:true});
+  // v0.13.6.63 — upright cereal bowl just ahead of the start, with a natural
+  // asymmetrical milk overflow: a small left branch and a long right branch.
+  // The tabletop/crumb lane is unchanged. All patches remain outside y≈1109.
+  props.push({type:'milk_cereal_cup',x:570,y:927,r:75,solid:false,scenery:true,interactive:false});
+  const cerealPatches=[
+    // Left: much smaller than the right-hand spill.
+    {x:507,y:1000,r:24,angle:-.26},{x:470,y:1019,r:18,angle:.23},
+    // Right: connected, irregular lobes, not four round stains.
+    {x:624,y:1003,r:29,angle:.18},{x:667,y:1021,r:34,angle:-.24},
+    {x:712,y:1029,r:33,angle:.19},{x:756,y:1021,r:38,angle:-.17},
+    {x:792,y:1041,r:28,angle:.31}
+  ];
+  for(const p of cerealPatches){
+    const spot={...p,type:'milk_cereal_spill',owner:-1,solid:false,scenery:true,interactive:false};
+    // Preserve a clean racing lane; impact with an off-road stain uses oil traction.
+    if(nearestCourse(spot,points).distance < LANE_HALF+spot.r+21)continue;
+    milkCerealSpills.push(spot);props.push(spot);
+  }
   // Tipped jar attached to the jam spill, not a standing jar floating elsewhere.
   const jnx=-Math.sin(stickyAngle),jny=Math.cos(stickyAngle);
   props.push({type:'jam_spill_jar',x:jamPatch.x+jnx*198,y:jamPatch.y+jny*198,r:64,solid:false,scenery:true});
@@ -2176,7 +2224,7 @@ function worldInit(){
   props.push({type:'ramp',x:launch.x,y:launch.y,r:44,a:ang,solid:false,jump:true,shortcut:true,segment:shortcutFrom});
   // World building: oversize breakfast props, not random obstacles in the lane.
   const scenery=[
-    ['plate_croissant',660,1055,70],['cookie',725,860,34],['cookie_alt',1100,890,36],
+    ['cookie',725,860,34],['cookie_alt',1100,890,36],
     ['mug',1750,1040,51],['toast',1530,950,49],['cereal',1770,440,57],
     ['orange',1250,165,48],
     ['glass',2050,1130,42],['cookie',585,160,39],
@@ -2289,8 +2337,105 @@ function paintWorld(){const ctx=trackCtx,W=WORLD_W,H=WORLD_H;
     drawPoly(ctx,[[cx-nx*5-fx*5,cy-ny*5-fy*5],[cx+nx*5-fx*5,cy+ny*5-fy*5],[cx+nx*5+fx*5,cy+ny*5+fy*5],[cx-nx*5+fx*5,cy-ny*5+fy*5]],(row+col)%2?'#f9f5e9':'#292d3b');
   }
 }
+
+// The milk is drawn from smoothly joined asymmetric lobes, not circles.
+// Rotation and deterministic waviness make the scattered splashes look poured.
+function milkOrganicPath(ctx,r,seed){
+ const lobes=20,pts=[];
+ for(let i=0;i<lobes;i++){
+  const a=i*Math.PI*2/lobes;
+  const wave=1+.13*Math.sin(a*3+seed)+.095*Math.sin(a*5-seed*.7)+.07*Math.cos(a*7+seed*.4);
+  pts.push({x:Math.cos(a)*r*1.20*wave,y:Math.sin(a)*r*.69*wave});
+ }
+ const first=pts[0],last=pts[pts.length-1];
+ ctx.beginPath();ctx.moveTo((first.x+last.x)/2,(first.y+last.y)/2);
+ for(let i=0;i<pts.length;i++){
+  const p=pts[i],q=pts[(i+1)%pts.length];
+  ctx.quadraticCurveTo(p.x,p.y,(p.x+q.x)/2,(p.y+q.y)/2);
+ }
+ ctx.closePath();
+}
+function drawMilkCerealSpill(ctx,o){
+ ctx.save();ctx.translate(o.x,o.y);ctx.rotate(o.angle||0);
+ const r=o.r,seed=(o.x*.013+o.y*.007);
+ ctx.translate(2,4);milkOrganicPath(ctx,r,seed);
+ ctx.fillStyle='#644d3f4a';ctx.fill();ctx.translate(-2,-4);
+ milkOrganicPath(ctx,r,seed);
+ ctx.fillStyle='#fff4dd';ctx.fill();ctx.strokeStyle='#e0cbaa';ctx.lineWidth=1.7;ctx.stroke();
+ // Semi-transparent gloss following the same uneven outline, never an oval decal.
+ ctx.save();ctx.translate(-r*.11,-r*.13);ctx.scale(.78,.61);
+ milkOrganicPath(ctx,r,seed);ctx.fillStyle='#ffffff8a';ctx.fill();ctx.restore();
+ for(let i=0;i<8;i++){
+  const a=(i*2.39996+seed),dr=.27+.48*((i*7%9)/8),x=Math.cos(a)*r*dr,y=Math.sin(a)*r*dr*.64;
+  ctx.save();ctx.translate(x,y);ctx.rotate(a*.35);
+  ctx.fillStyle=i%3===0?'#ba853e':i%3===1?'#d9ab5b':'#edc986';
+  ctx.beginPath();ctx.moveTo(-3.3,-3);ctx.quadraticCurveTo(2.2,-5.2,5.4,-1.2);
+  ctx.quadraticCurveTo(6.5,3.7,0,4.1);ctx.quadraticCurveTo(-5.3,2.6,-3.3,-3);ctx.fill();
+  ctx.strokeStyle='#95612b';ctx.lineWidth=.8;ctx.stroke();ctx.restore();
+ }
+ ctx.restore();
+}
+function drawMilkCerealCup(ctx,o){
+ const x=o.x,y=o.y;
+ ctx.save();ctx.translate(x,y);
+ // Overflow ribbons lie BEHIND the upright bowl. More milk streams right.
+ ctx.lineCap='round';ctx.lineJoin='round';
+ ctx.fillStyle='#e1cbb071';ctx.beginPath();
+ ctx.moveTo(-66,-8);ctx.bezierCurveTo(-90,6,-53,44,-77,64);
+ ctx.bezierCurveTo(-85,76,-119,73,-113,94);
+ ctx.bezierCurveTo(-105,106,-63,93,-52,78);
+ ctx.bezierCurveTo(-40,56,-63,19,-51,-5);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#fff1d4';ctx.beginPath();
+ ctx.moveTo(-64,-13);ctx.bezierCurveTo(-81,12,-54,42,-73,67);
+ ctx.bezierCurveTo(-88,84,-108,76,-109,92);
+ ctx.bezierCurveTo(-97,103,-69,86,-54,72);
+ ctx.bezierCurveTo(-44,55,-65,18,-49,-11);ctx.closePath();ctx.fill();
+ ctx.fillStyle='#fff2dd';ctx.beginPath();
+ ctx.moveTo(56,-10);ctx.bezierCurveTo(81,6,65,47,91,66);
+ ctx.bezierCurveTo(118,83,149,70,169,90);
+ ctx.bezierCurveTo(196,108,206,91,226,107);
+ ctx.bezierCurveTo(216,119,183,118,163,108);
+ ctx.bezierCurveTo(129,97,113,111,91,95);
+ ctx.bezierCurveTo(56,74,42,34,45,-7);ctx.closePath();ctx.fill();
+ ctx.strokeStyle='#fffdf0aa';ctx.lineWidth=3;ctx.beginPath();
+ ctx.moveTo(64,34);ctx.bezierCurveTo(89,79,124,84,166,92);ctx.stroke();
+ // Soft contact shadow: the bowl rests on the cloth, with no tilt or floating.
+ ctx.fillStyle='#49382d65';ctx.beginPath();ctx.ellipse(5,39,81,20,0,0,Math.PI*2);ctx.fill();
+ // Squat, symmetrical ceramic bowl: flat base and broad, perfectly level lip.
+ const body=ctx.createLinearGradient(0,-44,0,51);
+ body.addColorStop(0,'#fbfbf5');body.addColorStop(.60,'#dfe5ef');body.addColorStop(1,'#a5b6c7');
+ ctx.beginPath();ctx.moveTo(-78,-23);
+ ctx.bezierCurveTo(-79,13,-62,42,-45,48);
+ ctx.quadraticCurveTo(0,60,45,48);
+ ctx.bezierCurveTo(62,42,79,13,78,-23);ctx.closePath();
+ ctx.fillStyle=body;ctx.fill();ctx.strokeStyle='#8c9cb6';ctx.lineWidth=3;ctx.stroke();
+ ctx.fillStyle='#f5f4ee';ctx.beginPath();ctx.ellipse(0,-27,82,34,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#6685ad';ctx.beginPath();ctx.ellipse(0,-27,74,27,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#fff5df';ctx.beginPath();ctx.ellipse(0,-27,68,22,0,0,Math.PI*2);ctx.fill();
+ ctx.fillStyle='#fffdf28c';ctx.beginPath();ctx.ellipse(-15,-32,45,11,-.05,0,Math.PI*2);ctx.fill();
+ // Flakes clearly visible INSIDE the milk; no fixed random numbers per frame.
+ for(let i=0;i<21;i++){
+  const a=i*2.3999632,rr=9+((i*11)%17)*2.6;
+  const px=Math.cos(a)*rr,py=-27+Math.sin(a)*rr*.34;
+  ctx.save();ctx.translate(px,py);ctx.rotate(a);
+  ctx.beginPath();ctx.moveTo(-4,-2.5);ctx.quadraticCurveTo(2.4,-4.9,5,0);
+  ctx.quadraticCurveTo(3.4,4.2,-1.6,3.4);ctx.quadraticCurveTo(-4.7,1.1,-4,-2.5);
+  ctx.fillStyle=i%4===0?'#bd853e':i%3?'#d6a55c':'#e6c78b';ctx.fill();ctx.restore();
+ }
+ ctx.strokeStyle='#fffdf9';ctx.lineWidth=7;ctx.beginPath();ctx.ellipse(0,-27,79,32,0,0,Math.PI*2);ctx.stroke();
+ ctx.strokeStyle='#bfd0e0';ctx.lineWidth=2.2;ctx.beginPath();ctx.ellipse(0,-27,83,35,0,0,Math.PI*2);ctx.stroke();
+ ctx.restore();
+ // A few drifting flakes, on BOTH sides, over the matching milk streams.
+ for(let i=0;i<7;i++){
+  const side=i<2?-1:1,q=((clock*.30+i/7)%1);
+  const px=x+side*(55+q*(side<0?39:144)),py=y+3+q*(side<0?85:104);
+  ctx.fillStyle=i%3===0?'#fff4df':i%3===1?'#d9ad64':'#b98242';
+  ctx.beginPath();ctx.ellipse(px,py,2.7+(i%2),2+(i%3)*.4,q*3,0,Math.PI*2);ctx.fill();
+ }
+}
+
 function drawObstacle(ctx,o){
- if(o.type!=='crumb'&&o.type!=='ramp'&&o.type!=='jam_spill_jar'){
+ if(o.type!=='crumb'&&o.type!=='ramp'&&o.type!=='jam_spill_jar'&&o.type!=='milk_cereal_spill'&&o.type!=='milk_cereal_cup'){
   // Ground contact shadow and subtle tabletop bounce light anchor object volume.
   ctx.save();ctx.translate(o.x+Math.max(2,o.r*.10),o.y+Math.max(4,o.r*.24));
   ctx.scale(1,.53);const rad=Math.max(12,o.r*1.25);
@@ -2298,13 +2443,22 @@ function drawObstacle(ctx,o){
   grad.addColorStop(0,'rgba(30,17,9,.44)');grad.addColorStop(.58,'rgba(42,23,14,.19)');grad.addColorStop(1,'rgba(55,31,17,0)');
   ctx.fillStyle=grad;ctx.beginPath();ctx.arc(0,0,rad,0,Math.PI*2);ctx.fill();ctx.restore();
  }
- if(o.type==='jam_spill_jar'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(stickyAngle+Math.PI/2);window.TTRAssets?.draw(ctx,'jam_tipped',-76,-62,152,124);ctx.restore();}
+ if(o.type==='milk_cereal_spill'){drawMilkCerealSpill(ctx,o);}
+ else if(o.type==='milk_cereal_cup'){drawMilkCerealCup(ctx,o);}
+ else if(o.type==='jam_spill_jar'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(stickyAngle+Math.PI/2);window.TTRAssets?.draw(ctx,'jam_tipped',-76,-62,152,124);ctx.restore();}
  else if(o.type==='crumb')drawCrumb(ctx,o.x,o.y,o.r,o.x|0);else if(o.type==='cookie')drawCookie(ctx,o.x,o.y,o.r,(o.x+o.y)*.004,o.cookieKind||'cookie');else if(o.type==='mug')drawMug(ctx,o.x,o.y,o.r,'#f1ddd6');else if(o.type==='toast')drawToast(ctx,o.x,o.y,o.r*1.7,.35);else if(o.type==='orange_bump'){window.TTRAssets?.draw(ctx,'orange',o.x-33,o.y-30,66,60);}else if(['plate_croissant','cereal','orange','jam','glass'].includes(o.type)){const width=o.r*2.8;if(o.type==='jam'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(.93);window.TTRAssets?.draw(ctx,o.type,-width/2,-width*.52,width,width*.92);ctx.restore();}else window.TTRAssets?.draw(ctx,o.type,o.x-width/2,o.y-width*.52,width,width*.92);}else if(o.type==='knife'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(o.angle??0);if(o.interactive)drawKnife(ctx,0,0,o.length||120,28);else drawKnife(ctx,0,0,157,38);ctx.restore();}else if(o.type==='ramp')drawRamp(ctx,o);
 }
 
 // A knife near the jam is a low, visible obstacle. A fast, centred crossing
-// triggers a short hop over the sticky patch; the only legal jumps now come from the knife, ramp or orange bump.
+// triggers a short hop over the sticky patch; only the knife and ramp launch cars.
 function contactWithProp(c,o,previous=null){
+ // Orange rind remains physical even on an airborne contact: prevent phasing through.
+ if((o.type==='orange_bump'||(o.type==='orange'&&o.solid))&&c.jump>0){
+   const from=previous||c;
+   if(K.segmentCircle(from,c,o,(o.r||29)+(c.width||36)*.38)){
+     c.jump=0;c.jumpTotal=0;c.jumpCd=Math.max(c.jumpCd,.45);
+   }else return false;
+ }
  if(!o.solid||c.jump>0)return false;
  if(o.type!=='knife')return resolveCarObstacle(c,o);
  if(o.interactive!==true)return false;
@@ -2888,9 +3042,7 @@ function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSes
      c.onBridge=true;c.bridgeOffSeconds=0;if(c===race.player)SND.sfx('ramp');
    }
  }
- // Orange Jump: a low, optional rind bump, separate from the elevated toast shortcut.
- c.orangeCd=Math.max(0,(c.orangeCd||0)-dt);
- for(const o of props){if(o.type==='orange_bump'&&c.jump<=0&&c.orangeCd<=0&&c.jumpCd<=0&&c.speed>90&&distance(c,o)<o.r+16){c.jump=.25;c.jumpTotal=.25;c.jumpCd=.83;c.orangeCd=1.2;if(c===race.player)SND.sfx('spoon');}}
+ // Orange rind in v62 is a solid obstacle: no auto-launch and no jump award.
  // Static object collisions; jump avoids low obstacles.
  let touchedObstacle=false;
  for(const o of props){if(contactWithProp(c,o,{x:oldX,y:oldY})){
@@ -2900,7 +3052,10 @@ function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSes
  if(stuckRecoveryStep(c,dt,race.time,touchedObstacle))recoverCar(c,'stuck');
  // No invisible lane barrier; low-friction cloth instead of teleporting on contact.
  // Oil reduces grip but never forces a full spin.
- for(const oil of race.oils){if(!(c.oilCooldown>0)&&!(c.oilSpin>0)&&oilHit(c,oldX,oldY,oil)){
+ // Reuse oil physics for both deployed power-up oil and the fixed cereal-milk spills.
+ for(let si=0,n=race.oils.length+milkCerealSpills.length;si<n;si++){
+  const oil=si<race.oils.length?race.oils[si]:milkCerealSpills[si-race.oils.length];
+  if(!(c.oilCooldown>0)&&!(c.oilSpin>0)&&oilHit(c,oldX,oldY,oil)){
    c.slip=Math.max(c.slip,1.22);c.oilCooldown=1.55;c.oilSpin=1.16;
    const sign=Math.abs(c.steer)>.16?Math.sign(c.steer):(c.id%2?1:-1);
    c.oilSpinDir=sign;
@@ -3005,8 +3160,8 @@ const TTRShowroomStarts=Object.freeze({scatto:0,tuono:19,polvere:0,lampo:0,aero:
 // v0.13.6.61 — un solo renderer 2D del modello Scatto GT per ogni anteprima.
 // Il foglio 192-frame originale resta la fonte unica per menu e garage;
 // nessun filtro di luce/ombra specifico per modello, nessun falso shadow layer.
-const TTRShowroom60=Object.freeze({version:'0.13.6.61',reference:'scatto',columns:12,frames:192,
-  rotationFramesPerSecond:26.4,menuCycleSeconds:4.2,hopPixels:28,drivePixels:26,
+const TTRShowroom60=Object.freeze({version:'0.13.6.63',reference:'scatto',columns:12,frames:192,
+  rotationFramesPerSecond:26.4,menuCycleSeconds:3.35,hopPixels:44,drivePixels:38,
   contactShadows:false,cssStageAnimation:false,source:'approved-192-frame-turntables'});
 window.TTRShowroomPresentation=TTRShowroom60;
 const TTRShowroomFrameMetrics=Object.create(null);
@@ -3046,11 +3201,12 @@ function drawShowroom(canvas,index,view='menu'){
    const smooth=u=>{u=Math.max(0,Math.min(1,u));return u*u*(3-2*u)};
    // Accelerate, execute one clearly visible arcade hop, land and settle.
    // Values are in the fixed 520x300 preview canvas; the garage is untouched.
-   if(phase>=.55&&phase<1.00)drive=smooth((phase-.55)/.45);
-   else if(phase>=1.00&&phase<1.82)drive=1;
-   else if(phase>=1.82&&phase<2.25)drive=1-smooth((phase-1.82)/.43);
-   if(phase>=1.04&&phase<1.89)hop=TTRShowroom60.hopPixels*Math.sin(Math.PI*(phase-1.04)/.85);
-   else if(phase>=1.89&&phase<2.14)hop=3*Math.sin(Math.PI*(phase-1.89)/.25);
+   if(phase>=.12&&phase<.58)drive=smooth((phase-.12)/.46);
+   else if(phase>=.58&&phase<1.54)drive=1;
+   else if(phase>=1.54&&phase<2.03)drive=1-smooth((phase-1.54)/.49);
+   // Strong but brief takeoff / landing: clear on iPhone in landscape, no idle levitation.
+   if(phase>=.68&&phase<1.55)hop=TTRShowroom60.hopPixels*Math.sin(Math.PI*(phase-.68)/.87);
+   else if(phase>=1.55&&phase<1.73)hop=4*Math.sin(Math.PI*(phase-1.55)/.18);
  }
  ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
  if(valid){
@@ -3065,9 +3221,10 @@ function drawShowroom(canvas,index,view='menu'){
    // del foglio (Tuono usa frame da 256, gli altri da 192 pixel).
    const scale=Math.min(w*.43/metrics.visibleW,h*.54/metrics.visibleH,
                         w*.88/sw,h*.95/sh)*1.0;
-   const drawW=sw*scale,drawH=sh*scale;
-   const destX=w*.5-metrics.pivotX*scale+(menu?drive*TTRShowroom60.drivePixels:0);
-   const destY=h*.53-metrics.pivotY*scale-(menu?hop:0);
+   const launchStretch=menu&&hop>0?1+.028*Math.sin(Math.PI*hop/TTRShowroom60.hopPixels):1;
+   const drawW=sw*scale*launchStretch,drawH=sh*scale*launchStretch;
+   const destX=w*.5-metrics.pivotX*scale*launchStretch+(menu?drive*TTRShowroom60.drivePixels:0);
+   const destY=h*.585-metrics.pivotY*scale*launchStretch-(menu?hop:0);
    ctx.drawImage(sheet,(frame%cols)*sw,Math.floor(frame/cols)*sh,sw,sh,destX,destY,drawW,drawH);
  }else{
    // Unico fallback 2D temporaneo mentre i 192 frame non sono pronti.
@@ -3076,7 +3233,7 @@ function drawShowroom(canvas,index,view='menu'){
       const ratio=pic.naturalWidth/pic.naturalHeight;
       const dw=Math.min(w*.78,h*.65*ratio),dh=dw/ratio;
       ctx.drawImage(pic,w*.5-dw*.5+(menu?drive*TTRShowroom60.drivePixels:0),
-        h*.53-dh*.5-(menu?hop:0),dw,dh);
+        h*.585-dh*.5-(menu?hop:0),dw,dh);
    }
  }
 }
@@ -3328,6 +3485,24 @@ onlineWire();worldInit();window.TTRAssets?.ready.then(()=>{worldInit();if(!$('sc
 window.TTROnlineDebug={state:()=>onlineSession?{...onlineSession,connected:onlineSocket?.readyState===1,raceMode:race?.mode,rttMs:onlineRttMs,latencySupported:onlinePingSupported,net:{...onlineNetStats},prediction:!!race?.player?.netPrediction,local:race?.player?{x:race.player.x,y:race.player.y,a:race.player.a,netX:race.player.netX,netY:race.player.netY,netA:race.player.netA}:null,controls:race?.mode==='online'&&!onlineSession.host?onlineLocalInput():null,remoteSteer:onlineSession.host?onlineRemoteInputs[1]?.steer??null:null}:null};
 window.TTREliminationDebug={state:()=>race?.elim?{mode:race.mode,round:race.elim.round,state:race.elim.state,points:[...race.elim.points],goal:race.elim.goal,active:eliminationActive().map(c=>c.id),progress:race.cars.map(c=>c.elimDistance||0)}:null,knockOut:(id)=>{if(race?.mode!=='elimination')return false;return knockOutElimination(race.cars[id]);},award:(id)=>{if(race?.mode!=='elimination')return false;return awardEliminationPoint(race.cars[id]);}};
 window.TTRDebug={
+ getMenuClock:()=>({clock,phase:clock%TTRShowroom60.menuCycleSeconds,menuVisible:!$('screen').hidden}),
+ testOrangeCollision:()=>props.filter(o=>o.type==='orange'||o.type==='orange_bump').map(o=>{
+   const c={x:o.x,y:o.y,a:0,speed:150,width:36,length:64,hitVX:0,hitVY:0,jump:.2,jumpTotal:.2,jumpCd:0};
+   const hit=contactWithProp(c,o,{x:o.x-35,y:o.y});
+   return {type:o.type,solid:o.solid,hit,jumpAfter:c.jump,displacement:Math.hypot(c.x-o.x,c.y-o.y)};
+ }),
+ getBreakfastPreview:()=>{
+   const ox=155,oy=700,w=1000,h=600;const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+   const ctx=canvas.getContext('2d');ctx.drawImage(track,ox,oy,w,h,0,0,w,h);
+   ctx.save();ctx.translate(-ox,-oy);
+   props.filter(o=>o.x>ox-o.r&&o.x<ox+w+o.r&&o.y>oy-o.r&&o.y<oy+h+o.r).sort((a,b)=>a.y-b.y).forEach(o=>drawObstacle(ctx,o));
+   ctx.restore();return canvas.toDataURL('image/png');
+ },
+ testMilkSlip:()=>{
+   if(!race||milkCerealSpills.length<3)return false;
+   const c=race.player,o=milkCerealSpills[2];c.x=o.x;c.y=o.y;c.speed=105;c.jump=0;c.slip=0;c.oilCooldown=0;c.oilSpin=0;
+   c.respawnGrace=2;race.countdown=0;return true;
+ },
  testImpactEjection:()=>{
    if(!race||race.cars.length<2)return false;
    race.countdown=0;
@@ -3364,6 +3539,8 @@ window.TTRDebug={
  testOilPlayer:()=>{if(!race||race.cars.length<2)return false;const c=race.player,q=trackPoint(.32);c.x=q.x;c.y=q.y;c.a=tangent(.32);c.speed=120;c.jump=0;c.slip=0;c.skidVX=0;c.skidVY=0;c.oilCooldown=0;c.bridgeMissActive=false;c.bridgeMissPenalty=0;c.bridgeMissGrace=0;c.offtrack=false;c.offtrackEntry=null;c.respawnGrace=0;c.auditP=.32;c.auditTravel=0;c.auditCleanTime=0;c.p=.32;c.lastP=.32;c.shortcutRespawns=0;c.oilSpin=0;
  c.lastValidPosition={x:c.x,y:c.y,p:.32,a:c.a,speed:60,laps:c.lapsCompleted,flags:c.flags.slice()};
  race.countdown=0;race.oils=[{x:c.x,y:c.y,r:34,t:9,owner:1,phase:0}];return true;},
+ getCerealSpills:()=>milkCerealSpills.map(p=>({x:p.x,y:p.y,r:p.r,roadDistance:nearestCourse(p,points).distance})),
+ getOrangeRind:()=>props.filter(p=>p.type==='orange_bump').map(p=>({x:p.x,y:p.y,r:p.r,solid:p.solid,jump:p.jump})),
  getTrackMeta:()=>({jamPatch,courseYShift:K.COURSE_Y_SHIFT,crumbCount:K.crumbMarkers().length,worldW:WORLD_W,worldH:WORLD_H,length:TRACK_LENGTH,sections:sectionNames,sectionRanges,shortcutStart:shortcutFrom,shortcutEnd:shortcutTo,shortcut:shortcutSamples.map(q=>({x:q.x,y:q.y}))}),testEnterShortcut:()=>{if(!race)return false;const c=race.player,pt=shortcutPoint(.15),q=shortcutPoint(.19);c.x=pt.x;c.y=pt.y;c.a=Math.atan2(q.y-pt.y,q.x-pt.x);c.speed=160;c.respawnGrace=0;c.offtrack=false;c.offtrackEntry=null;race.countdown=0;return true;},teleportForCamera:(phase)=>{if(!race)return false;const c=race.player,p=trackPoint(phase);c.x=p.x;c.y=p.y;c.a=tangent(phase);c.speed=0;c.hitVX=c.hitVY=0;c.offtrack=false;return true;},getCamera:()=>({x:camX,y:camY,scale,viewportWidth:sw/scale,viewportHeight:sh/scale}),
  testFinishInnerLine:(offset=110)=>{if(!race)return false;const c=race.player,pt=trackPoint(0),a=tangent(0),nx=-Math.sin(a),ny=Math.cos(a),fx=Math.cos(a),fy=Math.sin(a);c.x=pt.x-fx*17+nx*offset;c.y=pt.y-fy*17+ny*offset;c.a=a;c.speed=160;c.flags=[true,true,true];c.lapGateBlocked=false;c.offtrack=false;c.respawnGrace=0;c.lastP=.966;c.p=.966;c.offtrackEntry=null;race.countdown=0;return true;},
  testCarAtEdge:()=>{if(!race)return false;const c=race.player;c.x=7;c.y=7;return true;},testCarStuck:()=>{if(!race)return false;const c=race.player;c.stuckAnchor={x:c.x,y:c.y};c.lastObstacleContact=race.time;c.obstacleStuckSeconds=2.56;return true;},getControls:()=>({...controls}),getSpoonStatus:()=>props.filter(o=>o.type==='spoon').map(o=>({x:o.x,y:o.y,interactive:!!o.interactive,solid:!!o.solid})),getCookieStyles:()=>props.filter(o=>o.type==='cookie').map(o=>o.cookieKind),getAssetStatus:()=>({...window.TTRAssets?.status}),
