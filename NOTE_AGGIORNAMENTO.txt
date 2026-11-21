@@ -1,9 +1,0 @@
-Tiny Track Rivals — v0.13.6.63 — Colazione Turbo
-
-Base recuperata: v0.13.6.62 (anteprima HTML).
-Modifiche: scodella di latte e cereali dritta e avanzata; latte irregolare, colata più ampia a destra; 7 macchie con fisica scivolamento già esistente.
-Non contiene aggiornamenti al server Online Beta.
-
-Per aggiornare GitHub Pages, nella radice del repository Tiny-Track-Rivals-ChatGPT sostituisci soltanto index.html e version.txt. NON cancellare manifest.webmanifest, favicon o le altre icone. Prima di pubblicare conserva una copia dell'index precedente e confronta con eventuali aggiornamenti online successivi.
-
-Questo pacchetto NON è stato pubblicato automaticamente.
