@@ -60,8 +60,23 @@ function getTTRShowroomMetrics(key){
  const visibleW=Math.max(1,r[2]-r[0]),visibleH=Math.max(1,r[3]-r[1]);
  return TTRShowroomFrameMetrics[key]=Object.freeze({pivotX,pivotY,visibleW,visibleH});
 }
+// Adapt the garage drawing buffer to its displayed CSS dimensions on Retina screens.
+// Limit the pixel ratio to 2 for mobile performance; menu and race remain unchanged.
+function ttrSyncGarageCanvasResolution(canvas){
+ if(canvas.id!=='garageCanvas'||typeof canvas.getBoundingClientRect!=='function')return;
+ const rect=canvas.getBoundingClientRect();
+ if(!(rect.width>0&&rect.height>0))return;
+ const ratio=Math.max(1,Math.min(2,window.devicePixelRatio||1));
+ const width=Math.max(1,Math.round(rect.width*ratio));
+ const height=Math.max(1,Math.round(rect.height*ratio));
+ if(canvas.width!==width||canvas.height!==height){
+  canvas.width=width;
+  canvas.height=height;
+ }
+}
 function drawShowroom(canvas,index,view='menu',clock,garageRotationOrigin,profiles){
  if(!canvas)return;
+ if(view==='garage')ttrSyncGarageCanvasResolution(canvas);
  const ctx=canvas.getContext('2d',{alpha:false}); if(!ctx)return;
  const w=canvas.width,h=canvas.height;
  ctx.setTransform(1,0,0,1,0,0);
