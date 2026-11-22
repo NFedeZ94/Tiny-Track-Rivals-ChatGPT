@@ -1,3 +1,4 @@
+<!-- v0.13.6.86: elimination jump-safe restarts, stable course-leader camera, reliable sustained far-offscreen KOs; based on 85. -->
 <!-- v0.13.6.85: Enduro SP race sprite reoriented; elimination multi-KO, legal bend camera, recovery-loop, round HUD, physical jam jar. -->
 <!-- Tiny Track Rivals v0.13.6.84: legal corner overtakes, fixed elimination grid camera, adaptive pickups, six-stat impact balancing. 82 remains intact. -->
 <!-- Tiny Track Rivals v0.13.6.81: entry ramp overpass depth, diamond power-up map legend, wide animated jam spill; based on 78. Previous notes: v0.13.6.78: legal corner overtake camera, top-down victory 360, bridge exit overpass and minimap shortcut; based on 77. Previous notes: v0.13.6.77: ramp/bridge underpass, elimination smooth group camera, milk layering, coffee and jam motion; based on 76. Previous notes: v0.13.6.76: Aero R race facing +180, 384-frame seam-continuous 360 and garage silhouette-size match. Based on v75. Original notes: Tuono V8 garage thumbnail isolated orientation fix; Aero R V6.4 solid fender shell and sporty five twin-spoke wheels, updated 192-frame garage, equalized presentation size; unchanged menu Tuono and race physics. -->
@@ -2243,7 +2244,7 @@ const K=window.TTRCore,{clamp,mod,angleDiff,distance,trackPoint,tangent,nearestT
 const $=id=>document.getElementById(id);
 const canvas=$('game'),g=canvas.getContext('2d',{alpha:false}),mini=$('mini'),mg=mini.getContext('2d');
 let sw=0,sh=0,dpr=0,scale=1,camX=WORLD_W/2,camY=WORLD_H/2,world=null;
-let elimCameraId=null,elimCameraProgress=0,elimFocusWeight=0,renderDelta=1/60;
+let elimCameraId=null,elimCameraProgress=0,elimFocusWeight=0,elimCandidateId=null,elimCandidateSince=0,renderDelta=1/60;
 let elimGridCamera={x:WORLD_W/2,y:WORLD_H/2};
 let race=null,lastRaceSettings=null,frameTime=performance.now(),clock=0,lastHint=0,hint='',resultsMusicTimer=null;
 const SND=window.TTRSound;
@@ -3094,6 +3095,32 @@ function refreshEliminationBoard(){
 // A fresh elimination match launches fully BEHIND the finish plane; later rounds
 // restart on a nearby safe road segment rather than teleporting to the finish.
 const ELIM_ROW_SPACING=84,ELIM_START_OFFSET=65;
+// Never line up a new heat ON the takeoff, knife jump or their short approach.
+// Phase is arc length around the *main* track; the ramp is an optional branch.
+const ELIM_JUMP_RUNUP=360,ELIM_JUMP_EXIT=190;
+function eliminationSignedArc(from,to){return (((mod(from-to,1)+.5)%1)-.5)*TRACK_LENGTH;}
+function eliminationJumpHazards(){
+ return [{name:'toast-ramp',phase:shortcutFrom},{name:'jam-knife',phase:knifePhase}];
+}
+function eliminationJumpSafeGrid(grid){
+ return grid.every(pt=>eliminationJumpHazards().every(h=>{
+   const ahead=eliminationSignedArc(pt.p,h.phase);
+   // Avoid both the approach (negative) and landing area (positive).
+   // For a grid after the jump, EVERY rear row must have cleared the hazard.
+   return ahead<-ELIM_JUMP_RUNUP || ahead>ELIM_JUMP_EXIT;
+ }));
+}
+function eliminationSafeRestartAnchor(p){
+ // If a score happens in/around a jump, rewind the grid rather than placing
+ // cars just ahead of the takeoff. All four/eight cars retain a full approach.
+ for(const hazard of eliminationJumpHazards()){
+   const delta=eliminationSignedArc(p,hazard.phase);
+   if(delta>=-ELIM_JUMP_RUNUP && delta<=ELIM_JUMP_EXIT+75){
+     return {phase:mod(hazard.phase-(ELIM_JUMP_RUNUP+90)/TRACK_LENGTH,1),jump:hazard.name};
+   }
+ }
+ return {phase:mod(p,1),jump:null};
+}
 function eliminationGridPosition(p,index,offset=0){
  const row=Math.floor(index/2),phase=mod(p-(offset+row*ELIM_ROW_SPACING)/TRACK_LENGTH,1);
  const spot=trackPoint(phase),angle=tangent(phase),side=index%2===0?-32:32;
@@ -3101,7 +3128,7 @@ function eliminationGridPosition(p,index,offset=0){
 }
 function eliminationGridValid(anchor,count,offset){
  const proposed=Array.from({length:count},(_,i)=>eliminationGridPosition(anchor,i,offset));
- return proposed.every((pt,i)=>{
+ return eliminationJumpSafeGrid(proposed)&&proposed.every((pt,i)=>{
    if(pt.x<48||pt.x>WORLD_W-48||pt.y<48||pt.y>WORLD_H-48)return false;
    const nearest=nearestTrackWindow(pt,points,pt.p,.022);
    if(nearest.distance>LANE_HALF-41)return false;
@@ -3112,15 +3139,21 @@ function eliminationGridValid(anchor,count,offset){
 }
 function eliminationChooseGrid(p,count,first=false){
  if(first)return {phase:0,offset:ELIM_START_OFFSET,grid:Array.from({length:count},(_,i)=>eliminationGridPosition(0,i,ELIM_START_OFFSET))};
- const offsets=[0,25,-25,50,-50,80,-80,115,-115,155,-155,210,-210,275,-275,350,-350];
- for(const metres of offsets){const at=mod(p+metres/TRACK_LENGTH,1);
-   if(eliminationGridValid(at,count,0))return {phase:at,offset:0,grid:Array.from({length:count},(_,i)=>eliminationGridPosition(at,i))};
+ const safe=eliminationSafeRestartAnchor(p);
+ // Prefer the score location for ordinary heats, but only use a jump-safe
+ // position before a nearby ramp/knife. Search backward first if blocked.
+ const offsets=safe.jump?[0,50,80,105,125,145,-35,-70,-110,-160,-230,-310,-420,-550,-700,220,320,470]:
+     [0,-25,25,-50,50,-80,80,-115,115,-155,155,-210,210,-275,275,-350,350];
+ for(const metres of offsets){const at=mod(safe.phase+metres/TRACK_LENGTH,1);
+   if(eliminationGridValid(at,count,0))return {phase:at,offset:0,grid:Array.from({length:count},(_,i)=>eliminationGridPosition(at,i)),jumpAdjusted:safe.jump};
  }
- // Safety fallback: never respawn on an obstacle even if it means a short relocation.
- for(let j=0;j<90;j++){const at=mod(p+(j*48)/TRACK_LENGTH,1);
-   if(eliminationGridValid(at,count,0))return {phase:at,offset:0,grid:Array.from({length:count},(_,i)=>eliminationGridPosition(at,i))};
+ // Exhaustive safe fallback. No unsafe return near either jump.
+ for(let j=0;j<Math.ceil(TRACK_LENGTH/30);j++){
+   const at=mod(safe.phase-j*30/TRACK_LENGTH,1);
+   if(eliminationGridValid(at,count,0))return {phase:at,offset:0,grid:Array.from({length:count},(_,i)=>eliminationGridPosition(at,i)),jumpAdjusted:safe.jump};
  }
- return {phase:0,offset:ELIM_START_OFFSET,grid:Array.from({length:count},(_,i)=>eliminationGridPosition(0,i,ELIM_START_OFFSET))};
+ const at=0,offset=ELIM_START_OFFSET;
+ return {phase:at,offset,grid:Array.from({length:count},(_,i)=>eliminationGridPosition(at,i,offset)),jumpAdjusted:'fallback'};
 }
 function eliminationApplyGrid(fresh,point,index){
  Object.assign(fresh,{x:point.x,y:point.y,a:point.a,p:point.p,lastP:point.p,
@@ -3172,7 +3205,7 @@ function eliminationNewRound(){
  });
  elimGridCamera=eliminationGridCameraPosition(placement.grid);
  camX=elimGridCamera.x;camY=elimGridCamera.y;
- elimCameraId=null;elimCameraProgress=0;elimFocusWeight=0;elimBanner.style.display='none';refreshEliminationBoard();
+ elimCameraId=null;elimCameraProgress=0;elimFocusWeight=0;elimCandidateId=null;elimCandidateSince=0;elimBanner.style.display='none';refreshEliminationBoard();
  // The round number is already visible in the upper HUD; do not cover the race with a duplicate announcement.
  hud();
 }
@@ -3239,14 +3272,17 @@ function eliminationPhysicalOvertake(challenger,incumbent){
  const dx=challenger.x-incumbent.x,dy=challenger.y-incumbent.y;
  if(Math.hypot(dx,dy)>335)return false; // only compare drivers sharing the same local bend
  const a=eliminationLegalMainPosition(challenger),b=eliminationLegalMainPosition(incumbent);
- if(a.distance>240||b.distance>240||phaseGap(a.p,b.p)>.092)return false;
+ if(a.distance>228||b.distance>228||phaseGap(a.p,b.p)>.065)return false;
  const t0=tangent(b.p),t1=tangent(a.p);
- // Opposing directions mean a neighbouring hairpin, NOT an overtake.
- if(Math.cos(angleDiff(t0,t1))<.12)return false;
+ // Opposing turns or unrelated hairpin branches are NOT overtakes.
+ if(Math.cos(angleDiff(t0,t1))<.60)return false;
+ const courseAdvance=eliminationSignedArc(a.p,b.p);
+ if(courseAdvance < -140 || courseAdvance > 360)return false;
+ if((challenger.elimDistance||0)+115<(incumbent.elimDistance||0))return false;
  const fx0=Math.cos(t0)+Math.cos(t1),fy0=Math.sin(t0)+Math.sin(t1);
  const norm=Math.hypot(fx0,fy0)||1,fx=fx0/norm,fy=fy0/norm;
  const forward=dx*fx+dy*fy,across=-dx*fy+dy*fx;
- if(forward<=9||Math.abs(across)>232)return false;
+ if(forward<=29||Math.abs(across)>195)return false;
  const heading=Math.atan2(fy,fx);
  return challenger.speed>9&&Math.cos(angleDiff(challenger.a,heading))>.14&&
         Math.cos(angleDiff(incumbent.a,heading))>-.08;
@@ -3258,35 +3294,48 @@ function eliminationProjectedAhead(challenger,incumbent){
  if(unsafe(challenger)||unsafe(incumbent))return false;
  const a=nearestTrackWindow(challenger,points,challenger.p,.055);
  const b=nearestTrackWindow(incumbent,points,incumbent.p,.055);
- if(a.distance>209||b.distance>209)return false;
+ if(a.distance>188||b.distance>188)return false;
+ if(Math.cos(angleDiff(tangent(a.p),tangent(b.p)))<.60)return false;
  const ahead=mod(a.p-b.p,1);
- if(ahead<=.010||ahead>=.14)return false;
- if((incumbent.elimDistance||0)-(challenger.elimDistance||0)>TRACK_LENGTH*.145)return false;
- if(Math.cos(angleDiff(challenger.a,tangent(a.p)))<.10)return false;
+ if(ahead<=.012||ahead>=.085)return false;
+ if((incumbent.elimDistance||0)-(challenger.elimDistance||0)>65)return false;
+ if(Math.cos(angleDiff(challenger.a,tangent(a.p)))<.38)return false;
  return true;
 }
 function eliminationCameraLeader(){
  const active=eliminationActive();if(!active.length)return race.player;
  const previous=active.find(c=>c.id===elimCameraId);
- // Progress is the long-distance ordering; *real, legal* close overtakes have
- // higher priority, including bends where track projection temporarily stalls.
+ // Race distance is authoritative, not on-screen Y. Keep the current leader
+ // through minor 1-frame phase/projection jitter on sharp bends.
+ const baseline=previous||active[0];
  let leader=active.reduce((best,c)=>
-   (c.elimDistance||0)>(best.elimDistance||0)+.35?c:best,previous||active[0]);
- for(const challenger of active){
-   if(challenger===leader)continue;
-   const physical=eliminationPhysicalOvertake(challenger,leader);
-   const projected=!eliminationPhysicalOvertake(leader,challenger)&&
-     eliminationProjectedAhead(challenger,leader);
-   if(physical||projected){
-     challenger.elimDistance=Math.max(challenger.elimDistance||0,(leader.elimDistance||0)+8);
-     leader=challenger;
+   (c.elimDistance||0)>(best.elimDistance||0)+(previous?19:.35)?c:best,baseline);
+ if(previous){
+   for(const challenger of active){
+     if(challenger===previous)continue;
+     const legalPass=eliminationPhysicalOvertake(challenger,previous)||
+       (!eliminationPhysicalOvertake(previous,challenger)&&eliminationProjectedAhead(challenger,previous));
+     if(!legalPass)continue;
+     if((challenger.elimDistance||0)+48<(leader.elimDistance||0))continue;
+     if(leader===previous||(challenger.elimDistance||0)>(leader.elimDistance||0)+19)leader=challenger;
    }
+   if(leader!==previous){
+     const clearGap=(leader.elimDistance||0)-(previous.elimDistance||0);
+     if(elimCandidateId!==leader.id){elimCandidateId=leader.id;elimCandidateSince=race.time;}
+     // Genuine big gaps change immediately; close overtakes must remain
+     // ahead for ~0.16 s before any camera motion or KO evaluation changes.
+     if(clearGap<90 && race.time-elimCandidateSince<.16)leader=previous;
+   }else {elimCandidateId=null;elimCandidateSince=0;}
  }
  if(elimCameraId!==leader.id){
-   // Prevent a stale, previous-frame camera rectangle awarding a false KO.
-   if(race?.elim){race.elim.lastLeaderSwitchTime=race.time;}
-   for(const c of active)c.elimLag=0;
-   elimFocusWeight=0;
+   // Once a legal overtaking move is confirmed, give it only the small missing
+   // route credit needed to keep the camera from bouncing back next frame.
+   if(previous&&eliminationPhysicalOvertake(leader,previous))
+     leader.elimDistance=Math.max(leader.elimDistance||0,(previous.elimDistance||0)+7);
+   if(race?.elim)race.elim.lastLeaderSwitchTime=race.time;
+   // An existing out-of-frame debt belongs to the car; changing camera
+   // leaders cannot erase it and force a second trip outside the screen.
+   elimFocusWeight=0;elimCandidateId=null;elimCandidateSince=0;
  }
  elimCameraId=leader.id;elimCameraProgress=leader.elimDistance||0;
  return leader;
@@ -3352,18 +3401,25 @@ function eliminationEvaluate(dt){
    }
    if(c===leader){c.elimLag=0;continue;}
    const physical=Math.hypot(leader.x-c.x,leader.y-c.y);
-   // Each out-of-frame rival is independently eligible, even when projection
-   // underestimates the gap after a legal tight bend.
-   const outside=Math.abs(c.x-view.x)>view.halfW+margin||
-                 Math.abs(c.y-view.y)>view.halfH+margin;
+   const beyondX=Math.abs(c.x-view.x)-view.halfW-margin;
+   const beyondY=Math.abs(c.y-view.y)-view.halfH-margin;
+   const outside=beyondX>0||beyondY>0;
+   const behind=(leader.elimDistance||0)-(c.elimDistance||0);
    const isActuallyInFront=eliminationPhysicalOvertake(c,leader)||
                            eliminationProjectedAhead(c,leader);
-   const qualifies=outside&&lensSettled&&cameraSettled&&
-      physical>ELIM_RULES_TEST.physicalSeparation&&!isActuallyInFront&&
-      !(c.respawnGrace>0)&&!(c.elimProtection>0)&&!(c.tableFalling>0)&&
-      !(c.impactGrace>0)&&!(c.bridgeMissGrace>0)&&!(c.bridgeMissActive);
-   c.elimLag=qualifies?(c.elimLag||0)+dt:Math.max(0,(c.elimLag||0)-dt*3);
-   if(c.elimLag>=ELIM_RULES_TEST.sustainedTrailSeconds)
+   // A competitor far behind and continuously outside the real viewport must
+   // not wait for a second exit because of camera settling or a recovery loop.
+   const farBehind=behind>220&&Math.max(beyondX,beyondY)>30;
+   const protectedRecovery=(c.respawnGrace>0)||(c.elimProtection>0)||
+       (c.impactGrace>0)||(c.bridgeMissGrace>0)||(c.bridgeMissActive);
+   const safeToCheck=outside&&!isActuallyInFront&&behind>35&&
+       physical>ELIM_RULES_TEST.physicalSeparation&&!(c.tableFalling>0)&&
+       (farBehind||(cameraSettled&&lensSettled));
+   // Accumulate independently for each racer; brief camera shifts do not
+   // zero the timer. Deeply trailing cars cannot renew immunity indefinitely.
+   c.elimLag=safeToCheck?(c.elimLag||0)+dt:Math.max(0,(c.elimLag||0)-dt*.7);
+   const enoughOutside=c.elimLag>=ELIM_RULES_TEST.sustainedTrailSeconds;
+   if(safeToCheck&&enoughOutside&&(!protectedRecovery||farBehind))
      queued.push([c,'fuori schermo']);
  }
  // Commit the entire batch before checking whether only one competitor remains.
@@ -3495,7 +3551,7 @@ function initRace(mode){
  SND.unlock().then(ok=>{if(ok)SND.sfx('start');});SND.stopMusic();frameTime=performance.now();camX=race.player.x;camY=race.player.y;
  elimGridCamera=mode==='elimination'?eliminationGridCameraPosition(race.cars):{x:camX,y:camY};
  if(mode==='elimination'){camX=elimGridCamera.x;camY=elimGridCamera.y;}
- elimCameraId=null;elimFocusWeight=0;hud();
+ elimCameraId=null;elimFocusWeight=0;elimCandidateId=null;elimCandidateSince=0;hud();
 }
 // One recovery path for excessive shortcut, tabletop edge and blocked obstacles.
 // All recoveries are silent on the HUD; the audio cue is subtle and never prints text.
@@ -4359,7 +4415,7 @@ function render(){const ratio=Math.min(race?.mode==='online'&&onlineSession&&!on
  const halfW=sw/(2*scale),halfH=sh/(2*scale);
   // Progressive catch-up replaces the old instantaneous follow=1 branch.
   const gapToTarget=Math.hypot(targetX-camX,targetY-camY);
-  const response=race?.mode==='elimination'?Math.min(28,17+gapToTarget/48):6.4;
+  const response=race?.mode==='elimination'?Math.min(23,14+gapToTarget/70):6.4;
   const follow=gridLocked?1:playerFalling?.23:1-Math.exp(-Math.min(.05,renderDelta)*response);
  camX+=(targetX-camX)*follow;camY+=(targetY-camY)*follow;
  const outerView=playerFalling?105:0;
@@ -4408,6 +4464,15 @@ window.addEventListener('ttr:career-close',()=>mainMenu());
 onlineWire();worldInit();window.TTRAssets?.ready.then(()=>{worldInit();if(!$('screen').hidden)drawShowroom($('menuCar'),selectedCar,'menu');if(!$('garageScreen').hidden)drawShowroom($('garageCanvas'),garagePreview,'garage');});wireMenu();boot();requestAnimationFrame(frame);
 window.TTROnlineDebug={state:()=>onlineSession?{...onlineSession,connected:onlineSocket?.readyState===1,raceMode:race?.mode,rttMs:onlineRttMs,latencySupported:onlinePingSupported,net:{...onlineNetStats},prediction:!!race?.player?.netPrediction,local:race?.player?{x:race.player.x,y:race.player.y,a:race.player.a,netX:race.player.netX,netY:race.player.netY,netA:race.player.netA}:null,controls:race?.mode==='online'&&!onlineSession.host?onlineLocalInput():null,remoteSteer:onlineSession.host?onlineRemoteInputs[1]?.steer??null:null}:null};
 window.TTREliminationDebug={startTestRace:()=>initRace('elimination'),
+ // Verify no front/rear starting slot lies near a jump takeoff or landing.
+ testJumpRestartGrid:()=>[shortcutFrom-.006,shortcutFrom+.01,knifePhase-.008,knifePhase+.008].flatMap(p=>[4,8].map(count=>{
+   const placement=eliminationChooseGrid(p,count),front=placement.grid[0];
+   return {scorePhase:p,count,restartPhase:placement.phase,zone:placement.jumpAdjusted,
+      safe:eliminationJumpSafeGrid(placement.grid)&&eliminationGridValid(placement.phase,count,placement.offset),
+      toRamp:Math.round(eliminationSignedArc(front.p,shortcutFrom)),
+      toKnife:Math.round(eliminationSignedArc(front.p,knifePhase))};
+ })),
+
  // Regression tools intentionally mutate a running test race, never persistent progress.
  testMultipleOutside:()=>{
    if(race?.mode!=='elimination'||race.cars.length<4)return {pass:false,reason:'Start 4-player elimination'};
@@ -4442,7 +4507,7 @@ window.TTREliminationDebug={startTestRace:()=>initRace('elimination'),
    const active=eliminationActive(),[incumbent,challenger]=active;
    const fields=['x','y','a','speed','elimDistance','offtrack','offtrackSeconds','offtrackReturnGrace','routePinch','respawnGrace','impactGrace','onBridge','bridgeMissActive','bridgeLandingActive','tableFalling'];
    const snapshots=active.map(c=>Object.fromEntries(fields.map(k=>[k,c[k]])));
-   const camera=[elimCameraId,elimCameraProgress,elimFocusWeight];
+   const camera=[elimCameraId,elimCameraProgress,elimFocusWeight,elimCandidateId,elimCandidateSince];
    let result;
    try{
      active.forEach(c=>c.elimDistance=0);
@@ -4453,12 +4518,15 @@ window.TTREliminationDebug={startTestRace:()=>initRace('elimination'),
      Object.assign(challenger,{x:pt.x+fx*43+nx*155,y:pt.y+fy*43+ny*155,a,speed:175,elimDistance:96,
        offtrack:true,offtrackSeconds:.28,offtrackReturnGrace:.8,routePinch:null,
        respawnGrace:0,impactGrace:0,onBridge:false,bridgeMissActive:false,bridgeLandingActive:false,tableFalling:0});
-     const physical=eliminationPhysicalOvertake(challenger,incumbent),lead=eliminationCameraLeader();
+     elimCameraId=incumbent.id;elimCandidateId=null;
+     const physical=eliminationPhysicalOvertake(challenger,incumbent);
+     eliminationCameraLeader();const savedTime=race.time;race.time+=.2;
+     const lead=eliminationCameraLeader();race.time=savedTime;
      result={pass:physical&&lead.id===challenger.id&&challenger.elimDistance>incumbent.elimDistance,
        physical,leaderId:lead.id,challengerId:challenger.id,projectedDeficit:incumbent.elimDistance-challenger.elimDistance};
    }finally{
      active.forEach((c,i)=>fields.forEach(k=>snapshots[i][k]===undefined?delete c[k]:c[k]=snapshots[i][k]));
-     [elimCameraId,elimCameraProgress,elimFocusWeight]=camera;
+     [elimCameraId,elimCameraProgress,elimFocusWeight,elimCandidateId,elimCandidateSince]=camera;
    }
    return result;
  },
@@ -4623,7 +4691,7 @@ window.TTRDebug={
  c.lastValidPosition={x:safe.x,y:safe.y,a:tangent(from),p:from,laps:c.lapsCompleted,flags:c.flags.slice()};
  c.auditP=from;c.auditTravel=350;c.auditCleanTime=0;c.x=pos.x;c.y=pos.y;c.p=from;c.lastP=from;c.a=tangent(to);c.speed=0;c.offtrack=false;c.respawnGrace=0;race.countdown=0;
  const before=c.shortcutRespawns||0;update(1/60);return {before,after:c.shortcutRespawns||0,phase:c.p,expectedPhase:from};
-},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.84',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
+},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.86',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
 })();
 
 
