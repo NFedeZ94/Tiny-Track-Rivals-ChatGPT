@@ -1,6 +1,6 @@
-<!-- Tiny Track Rivals v0.13.6.76: Aero R race facing +180, 384-frame seam-continuous 360 and garage silhouette-size match. Based on v75. Original notes: Tuono V8 garage thumbnail isolated orientation fix; Aero R V6.4 solid fender shell and sporty five twin-spoke wheels, updated 192-frame garage, equalized presentation size; unchanged menu Tuono and race physics. -->
+<!-- Tiny Track Rivals v0.13.6.77: ramp/bridge underpass, elimination smooth group camera, milk layering, coffee and jam motion; based on 76. Previous notes: v0.13.6.76: Aero R race facing +180, 384-frame seam-continuous 360 and garage silhouette-size match. Based on v75. Original notes: Tuono V8 garage thumbnail isolated orientation fix; Aero R V6.4 solid fender shell and sporty five twin-spoke wheels, updated 192-frame garage, equalized presentation size; unchanged menu Tuono and race physics. -->
 <!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1a2e"><meta name="ttr-build" content="v0.13.6.74"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tiny Track Rivals"><meta name="application-name" content="Tiny Track Rivals"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><link rel="manifest" href="manifest.webmanifest"><title>Tiny Track Rivals — Colazione Turbo</title><style>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1a2e"><meta name="ttr-build" content="v0.13.6.77"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tiny Track Rivals"><meta name="application-name" content="Tiny Track Rivals"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><link rel="manifest" href="manifest.webmanifest"><title>Tiny Track Rivals — Colazione Turbo</title><style>
 
 :root{color-scheme:dark;--cyan:#60d9ff;--yellow:#ffd55d;--ink:#071326;--line:#345577;--orange:#f39b43}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#081324;color:#f0f7ff;font-family:system-ui,-apple-system,'Arial Black',sans-serif;touch-action:none;user-select:none}#game{position:fixed;inset:0;width:100vw;height:100dvh;display:block;background:#7a5842}.screen{position:absolute;inset:0;z-index:8;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,rgba(3,10,24,.94),rgba(8,36,62,.84)),repeating-linear-gradient(45deg,#061b2b 0 35px,#122b43 35px 70px);padding:12px;overflow:auto;touch-action:pan-y}.panel{width:min(840px,100%);border:2px solid #5092bc;border-radius:22px;background:linear-gradient(170deg,#162f4e,#0a1a30 80%);box-shadow:0 18px 70px #000a,inset 0 0 35px #23688d22;padding:clamp(18px,4vw,40px);max-height:calc(100dvh - 24px);overflow-y:auto}.panel.resultsPanel{width:min(760px,100%);padding:clamp(16px,3vw,26px)}.panel.resultsPanel.compact{width:min(800px,100%);padding:16px 18px;overflow:hidden}.eyebrow{font-size:11px;letter-spacing:.2em;color:#86dfff;font-weight:850;margin:0 0 10px;text-transform:uppercase}.logo{font-weight:1000;font-style:italic;font-size:clamp(35px,8vw,83px);letter-spacing:-.055em;line-height:.94;color:#ffd054;text-shadow:3px 4px 0 #9f3c24,7px 8px 0 #06111e}.logo span{display:block;color:#fff;font-size:.48em;letter-spacing:.08em;text-shadow:3px 4px 0 #385a76}.sub{color:#bed1e2;line-height:1.45;font-size:14px;max-width:680px;margin:16px 0 22px}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.chip{padding:7px 10px;border-radius:99px;border:1px solid #446b86;background:#102e4b;color:#c8e2f8;font-size:12px;font-weight:700}.menu-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:20px}.resultsPanel .menu-row{margin-top:14px}.btn{touch-action:manipulation;border:2px solid #eccd76;border-radius:13px;background:linear-gradient(#fff3a5,#f5b73f);box-shadow:0 4px 0 #ab5d1f;color:#17203a;font-size:15px;font-weight:950;padding:13px 22px;cursor:pointer;text-align:center;min-height:48px}.btn.secondary{background:linear-gradient(#20466a,#123250);color:#e5f5ff;border-color:#5293b8;box-shadow:0 4px 0 #07182b}.btn:active{transform:translateY(3px);box-shadow:none}.settings{display:flex;flex-wrap:wrap;gap:14px;margin-top:19px}.settings label{display:flex;flex-direction:column;gap:5px;color:#add7ef;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.settings select{font-size:15px;background:#102943;color:#fff;border:1px solid #497ca2;padding:10px;border-radius:9px;min-width:130px}.note{font-size:12px;color:#a9c1d2;line-height:1.55;margin:17px 0 0}.resultTitle{font-size:clamp(28px,5vw,45px);font-weight:950;color:#ffe17d;margin:0 0 14px}.results{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}.results td{border-bottom:1px solid #3b5972;padding:8px 4px;vertical-align:middle}.results tr.me{color:#ffe395;font-weight:850}.results.compact{font-size:12px}.results.compact td{padding:5px 3px}.results td:first-child{width:44px}.resultSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin:10px 0 14px}.resultCard{border:1px solid #36617d;background:#0b1f36;border-radius:12px;padding:8px 10px}.resultCard b{display:block;color:#8fe5fd;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}.variantDot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:7px;vertical-align:-1px;border:1px solid #ffffff99;box-shadow:0 0 0 1px #0a1325}#hud{position:fixed;inset:0;pointer-events:none;z-index:4;display:none}.hudTop{position:absolute;left:8px;right:8px;top:max(7px,env(safe-area-inset-top));display:flex;align-items:flex-start;justify-content:space-between;gap:5px}.statBlock{border:1px solid #3f829e;background:#071831df;border-radius:10px;padding:8px 11px;box-shadow:0 3px 0 #0008;min-width:82px}.statBlock small{font-size:9px;display:block;color:#8ce3ff;font-weight:850;letter-spacing:.08em}.statBlock strong{font-size:clamp(15px,2.8vw,23px);color:#fff}.itemBlock{border-color:#b78b41}.itemBlock strong{color:#ffde79}#hint{position:absolute;left:50%;top:23%;transform:translate(-50%,-50%);background:#04172bcf;border:1px solid #6bc9e8;color:#fff;font-size:clamp(17px,4vw,33px);font-weight:950;border-radius:12px;padding:12px 19px;text-align:center;opacity:0;transition:opacity .15s;white-space:nowrap}#hint.show{opacity:1}#controls{position:fixed;z-index:5;bottom:max(10px,env(safe-area-inset-bottom));left:10px;right:10px;display:none;pointer-events:none;justify-content:space-between;gap:10px}.ctrlGroup{display:flex;align-items:end;gap:8px;pointer-events:none}.control{border:2px solid #b1d7ef;background:linear-gradient(155deg,#214666d9,#07192de6);color:#fff;box-shadow:inset 0 1px 8px #ffffff25,0 4px 0 #010711bd;border-radius:18px;width:clamp(52px,12vw,76px);height:clamp(56px,14vw,81px);font-size:28px;font-weight:950;touch-action:none;pointer-events:auto;display:flex;align-items:center;justify-content:center}.control.small{font-size:14px;width:clamp(56px,12vw,72px);color:#ffdb7c}.control.active{background:#eabf52;color:#0a1c28;transform:translateY(3px);box-shadow:0 1px #010711}.hudBottom{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);font-size:10px;white-space:nowrap;color:#e3f5ff;background:#071c30bd;padding:5px 10px;border-radius:8px}#pauseBtn{pointer-events:auto;position:absolute;right:9px;top:calc(63px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:8px 13px}#mini{position:absolute;top:calc(70px + env(safe-area-inset-top));left:10px;width:140px;height:90px;background:#071b2acb;border:1px solid #417fa8;border-radius:8px}#orientation{display:none;position:fixed;inset:auto 20px 100px;z-index:3;text-align:center;color:#f5f9ff;font-size:11px;opacity:.8}#muteBtn{pointer-events:auto;position:absolute;right:9px;top:calc(101px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:7px 11px}@media(orientation:portrait){#mini{width:96px;height:64px;top:calc(68px + env(safe-area-inset-top))}#pauseBtn{top:calc(68px + env(safe-area-inset-top))}#muteBtn{top:calc(105px + env(safe-area-inset-top))}#orientation{display:block}.hudBottom{bottom:99px;font-size:9px}.control{height:62px;width:58px}.control.small{width:57px}}@media(max-height:500px){.panel{padding:15px}.sub{margin:7px 0}.menu-row{margin-top:8px}.settings{margin-top:8px}.note{margin-top:9px}.control{height:58px}.hudBottom{display:none}#mini{top:calc(58px + env(safe-area-inset-top))}}
 
@@ -1535,7 +1535,12 @@ body #trackSelect:not([hidden]){position:fixed;inset:0;z-index:81;display:flex;a
   // Planned scenery zones, not equal-time lap subdivisions.
   const sectionRanges=[0,.177,.313,.412,.535,.695,.797,.903,1];
   const shortcutFrom=.605,shortcutTo=.800;
-  const shortcutCurve=[trackPoint(shortcutFrom),{x:1180,y:126+COURSE_Y_SHIFT},{x:810,y:150+COURSE_Y_SHIFT},trackPoint(shortcutTo)];
+  // v77: optional high-side toast shortcut. Both ends retreat ~60 units from the
+  // main racing line; the ramp must be sought deliberately, not driven over by default.
+  const shortcutEntry=trackPoint(shortcutFrom),shortcutExit=trackPoint(shortcutTo);
+  const shortcutCurve=[{x:shortcutEntry.x,y:shortcutEntry.y-62},
+    {x:1180,y:126+COURSE_Y_SHIFT-78},{x:810,y:150+COURSE_Y_SHIFT-78},
+    {x:shortcutExit.x,y:shortcutExit.y-66}];
   const shortcutPoint=t=>{
     const u=clamp(t,0,1),v=1-u;
     return {x:v*v*v*shortcutCurve[0].x+3*v*v*u*shortcutCurve[1].x+3*v*u*u*shortcutCurve[2].x+u*u*u*shortcutCurve[3].x,
@@ -2195,7 +2200,7 @@ const K=window.TTRCore,{clamp,mod,angleDiff,distance,trackPoint,tangent,nearestT
 const $=id=>document.getElementById(id);
 const canvas=$('game'),g=canvas.getContext('2d',{alpha:false}),mini=$('mini'),mg=mini.getContext('2d');
 let sw=0,sh=0,dpr=0,scale=1,camX=WORLD_W/2,camY=WORLD_H/2,world=null;
-let elimCameraId=null,elimCameraProgress=0,renderDelta=1/60;
+let elimCameraId=null,elimCameraProgress=0,elimFocusWeight=0,renderDelta=1/60;
 let race=null,lastRaceSettings=null,frameTime=performance.now(),clock=0,lastHint=0,hint='',resultsMusicTimer=null;
 const SND=window.TTRSound;
 const points=Array.from({length:520},(_,i)=>trackPoint(i/520));
@@ -2488,6 +2493,9 @@ const vehiclePalette=['#ef3d3d','#2987ee','#f4b942','#31ce98','#9447b4','#ef8f35
 const typeNames={turbo:'TURBO',oil:'OLIO',claw:'PINZA'};
 const track=(()=>{const c=document.createElement('canvas');c.width=WORLD_W;c.height=WORLD_H;return c;})();
 const trackCtx=track.getContext('2d');
+// Cached transparent deck: draw above road cars and below shortcut cars to express elevation.
+const bridgeLayer=document.createElement('canvas');bridgeLayer.width=WORLD_W;bridgeLayer.height=WORLD_H;
+const bridgeCtx=bridgeLayer.getContext('2d');
 const props=[];
 const milkCerealSpills=[]; // Static environmental hazards. Owner -1 means all cars can slip.
 const knifePhase=.747;
@@ -2547,7 +2555,7 @@ function worldInit(){
     props.push({type,x,y,r,solid:false,scenery:true,interactive:false});
   }
   props.filter(o=>o.type==='cookie').forEach((o,i)=>{o.cookieKind=i%2?'cookie_alt':'cookie';});
-  paintWorld();
+  paintWorld();paintBridgeDeck();
 }
 
 function drawMug(ctx,x,y,r,fill='#f3efe7'){
@@ -2589,6 +2597,20 @@ function drawRamp(ctx,o){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(o.a+Math.P
   ctx.fillStyle=grad;ctx.beginPath();ctx.moveTo(-32,18);ctx.lineTo(32,18);ctx.lineTo(20,-34);ctx.lineTo(-20,-34);ctx.closePath();ctx.fill();
   ctx.strokeStyle='#7b4e22';ctx.lineWidth=3;ctx.stroke();
  }ctx.restore();}
+function paintBridgeDeck(){const ctx=bridgeCtx;
+ ctx.clearRect(0,0,WORLD_W,WORLD_H);
+ // Keep the identical toasted-bread bridge shape, but with raised deck lighting.
+  // The shortcut is visibly separate: a narrower raised wooden-toast bridge between
+  // two points of the course. It has a ramp at entry but is NEVER mandatory.
+  const bridge=()=>{ctx.beginPath();shortcutSamples.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));};
+  ctx.save();bridge();ctx.lineCap='round';ctx.lineJoin='round';ctx.shadowColor='#442c228a';ctx.shadowBlur=18;ctx.shadowOffsetY=13;ctx.strokeStyle='#905f3f';ctx.lineWidth=82;ctx.stroke();ctx.restore();
+  ctx.save();bridge();ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#e29f56';ctx.lineWidth=74;ctx.stroke();
+  bridge();ctx.strokeStyle='#c77736';ctx.lineWidth=66;ctx.stroke();bridge();ctx.strokeStyle='#f7d39a';ctx.lineWidth=58;ctx.stroke();ctx.restore();
+  for(let i=5;i<shortcutSamples.length-5;i+=3){const p=shortcutSamples[i],q=shortcutSamples[i+1],a=Math.atan2(q.y-p.y,q.x-p.x),nx=-Math.sin(a),ny=Math.cos(a);
+    ctx.strokeStyle=i%2===0?'#b67b4b7a':'#eac080ad';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(p.x-nx*26,p.y-ny*26);ctx.lineTo(p.x+nx*26,p.y+ny*26);ctx.stroke();
+  }
+ // A slight dark underside along the edges helps distinguish the underpass.
+}
 function paintWorld(){const ctx=trackCtx,W=WORLD_W,H=WORLD_H;
   // Original cartoon breakfast-table world; no external sprites or copyrighted materials.
   const wood=ctx.createLinearGradient(0,0,W,H);wood.addColorStop(0,'#a86a48');wood.addColorStop(.47,'#d19a65');wood.addColorStop(1,'#875638');
@@ -2631,15 +2653,8 @@ function paintWorld(){const ctx=trackCtx,W=WORLD_W,H=WORLD_H;
     ctx.beginPath();ctx.ellipse(...b,0,0,Math.PI*2);ctx.fill();
   }
   ctx.strokeStyle='#ffbed2ad';ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(-8,-8,36,67,-.07,3.3,5.95);ctx.stroke();ctx.restore();
-  // The shortcut is visibly separate: a narrower raised wooden-toast bridge between
-  // two points of the course. It has a ramp at entry but is NEVER mandatory.
-  const bridge=()=>{ctx.beginPath();shortcutSamples.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));};
-  ctx.save();bridge();ctx.lineCap='round';ctx.lineJoin='round';ctx.shadowColor='#442c228a';ctx.shadowBlur=18;ctx.shadowOffsetY=13;ctx.strokeStyle='#905f3f';ctx.lineWidth=82;ctx.stroke();ctx.restore();
-  ctx.save();bridge();ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#e29f56';ctx.lineWidth=74;ctx.stroke();
-  bridge();ctx.strokeStyle='#c77736';ctx.lineWidth=66;ctx.stroke();bridge();ctx.strokeStyle='#f7d39a';ctx.lineWidth=58;ctx.stroke();ctx.restore();
-  for(let i=5;i<shortcutSamples.length-5;i+=3){const p=shortcutSamples[i],q=shortcutSamples[i+1],a=Math.atan2(q.y-p.y,q.x-p.x),nx=-Math.sin(a),ny=Math.cos(a);
-    ctx.strokeStyle=i%2===0?'#b67b4b7a':'#eac080ad';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(p.x-nx*26,p.y-ny*26);ctx.lineTo(p.x+nx*26,p.y+ny*26);ctx.stroke();
-  }
+  // Elevated toast bridge lives in an independent overpass layer; ground cars
+  // going across the original track can pass visually UNDER its deck.
   // Start/finish spans the actual full lane, including both sides of the line.
   const f=trackPoint(0),ang=tangent(0),nx=-Math.sin(ang),ny=Math.cos(ang),fx=Math.cos(ang),fy=Math.sin(ang);
   for(let row=0;row<3;row++)for(let col=-12;col<12;col++){
@@ -2692,10 +2707,10 @@ function drawMilkCerealSpill(ctx,o){
  }
  ctx.restore();
 }
-function drawMilkCerealCup(ctx,o){
+function drawMilkOverflow(ctx,o){
  const x=o.x,y=o.y;
  ctx.save();ctx.translate(x,y);
- // Overflow ribbons lie BEHIND the upright bowl. More milk streams right.
+ // Ground stream is BELOW puddle/cereal decals, and below the upright bowl.
  ctx.lineCap='round';ctx.lineJoin='round';
  ctx.fillStyle='#e1cbb071';ctx.beginPath();
  ctx.moveTo(-66,-8);ctx.bezierCurveTo(-90,6,-53,44,-77,64);
@@ -2716,6 +2731,11 @@ function drawMilkCerealCup(ctx,o){
  ctx.bezierCurveTo(56,74,42,34,45,-7);ctx.closePath();ctx.fill();
  ctx.strokeStyle='#fffdf0aa';ctx.lineWidth=3;ctx.beginPath();
  ctx.moveTo(64,34);ctx.bezierCurveTo(89,79,124,84,166,92);ctx.stroke();
+ ctx.restore();
+}
+function drawMilkCerealCup(ctx,o){
+ const x=o.x,y=o.y;
+ ctx.save();ctx.translate(x,y);
  // Soft contact shadow: the bowl rests on the cloth, with no tilt or floating.
  ctx.fillStyle='#49382d65';ctx.beginPath();ctx.ellipse(5,39,81,20,0,0,Math.PI*2);ctx.fill();
  // Squat, symmetrical ceramic bowl: flat base and broad, perfectly level lip.
@@ -2751,6 +2771,34 @@ function drawMilkCerealCup(ctx,o){
  }
 }
 
+function drawCoffeeAnimation(ctx,o){
+ // Gentle surface movement, not a second opaque coffee disc covering the mug art.
+ const r=o.r||48,wave=Math.sin(clock*1.35+o.x*.002);
+ ctx.save();ctx.translate(o.x,o.y);
+ ctx.fillStyle='rgba(77,40,25,.37)';ctx.beginPath();ctx.ellipse(-r*.04,-r*.10,r*.36,r*.24,-.08,0,Math.PI*2);ctx.fill();
+ ctx.strokeStyle='rgba(247,214,166,.60)';ctx.lineWidth=1.4;ctx.beginPath();
+ ctx.ellipse(-r*.07+wave*1.6,-r*.12,r*.20,r*.095,-.10,.25,2.70);ctx.stroke();
+ // Three deliberately faint, rising curved heat wisps, each with independent phase.
+ for(let i=0;i<3;i++){
+  const phase=(clock*.31+i*.33)%1,dx=(i-1)*r*.22;
+  ctx.globalAlpha=(1-phase)*(.42+.07*Math.sin(clock+i));ctx.strokeStyle='#8e8075';ctx.lineWidth=1.9+i*.25;
+  ctx.beginPath();ctx.moveTo(dx,-r*.33-phase*r*.23);
+  ctx.bezierCurveTo(dx+7*Math.sin(clock+i),-r*.53-phase*r*.25,dx-6,-r*.69-phase*r*.30,dx+3,-r*.91-phase*r*.38);ctx.stroke();
+ }
+ ctx.restore();
+}
+function drawJamPour(ctx,o){
+ // Flow from the tilted jar toward the existing physical jam patch.
+ const nx=-Math.sin(stickyAngle),ny=Math.cos(stickyAngle),t=clock;
+ const from=154,to=78,mid=116,wiggle=Math.sin(t*2.1)*3;
+ ctx.save();ctx.lineCap='round';ctx.strokeStyle='rgba(126,23,57,.85)';ctx.lineWidth=17;
+ ctx.beginPath();ctx.moveTo(jamPatch.x+nx*from,jamPatch.y+ny*from);
+ ctx.quadraticCurveTo(jamPatch.x+nx*mid+wiggle,jamPatch.y+ny*mid,jamPatch.x+nx*to,jamPatch.y+ny*to);ctx.stroke();
+ ctx.strokeStyle='rgba(250,98,147,.55)';ctx.lineWidth=3.6;ctx.stroke();
+ const q=(t*.44)%1,along=147-q*75;
+ ctx.fillStyle='rgba(238,71,127,.66)';ctx.beginPath();ctx.ellipse(jamPatch.x+nx*along+wiggle*q,jamPatch.y+ny*along,3.2+2.0*q,2.6,0,0,Math.PI*2);ctx.fill();
+ ctx.restore();
+}
 function drawObstacle(ctx,o){
  if(o.type!=='crumb'&&o.type!=='ramp'&&o.type!=='jam_spill_jar'&&o.type!=='milk_cereal_spill'&&o.type!=='milk_cereal_cup'){
   // Ground contact shadow and subtle tabletop bounce light anchor object volume.
@@ -2762,8 +2810,8 @@ function drawObstacle(ctx,o){
  }
  if(o.type==='milk_cereal_spill'){drawMilkCerealSpill(ctx,o);}
  else if(o.type==='milk_cereal_cup'){drawMilkCerealCup(ctx,o);}
- else if(o.type==='jam_spill_jar'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(stickyAngle+Math.PI/2);window.TTRAssets?.draw(ctx,'jam_tipped',-76,-62,152,124);ctx.restore();}
- else if(o.type==='crumb')drawCrumb(ctx,o.x,o.y,o.r,o.x|0);else if(o.type==='cookie')drawCookie(ctx,o.x,o.y,o.r,(o.x+o.y)*.004,o.cookieKind||'cookie');else if(o.type==='mug')drawMug(ctx,o.x,o.y,o.r,'#f1ddd6');else if(o.type==='toast')drawToast(ctx,o.x,o.y,o.r*1.7,.35);else if(o.type==='orange_bump'){window.TTRAssets?.draw(ctx,'orange',o.x-33,o.y-30,66,60);}else if(['plate_croissant','cereal','orange','jam','glass'].includes(o.type)){const width=o.r*2.8;if(o.type==='jam'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(.93);window.TTRAssets?.draw(ctx,o.type,-width/2,-width*.52,width,width*.92);ctx.restore();}else window.TTRAssets?.draw(ctx,o.type,o.x-width/2,o.y-width*.52,width,width*.92);}else if(o.type==='knife'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(o.angle??0);if(o.interactive)drawKnife(ctx,0,0,o.length||120,28);else drawKnife(ctx,0,0,157,38);ctx.restore();}else if(o.type==='ramp')drawRamp(ctx,o);
+ else if(o.type==='jam_spill_jar'){drawJamPour(ctx,o);ctx.save();ctx.translate(o.x,o.y);ctx.rotate(stickyAngle+Math.PI/2+Math.sin(clock*1.18)*.012);window.TTRAssets?.draw(ctx,'jam_tipped',-76,-62,152,124);ctx.restore();}
+ else if(o.type==='crumb')drawCrumb(ctx,o.x,o.y,o.r,o.x|0);else if(o.type==='cookie')drawCookie(ctx,o.x,o.y,o.r,(o.x+o.y)*.004,o.cookieKind||'cookie');else if(o.type==='mug'){drawMug(ctx,o.x,o.y,o.r,'#f1ddd6');drawCoffeeAnimation(ctx,o);}else if(o.type==='toast')drawToast(ctx,o.x,o.y,o.r*1.7,.35);else if(o.type==='orange_bump'){window.TTRAssets?.draw(ctx,'orange',o.x-33,o.y-30,66,60);}else if(['plate_croissant','cereal','orange','jam','glass'].includes(o.type)){const width=o.r*2.8;if(o.type==='jam'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(.93);window.TTRAssets?.draw(ctx,o.type,-width/2,-width*.52,width,width*.92);ctx.restore();}else window.TTRAssets?.draw(ctx,o.type,o.x-width/2,o.y-width*.52,width,width*.92);}else if(o.type==='knife'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(o.angle??0);if(o.interactive)drawKnife(ctx,0,0,o.length||120,28);else drawKnife(ctx,0,0,157,38);ctx.restore();}else if(o.type==='ramp')drawRamp(ctx,o);
 }
 
 // A knife near the jam is a low, visible obstacle. A fast, centred crossing
@@ -2835,7 +2883,12 @@ function contactWithProp(c,o,previous=null){
  return resolveCarObstacle(c,bladeCollider);
 }
 
-function gameObstacles(ctx){props.forEach(o=>drawObstacle(ctx,o));}
+function gameObstacles(ctx){
+ props.filter(o=>o.type==='milk_cereal_cup').forEach(o=>drawMilkOverflow(ctx,o));
+ props.filter(o=>o.type==='milk_cereal_spill').forEach(o=>drawObstacle(ctx,o));
+ ctx.drawImage(bridgeLayer,0,0);
+ props.filter(o=>o.type!=='milk_cereal_spill').forEach(o=>drawObstacle(ctx,o));
+}
 function drawBox(ctx,p){if(p.cool>0)return;
  const assets=window.TTRAssets;
  const phase=clock*2.5+p.phase;
@@ -2909,7 +2962,7 @@ function eliminationNewRound(){
   const keep={variantAccent:c.variantAccent,variantLabel:c.variantLabel,variantSprite:c.variantSprite};
   Object.assign(c,fresh,keep);c.eliminated=false;c.elimDistance=0;c.elimPrevP=c.p;c.elimLag=0;c.elimProtection=0;c.elimCelebration=0;
  });
- camX=race.player.x;camY=race.player.y;elimCameraId=null;elimCameraProgress=0;elimBanner.style.display='none';refreshEliminationBoard();
+ camX=race.player.x;camY=race.player.y;elimCameraId=null;elimCameraProgress=0;elimFocusWeight=0;elimBanner.style.display='none';refreshEliminationBoard();
  showHint(`ELIMINAZIONE · MANCHE ${e.round}`,1.4);hud();
 }
 function eliminationProgressUpdate(c,pr,dt){
@@ -2936,6 +2989,23 @@ function eliminationCameraLeader(){
   // Use spatial smoothing in render(), not a 65-unit switch delay that loses the leader.
   if(leader.id!==current.id){elimCameraId=leader.id;elimCameraProgress=leader.elimDistance||0;return leader;}
   return leader;
+}
+// v77 group-aware camera: one stable world-space target, no camera switching snaps.
+function eliminationCameraTarget(){
+ const active=eliminationActive();if(!active.length)return {x:camX,y:camY};
+ const leader=eliminationCameraLeader();
+ const near=active.filter(c=>Math.hypot(c.x-leader.x,c.y-leader.y)<235&&
+   Math.abs((leader.elimDistance||0)-(c.elimDistance||0))<275);
+ const closest=active.filter(c=>c!==leader).reduce((best,c)=>
+   Math.min(best,Math.max(0,(leader.elimDistance||0)-(c.elimDistance||0))),Infinity);
+ // ~2 car lengths: share the shot. >4 car lengths: lead car owns the frame.
+ const requested=clamp((closest-125)/145,0,1);
+ const smoothing=1-Math.exp(-Math.min(.05,renderDelta)*5.0);
+ elimFocusWeight+=(requested-elimFocusWeight)*smoothing;
+ let cx=leader.x*1.35,cy=leader.y*1.35,total=1.35;
+ for(const c of near){if(c===leader)continue;cx+=c.x;cy+=c.y;total++;}
+ cx/=total;cy/=total;
+ return {x:cx+(leader.x-cx)*elimFocusWeight,y:cy+(leader.y-cy)*elimFocusWeight};
 }
 function eliminationEvaluate(dt){
  const e=race.elim;if(e.state!=='race'||race.countdown>0)return;
@@ -3072,7 +3142,7 @@ function initRace(mode){
  $('position').parentElement.querySelector('small').textContent=mode==='elimination'?'IN PISTA':t('position');
  $('lap').parentElement.querySelector('small').textContent=mode==='elimination'?'MANCHE':t('lap');
  $('hud').classList.toggle('hud-elimination',mode==='elimination');
- SND.unlock().then(ok=>{if(ok)SND.sfx('start');});SND.stopMusic();frameTime=performance.now();camX=race.player.x;camY=race.player.y;hud();
+ SND.unlock().then(ok=>{if(ok)SND.sfx('start');});SND.stopMusic();frameTime=performance.now();camX=race.player.x;camY=race.player.y;elimCameraId=null;elimFocusWeight=0;hud();
 }
 // One recovery path for excessive shortcut, tabletop edge and blocked obstacles.
 // All recoveries are silent on the HUD; the audio cue is subtle and never prints text.
@@ -3884,12 +3954,16 @@ function render(){const ratio=Math.min(race?.mode==='online'&&onlineSession&&!on
  // Keep the player just behind centre, giving sight of the upcoming corner.
  const player=race?.mode==='elimination'?(race.elim.state==='celebration'?race.cars[race.elim.winner]:eliminationCameraLeader()):race?.player,playerFalling=!!(player&&player.tableFalling>0);
  const look=player&&race.countdown<=0&&!playerFalling?(race?.mode==='elimination'?0:85):0;
- const targetX=player?player.x+Math.cos(player.a)*look:WORLD_W/2,targetY=player?player.y+Math.sin(player.a)*look:WORLD_H/2;
+ const groupTarget=race?.mode==='elimination'&&race.elim.state==='race'?eliminationCameraTarget():null;
+ const targetX=groupTarget?groupTarget.x:player?player.x+Math.cos(player.a)*look:WORLD_W/2;
+ const targetY=groupTarget?groupTarget.y:player?player.y+Math.sin(player.a)*look:WORLD_H/2;
  scale=sw<sh?Math.min(.85,Math.max(.60,sh/620)):
    Math.min(.86,Math.max(.59,Math.min(sw/1140,sh/540)));
  const halfW=sw/(2*scale),halfH=sh/(2*scale);
-  const leaderIsEscaping=race?.mode==='elimination'&&player&&Math.hypot(targetX-camX,targetY-camY)>Math.min(halfW,halfH)*.52;
-  const follow=playerFalling?.23:leaderIsEscaping?1:1-Math.exp(-Math.min(.05,renderDelta)* (race?.mode==='elimination'?15:6.4));
+  // Progressive catch-up replaces the old instantaneous follow=1 branch.
+  const gapToTarget=Math.hypot(targetX-camX,targetY-camY);
+  const response=race?.mode==='elimination'?Math.min(11,5.2+gapToTarget/140):6.4;
+  const follow=playerFalling?.23:1-Math.exp(-Math.min(.05,renderDelta)*response);
  camX+=(targetX-camX)*follow;camY+=(targetY-camY)*follow;
  const outerView=playerFalling?105:0;
  camX=halfW>=WORLD_W/2?WORLD_W/2:clamp(camX,halfW-outerView,WORLD_W-halfW+outerView);
@@ -3902,11 +3976,17 @@ function render(){const ratio=Math.min(race?.mode==='online'&&onlineSession&&!on
   // Ramp must always be BELOW the flying vehicle; otherwise the bread sprite masks the jump.
   const visibleProp=o=>Math.abs(o.x-camX)<halfW+145&&Math.abs(o.y-camY)<halfH+145;
   // Floor spills are decals below all four wheels, irrespective of their y-sort position.
+   // Overflow goes UNDER the puddle shapes, preserving exposed cereal pieces.
+   props.filter(o=>o.type==='milk_cereal_cup'&&visibleProp(o)).forEach(o=>drawMilkOverflow(g,o));
    props.filter(o=>o.type==='milk_cereal_spill'&&visibleProp(o)).forEach(o=>drawObstacle(g,o));
+   // Road cars are drawn first. The opaque raised bread deck then occludes them
+   // at crossings, while vehicles actually ON the bridge stay visible on top.
+   [...props.filter(o=>o.type!=='ramp'&&o.type!=='milk_cereal_spill'&&visibleProp(o)).map(o=>({y:o.y,prop:o})),
+    ...race.cars.filter(c=>!c.eliminated&&c.jump<=0&&!c.onBridge).map(c=>({y:c.y,car:c}))]
+     .sort((a,b)=>a.y-b.y).forEach(e=>e.prop?drawObstacle(g,e.prop):carSprite(g,e.car));
+   if(viewRight>viewLeft&&viewBottom>viewTop)g.drawImage(bridgeLayer,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop);
    props.filter(o=>o.type==='ramp'&&visibleProp(o)).forEach(o=>drawObstacle(g,o));
-   [...props.filter(o=>o.type!=='ramp'&&o.type!=='milk_cereal_spill'&&visibleProp(o)).map(o=>({y:o.y,prop:o})),...race.cars.filter(c=>!c.eliminated&&c.jump<=0).map(c=>({y:c.y,car:c}))].sort((a,b)=>a.y-b.y).forEach(e=>e.prop?drawObstacle(g,e.prop):carSprite(g,e.car));
-  // Flying cars are always in foreground; ground shadow remains at real collision position.
-  race.cars.filter(c=>!c.eliminated&&c.jump>0).forEach(c=>carSprite(g,c));
+   race.cars.filter(c=>!c.eliminated&&(c.onBridge||c.jump>0)).forEach(c=>carSprite(g,c));
  for(const c of race.cars){if(!c.eliminated&&c.claw>0&&c.clawTarget)drawClawCable(g,c,c.clawTarget);}
  race.effects.forEach(e=>renderEffect(g,e));if(race.countdown>0){g.save();g.setTransform(dpr,0,0,dpr,0,0);g.textAlign='center';g.textBaseline='middle';g.lineWidth=7;g.strokeStyle='#142438';g.font=`950 ${Math.min(90,sw/5)}px system-ui`;const v=Math.ceil(race.countdown);g.strokeText(String(v),sw/2,sh/2);g.fillStyle='#ffe67f';g.fillText(String(v),sw/2,sh/2);g.restore();}}else gameObstacles(g);
  if(clock>lastHint&&lastHint!==0){$('hint').classList.remove('show');lastHint=0;}
@@ -3951,7 +4031,9 @@ window.TTRDebug={
  getBreakfastPreview:()=>{
    const ox=155,oy=700,w=1000,h=600;const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
    const ctx=canvas.getContext('2d');ctx.drawImage(track,ox,oy,w,h,0,0,w,h);
+   ctx.drawImage(bridgeLayer,ox,oy,w,h,0,0,w,h);
    ctx.save();ctx.translate(-ox,-oy);
+   props.filter(o=>o.type==='milk_cereal_cup').forEach(o=>drawMilkOverflow(ctx,o));
    props.filter(o=>o.x>ox-o.r&&o.x<ox+w+o.r&&o.y>oy-o.r&&o.y<oy+h+o.r).sort((a,b)=>a.y-b.y).forEach(o=>drawObstacle(ctx,o));
    ctx.restore();return canvas.toDataURL('image/png');
  },
@@ -3997,6 +4079,15 @@ window.TTRDebug={
  c.lastValidPosition={x:c.x,y:c.y,p:.32,a:c.a,speed:60,laps:c.lapsCompleted,flags:c.flags.slice()};
  race.countdown=0;race.oils=[{x:c.x,y:c.y,r:34,t:9,owner:1,phase:0}];return true;},
  getCerealSpills:()=>milkCerealSpills.map(p=>({x:p.x,y:p.y,rx:p.rx,ry:p.ry,shape:p.spillShape,roadDistance:nearestCourse(p,points).distance})),
+ getEliminationCamera:()=>({leaderId:elimCameraId,focusWeight:elimFocusWeight,camera:{x:camX,y:camY}}),
+ testEliminationCameraSetup:(gap=55)=>{
+  if(!race||race.mode!=='elimination')return false;
+  // Deterministic frozen-grid camera diagnostic (available only via TTRDebug).
+  const dist=Math.max(0,Number(gap)||0);race.countdown=999;race.elim.state='race';
+  race.cars.forEach((c,i)=>{c.x=1080-i*dist;c.y=710+i*10;c.speed=0;c.elimDistance=1800-i*dist;
+   c.eliminated=false;c.done=false;c.tableFalling=0;c.respawnGrace=0;});
+  camX=950;camY=710;elimCameraId=null;elimFocusWeight=0;return true;
+ },
  getOrangeRind:()=>props.filter(p=>p.type==='orange_bump').map(p=>({x:p.x,y:p.y,r:p.r,solid:p.solid,jump:p.jump})),
  getTrackMeta:()=>({jamPatch,courseYShift:K.COURSE_Y_SHIFT,crumbCount:K.crumbMarkers().length,worldW:WORLD_W,worldH:WORLD_H,length:TRACK_LENGTH,sections:sectionNames,sectionRanges,shortcutStart:shortcutFrom,shortcutEnd:shortcutTo,shortcut:shortcutSamples.map(q=>({x:q.x,y:q.y}))}),testEnterShortcut:()=>{if(!race)return false;const c=race.player,pt=shortcutPoint(.15),q=shortcutPoint(.19);c.x=pt.x;c.y=pt.y;c.a=Math.atan2(q.y-pt.y,q.x-pt.x);c.speed=160;c.respawnGrace=0;c.offtrack=false;c.offtrackEntry=null;race.countdown=0;return true;},teleportForCamera:(phase)=>{if(!race)return false;const c=race.player,p=trackPoint(phase);c.x=p.x;c.y=p.y;c.a=tangent(phase);c.speed=0;c.hitVX=c.hitVY=0;c.offtrack=false;return true;},getCamera:()=>({x:camX,y:camY,scale,viewportWidth:sw/scale,viewportHeight:sh/scale}),
  testFinishInnerLine:(offset=110)=>{if(!race)return false;const c=race.player,pt=trackPoint(0),a=tangent(0),nx=-Math.sin(a),ny=Math.cos(a),fx=Math.cos(a),fy=Math.sin(a);c.x=pt.x-fx*17+nx*offset;c.y=pt.y-fy*17+ny*offset;c.a=a;c.speed=160;c.flags=[true,true,true];c.lapGateBlocked=false;c.offtrack=false;c.respawnGrace=0;c.lastP=.966;c.p=.966;c.offtrackEntry=null;race.countdown=0;return true;},
@@ -4041,7 +4132,7 @@ window.TTRDebug={
  c.lastValidPosition={x:safe.x,y:safe.y,a:tangent(from),p:from,laps:c.lapsCompleted,flags:c.flags.slice()};
  c.auditP=from;c.auditTravel=350;c.auditCleanTime=0;c.x=pos.x;c.y=pos.y;c.p=from;c.lastP=from;c.a=tangent(to);c.speed=0;c.offtrack=false;c.respawnGrace=0;race.countdown=0;
  const before=c.shortcutRespawns||0;update(1/60);return {before,after:c.shortcutRespawns||0,phase:c.p,expectedPhase:from};
-},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.53',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
+},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.77',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
 })();
 
 
