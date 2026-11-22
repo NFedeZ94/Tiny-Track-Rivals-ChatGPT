@@ -1,6 +1,7 @@
+<!-- Tiny Track Rivals v0.13.6.83: legal corner overtakes, fixed elimination grid camera, adaptive pickups, six-stat impact balancing. 82 remains intact. -->
 <!-- Tiny Track Rivals v0.13.6.81: entry ramp overpass depth, diamond power-up map legend, wide animated jam spill; based on 78. Previous notes: v0.13.6.78: legal corner overtake camera, top-down victory 360, bridge exit overpass and minimap shortcut; based on 77. Previous notes: v0.13.6.77: ramp/bridge underpass, elimination smooth group camera, milk layering, coffee and jam motion; based on 76. Previous notes: v0.13.6.76: Aero R race facing +180, 384-frame seam-continuous 360 and garage silhouette-size match. Based on v75. Original notes: Tuono V8 garage thumbnail isolated orientation fix; Aero R V6.4 solid fender shell and sporty five twin-spoke wheels, updated 192-frame garage, equalized presentation size; unchanged menu Tuono and race physics. -->
 <!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1a2e"><meta name="ttr-build" content="v0.13.6.82"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tiny Track Rivals"><meta name="application-name" content="Tiny Track Rivals"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><link rel="manifest" href="manifest.webmanifest"><title>Tiny Track Rivals — Colazione Turbo</title><style>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1a2e"><meta name="ttr-build" content="v0.13.6.83"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tiny Track Rivals"><meta name="application-name" content="Tiny Track Rivals"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><link rel="manifest" href="manifest.webmanifest"><title>Tiny Track Rivals — Colazione Turbo</title><style>
 
 :root{color-scheme:dark;--cyan:#60d9ff;--yellow:#ffd55d;--ink:#071326;--line:#345577;--orange:#f39b43}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#081324;color:#f0f7ff;font-family:system-ui,-apple-system,'Arial Black',sans-serif;touch-action:none;user-select:none}#game{position:fixed;inset:0;width:100vw;height:100dvh;display:block;background:#7a5842}.screen{position:absolute;inset:0;z-index:8;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,rgba(3,10,24,.94),rgba(8,36,62,.84)),repeating-linear-gradient(45deg,#061b2b 0 35px,#122b43 35px 70px);padding:12px;overflow:auto;touch-action:pan-y}.panel{width:min(840px,100%);border:2px solid #5092bc;border-radius:22px;background:linear-gradient(170deg,#162f4e,#0a1a30 80%);box-shadow:0 18px 70px #000a,inset 0 0 35px #23688d22;padding:clamp(18px,4vw,40px);max-height:calc(100dvh - 24px);overflow-y:auto}.panel.resultsPanel{width:min(760px,100%);padding:clamp(16px,3vw,26px)}.panel.resultsPanel.compact{width:min(800px,100%);padding:16px 18px;overflow:hidden}.eyebrow{font-size:11px;letter-spacing:.2em;color:#86dfff;font-weight:850;margin:0 0 10px;text-transform:uppercase}.logo{font-weight:1000;font-style:italic;font-size:clamp(35px,8vw,83px);letter-spacing:-.055em;line-height:.94;color:#ffd054;text-shadow:3px 4px 0 #9f3c24,7px 8px 0 #06111e}.logo span{display:block;color:#fff;font-size:.48em;letter-spacing:.08em;text-shadow:3px 4px 0 #385a76}.sub{color:#bed1e2;line-height:1.45;font-size:14px;max-width:680px;margin:16px 0 22px}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.chip{padding:7px 10px;border-radius:99px;border:1px solid #446b86;background:#102e4b;color:#c8e2f8;font-size:12px;font-weight:700}.menu-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:20px}.resultsPanel .menu-row{margin-top:14px}.btn{touch-action:manipulation;border:2px solid #eccd76;border-radius:13px;background:linear-gradient(#fff3a5,#f5b73f);box-shadow:0 4px 0 #ab5d1f;color:#17203a;font-size:15px;font-weight:950;padding:13px 22px;cursor:pointer;text-align:center;min-height:48px}.btn.secondary{background:linear-gradient(#20466a,#123250);color:#e5f5ff;border-color:#5293b8;box-shadow:0 4px 0 #07182b}.btn:active{transform:translateY(3px);box-shadow:none}.settings{display:flex;flex-wrap:wrap;gap:14px;margin-top:19px}.settings label{display:flex;flex-direction:column;gap:5px;color:#add7ef;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.settings select{font-size:15px;background:#102943;color:#fff;border:1px solid #497ca2;padding:10px;border-radius:9px;min-width:130px}.note{font-size:12px;color:#a9c1d2;line-height:1.55;margin:17px 0 0}.resultTitle{font-size:clamp(28px,5vw,45px);font-weight:950;color:#ffe17d;margin:0 0 14px}.results{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}.results td{border-bottom:1px solid #3b5972;padding:8px 4px;vertical-align:middle}.results tr.me{color:#ffe395;font-weight:850}.results.compact{font-size:12px}.results.compact td{padding:5px 3px}.results td:first-child{width:44px}.resultSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin:10px 0 14px}.resultCard{border:1px solid #36617d;background:#0b1f36;border-radius:12px;padding:8px 10px}.resultCard b{display:block;color:#8fe5fd;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}.variantDot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:7px;vertical-align:-1px;border:1px solid #ffffff99;box-shadow:0 0 0 1px #0a1325}#hud{position:fixed;inset:0;pointer-events:none;z-index:4;display:none}.hudTop{position:absolute;left:8px;right:8px;top:max(7px,env(safe-area-inset-top));display:flex;align-items:flex-start;justify-content:space-between;gap:5px}.statBlock{border:1px solid #3f829e;background:#071831df;border-radius:10px;padding:8px 11px;box-shadow:0 3px 0 #0008;min-width:82px}.statBlock small{font-size:9px;display:block;color:#8ce3ff;font-weight:850;letter-spacing:.08em}.statBlock strong{font-size:clamp(15px,2.8vw,23px);color:#fff}.itemBlock{border-color:#b78b41}.itemBlock strong{color:#ffde79}#hint{position:absolute;left:50%;top:23%;transform:translate(-50%,-50%);background:#04172bcf;border:1px solid #6bc9e8;color:#fff;font-size:clamp(17px,4vw,33px);font-weight:950;border-radius:12px;padding:12px 19px;text-align:center;opacity:0;transition:opacity .15s;white-space:nowrap}#hint.show{opacity:1}#controls{position:fixed;z-index:5;bottom:max(10px,env(safe-area-inset-bottom));left:10px;right:10px;display:none;pointer-events:none;justify-content:space-between;gap:10px}.ctrlGroup{display:flex;align-items:end;gap:8px;pointer-events:none}.control{border:2px solid #b1d7ef;background:linear-gradient(155deg,#214666d9,#07192de6);color:#fff;box-shadow:inset 0 1px 8px #ffffff25,0 4px 0 #010711bd;border-radius:18px;width:clamp(52px,12vw,76px);height:clamp(56px,14vw,81px);font-size:28px;font-weight:950;touch-action:none;pointer-events:auto;display:flex;align-items:center;justify-content:center}.control.small{font-size:14px;width:clamp(56px,12vw,72px);color:#ffdb7c}.control.active{background:#eabf52;color:#0a1c28;transform:translateY(3px);box-shadow:0 1px #010711}.hudBottom{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);font-size:10px;white-space:nowrap;color:#e3f5ff;background:#071c30bd;padding:5px 10px;border-radius:8px}#pauseBtn{pointer-events:auto;position:absolute;right:9px;top:calc(63px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:8px 13px}#mini{position:absolute;top:calc(70px + env(safe-area-inset-top));left:10px;width:140px;height:90px;background:#071b2acb;border:1px solid #417fa8;border-radius:8px}#orientation{display:none;position:fixed;inset:auto 20px 100px;z-index:3;text-align:center;color:#f5f9ff;font-size:11px;opacity:.8}#muteBtn{pointer-events:auto;position:absolute;right:9px;top:calc(101px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:7px 11px}@media(orientation:portrait){#mini{width:96px;height:64px;top:calc(68px + env(safe-area-inset-top))}#pauseBtn{top:calc(68px + env(safe-area-inset-top))}#muteBtn{top:calc(105px + env(safe-area-inset-top))}#orientation{display:block}.hudBottom{bottom:99px;font-size:9px}.control{height:62px;width:58px}.control.small{width:57px}}@media(max-height:500px){.panel{padding:15px}.sub{margin:7px 0}.menu-row{margin-top:8px}.settings{margin-top:8px}.note{margin-top:9px}.control{height:58px}.hudBottom{display:none}#mini{top:calc(58px + env(safe-area-inset-top))}}
 
@@ -1227,7 +1228,7 @@ body #trackSelect:not([hidden]){position:fixed;inset:0;z-index:81;display:flex;a
    
   </aside>
  </div>
- <footer class="v11-foot"><div class="v11-footer-btns"><button class="mini-btn ttr-settings-launch" id="settingsBtn" type="button" aria-controls="retroSettings" aria-haspopup="dialog"><span class="ttr-settings-gear" aria-hidden="true">⚙︎</span><span data-i18n="settings">IMPOSTAZIONI</span></button></div><span class="v11-version">v0.13.6.82</span></footer>
+ <footer class="v11-foot"><div class="v11-footer-btns"><button class="mini-btn ttr-settings-launch" id="settingsBtn" type="button" aria-controls="retroSettings" aria-haspopup="dialog"><span class="ttr-settings-gear" aria-hidden="true">⚙︎</span><span data-i18n="settings">IMPOSTAZIONI</span></button></div><span class="v11-version">v0.13.6.83</span></footer>
 </div>
 <details class="v11-settings" id="retroSettings" role="dialog" aria-modal="true" aria-label="Impostazioni"><summary data-i18n="settings">IMPOSTAZIONI</summary>
  <div class="v11-settings-card"><div class="v11-settings-head"><b data-i18n="settings">IMPOSTAZIONI</b><button id="closeSettings" type="button" aria-label="Chiudi">✕</button></div>
@@ -1385,7 +1386,9 @@ body #trackSelect:not([hidden]){position:fixed;inset:0;z-index:81;display:flex;a
   // The player may hug either edge of the real road but must physically traverse
   // the outer section before arriving after the bend. It resets each completed lap.
   function mugBendGate(near,car,passed=false){
-    const legalApex=near.p>=.244&&near.p<=.297&&near.distance<=155&&car.x>=1768;
+    // Follow the real outside cup bend, but allow the shallow inside racing line.
+    // A direct cloth crossing still fails the mandatory apex and route audits.
+    const legalApex=near.p>=.238&&near.p<=.306&&near.distance<=168&&car.x>=1710;
     const nowPassed=!!passed||legalApex;
     const skipped=near.p>.313&&near.p<.435&&near.distance<172&&car.y<950&&!nowPassed;
     return {passed:nowPassed,penalty:skipped,legalApex};
@@ -1490,10 +1493,10 @@ body #trackSelect:not([hidden]){position:fixed;inset:0;z-index:81;display:flex;a
      Object.entries(TTR_DESIGN_STATS).map(([id,stats])=>
        [id,Object.freeze(ttrCalibratedProfile({id,max:257,acc:195,turn:2.65,mass:1}))])));
    window.TTRBalanceAudit=Object.freeze({
-     version:'0.13.6.50',scope:'offline_only',profileCount:30,
+     version:'0.13.6.83',scope:'all_modes_on_matching_builds',profileCount:30,
      playableCount:5,hiddenExpansionCount:10,
-     status:'test_calibration',onlinePhysics:'unchanged',
-     notes:'All six design stats mapped to physics. Non-playable profiles are data only.'
+     status:'preliminary_tuning_requires_playtesting',onlinePhysics:'host_uses_six_stats_on_updated_builds',
+     notes:'Six design stats mapped to all race modes; 5 playable cars, others remain data only. Mixed client versions are not validated.'
    });
   // v0.13: original, arc-length-sampled tabletop course (not an oval).
   // Eight canon sections are represented in the course and identified in track-data.json.
@@ -1730,16 +1733,26 @@ body #trackSelect:not([hidden]){position:fixed;inset:0;z-index:81;display:flex;a
       if(iteration===0&&closing>3){
         // Velocity/mass based impulse, capped for arcade stability. Re-run iterations
         // resolve penetration but do not multiply one contact into multiple impulses.
-        const strength=Math.min(188,(1+.16)*closing/total);
+        // The six-stat profiles govern impact transfer and stability independently.
+        // Controlled restitution avoids sideways launches while keeping weight visible.
+        const strength=Math.min(166,(1+.10)*closing/total);
         maxImpulse=Math.max(maxImpulse,strength);
         a.hitVX=(a.hitVX||0)-strength*nx*invA;
         a.hitVY=(a.hitVY||0)-strength*ny*invA;
         b.hitVX=(b.hitVX||0)+strength*nx*invB;
         b.hitVY=(b.hitVY||0)+strength*ny*invB;
         const severity=Math.min(1,closing/240);
-        a.speed*=1-(.055/(a.profile?.impactFactor||1))*severity;b.speed*=1-(.055/(b.profile?.impactFactor||1))*severity;
-         // Cap transferred impulse vectors: prevent unrealistic sideways catapulting.
-         for(const c of [a,b]){const hv=Math.hypot(c.hitVX||0,c.hitVY||0);if(hv>178){c.hitVX*=178/hv;c.hitVY*=178/hv;}}
+        a.speed*=1-(.075/(a.profile?.impactFactor||1))*severity;
+        b.speed*=1-(.075/(b.profile?.impactFactor||1))*severity;
+        // A tiny bounded tangential separation makes sideswipes slide rather than glue.
+        const tx=-ny,ty=nx,relativeSlide=(vax-vbx)*tx+(vay-vby)*ty;
+        const sideImpulse=clamp(relativeSlide*.055,-11,11)/total;
+        a.hitVX=(a.hitVX||0)-tx*sideImpulse*invA;
+        a.hitVY=(a.hitVY||0)-ty*sideImpulse*invA;
+        b.hitVX=(b.hitVX||0)+tx*sideImpulse*invB;
+        b.hitVY=(b.hitVY||0)+ty*sideImpulse*invB;
+        // No giant lateral catapult; high-grip cars regain control more quickly.
+        for(const c of [a,b]){const hv=Math.hypot(c.hitVX||0,c.hitVY||0);if(hv>154){c.hitVX*=154/hv;c.hitVY*=154/hv;}}
         // Side swipes turn the body slightly; head-on bumps hardly yaw it.
         const crossA=ca*ny-sa*nx,crossB=cb*ny-sb*nx;
          a.hitYaw=Math.max(-.9,Math.min(.9,(a.hitYaw||0)-crossA*severity*.52/(Math.max(.8,ma)*(a.profile?.stabilityFactor||1))));
@@ -1755,7 +1768,10 @@ body #trackSelect:not([hidden]){position:fixed;inset:0;z-index:81;display:flex;a
   }
   function racePosition(car){return Math.max(0,car.lapsCompleted||0)+mod(car.p||0,1);}
   function pickupCount(referenceLapSeconds){return referenceLapSeconds<45?2:(referenceLapSeconds<=70?3:4);}
-  return {WORLD_W,WORLD_H,LANE_HALF,COURSE_Y_SHIFT,TRACK_LENGTH,sectionNames,sectionRanges,routeAnchors,crumbMarkers,shortcutFrom,shortcutTo,shortcutPoint,shortcutSamples,shortcutNearest,nearestCourse,phaseGap,nearestTrackWindow,junctionPhaseHop,TAU,clamp,mod,lerp,offTrackDynamics,wideCornerRecovery,spoonContactZone,insideTrackLoop,forwardProgress,shortcutViolation,illegalRouteGain,mugBendGate,finishGateCrossing,finishLinePlane,edgeOfTable,stuckRecoveryStep,angleDiff,distance,profiles,trackPoint,tangent,nearestTrack,circleRotatedRect,segmentCircle,clawTarget,rampEntryVisual,rampLaunch,jamHit,bridgeLaneViolation,segmentPointDistance,oilHit,clawPullStep,resolveCarContacts,resolveCarObstacle,resolveBorderContact,stepDriveSpeed,pickupSegments,pickupType,racePosition,pickupCount,ttrCalibratedProfile};
+  // More rivals share the same pickups: rebalance availability, not spawn count.
+  // 2/4/6/8 participants => 11/9/7/5 seconds. Solo time trial stays at 10s.
+  function pickupRespawnSeconds(participants){const n=Math.max(1,Math.min(8,Math.round(participants)||1));return n===1?10:Math.max(5,13-n);}
+  return {WORLD_W,WORLD_H,LANE_HALF,COURSE_Y_SHIFT,TRACK_LENGTH,sectionNames,sectionRanges,routeAnchors,crumbMarkers,shortcutFrom,shortcutTo,shortcutPoint,shortcutSamples,shortcutNearest,nearestCourse,phaseGap,nearestTrackWindow,junctionPhaseHop,TAU,clamp,mod,lerp,offTrackDynamics,wideCornerRecovery,spoonContactZone,insideTrackLoop,forwardProgress,shortcutViolation,illegalRouteGain,mugBendGate,finishGateCrossing,finishLinePlane,edgeOfTable,stuckRecoveryStep,angleDiff,distance,profiles,trackPoint,tangent,nearestTrack,circleRotatedRect,segmentCircle,clawTarget,rampEntryVisual,rampLaunch,jamHit,bridgeLaneViolation,segmentPointDistance,oilHit,clawPullStep,resolveCarContacts,resolveCarObstacle,resolveBorderContact,stepDriveSpeed,pickupSegments,pickupType,racePosition,pickupCount,pickupRespawnSeconds,ttrCalibratedProfile};
 });
 
 
@@ -2212,6 +2228,7 @@ const $=id=>document.getElementById(id);
 const canvas=$('game'),g=canvas.getContext('2d',{alpha:false}),mini=$('mini'),mg=mini.getContext('2d');
 let sw=0,sh=0,dpr=0,scale=1,camX=WORLD_W/2,camY=WORLD_H/2,world=null;
 let elimCameraId=null,elimCameraProgress=0,elimFocusWeight=0,renderDelta=1/60;
+let elimGridCamera={x:WORLD_W/2,y:WORLD_H/2};
 let race=null,lastRaceSettings=null,frameTime=performance.now(),clock=0,lastHint=0,hint='',resultsMusicTimer=null;
 const SND=window.TTRSound;
 const points=Array.from({length:520},(_,i)=>trackPoint(i/520));
@@ -3084,7 +3101,8 @@ function eliminationNewRound(){
   const keep={variantAccent:c.variantAccent,variantLabel:c.variantLabel,variantSprite:c.variantSprite};
   Object.assign(c,fresh,keep);c.eliminated=false;c.elimDistance=0;c.elimPrevP=c.p;c.elimLag=0;c.elimProtection=0;c.elimCelebration=0;
  });
- camX=race.player.x;camY=race.player.y;elimCameraId=null;elimCameraProgress=0;elimFocusWeight=0;elimBanner.style.display='none';refreshEliminationBoard();
+ camX=race.player.x;camY=race.player.y;elimGridCamera={x:camX,y:camY};
+ elimCameraId=null;elimCameraProgress=0;elimFocusWeight=0;elimBanner.style.display='none';refreshEliminationBoard();
  showHint(`ELIMINAZIONE · MANCHE ${e.round}`,1.4);hud();
 }
 function eliminationProgressUpdate(c,pr,dt){
@@ -3129,13 +3147,37 @@ function eliminationViewBounds(){
  const zoom=scale||.65;
  return {x:camX,y:camY,halfW:(sw||innerWidth)/(2*zoom),halfH:(sh||innerHeight)/(2*zoom)};
 }
+// A shallow, legal corner cut may put a car physically ahead while nearest-track
+// phase stalls or momentarily regresses. Resolve *close* overtakes from geometry,
+// independently of accumulated progress, only when the two cars share a bend.
+function eliminationPhysicalOvertake(challenger,incumbent){
+ if(!challenger||!incumbent||challenger===incumbent)return false;
+ const bad=c=>c.done||c.eliminated||c.onBridge||c.bridgeMissActive||c.bridgeLandingActive||
+   c.routePinch||c.tableFalling>0||c.respawnGrace>0||
+   ((c.offtrackSeconds||0)>2.2&&!(c.offtrackReturnGrace>0));
+ if(bad(challenger)||bad(incumbent))return false;
+ if((incumbent.elimDistance||0)-(challenger.elimDistance||0)>145)return false;
+ const a=nearestCourse(challenger,points),b=nearestCourse(incumbent,points);
+ if(a.shortcut||b.shortcut||a.distance>191||b.distance>191||phaseGap(a.p,b.p)>.043)return false;
+ const dx=challenger.x-incumbent.x,dy=challenger.y-incumbent.y;
+ if(Math.hypot(dx,dy)>240)return false;
+ const t0=tangent(b.p),t1=tangent(a.p);
+ const fx0=Math.cos(t0)+Math.cos(t1),fy0=Math.sin(t0)+Math.sin(t1);
+ const norm=Math.hypot(fx0,fy0)||1,fx=fx0/norm,fy=fy0/norm;
+ const forward=dx*fx+dy*fy,across=-dx*fy+dy*fx;
+ if(forward<=13||Math.abs(across)>190)return false;
+ // Physical direction must broadly agree with the intended race direction.
+ const t=Math.atan2(fy,fx);
+ return Math.cos(angleDiff(challenger.a,t))>.2 && Math.cos(angleDiff(incumbent.a,t))>.05;
+}
 function eliminationCameraLeader(){
  const active=eliminationActive();if(!active.length)return race.player;
  const current=active.find(c=>c.id===elimCameraId);
- // During a genuine overtake the new leader gets camera authority immediately.
- // A sub-pixel tie favours the previous leader to avoid projection jitter.
- const leader=active.reduce((best,c)=>
+ let leader=active.reduce((best,c)=>
    (c.elimDistance||0)>(best.elimDistance||0)+.35?c:best,current||active[0]);
+ // If the timing projection missed a real shallow-cut pass, the camera must
+ // nevertheless follow the actual front car (not reward an illegal shortcut).
+ for(const challenger of active){if(eliminationPhysicalOvertake(challenger,leader))leader=challenger;}
  if(elimCameraId!==leader.id)elimFocusWeight=0;
  elimCameraId=leader.id;elimCameraProgress=leader.elimDistance||0;
  return leader;
@@ -3169,7 +3211,7 @@ function eliminationCameraTarget(){
  if(active.length===1){awardEliminationPoint(active[0]);return;}
  if(active.length===0){eliminationNewRound();return;}
  if(e.roundTime<ELIM_RULES_TEST.minimumRoundSeconds)return;
- const leader=active.reduce((a,b)=>(a.elimDistance||0)>(b.elimDistance||0)?a:b);
+ const leader=eliminationCameraLeader();
  const view=eliminationViewBounds(),margin=ELIM_RULES_TEST.edgeMargin;
  for(const c of active){
   c.elimProtection=Math.max(0,(c.elimProtection||0)-dt);
@@ -3229,7 +3271,7 @@ function showEliminationResults(){
  $('again').onclick=()=>openCircuitLoading('elimination');$('toMenu').onclick=mainMenu;
 }
 
-function createCar(index,p,t=0){const base=profiles[((p%profiles.length)+profiles.length)%profiles.length],pr=race&&race.mode!=='online'?ttrCalibratedProfile(base):base,pos=trackPoint(t),a=tangent(t);const n={x:-Math.sin(a),y:Math.cos(a)};let lane=index%2===0?-29:29;
+function createCar(index,p,t=0){const base=profiles[((p%profiles.length)+profiles.length)%profiles.length],pr=ttrCalibratedProfile(base),pos=trackPoint(t),a=tangent(t);const n={x:-Math.sin(a),y:Math.cos(a)};let lane=index%2===0?-29:29;
  return {id:index,profile:pr,color:index===0?pr.color:pr.color,x:pos.x+n.x*lane,y:pos.y+n.y*lane,a,speed:0,steer:0,width:pr.shape==='muscle'?39:pr.shape==='buggy'?41:pr.shape==='sport'?37:36,length:pr.shape==='muscle'?69:pr.shape==='buggy'?63:pr.shape==='sport'?67:61,boost:0,slip:0,jump:0,jumpTotal:.72,jumpCd:0,rampEntryVisual:false,claw:0,clawTarget:null,item:null,lapsCompleted:0,lastP:t,p:t,flags:[false,false,false],done:false,finishTime:null,lastCheckpoint:0,stuckTime:0,hitVX:0,hitVY:0,reverseRecovery:0,knifeCd:0,offtrack:false,offtrackSeconds:0,mode:'race',mugApexPassed:false,wheelPhase:0,hitYaw:0,impactGrace:0,variantAccent:null,variantLabel:'',variantSprite:null,auditP:mod(t,1),auditTravel:0,auditCleanTime:0,auditBridge:false,auditOutsideTime:0,oilSpin:0,oilSpinDir:1,routeStableP:mod(t,1),routePinch:null,routeResolvedNear:null};
 }
 const duplicateColourSchemes={
@@ -3318,7 +3360,8 @@ function initRace(mode){
  $('position').parentElement.querySelector('small').textContent=mode==='elimination'?'IN PISTA':t('position');
  $('lap').parentElement.querySelector('small').textContent=mode==='elimination'?'MANCHE':t('lap');
  $('hud').classList.toggle('hud-elimination',mode==='elimination');
- SND.unlock().then(ok=>{if(ok)SND.sfx('start');});SND.stopMusic();frameTime=performance.now();camX=race.player.x;camY=race.player.y;elimCameraId=null;elimFocusWeight=0;hud();
+ SND.unlock().then(ok=>{if(ok)SND.sfx('start');});SND.stopMusic();frameTime=performance.now();camX=race.player.x;camY=race.player.y;
+ elimGridCamera={x:camX,y:camY};elimCameraId=null;elimFocusWeight=0;hud();
 }
 // One recovery path for excessive shortcut, tabletop edge and blocked obstacles.
 // All recoveries are silent on the HUD; the audio cue is subtle and never prints text.
@@ -3366,8 +3409,10 @@ function junctionContinuity(c,near,oldX,oldY,dt){
       c.routePinch=null;c.routeStableP=near.p;return {near,penalty:false};
     }
     // Strong evidence from geometry + sustained actual travel, not a noisy nearest-phase projection.
-    const illegal=(pending.travel>30&&legal.distance>158&&near.distance<108) ||
-      (pending.travel>52&&pending.elapsed>.40&&legal.distance>132&&near.distance<44);
+    // Require sustained, substantial travel away from the *previous* arm:
+    // tiny inside-corner cuts must not trigger an instant teleport.
+    const illegal=(pending.travel>66&&pending.elapsed>.38&&legal.distance>185&&near.distance<105) ||
+      (pending.travel>88&&pending.elapsed>.65&&legal.distance>159&&near.distance<42);
     if(illegal)return {near:legal,penalty:true};
     c.routeStableP=legal.p;
     return {near:{...legal,shortcut:false},penalty:false,pending:true};
@@ -3502,11 +3547,13 @@ function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSes
    }
  }
  const oldX=c.x,oldY=c.y;
- c.skidVX=(c.skidVX||0)*Math.exp(-(c.slip>0?.95:6)*dt);
- c.skidVY=(c.skidVY||0)*Math.exp(-(c.slip>0?.95:6)*dt);
+ // Grip and stability govern lateral drift recovery, unlike top speed/acceleration.
+ const slideDrag=(c.slip>0?.95:5.6)*(c.profile.gripFactor||1)*(c.profile.stabilityFactor||1);
+ c.skidVX=(c.skidVX||0)*Math.exp(-slideDrag*dt);
+ c.skidVY=(c.skidVY||0)*Math.exp(-slideDrag*dt);
  c.x+=(Math.cos(c.a)*c.speed+(c.hitVX||0)+c.skidVX)*dt;
  c.y+=(Math.sin(c.a)*c.speed+(c.hitVY||0)+c.skidVY)*dt;
- const hitDrag=(c.impactGrace>0?2.65:6.0);
+ const hitDrag=(c.impactGrace>0?2.65:6.0)*(c.profile.stabilityFactor||1);
  c.hitVX=(c.hitVX||0)*Math.exp(-hitDrag*dt);c.hitVY=(c.hitVY||0)*Math.exp(-hitDrag*dt);
  c.wheelPhase=(c.wheelPhase||0)+Math.abs(c.speed)*dt/11.5;
  // v80: treat a real entrance contact as an immediate jump. Running this
@@ -3545,7 +3592,7 @@ function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSes
  // In the first two bends, the cloth is visually continuous but nearest-track
  // projection can briefly overshoot its nominal 138u centreline distance.
  // A 20u edge cushion avoids false respawns on legitimate inside racing lines.
- const protectedEarlyBend=near.p>.015&&near.p<.335&&near.distance<=158;
+ const protectedEarlyBend=near.p>.015&&near.p<.335&&near.distance<=165;
  if(protectedEarlyBend&&surface.outside)surface={outside:false,grip:surface.grip,speedFactor:surface.speedFactor};
  if(c.bridgeLandingActive&&!c.onBridge&&nearestTrack(c,points).distance<112){c.bridgeLandingActive=false;c.bridgeMissGrace=Math.max(c.bridgeMissGrace||0,1.2);c.auditP=near.p;c.auditTravel=0;c.auditOutsideTime=0;}
  const nowInside=insideTrackLoop(c,points);
@@ -3559,9 +3606,9 @@ function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSes
    // A large phase jump is NOT sufficient evidence of an illegal shortcut:
    // at adjacent hairpins, two legitimate road segments can project to widely
    // separated phases. Require verified time away from the drivable corridor.
-   c.auditOutsideTime=near.distance>158&&!near.shortcut?(c.auditOutsideTime||0)+dt:Math.max(0,(c.auditOutsideTime||0)-dt*.35);
+   c.auditOutsideTime=near.distance>196&&!near.shortcut?(c.auditOutsideTime||0)+dt:Math.max(0,(c.auditOutsideTime||0)-dt*.6);
    const suspiciousAdvance=illegalRouteGain(c.auditP??c.lastP??near.p,near.p,c.auditTravel,TRACK_LENGTH);
-   if(suspiciousAdvance&&c.auditOutsideTime>.24){
+   if(suspiciousAdvance&&c.auditOutsideTime>.47){
      recoverCar(c,'route-cut');continue;
    }
    if(near.distance<75&&!surface.outside&&c.speed>=0&&Math.cos(angleDiff(c.a,tangent(near.p)))>.38){
@@ -3613,7 +3660,7 @@ function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSes
     const recoverWide=!(c.offtrackReturnGrace>0)&&wideCornerRecovery(near.distance,c.offtrackSeconds,near.shortcut);
    // Early breakfast bend: keep legal tight lines safe, but do NOT allow a cloth-cut before the mug.
    const earlyBendAdvance=!near.shortcut&&c.offtrackEntry?K.forwardProgress(c.offtrackEntry.p,near.p):0;
-   const lenientEarlyBend=!near.shortcut&&near.p>.095&&near.p<.335&&near.distance<158&&c.offtrackSeconds<.62&&earlyBendAdvance<.072;
+   const lenientEarlyBend=!near.shortcut&&near.p>.095&&near.p<.335&&near.distance<166&&c.offtrackSeconds<.90&&earlyBendAdvance<.088;
    if(!c.onBridge&&!c.bridgeLandingActive&&!c.bridgeMissActive&&!(c.bridgeMissGrace>0)&&!(c.impactGrace>0)&&!(lenientEarlyBend||lenientJamCurve||lenientFinish)&&(penalty||recoverWide)){
      recoverCar(c,penalty?'shortcut':'wide-corner');near=nearestCourse(c,points);
    }else if(!surface.outside){
@@ -3680,7 +3727,7 @@ function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSes
    if(c===race.player)SND.sfx('oilSkid');
  }}
  // Pickup collision: a fixed 1.5× visible-box diameter (22 * 1.5 / 2).
- for(const p of race.pickups){if(p.cool>0||c.item||c.jump>0)continue;if(circleRotatedRect(p,c,p.r)){c.item=pickupType(race.mode,Math.random());p.cool=10;if(c===race.player){if(race.mode==='career'&&race.careerStats)race.careerStats.pickups++;SND.sfx('pickup');}}}
+ for(const p of race.pickups){if(p.cool>0||c.item||c.jump>0)continue;if(circleRotatedRect(p,c,p.r)){c.item=pickupType(race.mode,Math.random());p.cool=K.pickupRespawnSeconds(race.cars.length);if(c===race.player){if(race.mode==='career'&&race.careerStats)race.careerStats.pickups++;SND.sfx('pickup');}}}
  // Checkpoint and three-lap progress.
  let closest=c.routeResolvedNear||nearestCourse(c,points),pr=closest.p;c.p=pr;const oldP=c.lastP;
  if(race.mode==='elimination')eliminationProgressUpdate(c,pr,dt);
@@ -4165,18 +4212,19 @@ for(const c of race.cars){mg.fillStyle=c===race.player?'#ffdc76':'#ff766f';mg.be
 function render(){const ratio=Math.min(race?.mode==='online'&&onlineSession&&!onlineSession.host?1.38:1.65,devicePixelRatio||1);if(sw!==innerWidth||sh!==innerHeight||dpr!==ratio){sw=innerWidth;sh=innerHeight;dpr=ratio;canvas.width=Math.ceil(sw*dpr);canvas.height=Math.ceil(sh*dpr);}g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#6e4a37';g.fillRect(0,0,sw,sh);
  // Real follow camera: the circuit extends beyond the mobile viewport.
  // Keep the player just behind centre, giving sight of the upcoming corner.
- const player=race?.mode==='elimination'?(race.elim.state==='celebration'?race.cars[race.elim.winner]:eliminationCameraLeader()):race?.player,playerFalling=!!(player&&player.tableFalling>0);
+ const gridLocked=race?.mode==='elimination'&&race.elim.state==='race'&&race.countdown>0;
+ const player=race?.mode==='elimination'?(gridLocked?race.player:race.elim.state==='celebration'?race.cars[race.elim.winner]:eliminationCameraLeader()):race?.player,playerFalling=!!(player&&player.tableFalling>0);
  const look=player&&race.countdown<=0&&!playerFalling?(race?.mode==='elimination'?0:85):0;
- const groupTarget=race?.mode==='elimination'&&race.elim.state==='race'?eliminationCameraTarget():null;
- const targetX=groupTarget?groupTarget.x:player?player.x+Math.cos(player.a)*look:WORLD_W/2;
- const targetY=groupTarget?groupTarget.y:player?player.y+Math.sin(player.a)*look:WORLD_H/2;
+ const groupTarget=race?.mode==='elimination'&&race.elim.state==='race'&&!gridLocked?eliminationCameraTarget():null;
+ const targetX=gridLocked?elimGridCamera.x:groupTarget?groupTarget.x:player?player.x+Math.cos(player.a)*look:WORLD_W/2;
+ const targetY=gridLocked?elimGridCamera.y:groupTarget?groupTarget.y:player?player.y+Math.sin(player.a)*look:WORLD_H/2;
  scale=sw<sh?Math.min(.85,Math.max(.60,sh/620)):
    Math.min(.86,Math.max(.59,Math.min(sw/1140,sh/540)));
  const halfW=sw/(2*scale),halfH=sh/(2*scale);
   // Progressive catch-up replaces the old instantaneous follow=1 branch.
   const gapToTarget=Math.hypot(targetX-camX,targetY-camY);
   const response=race?.mode==='elimination'?Math.min(18,8.5+gapToTarget/92):6.4;
-  const follow=playerFalling?.23:1-Math.exp(-Math.min(.05,renderDelta)*response);
+  const follow=gridLocked?1:playerFalling?.23:1-Math.exp(-Math.min(.05,renderDelta)*response);
  camX+=(targetX-camX)*follow;camY+=(targetY-camY)*follow;
  const outerView=playerFalling?105:0;
  camX=halfW>=WORLD_W/2?WORLD_W/2:clamp(camX,halfW-outerView,WORLD_W-halfW+outerView);
@@ -4224,6 +4272,32 @@ window.addEventListener('ttr:career-close',()=>mainMenu());
 onlineWire();worldInit();window.TTRAssets?.ready.then(()=>{worldInit();if(!$('screen').hidden)drawShowroom($('menuCar'),selectedCar,'menu');if(!$('garageScreen').hidden)drawShowroom($('garageCanvas'),garagePreview,'garage');});wireMenu();boot();requestAnimationFrame(frame);
 window.TTROnlineDebug={state:()=>onlineSession?{...onlineSession,connected:onlineSocket?.readyState===1,raceMode:race?.mode,rttMs:onlineRttMs,latencySupported:onlinePingSupported,net:{...onlineNetStats},prediction:!!race?.player?.netPrediction,local:race?.player?{x:race.player.x,y:race.player.y,a:race.player.a,netX:race.player.netX,netY:race.player.netY,netA:race.player.netA}:null,controls:race?.mode==='online'&&!onlineSession.host?onlineLocalInput():null,remoteSteer:onlineSession.host?onlineRemoteInputs[1]?.steer??null:null}:null};
 window.TTREliminationDebug={state:()=>race?.elim?{mode:race.mode,round:race.elim.round,state:race.elim.state,points:[...race.elim.points],goal:race.elim.goal,active:eliminationActive().map(c=>c.id),recoveries:race.cars.map(c=>c.elimRecoveryCount||0),stalls:race.cars.map(c=>Number((c.elimStallSeconds||0).toFixed(2))),progress:race.cars.map(c=>c.elimDistance||0),cameraLeader:elimCameraId,cameraTarget:eliminationCameraTarget()}:null,knockOut:(id)=>{if(race?.mode!=='elimination')return false;return knockOutElimination(race.cars[id]);},award:(id)=>{if(race?.mode!=='elimination')return false;return awardEliminationPoint(race.cars[id]);},
+ // Visual lead must override a stalled nearest-track projection on a legal bend.
+ testPhysicalCornerCamera:()=>{
+   if(race?.mode!=='elimination'||eliminationActive().length<2)return {pass:false,reason:'Start Eliminazione first'};
+   const active=eliminationActive(),[incumbent,challenger]=active;
+   const fields=['x','y','a','speed','elimDistance','offtrack','offtrackSeconds','offtrackReturnGrace','routePinch','respawnGrace','impactGrace','onBridge','bridgeMissActive','bridgeLandingActive','tableFalling'];
+   const snapshots=active.map(c=>Object.fromEntries(fields.map(k=>[k,c[k]])));
+   const camera=[elimCameraId,elimCameraProgress,elimFocusWeight];
+   let result;
+   try{
+     active.forEach(c=>c.elimDistance=0);
+     const p=.116,pt=trackPoint(p),a=tangent(p),fx=Math.cos(a),fy=Math.sin(a),nx=-fy,ny=fx;
+     Object.assign(incumbent,{x:pt.x,y:pt.y,a,speed:170,elimDistance:100,
+       offtrack:false,offtrackSeconds:0,offtrackReturnGrace:0,routePinch:null,
+       respawnGrace:0,impactGrace:0,onBridge:false,bridgeMissActive:false,bridgeLandingActive:false,tableFalling:0});
+     Object.assign(challenger,{x:pt.x+fx*43+nx*155,y:pt.y+fy*43+ny*155,a,speed:175,elimDistance:96,
+       offtrack:true,offtrackSeconds:.28,offtrackReturnGrace:.8,routePinch:null,
+       respawnGrace:0,impactGrace:0,onBridge:false,bridgeMissActive:false,bridgeLandingActive:false,tableFalling:0});
+     const physical=eliminationPhysicalOvertake(challenger,incumbent),lead=eliminationCameraLeader();
+     result={pass:physical&&lead.id===challenger.id&&challenger.elimDistance<incumbent.elimDistance,
+       physical,leaderId:lead.id,challengerId:challenger.id,projectedDeficit:incumbent.elimDistance-challenger.elimDistance};
+   }finally{
+     active.forEach((c,i)=>fields.forEach(k=>snapshots[i][k]===undefined?delete c[k]:c[k]=snapshots[i][k]));
+     [elimCameraId,elimCameraProgress,elimFocusWeight]=camera;
+   }
+   return result;
+ },
  // A repeatable in-browser smoke test. It restores every changed car/camera field.
  testLegalCornerOvertake:()=>{
    if(race?.mode!=='elimination'||eliminationActive().length<2)return {pass:false,reason:'Start Eliminazione with two or more racers'};
@@ -4254,6 +4328,9 @@ window.TTREliminationDebug={state:()=>race?.elim?{mode:race.mode,round:race.elim
    return result;
  }};
 window.TTRDebug={
+ getPickupRespawnSeconds:(n)=>K.pickupRespawnSeconds(n),
+ getPickupCooldowns:()=>race?.pickups.map(p=>p.cool),
+ getPhysicsProfiles:()=>profiles.map(pr=>({id:pr.id,...ttrCalibratedProfile(pr)})),
  getMenuClock:()=>({clock,phase:clock%TTRShowroom60.menuCycleSeconds,menuVisible:!$('screen').hidden,cycle:TTRShowroom60.menuCycleSeconds,hopPixels:TTRShowroom60.hopPixels}),
  testMilkCupCollision:()=>{
     const bowl=props.find(o=>o.type==='milk_cereal_cup');if(!bowl)return {pass:false,reason:'cup not found'};
@@ -4323,7 +4400,7 @@ window.TTRDebug={
  c.lastValidPosition={x:c.x,y:c.y,p:.32,a:c.a,speed:60,laps:c.lapsCompleted,flags:c.flags.slice()};
  race.countdown=0;race.oils=[{x:c.x,y:c.y,r:34,t:9,owner:1,phase:0}];return true;},
  getCerealSpills:()=>milkCerealSpills.map(p=>({x:p.x,y:p.y,rx:p.rx,ry:p.ry,shape:p.spillShape,roadDistance:nearestCourse(p,points).distance})),
- getEliminationCamera:()=>({leaderId:elimCameraId,focusWeight:elimFocusWeight,camera:{x:camX,y:camY}}),
+ getEliminationCamera:()=>({leaderId:elimCameraId,focusWeight:elimFocusWeight,camera:{x:camX,y:camY},gridLocked:race?.mode==='elimination'&&race.countdown>0}),
  testEliminationCameraSetup:(gap=55)=>{
   if(!race||race.mode!=='elimination')return false;
   // Deterministic frozen-grid camera diagnostic (available only via TTRDebug).
@@ -4376,7 +4453,7 @@ window.TTRDebug={
  c.lastValidPosition={x:safe.x,y:safe.y,a:tangent(from),p:from,laps:c.lapsCompleted,flags:c.flags.slice()};
  c.auditP=from;c.auditTravel=350;c.auditCleanTime=0;c.x=pos.x;c.y=pos.y;c.p=from;c.lastP=from;c.a=tangent(to);c.speed=0;c.offtrack=false;c.respawnGrace=0;race.countdown=0;
  const before=c.shortcutRespawns||0;update(1/60);return {before,after:c.shortcutRespawns||0,phase:c.p,expectedPhase:from};
-},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.80',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
+},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.83',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
 })();
 
 
