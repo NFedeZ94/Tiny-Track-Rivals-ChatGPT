@@ -1,0 +1,61 @@
+
+
+/* v0.13.6.61 — five consistent retro menu glyphs (CSS mask, no emoji).
+   Restrict to these five buttons; Garage/Options and all other screens stay unchanged. */
+#screen.v11-screen .v11-options .retro-option{padding-right:clamp(31px,5vw,43px)!important;}
+#screen.v11-screen .v11-options .retro-option:nth-child(-n+5)::after{
+ content:'';position:absolute;right:clamp(6px,1.5vw,12px);top:50%;
+ width:clamp(18px,3.9vh,25px);height:clamp(18px,3.9vh,25px);
+ transform:translateY(-50%);display:block;opacity:.95;
+ background-color:currentColor;pointer-events:none;
+ -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+ -webkit-mask-position:center;mask-position:center;
+ -webkit-mask-size:contain;mask-size:contain;
+ filter:none;
+}
+#screen.v11-screen .v11-options .retro-option:nth-child(-n+5):not(.selected){color:#fff0b4;}
+#screen.v11-screen .v11-options .retro-option:nth-child(-n+5).selected{color:#152451;}
+@media(max-width:620px) and (orientation:landscape){
+ #screen.v11-screen .v11-options .retro-option{padding-right:28px!important;}
+ #screen.v11-screen .v11-options .retro-option:nth-child(-n+5)::after{right:6px;width:18px;height:18px;}
+}
+@media(prefers-reduced-motion:reduce){
+ /* The existing menu canvas renderer handles the preference; no CSS motion here. */
+ #screen.v11-screen #menuCar{animation:none!important;}
+}
+#screen.v11-screen .v11-options #careerBtn::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%204h8v4c0%203-2%205-4%205s-4-2-4-5V4Z%22%2F%3E%3Cpath%20d%3D%22M8%206H5v2a4%204%200%200%200%204%204M16%206h3v2a4%204%200%200%201-4%204M12%2013v4M8%2020h8M9%2017h6v3H9z%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M8%204h8v4c0%203-2%205-4%205s-4-2-4-5V4Z%22%2F%3E%3Cpath%20d%3D%22M8%206H5v2a4%204%200%200%200%204%204M16%206h3v2a4%204%200%200%201-4%204M12%2013v4M8%2020h8M9%2017h6v3H9z%22%2F%3E%3C%2Fsvg%3E");}
+#screen.v11-screen .v11-options #raceBtn::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2021V3%22%2F%3E%3Cpath%20d%3D%22M5%204h14v11H5%22%2F%3E%3Cpath%20d%3D%22M5%204h4v4H5zm8%200h4v4h-4zM9%208h4v4H9zm8%200h2v4h-2zM5%2012h4v3H5zm8%200h4v3h-4z%22%20fill%3D%22currentColor%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%2021V3%22%2F%3E%3Cpath%20d%3D%22M5%204h14v11H5%22%2F%3E%3Cpath%20d%3D%22M5%204h4v4H5zm8%200h4v4h-4zM9%208h4v4H9zm8%200h2v4h-2zM5%2012h4v3H5zm8%200h4v3h-4z%22%20fill%3D%22currentColor%22%20stroke%3D%22none%22%2F%3E%3C%2Fsvg%3E");}
+#screen.v11-screen .v11-options #trialBtn::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2213%22%20r%3D%228%22%2F%3E%3Cpath%20d%3D%22M9%202h6M12%202v3M18.5%206.5%2020%205M12%209v4l-3%202%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2213%22%20r%3D%228%22%2F%3E%3Cpath%20d%3D%22M9%202h6M12%202v3M18.5%206.5%2020%205M12%209v4l-3%202%22%2F%3E%3C%2Fsvg%3E");}
+#screen.v11-screen .v11-options #eliminationBtn::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M7%203h10l4%204v10l-4%204H7l-4-4V7z%22%2F%3E%3Cpath%20d%3D%22m9%209%206%206M15%209l-6%206%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M7%203h10l4%204v10l-4%204H7l-4-4V7z%22%2F%3E%3Cpath%20d%3D%22m9%209%206%206M15%209l-6%206%22%2F%3E%3C%2Fsvg%3E");}
+#screen.v11-screen .v11-options #onlineBtn::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M3%2012h18M12%203c-3%203-4%206-4%209s1%206%204%209M12%203c3%203%204%206%204%209s-1%206-4%209M5%207h14M5%2017h14%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22currentColor%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%229%22%2F%3E%3Cpath%20d%3D%22M3%2012h18M12%203c-3%203-4%206-4%209s1%206%204%209M12%203c3%203%204%206%204%209s-1%206-4%209M5%207h14M5%2017h14%22%2F%3E%3C%2Fsvg%3E");}
+
+/* v62: genuine garage shutter and settings gear; same monochrome mask treatment as modes. */
+#screen.v11-screen .v11-options .retro-option:nth-child(n+6)::after{
+ content:'';position:absolute;right:clamp(6px,1.5vw,12px);top:50%;
+ width:clamp(18px,3.9vh,25px);height:clamp(18px,3.9vh,25px);
+ transform:translateY(-50%);display:block;opacity:.95;
+ background-color:currentColor;pointer-events:none;
+ -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+ -webkit-mask-position:center;mask-position:center;
+ -webkit-mask-size:contain;mask-size:contain;
+}
+#screen.v11-screen .v11-options #garageBtn::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.05%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3.5%2021V9L12%203.5%2020.5%209v12%22%2F%3E%3Cpath%20d%3D%22M6%2021V10.5h12V21%22%2F%3E%3Cpath%20d%3D%22M7%2013.5h10M7%2016.5h10M7%2019.5h10%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.05%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3.5%2021V9L12%203.5%2020.5%209v12%22%2F%3E%3Cpath%20d%3D%22M6%2021V10.5h12V21%22%2F%3E%3Cpath%20d%3D%22M7%2013.5h10M7%2016.5h10M7%2019.5h10%22%2F%3E%3C%2Fsvg%3E");}
+#screen.v11-screen .v11-options #settingsBtn::after{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10%202h4l.6%202.2a8%208%200%200%201%201.9.8l2-1.1%202.8%202.8-1.1%202a8%208%200%200%201%20.8%201.9l2.2.6v4l-2.2.6a8%208%200%200%201-.8%201.9l1.1%202-2.8%202.8-2-1.1a8%208%200%200%201-1.9.8L14%2024h-4l-.6-2.2a8%208%200%200%201-1.9-.8l-2%201.1-2.8-2.8%201.1-2a8%208%200%200%201-.8-1.9L1%2014.8v-4l2.2-.6A8%208%200%200%201%204%208.3l-1.1-2%202.8-2.8%202%201.1a8%208%200%200%201%201.9-.8L10%202Z%22%20transform%3D%22translate%281%20.2%29%20scale%28.91%29%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212.3%22%20r%3D%223.1%22%2F%3E%3C%2Fsvg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10%202h4l.6%202.2a8%208%200%200%201%201.9.8l2-1.1%202.8%202.8-1.1%202a8%208%200%200%201%20.8%201.9l2.2.6v4l-2.2.6a8%208%200%200%201-.8%201.9l1.1%202-2.8%202.8-2-1.1a8%208%200%200%201-1.9.8L14%2024h-4l-.6-2.2a8%208%200%200%201-1.9-.8l-2%201.1-2.8-2.8%201.1-2a8%208%200%200%201-.8-1.9L1%2014.8v-4l2.2-.6A8%208%200%200%201%204%208.3l-1.1-2%202.8-2.8%202%201.1a8%208%200%200%201%201.9-.8L10%202Z%22%20transform%3D%22translate%281%20.2%29%20scale%28.91%29%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212.3%22%20r%3D%223.1%22%2F%3E%3C%2Fsvg%3E");}
+/* Animate the white selector arrow itself, never the menu text/button. */
+#screen.v11-screen .v11-options .retro-option.selected::before,
+#screen.v11-screen .v11-options .retro-option:focus-visible::before{
+ content:'➜';display:block;left:3px;top:50%;
+ animation:ttrV62SelectorArrow .7s ease-in-out infinite!important;
+ will-change:transform,opacity;
+}
+@keyframes ttrV62SelectorArrow{
+ 0%,100%{transform:translate3d(0,-50%,0) scale(1);opacity:.85}
+ 50%{transform:translate3d(7px,-50%,0) scale(1.09);opacity:1}
+}
+@media(max-width:620px) and (orientation:landscape){
+ #screen.v11-screen .v11-options .retro-option:nth-child(n+6)::after{right:6px;width:18px;height:18px;}
+}
+@media(prefers-reduced-motion:reduce){
+ #screen.v11-screen .v11-options .retro-option.selected::before,
+ #screen.v11-screen .v11-options .retro-option:focus-visible::before{animation:none!important;transform:translateY(-50%);}
+}

@@ -1,0 +1,12 @@
+TINY TRACK RIVALS — VERSIONE 0.13.6.86 — 22 novembre 2026
+BASE: v0.13.6.85. Asset, veicoli, fisica, rete e circuito conservati.
+
+MODIFICHE MODALITÀ ELIMINAZIONE
+1) Ripartenza dopo punto: nuova zona di sicurezza per rampa del toast e coltello vicino alla marmellata. Le auto ripartono sufficientemente prima del salto per prendere velocità e scegliere una traiettoria; nessuna griglia in mezzo alla zona di decollo o atterraggio. Se la posizione ideale è occupata, cerca prima una posizione arretrata sicura. La partenza iniziale resta invariata.
+2) Telecamera: il progresso reale sul tracciato determina chi è in testa. Sorpassi validi in curva restano possibili, ma scarti laterali/verticali e proiezioni instabili non bastano per cambiare subito leader: breve conferma temporale e smorzamento movimento. Non si modifica la camera delle gare veloci.
+3) Eliminazioni: temporizzatore indipendente per ciascuna vettura oltre il bordo reale dell'immagine; un distacco importante non è bloccato dalla stabilizzazione della lente o dalla protezione del respawn; cambio leader non azzera il tempo fuori schermo; più eliminazioni simultanee restano possibili.
+
+COLLAUDI
+- Controllo sintattico di tutti gli script e controllo automatico del posizionamento delle griglie. Test di logica aggiuntivi disponibili nella console: TTREliminationDebug.testJumpRestartGrid().
+- Valutare anche su iPhone/Android in verticale e orizzontale: frenata/salto presso coltello, rampa e limite inquadratura.
+- Sostituisce solo i file della build, non pubblica automaticamente su GitHub Pages.

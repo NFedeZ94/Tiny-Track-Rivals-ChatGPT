@@ -1,0 +1,611 @@
+
+
+:root{color-scheme:dark;--cyan:#60d9ff;--yellow:#ffd55d;--ink:#071326;--line:#345577;--orange:#f39b43}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#081324;color:#f0f7ff;font-family:system-ui,-apple-system,'Arial Black',sans-serif;touch-action:none;user-select:none}#game{position:fixed;inset:0;width:100vw;height:100dvh;display:block;background:#7a5842}.screen{position:absolute;inset:0;z-index:8;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,rgba(3,10,24,.94),rgba(8,36,62,.84)),repeating-linear-gradient(45deg,#061b2b 0 35px,#122b43 35px 70px);padding:12px;overflow:auto;touch-action:pan-y}.panel{width:min(840px,100%);border:2px solid #5092bc;border-radius:22px;background:linear-gradient(170deg,#162f4e,#0a1a30 80%);box-shadow:0 18px 70px #000a,inset 0 0 35px #23688d22;padding:clamp(18px,4vw,40px);max-height:calc(100dvh - 24px);overflow-y:auto}.panel.resultsPanel{width:min(760px,100%);padding:clamp(16px,3vw,26px)}.panel.resultsPanel.compact{width:min(800px,100%);padding:16px 18px;overflow:hidden}.eyebrow{font-size:11px;letter-spacing:.2em;color:#86dfff;font-weight:850;margin:0 0 10px;text-transform:uppercase}.logo{font-weight:1000;font-style:italic;font-size:clamp(35px,8vw,83px);letter-spacing:-.055em;line-height:.94;color:#ffd054;text-shadow:3px 4px 0 #9f3c24,7px 8px 0 #06111e}.logo span{display:block;color:#fff;font-size:.48em;letter-spacing:.08em;text-shadow:3px 4px 0 #385a76}.sub{color:#bed1e2;line-height:1.45;font-size:14px;max-width:680px;margin:16px 0 22px}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.chip{padding:7px 10px;border-radius:99px;border:1px solid #446b86;background:#102e4b;color:#c8e2f8;font-size:12px;font-weight:700}.menu-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:20px}.resultsPanel .menu-row{margin-top:14px}.btn{touch-action:manipulation;border:2px solid #eccd76;border-radius:13px;background:linear-gradient(#fff3a5,#f5b73f);box-shadow:0 4px 0 #ab5d1f;color:#17203a;font-size:15px;font-weight:950;padding:13px 22px;cursor:pointer;text-align:center;min-height:48px}.btn.secondary{background:linear-gradient(#20466a,#123250);color:#e5f5ff;border-color:#5293b8;box-shadow:0 4px 0 #07182b}.btn:active{transform:translateY(3px);box-shadow:none}.settings{display:flex;flex-wrap:wrap;gap:14px;margin-top:19px}.settings label{display:flex;flex-direction:column;gap:5px;color:#add7ef;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.settings select{font-size:15px;background:#102943;color:#fff;border:1px solid #497ca2;padding:10px;border-radius:9px;min-width:130px}.note{font-size:12px;color:#a9c1d2;line-height:1.55;margin:17px 0 0}.resultTitle{font-size:clamp(28px,5vw,45px);font-weight:950;color:#ffe17d;margin:0 0 14px}.results{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}.results td{border-bottom:1px solid #3b5972;padding:8px 4px;vertical-align:middle}.results tr.me{color:#ffe395;font-weight:850}.results.compact{font-size:12px}.results.compact td{padding:5px 3px}.results td:first-child{width:44px}.resultSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin:10px 0 14px}.resultCard{border:1px solid #36617d;background:#0b1f36;border-radius:12px;padding:8px 10px}.resultCard b{display:block;color:#8fe5fd;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}.variantDot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:7px;vertical-align:-1px;border:1px solid #ffffff99;box-shadow:0 0 0 1px #0a1325}#hud{position:fixed;inset:0;pointer-events:none;z-index:4;display:none}.hudTop{position:absolute;left:8px;right:8px;top:max(7px,env(safe-area-inset-top));display:flex;align-items:flex-start;justify-content:space-between;gap:5px}.statBlock{border:1px solid #3f829e;background:#071831df;border-radius:10px;padding:8px 11px;box-shadow:0 3px 0 #0008;min-width:82px}.statBlock small{font-size:9px;display:block;color:#8ce3ff;font-weight:850;letter-spacing:.08em}.statBlock strong{font-size:clamp(15px,2.8vw,23px);color:#fff}.itemBlock{border-color:#b78b41}.itemBlock strong{color:#ffde79}#hint{position:absolute;left:50%;top:23%;transform:translate(-50%,-50%);background:#04172bcf;border:1px solid #6bc9e8;color:#fff;font-size:clamp(17px,4vw,33px);font-weight:950;border-radius:12px;padding:12px 19px;text-align:center;opacity:0;transition:opacity .15s;white-space:nowrap}#hint.show{opacity:1}#controls{position:fixed;z-index:5;bottom:max(10px,env(safe-area-inset-bottom));left:10px;right:10px;display:none;pointer-events:none;justify-content:space-between;gap:10px}.ctrlGroup{display:flex;align-items:end;gap:8px;pointer-events:none}.control{border:2px solid #b1d7ef;background:linear-gradient(155deg,#214666d9,#07192de6);color:#fff;box-shadow:inset 0 1px 8px #ffffff25,0 4px 0 #010711bd;border-radius:18px;width:clamp(52px,12vw,76px);height:clamp(56px,14vw,81px);font-size:28px;font-weight:950;touch-action:none;pointer-events:auto;display:flex;align-items:center;justify-content:center}.control.small{font-size:14px;width:clamp(56px,12vw,72px);color:#ffdb7c}.control.active{background:#eabf52;color:#0a1c28;transform:translateY(3px);box-shadow:0 1px #010711}.hudBottom{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);font-size:10px;white-space:nowrap;color:#e3f5ff;background:#071c30bd;padding:5px 10px;border-radius:8px}#pauseBtn{pointer-events:auto;position:absolute;right:9px;top:calc(63px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:8px 13px}#mini{position:absolute;top:calc(70px + env(safe-area-inset-top));left:10px;width:140px;height:90px;background:#071b2acb;border:1px solid #417fa8;border-radius:8px}#orientation{display:none;position:fixed;inset:auto 20px 100px;z-index:3;text-align:center;color:#f5f9ff;font-size:11px;opacity:.8}#muteBtn{pointer-events:auto;position:absolute;right:9px;top:calc(101px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:7px 11px}@media(orientation:portrait){#mini{width:96px;height:64px;top:calc(68px + env(safe-area-inset-top))}#pauseBtn{top:calc(68px + env(safe-area-inset-top))}#muteBtn{top:calc(105px + env(safe-area-inset-top))}#orientation{display:block}.hudBottom{bottom:99px;font-size:9px}.control{height:62px;width:58px}.control.small{width:57px}}@media(max-height:500px){.panel{padding:15px}.sub{margin:7px 0}.menu-row{margin-top:8px}.settings{margin-top:8px}.note{margin-top:9px}.control{height:58px}.hudBottom{display:none}#mini{top:calc(58px + env(safe-area-inset-top))}}
+
+@media(max-width:1000px){.hudBottom{display:none}}
+/* ==== RETRO ARCADE UI v0.2 ==== */
+[hidden]{display:none!important}
+html,body{background:#221b27}#game{background:#d8c29b}
+.screen{background:radial-gradient(circle at 12% 22%,#29416aef,transparent 44%),linear-gradient(135deg,#10172ff5,#071223f7 74%);padding:8px}
+.panel{position:relative;background:linear-gradient(148deg,#1b385d,#07172d 78%);border:2px solid #58cce9;border-radius:11px;box-shadow:0 0 0 4px #07101be9,0 14px 50px #0009,inset 0 0 30px #59c9fb20;max-height:calc(100dvh - 16px);width:min(990px,100%);padding:18px;overflow:auto}
+.flag-tape{height:8px;position:absolute;top:0;left:0;right:0;background:conic-gradient(#e5e2d8 25%,#112640 0 50%,#e5e2d8 0 75%,#112640 0) 0 0/22px 22px}
+.logo-mark{font-family:system-ui,'Arial Black',sans-serif;font-weight:1000;font-style:italic;transform:skew(-8deg);text-shadow:3px 4px 0 #050d21,5px 6px 0 #0009;line-height:.88;filter:drop-shadow(0 7px 0 #6d2117)}
+.logo-tiny{display:block;color:#f7faff;font-size:clamp(21px,4.7vw,44px);letter-spacing:-.06em;-webkit-text-stroke:1px #122e50}.logo-rivals{display:block;color:#ffe262;font-size:clamp(33px,7.5vw,71px);letter-spacing:-.07em;-webkit-text-stroke:1.3px #8c301b}
+.menu-grid{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);gap:20px;align-items:start;margin-top:7px}.hero-side{display:flex;flex-direction:column;gap:8px;align-items:flex-start;min-width:0}.hero-side .eyebrow{margin:2px 0 3px}.menu-tagline{font-size:12px;color:#e1f4fc;margin:1px 0 0;font-weight:800;letter-spacing:.03em}
+#menuCar{width:100%;max-height:146px;object-fit:contain;background:linear-gradient(155deg,#253e53,#091c31);border:2px solid #3b7096;border-radius:12px}.hero-tag{width:100%;border:1px solid #8d6d38;background:linear-gradient(90deg,#a92e25,#6d1818);border-radius:6px;color:#fff;padding:8px 11px;font-size:12px;box-shadow:0 3px 0 #27121c;display:flex;gap:10px;align-items:center}.hero-tag b{color:#ffe88b;font-size:18px}.hero-tag em{margin-left:auto;color:#ffe18b;font-size:10px}
+.menu-side{min-width:0}.menu-mini-title{color:#83dfff;font-size:12px;font-weight:950;letter-spacing:.16em;margin:0 0 10px}.menu-buttons{display:grid;gap:9px}.btn{border:2px solid #fff0a6;border-radius:7px;background:linear-gradient(#fffaac,#f3b739 68%,#b75d20);box-shadow:inset 0 2px #ffffffad,0 5px 0 #6c2b16,0 7px 12px #0009;transform:translateY(0);transition:transform .12s,filter .12s;font-weight:1000;letter-spacing:.06em;color:#182336;padding:11px 16px}.btn:hover{filter:brightness(1.15)}.btn:active{transform:translateY(3px);box-shadow:inset 0 1px #fff9,0 1px 0 #6c2b16}.btn.secondary{background:linear-gradient(#e7edf7,#5a9bcc 65%,#1b4e87);border-color:#a5e5ff;color:#061c37;box-shadow:inset 0 2px #fff8,0 5px 0 #17365b}.btn.blue{background:linear-gradient(#a2e4ff,#2b9fdf 62%,#1065a5);border-color:#b9f4ff;color:#052041;box-shadow:inset 0 2px #fff8,0 5px 0 #16416b}.btn-big{display:block;text-align:left;width:100%;min-height:43px;font-size:15px}.menu-settings{border:1px solid #427ea5;padding:7px 9px;background:#041a33a3;border-radius:7px;margin-top:12px}.menu-settings summary{font-size:12px;color:#9cdbff;font-weight:850;cursor:pointer;letter-spacing:.05em;list-style:none}.menu-settings summary::-webkit-details-marker{display:none}.settings{margin:9px 0 0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.settings label{font-size:10px}.settings select{width:100%;min-width:0;padding:7px 6px;font-size:13px;background:#0d2946}.menu-footer{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-top:14px}.mini-btn{border:1px solid #477897;border-radius:6px;background:#152c4b;color:#d8f5ff;font-size:11px;padding:6px 10px;cursor:pointer}.prototype-label{margin-left:auto;color:#b8d3e5;font-size:10px;font-weight:800}
+.splash-overlay{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,#24416d 0,#07142c 80%);text-align:center;overflow:hidden}.splash-overlay:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(-32deg,transparent 0 43px,#ffffff08 44px 86px);animation:movebg 8s linear infinite}@keyframes movebg{to{background-position:500px 0}}.splash-inner{position:relative;width:min(520px,86vw)}.splash-inner .logo-tiny{font-size:clamp(35px,7vw,64px)}.splash-inner .logo-rivals{font-size:clamp(60px,13vw,117px)}.wheel-icon{font-size:55px;color:#ffe477;animation:wheelspin 1.2s linear infinite;margin:20px 0 7px;text-shadow:0 0 14px #ff8b49}@keyframes wheelspin{to{transform:rotate(360deg)}}.loader-rail{display:none}.loader-fill{height:100%;width:3%;background:repeating-linear-gradient(90deg,#f8cc4c 0 18px,#ec6a26 18px 36px);transition:width .32s}.loading-copy{display:none;color:#c7eafa;font-size:12px;font-weight:900;letter-spacing:.14em}.flag-stripe{display:block;height:9px;background:conic-gradient(#fff 25%,#152b4e 0 50%,#fff 0 75%,#152b4e 0) 0 0/20px 20px;margin-top:16px}
+.lang-panel{width:min(590px,100%);text-align:center;padding:25px}.small-logo .logo-tiny{font-size:27px}.small-logo .logo-rivals{font-size:43px}.lang-panel .eyebrow{margin-top:25px;font-size:10px}.lang-head{font-size:23px;color:#fff;margin:6px 0 20px}.language-options{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}.language-btn{font-size:14px;min-width:135px}
+.orientation-overlay{display:none;position:fixed;inset:0;z-index:99;background:linear-gradient(150deg,#07172df8,#164269fa);align-items:center;justify-content:center;flex-direction:column;text-align:center;color:#fff;padding:22px;gap:10px}.orientation-overlay h2{font-size:clamp(24px,8vw,44px);margin:8px 0 6px;color:#ffe073}.orientation-overlay p{font-size:15px;color:#c8eafa;max-width:320px;margin:0}.rotate-phone{font-size:100px;line-height:1;transform:rotate(-20deg);color:#99e9ff;position:relative;display:inline-flex;align-items:center;justify-content:center;width:128px;height:128px;margin-bottom:6px;animation:tilt 2s ease-in-out infinite}.rotate-phone::before,.rotate-phone::after{content:"";position:absolute;top:50%;width:28px;height:28px;border-top:4px solid #ffcc71;border-right:4px solid #ffcc71;opacity:.95}.rotate-phone::before{left:-14px;transform:translateY(-50%) rotate(-135deg)}.rotate-phone::after{right:-14px;transform:translateY(-50%) rotate(45deg)}.rotate-phone span{position:absolute;bottom:-6px;right:-36px;color:#ffcc71;font-size:52px;background:rgba(7,23,45,.52);padding:2px 8px;border-radius:999px}@keyframes tilt{50%{transform:rotate(90deg)}}@media(orientation:portrait){.orientation-overlay{display:flex!important}}
+.garage-panel{width:min(1030px,100%)}.garage-header{display:flex;justify-content:space-between;align-items:center;gap:18px}.garage-header h2{margin:0;color:#ffe386;font-size:clamp(22px,4vw,39px);font-style:italic}.garage-layout{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(220px,1fr);gap:17px;margin-top:12px}.garage-stage{border:1px solid #386d9b;border-radius:9px;padding:8px;background:linear-gradient(#23405d,#0a1b30)}#garageCanvas{width:100%;height:clamp(130px,28vh,200px);border-radius:8px;background:#112a43}.garage-specs h3{font-size:24px;color:#ffe070;margin:6px 0}.garage-specs p{font-size:11px;color:#c7e6f6;margin:3px 0 10px}.garage-stats{display:grid;grid-template-columns:105px 1fr 24px;gap:5px;align-items:center;font-size:10px;margin:5px 0}.garage-stats .rail{height:8px;background:#0b1c30;border-radius:4px;overflow:hidden}.garage-stats .rail b{display:block;height:100%;background:linear-gradient(90deg,#f86638,#ffde70)}.garage-list{display:flex;flex-direction:column;gap:9px}.car-choice-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.car-choice{border:2px solid #3c7aa0;background:linear-gradient(#244564,#102e48);border-radius:8px;padding:8px;text-align:left;color:#fff;min-height:57px;font-size:13px;cursor:pointer}.car-choice.active{border-color:#ffdc75;background:#63451e}.car-choice small{display:block;font-size:10px;color:#9bc0d7}.garage-lock{padding:9px;background:#0b1c31;border:1px dashed #577590;border-radius:7px;display:flex;flex-direction:column;gap:3px;color:#bcd8ec;font-size:11px}.garage-list>.btn{width:100%;margin-top:auto}
+@media(max-height:520px){.panel{padding:12px}.menu-grid{gap:14px}.menu-buttons{gap:6px}.btn-big{min-height:39px;padding:8px 11px;font-size:13px}.logo-tiny{font-size:26px}.logo-rivals{font-size:42px}.hero-side{gap:4px}#menuCar{max-height:112px}.menu-footer{margin-top:8px}.menu-mini-title{margin-bottom:6px}.garage-header h2{font-size:24px}.garage-layout{margin-top:6px}.garage-panel #garageCanvas{height:125px}.garage-specs h3{font-size:17px}.garage-specs p{display:none}.garage-stats{margin:2px 0}.garage-list{gap:6px}.car-choice{min-height:47px}.language-btn{padding:8px 14px}}
+@media(max-width:620px) and (orientation:landscape){.menu-grid{grid-template-columns:.85fr 1.15fr}.hero-side .menu-tagline{display:none}.menu-footer{margin-top:4px}.garage-layout{grid-template-columns:1fr 1fr}}
+
+.splash-emblem{height:87px;width:185px;margin:20px auto 9px;filter:drop-shadow(0 9px 7px #0009);animation:emblembounce 2.6s ease-in-out infinite}.splash-emblem svg{height:100%;width:100%}@keyframes emblembounce{50%{transform:translateY(-6px)}}
+
+/* v0.5: Safari must never treat steering as text selection, zoom, or callout. */
+#controls,#controls *, .control{touch-action:none!important;-webkit-touch-callout:none!important;-webkit-user-select:none!important;user-select:none!important;overscroll-behavior:none!important;outline:none;-webkit-tap-highlight-color:transparent;}
+.control:focus,.control:focus-visible{outline:none;}
+#controls{isolation:isolate;}
+
+/* v0.6: accessible iOS audio unlock, no text selection while racing. */
+html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!important;user-select:none!important;-webkit-touch-callout:none!important;-webkit-tap-highlight-color:transparent;}
+#game,#hud,#controls{touch-action:none;overscroll-behavior:none;}
+#game{pointer-events:none;}
+.enter-game{display:block;margin:16px auto 5px;max-width:95%;font-size:clamp(11px,2.6vw,17px);box-shadow:0 0 20px #f6d45e80;animation:enterpulse 1.6s ease-in-out infinite}
+.enter-game[hidden]{display:none!important}@keyframes enterpulse{50%{filter:brightness(1.18);box-shadow:0 0 28px #f6d45ecc}}
+.audio-status{font-size:10px;color:#ffe69d;font-weight:700;min-width:70px}
+.audio-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 12px;margin-top:12px;border-top:1px solid #396584;padding-top:8px}
+.audio-settings label{display:flex;align-items:center;gap:8px;font-size:10px;color:#d8f2ff}
+.audio-settings label span{min-width:76px}.audio-settings input{width:100%;min-width:55px;accent-color:#ffe176;touch-action:pan-x}
+@media(max-height:470px){.audio-settings{gap:3px 8px;margin-top:5px}.audio-settings label{font-size:9px}}
+
+/* v0.7: authentic retro selection-screen grammar, original branding and artwork. */
+.retro-screen{background-color:#292a70;background-image:linear-gradient(0deg,rgba(12,18,70,.46),rgba(12,18,70,.46)),conic-gradient(#6265b5 25%,#222967 0 50%,#6265b5 0 75%,#222967 0);background-size:auto,104px 104px;animation:retroCheckers 15s linear infinite;align-items:center;overflow:auto;padding:7px}
+@keyframes retroCheckers{to{background-position:0 0,104px 0}}
+.retro-shell{position:relative;width:min(960px,99%);min-height:min(95dvh,470px);padding:8px clamp(10px,3vw,30px) 10px;border:5px solid #152257;box-shadow:0 0 0 2px #8795e7,0 0 0 6px #12183c,0 18px 0 #04082799;background:linear-gradient(145deg,#272778d9,#4246a5e6);overflow:visible}
+.retro-shell:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.12;background:repeating-linear-gradient(0deg,#fff 0 2px,transparent 3px 5px)}
+.retro-topline{display:flex;justify-content:space-between;color:#b9c9f7;font-size:8px;font-weight:900;letter-spacing:.13em;position:relative}
+.retro-head{position:relative;display:flex;justify-content:center;align-items:center;min-height:107px}
+.retro-logo{font-family:Impact,system-ui,sans-serif;font-weight:1000;text-align:center;font-style:italic;transform:skew(-8deg);line-height:.85;filter:drop-shadow(5px 7px 0 #060b30);animation:retroLogo 2.8s ease-in-out infinite}
+.retro-logo-top{display:block;color:#f6ffff;font-size:clamp(22px,4.8vw,43px);letter-spacing:-.04em;-webkit-text-stroke:1.8px #163461;text-shadow:3px 3px #11578a}
+.retro-logo-main{display:block;color:#ffe243;font-size:clamp(38px,8vw,75px);letter-spacing:-.07em;-webkit-text-stroke:2px #c63d2a;text-shadow:2px 3px #b82822,5px 6px #051a47}
+.retro-flag{position:absolute;right:5%;top:40%;color:#eaf2ff;font-size:27px;text-shadow:3px 3px #091244;letter-spacing:-.08em}
+@keyframes retroLogo{50%{transform:skew(-8deg) translateY(-3px)}}
+.retro-prompt{position:relative;text-align:center;margin:4px 0 10px;font-family:Georgia,serif;font-weight:900;color:#ffe98c;font-size:clamp(15px,3.1vw,23px);letter-spacing:.13em;text-shadow:2px 2px 0 #201a50}
+.retro-body{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.87fr);gap:clamp(12px,5vw,58px);align-items:center;margin:2px auto 5px;width:95%}
+.retro-options{display:flex;flex-direction:column;gap:8px;align-items:stretch}
+.retro-option{font-family:Georgia,'Times New Roman',serif;position:relative;display:block;width:100%;text-align:left;border:0;background:transparent;padding:5px 6px 5px 27px;font-size:clamp(16px,3.2vw,27px);font-weight:1000;color:#f5d76d;text-shadow:2px 2px #16143d;letter-spacing:.015em;white-space:nowrap;line-height:1.13;touch-action:manipulation;cursor:pointer;transition:filter .12s,transform .12s}
+.retro-option:before{content:'➜';display:none;position:absolute;left:0;top:50%;transform:translateY(-50%);color:#fafafa;text-shadow:1px 1px #101537;font-size:1.07em}
+.retro-option.selected:before,.retro-option:focus-visible:before{display:block;animation:arrowBounce .55s steps(2,end) infinite}
+.retro-option.selected{filter:brightness(1.18);color:#fff4a7;transform:translateX(2px)}
+.retro-option:focus-visible{outline:2px dashed #ffeb9b;outline-offset:1px}
+@keyframes arrowBounce{50%{left:4px}}
+.retro-portrait{width:100%;max-width:380px;min-width:0;justify-self:end;filter:drop-shadow(5px 5px #11184a)}
+.retro-car-frame{position:relative;aspect-ratio:1.55;border:8px solid #f3f4e1;outline:5px solid #10112d;background:#091635;box-shadow:inset 0 0 30px #0008;overflow:hidden}
+.retro-car-photo{width:100%;height:100%;display:block;object-fit:cover;animation:retroCarBreathe 6.6s ease-in-out infinite;filter:saturate(1.15)}
+.retro-car-sheen{position:absolute;inset:0;background:linear-gradient(120deg,transparent 40%,#ffffff25 50%,transparent 60%);transform:translateX(-130%);animation:retroShine 4.8s ease-in-out infinite;pointer-events:none}
+.retro-car-caption{text-align:center;color:#fff6bc;font-weight:900;letter-spacing:.09em;font-size:11px;padding-top:8px;text-shadow:1px 2px #11143c}
+@keyframes retroCarBreathe{50%{transform:scale(1.09) translateY(-1%)}}
+@keyframes retroShine{42%,100%{transform:translateX(130%)}}
+.retro-bottom{position:relative;margin-top:12px;border-top:2px solid #b8baff77;padding-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.retro-utilities{display:flex;gap:8px;flex-wrap:wrap}
+.retro-bottom .mini-btn{border:2px solid #949bd8;background:#18246c;color:#faf8cb;border-radius:0;font-weight:900;box-shadow:2px 3px #121537;padding:5px 9px}
+.retro-bottom .prototype-label{color:#cbd5fa}
+.retro-settings{position:relative;border:2px solid #a2a7dd;border-radius:0;background:#17205deb;box-shadow:0 4px 0 #0e113d}
+.retro-settings summary{color:#ffe088}
+.retro-settings[open]{margin-top:12px}
+@media(max-height:450px) and (orientation:landscape){.retro-shell{padding:4px 12px 6px;min-height:auto}.retro-head{min-height:77px}.retro-logo-top{font-size:25px}.retro-logo-main{font-size:43px}.retro-prompt{font-size:15px;margin:0 0 3px}.retro-body{gap:17px}.retro-options{gap:2px}.retro-option{font-size:19px;padding:3px 6px 3px 24px}.retro-car-frame{border-width:5px;outline-width:3px}.retro-car-caption{font-size:9px;padding-top:4px}.retro-bottom{margin-top:5px;padding-top:4px}.retro-topline{display:none}}
+@media(max-width:660px) and (orientation:landscape){.retro-shell{width:99%}.retro-portrait{max-width:310px}.retro-option{font-size:clamp(15px,3vw,20px)}.retro-topline{display:none}}
+@media(prefers-reduced-motion:reduce){.retro-screen,.retro-logo,.retro-car-photo,.retro-car-sheen,.retro-option:before{animation:none!important}}
+
+/* v0.8 — original bold late-90s arcade lettering: no remote fonts and no font files. */
+.retro-option,.retro-prompt,.retro-logo,.retro-car-caption,.circuit-loading h2,.circuit-load-kicker{
+ font-family:Impact,'Arial Black','Arial Narrow',system-ui,sans-serif;font-stretch:condensed;
+ font-style:italic;letter-spacing:.035em;text-transform:uppercase;
+}
+.retro-option{font-size:clamp(19px,3.2vw,29px);-webkit-text-stroke:.45px #481e3f;
+ text-shadow:1px 2px 0 #482378,3px 4px 0 #0a1239,4px 5px 0 #09152c;}
+.retro-option.selected{filter:brightness(1.23);text-shadow:2px 3px 0 #6b2461,4px 5px 0 #04112b;}
+.retro-prompt{font-size:clamp(17px,3.3vw,25px);text-shadow:3px 3px 0 #16143c,5px 5px 0 #091427;}
+.circuit-loading{position:fixed;z-index:26;inset:0;background:radial-gradient(circle at 50% 40%,#324890 0%,#080d31 88%);display:flex;align-items:center;justify-content:center;padding:12px;color:#fff;overflow:auto;touch-action:none;user-select:none}
+.circuit-loading:before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.20;background:conic-gradient(#fff 25%,#1d3882 0 50%,#fff 0 75%,#1d3882 0) 0 0 / 34px 34px;}
+.circuit-load-card{position:relative;width:min(1060px,98vw);max-height:96vh;overflow:hidden;background:linear-gradient(150deg,#243c86,#0b1a4b);border:5px solid #ffe395;box-shadow:0 0 0 5px #0a0e32,0 16px 60px #000a;padding:clamp(10px,2.1vw,22px);}
+.circuit-load-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.circuit-load-kicker{font-size:clamp(9px,1.3vw,13px);color:#bde9fa;letter-spacing:.16em}.circuit-load-kicker b{color:#ffe27b}.circuit-load-head h2{color:#ffe256;line-height:.95;font-size:clamp(26px,4.5vw,51px);margin:5px 0 0;-webkit-text-stroke:1px #742b3a;text-shadow:3px 4px 0 #ba3c38,5px 6px 0 #03092a}.circuit-load-head p{font-size:clamp(11px,1.8vw,15px);color:#d2e6ff;font-weight:900;margin:7px 0}.load-checker{font-size:clamp(24px,5vw,55px);color:#fff2ae;white-space:nowrap}
+.circuit-load-content{display:grid;grid-template-columns:1.35fr .75fr;gap:12px;max-height:55vh}.circuit-load-photo{position:relative;overflow:hidden;background:#96725a;min-height:120px;border:4px solid #d5d5f4}.circuit-load-photo img{display:block;width:100%;height:100%;max-height:50vh;object-fit:cover;object-position:center}.circuit-load-photo-cap{position:absolute;left:0;right:0;bottom:0;padding:6px 10px;color:#ffeb8d;background:#07152cdc;font-family:Impact,system-ui,sans-serif;font-size:clamp(9px,1.6vw,14px);letter-spacing:.07em}
+.circuit-load-side{display:flex;min-width:0;flex-direction:column;background:#081534;padding:8px;border:3px solid #5b8acc}.circuit-map-label{font-family:Impact,system-ui,sans-serif;color:#ffdb6c;font-size:clamp(12px,1.7vw,18px);letter-spacing:.1em}.circuit-load-side canvas{width:100%;flex:1;min-height:85px;max-height:190px;object-fit:contain}.circuit-load-key{display:flex;justify-content:space-around;gap:5px;flex-wrap:wrap;font-weight:850;font-size:clamp(8px,1.15vw,11px);color:#fff}.circuit-load-key span{color:#fff}.circuit-load-key .key-symbol{display:inline-block;color:#26d8f1;font-weight:900;margin-right:3px}.circuit-load-key .key-shortcut-symbol{color:#46f5e2}
+.circuit-load-bottom{display:grid;grid-template-columns:1fr 1.65fr;gap:5px 14px;align-items:center;margin-top:9px;font-family:Impact,system-ui,sans-serif;letter-spacing:.08em;font-size:clamp(11px,1.6vw,17px);color:#ffe9a5}.circuit-load-bar{height:14px;border:2px solid #bde9fb;background:#071026;box-shadow:0 3px 0 #060b29}.circuit-load-bar div{height:100%;width:0;background:repeating-linear-gradient(90deg,#ffde64 0 24px,#ff963a 24px 48px);transition:width 1s ease}.circuit-load-tip{grid-column:1/-1;font-family:system-ui,sans-serif;font-size:clamp(9px,1.3vw,12px);color:#bbd9fa}
+@media(max-height:470px) and (orientation:landscape){.circuit-load-card{padding:8px 12px;border-width:3px}.circuit-load-head h2{font-size:30px}.circuit-load-head p{margin:0 0 4px}.circuit-load-content{max-height:54vh}.circuit-load-side canvas{max-height:135px}.circuit-load-bottom{margin-top:5px;font-size:12px}.circuit-load-tip{display:none}.retro-option{font-size:clamp(18px,3vw,23px)}}
+@media(max-width:610px) and (orientation:landscape){.circuit-load-photo-cap{font-size:9px}.load-checker{display:none}.circuit-load-key{display:none}}
+
+.upcoming-preview{border:1px solid #568cb2;background:#0b1c36;padding:7px;margin-top:1px;max-width:100%}.upcoming-preview h4{color:#ffe083;font-family:Impact,'Arial Black',system-ui,sans-serif;letter-spacing:.09em;font-weight:900;font-size:clamp(10px,1.7vw,13px);margin:0 0 5px}.upcoming-grid{display:flex;gap:8px}.upcoming-grid figure{min-width:0;width:50%;margin:0;background:linear-gradient(#344d6d,#101b36);border:1px solid #385d8c;overflow:hidden}.upcoming-grid img{display:block;width:100%;height:clamp(51px,10vh,85px);object-fit:contain}.upcoming-grid figcaption{display:flex;justify-content:space-between;gap:3px;padding:3px 5px;color:#deeff9;font-weight:850;font-size:10px}.upcoming-grid figcaption span{color:#ffe08d}
+
+/* True iPhone landscape menu fit: no clipped title at 932×430 or small landscape screens. */
+@media(max-height:480px) and (orientation:landscape){
+ .retro-screen{align-items:center;overflow:hidden;padding:8px}
+ .retro-shell{height:auto;min-height:0;max-height:calc(100dvh - 16px);overflow-y:auto;padding:5px 12px}
+ .retro-head{min-height:56px;height:56px}
+ .retro-logo-top{font-size:20px}.retro-logo-main{font-size:34px}
+ .retro-flag{top:16px;font-size:19px}
+ .retro-prompt{font-size:15px;margin:2px 0 4px}
+ .retro-body{gap:14px;margin:0 auto 1px}
+ .retro-option{font-size:clamp(16px,2.8vw,20px);padding:3px 4px 3px 25px}
+ .retro-car-frame{height:clamp(135px,42vh,178px);aspect-ratio:auto}
+ .retro-car-caption{padding-top:2px;line-height:1;font-size:8px}
+ .retro-bottom{margin-top:6px}
+ .retro-settings{margin-top:3px}
+ .retro-settings summary{padding:5px}
+}
+
+/* === v0.9: dedicated fixed-height handheld arcade menu, never scroll to reach Options === */
+#screen.retro-screen{overflow:hidden!important;padding:0!important;overscroll-behavior:none!important;align-items:center;justify-content:center;touch-action:manipulation}
+#screen.retro-screen .retro-shell{
+ width:100vw!important;height:100dvh!important;max-height:100dvh!important;min-height:0!important;
+ padding:max(5px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(5px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left))!important;
+ overflow:hidden!important;display:grid;grid-template-rows:15px minmax(54px,17%) minmax(21px,8%) minmax(0,1fr) minmax(34px,13%);
+ gap:0;border:0!important;border-top:4px solid #ffe15a!important;border-bottom:4px solid #f37a36!important;
+ background:radial-gradient(ellipse at 70% 27%,#7049c0b5,transparent 49%),
+ linear-gradient(126deg,#161d78e9,#4b237abf 60%,#16154bee)!important;
+ box-shadow:inset 0 0 0 5px #071e51,0 0 0 20px #0a1034!important;
+}
+#screen.retro-screen .retro-shell:before{opacity:.10;background:repeating-linear-gradient(120deg,transparent 0 26px,#ff6fcb 29px,transparent 37px)}
+#screen .retro-topline{font:900 clamp(7px,1vw,11px)/1 Impact,'Arial Black',system-ui,sans-serif;letter-spacing:.15em;align-items:center;color:#b9d9ff;}
+#screen .retro-head{height:auto!important;min-height:0!important;justify-content:flex-start;gap:12px;overflow:visible;border-bottom:2px solid #fece65a0;}
+#screen .retro-logo{transform:skew(-9deg) rotate(-2deg);margin-left:3%;z-index:1;filter:drop-shadow(4px 6px 0 #080b31);}
+#screen .retro-logo-top{font:900 clamp(19px,4vw,34px)/.88 Impact,'Arial Black',system-ui,sans-serif;letter-spacing:-.06em;color:#fff;white-space:nowrap;-webkit-text-stroke:1px #132366;text-shadow:2px 3px #318ad9,4px 5px #10144c;}
+#screen .retro-logo-main{font:900 clamp(34px,7vw,61px)/.86 Impact,'Arial Black',system-ui,sans-serif;letter-spacing:-.075em;color:#ffea35;white-space:nowrap;-webkit-text-stroke:1.5px #d24326;text-shadow:2px 3px #e84e26,5px 6px #071139;}
+#screen .retro-head-tag{margin-left:auto;margin-right:3%;font:900 clamp(9px,1.35vw,15px)/1.05 Impact,'Arial Black',system-ui,sans-serif;color:#eff8ff;letter-spacing:.11em;text-shadow:2px 2px #0c1244;}
+#screen .retro-head-tag b{color:#ffe45b;font-size:1.1em}
+#screen .retro-flag{right:25%;top:5%;font-size:clamp(15px,3vw,28px);color:#fdf5c0}
+#screen .retro-prompt{font:900 clamp(11px,2vw,16px)/1.1 Impact,'Arial Black',system-ui,sans-serif;letter-spacing:.16em;margin:0!important;text-align:left;padding:3px 0 0 4%;color:#fff4b9;align-self:center;}
+#screen .retro-body{width:100%;max-width:1100px;min-height:0;overflow:hidden;margin:0!important;padding:0 3% 1px 3%;display:grid;grid-template-columns:minmax(265px,.94fr) minmax(0,1fr);gap:3.4%;align-items:stretch;}
+#screen .retro-options{display:grid;grid-template-rows:repeat(4,minmax(0,1fr));gap:clamp(4px,1.9vh,10px);width:100%;min-height:0;}
+#screen .retro-option{
+ display:flex;align-items:center;min-height:0;height:100%;padding:0 8px 0 18%;margin:0;
+ font:900 clamp(17px,3.4vw,27px)/1 Impact,'Arial Black','Arial Narrow',system-ui,sans-serif;
+ font-style:italic;white-space:nowrap;text-transform:uppercase;letter-spacing:.045em;
+ color:#f8f5ff;background:linear-gradient(160deg,#26418e 0%,#101b57 52%,#111142 100%);
+ border:2px solid #d8e4ff;border-radius:3px;box-shadow:3px 3px 0 #07092b,inset 0 2px 0 #7fb4ff5e;
+ text-shadow:2px 3px 0 #051333;transform:none!important;filter:none;
+ position:relative;transition:background .09s,filter .09s;
+}
+#screen .retro-option:nth-child(1):after{content:'🏁';position:absolute;right:8px;font-size:.77em;opacity:.8;}
+#screen .retro-option:nth-child(2):after{content:'◷';position:absolute;right:10px;font-size:1.15em;opacity:.8;}
+#screen .retro-option:nth-child(3):after{content:'⚙';position:absolute;right:10px;font-size:1.0em;opacity:.8;}
+#screen .retro-option:nth-child(4):after{content:'☰';position:absolute;right:10px;font-size:.85em;opacity:.8;}
+#screen .retro-option:before{content:'▶';display:block;opacity:0;position:absolute;left:6%;top:50%;font-size:1.0em;color:#fff;text-shadow:2px 2px #d75f2d;transform:translateY(-50%);animation:none;}
+#screen .retro-option.selected,#screen .retro-option:active{background:linear-gradient(#fff27a 0%,#ffb820 53%,#f58a1d 100%);border-color:#fffad5;color:#14254d;text-shadow:1px 1px 0 #fff9a5;box-shadow:inset 0 2px 0 #fff6c8,3px 4px #131549;}
+#screen .retro-option.selected:before,#screen .retro-option:focus-visible:before{opacity:1;color:#0c1a47;text-shadow:none;animation:arrowBounce .5s steps(2,end) infinite;}
+#screen .retro-portrait{min-height:0;max-width:none;height:100%;width:100%;display:flex;flex-direction:column;align-items:stretch;gap:3px;filter:none;overflow:hidden;justify-self:stretch;}
+#screen .retro-car-frame{flex:1 1 auto;min-height:0;width:100%;height:0;aspect-ratio:auto;border:3px solid #f5e96c;outline:2px solid #09153b;box-shadow:0 0 0 5px #292d9c;overflow:hidden;}
+#screen .retro-car-photo{width:100%;height:100%;object-fit:cover;object-position:center 48%;}
+#screen .retro-car-caption{flex:0 0 auto;text-align:left;padding:0 0 0 5px;font:900 clamp(8px,1.5vw,12px)/1.15 Impact,'Arial Black',sans-serif;letter-spacing:.07em;}
+#screen .retro-preview-stats{display:flex;justify-content:space-between;gap:4px;flex:0 0 auto;color:#f4f5ff;font:900 clamp(7px,1.1vw,10px)/1 Impact,'Arial Black',sans-serif;padding:2px 4px;letter-spacing:.04em;background:#0a164eaa;}
+#screen .retro-preview-stats span:first-child{color:#ffe380}
+#screen .retro-bottom{min-height:0;max-height:none;overflow:hidden;margin:0!important;padding:0 0 0 3%!important;border:0;align-content:center;align-items:center;gap:8px;display:flex;justify-content:space-between;flex-wrap:nowrap;}
+#screen .retro-utilities{display:flex;gap:clamp(4px,1.2vw,11px);flex-wrap:nowrap;align-items:center;}
+#screen .retro-bottom .mini-btn{font:900 clamp(9px,1.5vw,12px)/1 Impact,'Arial Black',system-ui,sans-serif;border:2px solid #b3c5ff;border-radius:3px;background:linear-gradient(#254887,#10194e);color:#ffdf80;padding:clamp(3px,.7vh,6px) clamp(4px,1.2vw,9px);box-shadow:2px 3px #080e39;white-space:nowrap;}
+#screen .audio-status{font-size:clamp(8px,1vw,10px);min-width:0;white-space:nowrap;}
+#screen .prototype-label{font-size:clamp(7px,1vw,9px);white-space:nowrap;color:#c6d8ff;}
+#screen #retroSettings:not([open]){display:none!important}
+#screen #retroSettings[open]{
+ position:fixed!important;inset:3.7vh 7vw 4.3vh!important;width:auto!important;height:auto!important;
+ z-index:60;margin:0!important;padding:10px 18px!important;
+ overflow:auto!important;background:linear-gradient(155deg,#1c3273,#10143e 90%)!important;
+ box-shadow:0 0 0 100vmax #050621e0,0 0 0 5px #ffc84b,0 15px 45px #000!important;
+ border:3px solid #f5e2a0!important;border-radius:6px!important;
+}
+#screen #retroSettings summary{display:block;list-style:none;cursor:pointer;font:900 clamp(19px,4vw,32px)/1 Impact,'Arial Black',system-ui,sans-serif;color:#ffdb69;padding:3px 42px 7px 8px;border-bottom:3px solid #f5cb4f;}
+#screen #retroSettings summary:after{content:'✕';position:absolute;top:8px;right:13px;font-size:24px;color:#fff;}
+#screen #retroSettings .settings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:8px 0 3px;gap:5px 10px;}
+#screen #retroSettings .settings label{font-size:clamp(9px,1.45vw,12px);gap:3px;}
+#screen #retroSettings .settings select{min-width:0;width:100%;padding:5px 4px;font-size:clamp(10px,1.5vw,13px);border-radius:2px;}
+#screen #retroSettings .audio-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 18px;margin:7px 0 0;padding:7px 0;border-color:#6070b3;}
+#screen #retroSettings .audio-settings label{font-size:clamp(9px,1.3vw,12px);}
+#screen #retroSettings .audio-settings input{max-height:30px;}
+@media (max-height:390px) and (orientation:landscape){
+ #screen .retro-shell{grid-template-rows:8px minmax(42px,15%) minmax(17px,7%) minmax(0,1fr) minmax(31px,12%);}
+ #screen .retro-logo-top{font-size:clamp(17px,3.7vw,27px)}#screen .retro-logo-main{font-size:clamp(29px,6.6vw,43px)}
+ #screen .retro-head-tag{font-size:8px}
+ #screen .retro-option{font-size:clamp(15px,3.2vw,22px)}
+ #screen .retro-preview-stats span:last-child{display:none}
+ #screen .retro-bottom .prototype-label{display:none}
+ #screen #retroSettings{padding:5px 12px!important}
+}
+@media (max-width:710px) and (orientation:landscape){#screen .retro-head-tag{display:none}#screen .retro-flag{right:8%}#screen .retro-body{grid-template-columns:minmax(200px,1fr) minmax(150px,.8fr);gap:2%}#screen .retro-option{font-size:clamp(14px,3vw,20px)}}
+
+/* A dedicated in-race pause screen. Do not reuse the oversized floating hint. */
+.race-pause{position:fixed;z-index:30;inset:0;display:flex;align-items:center;justify-content:center;padding:max(8px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:#030827c9;backdrop-filter:blur(4px);touch-action:manipulation;}
+.race-pause:before{content:'';position:absolute;inset:0;opacity:.19;pointer-events:none;background:conic-gradient(#162a8c 25%,#0a1449 0 50%,#162a8c 0 75%,#0a1449 0) 0 0 / 35px 35px}
+.pause-card{position:relative;width:min(500px,83vw);height:min(93dvh,420px);display:flex;flex-direction:column;justify-content:center;gap:clamp(5px,1.4vh,12px);border:5px solid #ffe681;background:linear-gradient(165deg,#2c317e,#0c184d 83%);box-shadow:0 0 0 5px #0b0e36,0 13px 60px #000c;padding:clamp(9px,2vh,22px) clamp(15px,3vw,28px);}
+.pause-heading{display:flex;align-items:center;gap:12px;min-height:0;}
+.pause-emblem{font:900 36px Impact,sans-serif;color:#ffe06e;text-shadow:3px 4px 0 #d75227}
+.pause-heading p{margin:0;font-size:10px;font-weight:900;color:#8dd7ee;letter-spacing:.16em}
+.pause-heading h2{margin:0;font:900 clamp(22px,5vw,37px)/1 Impact,'Arial Black',sans-serif;color:#fff;text-shadow:3px 3px #163078;letter-spacing:.05em}
+.pause-preview{display:flex;align-items:center;justify-content:space-between;padding:3px 6px;border-top:1px solid #8391e5;border-bottom:1px solid #8391e5;color:#ffdf70;font:900 10px Impact,'Arial Black',sans-serif;letter-spacing:.13em}
+.pause-preview span{color:#93cdfe}
+.pause-choices{display:flex;flex-direction:column;gap:clamp(5px,1.2vh,10px);min-height:0;}
+.pause-choice{width:100%;min-height:clamp(37px,10vh,56px);border:3px solid #dce7ff;border-radius:3px;background:linear-gradient(#344e93,#101f60);box-shadow:3px 4px #050b2e;color:#fff;text-align:left;padding-left:7%;font:900 clamp(17px,3.7vw,25px)/1 Impact,'Arial Black',sans-serif;letter-spacing:.07em;cursor:pointer}
+.pause-choice.active{background:linear-gradient(#fff6a3,#f6a52b);color:#102051;border-color:#fff4ba;}
+.pause-choice.danger{color:#ffc1b7}
+.pause-footer{text-align:center;margin:0;font:900 10px Impact,'Arial Black',sans-serif;color:#9eb9d9;letter-spacing:.15em}
+/* v0.9 vehicle browser: thumbnail is the *actual* loaded showroom art, not a placeholder. */
+.car-choice{display:flex!important;gap:7px!important;align-items:center!important;text-align:left!important;padding:3px!important;overflow:hidden}
+.car-choice-preview{width:clamp(43px,6vw,66px);height:clamp(40px,8vh,66px);flex:0 0 auto;object-fit:contain;filter:drop-shadow(0 2px 4px #0007)}
+.car-choice-info{min-width:0;display:flex;flex-direction:column;gap:3px}
+.car-choice-info b{font:900 clamp(10px,1.3vw,15px)/1 Impact,'Arial Black',system-ui,sans-serif;white-space:nowrap}
+.car-choice-info small{font-size:clamp(8px,1vw,11px)}
+@media(max-height:470px) and (orientation:landscape){.garage-panel{overflow-y:auto!important}.garage-panel .upcoming-preview{display:none}.garage-panel .garage-header{height:30px}.garage-panel .garage-header h2{font-size:20px}.garage-panel .garage-layout{gap:8px;margin-top:4px}.garage-stage{padding:4px}#garageCanvas{height:min(40dvh,175px)}.garage-list{gap:5px}.car-choice{min-height:40px;padding:1px!important}.garage-lock{font-size:9px;padding:3px}.garage-specs h3{margin:0;font-size:16px}.garage-specs p{display:none}.garage-specs .garage-stats{margin:1px 0;gap:3px}.garage-list>.btn{min-height:30px;padding:3px;font-size:11px}}
+/* Explicitly reserve the ticker grid row; older mobile rules hid it and shifted every menu item one row up. */
+#screen .retro-topline{display:flex!important;width:100%!important;height:100%!important;}
+/* Final menu art direction: high-contrast cobalt checkerboard + speed streaks. */
+#screen.retro-screen .retro-shell{background:
+ radial-gradient(ellipse at 70% 28%,#8b50b655,transparent 50%),
+ linear-gradient(126deg,#11185eda,#4b2479d5 62%,#161752d8),
+ conic-gradient(#5966c9 25%,#1e2774 0 50%,#5966c9 0 75%,#1e2774 0) 0 0/62px 62px!important;}
+#screen .retro-shell:before{opacity:.11;background:repeating-linear-gradient(120deg,transparent 0 35px,#fff 37px,transparent 40px)}
+#screen .retro-topline{visibility:hidden!important}
+#screen .retro-flag{display:none!important}
+#screen .retro-head-tag{font-size:clamp(9px,1.4vw,13px);text-align:right;letter-spacing:.12em;margin-right:4%;max-width:50%;}
+#screen .retro-logo-main{-webkit-text-stroke:1px #bd2c1b;text-shadow:2px 3px 0 #ec6c23,4px 5px #070e4b;}
+
+/* v0.11 — fresh layout: title and mode prompt occupy SEPARATE grid rows.
+   Not transformed or absolutely positioned: cannot overlap on iOS safe-area layouts. */
+#screen.v11-screen{padding:max(6px,env(safe-area-inset-top)) max(9px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(9px,env(safe-area-inset-left));overflow:hidden;touch-action:none;background:linear-gradient(140deg,#101d56,#202578 58%,#101839)}
+.v11-shell{width:min(960px,100%);height:100%;max-height:490px;min-height:0;display:grid;grid-template-rows:minmax(67px,22%) minmax(0,1fr) 31px;overflow:hidden;border:3px solid #9ab4ff;box-shadow:inset 0 0 0 3px #111a48,0 6px 0 #060929;background:repeating-conic-gradient(#4a45a1 0% 25%,#31357f 0% 50%) 0 0/44px 44px;position:relative}
+.v11-shell:before{content:'';position:absolute;inset:0;background:#192454ad;pointer-events:none;z-index:0}
+.v11-shell>*{position:relative;z-index:1;min-height:0}
+.v11-head{display:flex;align-items:center;justify-content:space-between;padding:4px 14px 3px;border-bottom:2px solid #b8a0ff8c;gap:12px}
+.v11-brand{line-height:.9;font-family:Impact,'Arial Black',sans-serif;font-style:italic;transform:skewX(-7deg);text-shadow:3px 4px #0d164a,-1px -1px #141547;white-space:nowrap}
+.v11-brand span{display:block;font-size:clamp(18px,4.6vh,31px);color:#fbfaff;letter-spacing:.05em;-webkit-text-stroke:.8px #17366e}
+.v11-brand strong{display:block;font-size:clamp(31px,8vh,56px);color:#ffde38;letter-spacing:-.035em;-webkit-text-stroke:1px #ac2928}
+.v11-topright{text-align:right;letter-spacing:.15em;font-size:clamp(10px,2.5vh,16px);font-weight:1000;color:#fef5b8;font-family:Impact,'Arial Black',sans-serif;white-space:nowrap}
+.v11-topright small{display:block;color:#c7e5ff;font-size:clamp(7px,1.8vh,11px)}
+.v11-star{color:#fa832e}
+.v11-main{display:grid;grid-template-columns:minmax(0,.94fr) minmax(0,1fr);min-height:0;gap:10px;padding:4px 12px 2px}
+.v11-menu-left{display:flex;flex-direction:column;min-height:0;gap:3px}
+.v11-prompt{height:clamp(18px,5vh,28px);line-height:1;flex-shrink:0;display:flex;align-items:center;margin:0;color:#ffdf7b;font:bold clamp(13px,3.8vh,21px) Impact,'Arial Black',sans-serif;text-shadow:2px 2px #131844;letter-spacing:.08em}
+.v11-options{min-height:0;flex:1;display:flex;flex-direction:column;gap:4px;justify-content:stretch}
+.v11-options .retro-option{min-height:0;flex:1;display:flex;align-items:center;padding:2px 10px 2px 27px;max-width:100%;margin:0;background:linear-gradient(#233b8f,#0f2457);border:2px solid #b0d9ff;border-radius:2px;box-shadow:2px 2px 0 #070c36;color:#fff2a7;text-align:left;font:italic 1000 clamp(15px,4.4vh,27px) Impact,'Arial Black',sans-serif;letter-spacing:.045em;white-space:nowrap;line-height:1;transform:none!important;text-shadow:2px 2px #11143f;-webkit-text-stroke:0;overflow:hidden}
+.v11-options .retro-option:before{left:3px;font-size:clamp(12px,4vh,23px)}
+.v11-options .retro-option.selected{background:linear-gradient(#ffe878,#e89f20);color:#111e52;border-color:#fff1a2;text-shadow:none}
+.v11-showcase{display:flex;flex-direction:column;min-width:0;min-height:0;align-items:stretch;gap:3px}
+.v11-car-stage{min-height:0;flex:1;position:relative;border:3px solid #fff1ab;background:radial-gradient(ellipse at center 40%,#325e9f,#15234f 68%,#0a1531);box-shadow:0 0 0 2px #17204f;overflow:hidden}
+#menuCar{display:block;width:100%;height:100%;object-fit:contain}
+.v11-turn-label{position:absolute;right:5px;top:5px;font-size:clamp(8px,1.7vh,11px);font-weight:900;letter-spacing:.12em;color:#fff8b5;pointer-events:none}
+.v11-car-name{height:clamp(16px,3.3vh,22px);font:900 clamp(11px,3.1vh,18px) Impact,'Arial Black',sans-serif;letter-spacing:.12em;text-align:center;color:#fff1aa;text-shadow:2px 2px #07143a;white-space:nowrap}
+.v11-car-meta{height:clamp(13px,2.6vh,20px);display:flex;justify-content:space-between;font-size:clamp(8px,1.8vh,11px);font-weight:900;color:#dae8fc}
+.v11-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;padding:1px 12px;border-top:2px solid #a6a6e8}
+.v11-footer-btns{display:flex;gap:4px;min-width:0}
+.v11-foot .mini-btn{font:900 clamp(8px,2vh,12px) Impact,'Arial Black',sans-serif;border-radius:2px;border:2px solid #a0c8ec;background:#172967;color:#fff6bd;padding:2px 7px;white-space:nowrap}
+.v11-foot #audioStatus{color:#def3e4;font-size:clamp(7px,1.6vh,10px);white-space:nowrap}
+.v11-version{font:bold 9px monospace;color:#c4ceee}
+.v11-settings:not([open]){display:none!important}
+.v11-settings[open]{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:#02081de5;padding:12px;overflow:auto;touch-action:pan-y}
+.v11-settings>summary{display:none}
+.v11-settings-card{width:min(680px,96vw);max-height:calc(100dvh - 25px);overflow:auto;background:linear-gradient(#263b7c,#0b1e46);border:3px solid #ffdf77;padding:12px;box-shadow:0 8px 28px #000c}
+.v11-settings-head{display:flex;align-items:center;justify-content:space-between;color:#ffe286;font:900 22px Impact,sans-serif;letter-spacing:.1em}
+.v11-settings-head button{background:#e6b541;color:#111c46;border:2px solid #fff2bf;font:900 20px system-ui;padding:0 12px;cursor:pointer}
+.v11-settings .settings{margin:7px 0 10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.v11-settings .settings label{font-size:11px}
+.v11-settings .audio-settings{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+.v11-settings .audio-settings label{min-width:0}
+.v11-concept{position:absolute;bottom:4px;right:8px;width:95px;height:70px;object-fit:cover;border:2px solid #ffe8a0;box-shadow:1px 2px #0a1830}
+@media (max-height:365px) and (orientation:landscape){
+.v11-shell{grid-template-rows:60px minmax(0,1fr) 28px}.v11-head{padding:2px 12px}.v11-brand span{font-size:19px}.v11-brand strong{font-size:31px}.v11-main{padding:2px 9px}.v11-prompt{height:18px;font-size:13px}.v11-options .retro-option{font-size:14px;letter-spacing:0}.v11-footer-btns .mini-btn{padding:1px 5px}
+}
+@media(max-width:620px) and (orientation:landscape){.v11-topright small{display:none}.v11-main{gap:5px;padding:2px 8px}.v11-options .retro-option{padding-left:23px;font-size:14px}.v11-head{padding:2px 9px}}
+/* Important: neutralize legacy max-height:112px applied to #menuCar on mobile. */
+#screen.v11-screen #menuCar{max-height:none!important;width:100%!important;height:100%!important;object-fit:fill!important;background:transparent!important;border:0!important;border-radius:0!important}
+/* Canonical Scatto concept stays INSIDE its own garage stage, never over buttons. */
+.garage-stage{position:relative}
+.garage-stage .v11-concept{top:8px;right:9px;bottom:auto;width:90px;height:64px;z-index:3}
+
+/* 0.11.2 retro-toon: clean violet/blue console palette; grounded 2D sprite. */
+#screen.v11-screen{background:radial-gradient(ellipse at 60% 20%,#5f459b 0%,#33236e 48%,#15103d 100%)}
+.v11-shell{background:repeating-conic-gradient(#6543a3 0 25%,#3c2a87 0 50%) 0 0 / 42px 42px;
+ border-color:#e0b7f2;box-shadow:inset 0 0 0 3px #24205f,0 5px 0 #080721}
+.v11-shell:before{background:#2e185ca9}
+.v11-head{border-bottom-color:#ceabea9e}
+.v11-car-stage{background:radial-gradient(ellipse at 45% 30%,#5c6ea6,#33265f 69%,#1e173e)}
+.v11-car-stage:before,.garage-stage:before{content:"";position:absolute;z-index:0;left:19%;width:62%;height:13%;bottom:7%;border-radius:50%;background:#0d0c2e99;box-shadow:0 2px 0 2px #b4a7df65,inset 0 3px 7px #0009;pointer-events:none}
+#menuCar,#garageCanvas{position:relative;z-index:1;animation:ttrParkHop 7.8s ease-in-out infinite;will-change:transform;transform-origin:50% 79%;}
+@keyframes ttrParkHop{
+  0%,34%,49%,61%,100%{transform:translate3d(0,0,0) scale(1)}
+  35%,39%{transform:translate3d(1px,0,0) scale(1.005,.996)}
+  40%{transform:translate3d(-2px,0,0) scale(1.013,.992)}
+  42%{transform:translate3d(0,-12px,0) scale(1.015,1.015)}
+  44%{transform:translate3d(0,-17px,0) scale(1.012,1.016)}
+  48%{transform:translate3d(0,0,0) scale(1.02,.986)}
+}
+.v11-turn-label{background:#301a5dba;border:1px solid #d9b8ff;border-radius:7px;padding:3px 5px}
+.v11-foot{border-top-color:#d1abf6}
+.v11-options .retro-option{border-radius:6px;border-color:#c9b7ff;background:linear-gradient(#554093,#2b2265);box-shadow:2px 2px 0 #140e35}
+.v11-options .retro-option.selected{background:linear-gradient(#fff09c,#efc34e);border-color:#fff2b6}
+@media(prefers-reduced-motion:reduce){#menuCar,#garageCanvas{animation:none}}
+
+/* Ground the showroom vehicle on its fixed platform; garage stats occupy lower half. */
+.garage-stage:before{top:42%;bottom:auto;height:10%;left:24%;width:55%;}
+#menuCar,#garageCanvas{filter:drop-shadow(1px 1px 0 #18143980) drop-shadow(-1px -1px 0 #ffe3b530);}
+
+/* v0.11.3: actual user-supplied concept artwork is the primary garage vehicle. */
+#menuCar{animation:ttrGarageDrive 4.2s cubic-bezier(.44,0,.35,1) infinite!important;transform-origin:50% 83%!important;will-change:transform}
+#garageCanvas{animation:none!important;filter:none!important;transform:none!important}
+@keyframes ttrGarageDrive{
+  0%,100%{transform:translate3d(-9px,0,0) scale(1)}
+  25%{transform:translate3d(0px,0,0) scale(1.015)}
+  55%{transform:translate3d(11px,0,0) scale(1.022)}
+  75%{transform:translate3d(4px,0,0) scale(1.012)}
+}
+.v11-concept{width:clamp(100px,20vw,148px);height:clamp(65px,21vh,98px);object-fit:cover;border-radius:4px;box-shadow:0 0 0 2px #1d1746,0 5px 10px #0008}
+.garage-stage{position:relative;background:linear-gradient(#3a2c68,#161c3b)}
+#garageCanvas{object-fit:cover!important;max-height:none;filter:saturate(1.06)}
+.car-choice-preview{object-fit:contain!important;image-rendering:auto}
+@media(prefers-reduced-motion:reduce){#menuCar{animation:none!important}}
+
+/* v0.11.3 showroom fit correction: car stays fully within hero pane. */
+#garageCanvas{display:block;width:100%;object-fit:contain!important;max-height:none!important;}
+@media(max-height:470px) and (orientation:landscape){
+ .garage-panel #garageCanvas{height:170px!important;}
+ .garage-panel .garage-specs .garage-stats{margin:0!important;font-size:9px}
+ .garage-panel .garage-specs h3{margin:2px 0;font-size:15px}
+ .garage-panel{padding:8px!important;max-height:96dvh!important;overflow-y:auto!important}
+ .garage-panel .garage-header{height:31px!important}
+ .garage-panel .garage-layout{margin-top:3px}
+ .garage-panel .garage-stage{min-height:0}
+}
+
+/* Final polish: no clipped legacy eyebrow under the decorative tape on phones. */
+@media(max-height:470px) and (orientation:landscape){.garage-header .eyebrow{display:none!important}}
+
+/* v0.11.4 — compact, clipped-free phone options and coherent toy showroom */
+.v11-settings[open]{inset:0;padding:clamp(4px,1vh,10px);overflow:hidden;align-items:center;justify-content:center}
+.v11-settings-card{box-sizing:border-box;width:min(760px,98vw);max-height:96dvh;max-width:98vw;min-width:0;overflow-x:hidden;overflow-y:auto;padding:clamp(5px,1.8vh,12px);border-radius:9px}
+.v11-settings-card *, .v11-settings-card *::before{box-sizing:border-box;min-width:0;max-width:100%}
+.v11-settings-head{font-size:clamp(15px,3.5vh,23px);line-height:1.1;gap:10px}
+.v11-settings-head button{font-size:clamp(16px,4vh,24px);line-height:1;padding:2px 10px}
+.v11-settings label,.v11-settings span{overflow-wrap:anywhere;white-space:normal}
+.v11-settings .settings{gap:clamp(3px,1vh,8px);margin:5px 0 7px}
+.v11-settings .settings label{display:flex;flex-direction:column;gap:2px;font-size:clamp(9px,2.3vh,12px)}
+.v11-settings .settings select{display:block;max-width:100%;width:100%;min-width:0;min-height:26px;font-size:clamp(11px,2.9vh,14px);padding:3px 5px}
+.v11-settings .audio-settings{gap:clamp(3px,1vh,7px)}
+.v11-settings .audio-settings label{display:flex;flex-direction:column;min-width:0;font-size:clamp(9px,2.2vh,12px);gap:2px}
+.v11-settings input[type=range]{width:100%;max-width:100%;margin:0;accent-color:#ffd364}
+#garageCanon{display:none!important}
+.garage-stage{background:radial-gradient(ellipse at 50% 38%,#615398,#182955 72%,#111c3c)}
+#garageCanvas{object-fit:contain!important;image-rendering:auto;max-width:100%}
+@media(max-height:450px) and (orientation:landscape){
+ .v11-settings-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 clamp(6px,2vw,16px);align-content:start;overflow-y:auto;max-height:97dvh}
+ .v11-settings-head{grid-column:1/-1;margin:0 0 4px}
+ .v11-settings .settings{display:grid;grid-column:1;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;margin:0;gap:5px}
+ .v11-settings .audio-settings{display:grid;grid-column:2;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;margin:0;gap:6px}
+ .v11-settings .settings label,.v11-settings .audio-settings label{font-size:clamp(9px,2.6vh,11px)}
+ .v11-settings select{font-size:12px}
+}
+@media(max-width:640px) and (orientation:landscape){
+ .v11-settings-card{gap:3px 7px;padding:5px}
+ .v11-settings .settings,.v11-settings .audio-settings{gap:3px}
+ .v11-settings-head{font-size:15px}
+ .v11-settings .settings label{font-size:9px}
+}
+
+/* v0.11.4: animate only the car inside Canvas (pedestal never floats). */
+#menuCar,#garageCanvas{animation:none!important;transform:none!important;will-change:auto!important}
+
+/* v0.11.5 original four-car splash; portrait keeps the brand and a readable start button. */
+.splash-emblem{width:clamp(105px,18vh,180px);height:clamp(105px,18vh,180px);margin:6px auto 8px;filter:drop-shadow(0 5px 12px #000a);animation:emblembounce 3.8s ease-in-out infinite}
+.splash-emblem img{width:100%;height:100%;display:block;object-fit:contain;border-radius:18%;}
+.splash-inner{max-width:92vw}
+.splash-inner .logo-tiny{font-size:clamp(17px,5.8vh,40px)}
+.splash-inner .logo-rivals{font-size:clamp(30px,9.6vh,70px)}
+.splash-inner .loader-rail{height:11px}
+.splash-inner .loading-copy{font-size:clamp(9px,2.2vh,12px);margin:4px auto}
+.splash-inner .enter-game{min-height:32px;padding:6px 12px;font-size:clamp(11px,2.8vh,15px)}
+@media(max-height:370px) and (orientation:landscape){
+ .splash-emblem{width:98px;height:98px;margin:2px auto 3px}
+ .splash-inner .logo-tiny{font-size:17px}
+ .splash-inner .logo-rivals{font-size:30px}
+ .splash-inner .flag-stripe{margin-top:5px;height:5px}
+}
+/* Soft, warm 16-bit palette and anti-aliased illustration rather than harsh pixel polygons. */
+.v11-car-stage canvas,.garage-stage canvas{image-rendering:auto}
+.garage-stage{background:radial-gradient(ellipse at 50% 36%,#6964a4,#2b285e 73%,#131c40)}
+
+/* v0.12 — official user-provided icon, fitted without duplicated branding. */
+.splash-inner{width:min(430px,90vw);display:flex;flex-direction:column;align-items:center;gap:3px}
+.splash-emblem{width:min(218px,38vh);height:min(218px,38vh);min-width:115px;min-height:115px;margin:2px auto 4px;animation:none}
+.splash-emblem img{width:100%;height:100%;object-fit:cover;border-radius:21%;box-shadow:0 8px 24px #070524ad}
+.splash-inner .loader-rail{width:85%}
+.splash-inner .enter-game{margin:2px auto 1px}
+@media(max-height:370px) and (orientation:landscape){.splash-emblem{width:128px;height:128px;min-width:0;min-height:0}}
+
+/* v0.13: item icon lives on the use button, not as an intrusive screen banner. */
+#use{padding:2px;border-color:#ffd995;border-radius:21px;box-shadow:inset 0 1px 9px #fff4,0 4px #0e133b}
+.power-token{width:43px;height:43px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:3px solid #ffedbb;color:#f9faff;font-size:24px;font-style:normal;background:linear-gradient(140deg,#506d9b,#16274c);text-shadow:1px 2px #1b2643}
+.power-token.turbo{background:linear-gradient(150deg,#ffd55b,#e37918);color:#222841}
+.power-token.oil{background:linear-gradient(150deg,#525d71,#1c283c);color:#d3eef5}
+.power-token.claw{background:linear-gradient(150deg,#e04961,#631f42);color:#fff7ec}
+.power-token.empty{opacity:.6}
+@media(max-height:430px){.power-token{width:37px;height:37px;font-size:22px;border-width:2px}}
+
+
+/* v0.13.4 — remove display pedestals completely; natural flat garage floor. */
+.v11-car-stage::before,.garage-stage::before{display:none!important}
+.v11-car-stage,.garage-stage{background:radial-gradient(ellipse at 50% 45%,#5b517f,#202753 73%,#121d3c)!important}
+/* v0.13.4 — full-bleed official splash art, never crop the official icon in the launcher. */
+.splash-overlay{background:#101b32!important;overflow:hidden}
+.splash-overlay::before,.splash-overlay::after{display:none!important}
+.splash-wallpaper{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;pointer-events:none}
+.splash-inner{position:relative!important;z-index:1;width:100%!important;max-width:none!important;height:100%!important;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;align-items:center!important;padding:0 12px max(15px,env(safe-area-inset-bottom))!important;gap:5px!important;background:linear-gradient(transparent 58%,#061129ba 100%)}
+.splash-emblem{display:none!important}
+.splash-inner .loader-rail{width:min(390px,76vw);height:7px!important;margin:0 auto!important}
+.splash-inner .loading-copy{font-size:clamp(10px,2.2vh,15px)!important;text-shadow:1px 2px #071329}
+.splash-inner .enter-game{margin:4px auto!important;position:relative!important;z-index:2;width:min(390px,86vw)!important;max-width:390px!important}
+.splash-inner .flag-stripe{display:none!important}
+@media(max-height:380px){.splash-inner{padding-bottom:8px!important;gap:2px!important}.splash-inner .enter-game{padding:6px 18px!important;min-height:30px!important}}
+
+
+.splash-wallpaper{object-fit:cover!important;object-position:center top!important} #splash{background:#101b32!important}
+/* v0.13.6.11 — accessible portrait instruction: clear illustrated smartphone. */
+.orientation-overlay{gap:10px;justify-content:center;padding:clamp(18px,5vh,34px) 20px!important}
+.orientation-overlay h2{position:relative;z-index:2;font-size:clamp(22px,7vw,36px);line-height:1.15;margin:2px 0!important;max-width:95vw}
+.orientation-overlay p{position:relative;z-index:2;line-height:1.45;margin:0;max-width:290px;font-size:clamp(12px,3.5vw,16px)}
+.rotate-phone{height:132px;width:162px;display:flex;justify-content:center;align-items:center;position:relative;animation:none!important;transform:none!important;flex-shrink:0;overflow:visible;margin-bottom:4px}
+.phone-shell{position:relative;width:74px;height:124px;background:linear-gradient(145deg,#162d42,#040e1f);border:6px solid #b2e9fa;border-radius:19px;box-shadow:0 9px 18px #02091ab5,inset 0 0 0 2px #536a84;animation:ttrPhoneTurn 2.8s ease-in-out infinite;transform-origin:center center}
+.phone-speaker{position:absolute;top:5px;left:27px;width:16px;height:3px;border-radius:3px;background:#b2d6e7}
+.phone-display{position:absolute;inset:13px 5px 11px;border-radius:8px;background:radial-gradient(circle at 60% 40%,#3ec1df,#124d84 74%,#112143);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.phone-wheel{font-size:36px;color:#ffe07b;z-index:1;transform:rotate(-20deg);text-shadow:1px 2px #12223d}
+.phone-track{position:absolute;bottom:2px;left:4px;font-size:42px;color:#f6f2df77}
+.phone-homebar{position:absolute;bottom:5px;left:28px;width:15px;height:3px;border-radius:2px;background:#a6d4e8}
+@keyframes ttrPhoneTurn{0%,17%,100%{transform:rotate(-17deg)}48%,68%{transform:rotate(72deg)}}
+@media(prefers-reduced-motion:reduce){.phone-shell{animation:none}}
+/* Loading adds an explicit per-circuit power-up roster. */
+.load-powerups{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;min-height:23px;margin-top:6px}
+.load-powerups b{color:#ffe087;font-size:clamp(9px,1.4vw,12px);letter-spacing:.06em}
+.load-powerups .power-chip{border:1px solid #6c95c8;background:#112b59d9;border-radius:6px;padding:3px 9px;font-size:clamp(9px,1.5vw,12px);font-weight:850;color:#eaf4ff}
+@media(max-height:470px) and (orientation:landscape){.load-powerups{min-height:16px;margin-top:2px}.load-powerups .power-chip{padding:1px 6px}}
+
+/* v0.13.6.14: portrait orientation instructional animation, isolated from the text. */
+.orientation-overlay{display:none;gap:clamp(12px,2.7vh,22px)!important;justify-content:center;padding:12px 18px!important}
+.rotate-phone{width:168px!important;height:150px!important;min-height:150px!important;margin:0 0 7px!important;overflow:visible!important;animation:none!important;transform:none!important;flex:none!important}
+.phone-shell{width:64px!important;height:112px!important;box-sizing:border-box!important;position:relative!important;animation:ttrRotateScreen 3s cubic-bezier(.65,.02,.27,1) infinite!important;transform-origin:center center!important;will-change:transform;filter:drop-shadow(0 6px 10px rgba(0,0,0,.35))}
+@keyframes ttrRotateScreen{0%,15%{transform:rotate(0deg)}42%,67%{transform:rotate(90deg)}86%,100%{transform:rotate(0deg)}}
+.rotate-phone::after{content:'↻';position:absolute;right:-8px;top:35px;font-size:42px;color:#ffe17b;text-shadow:0 2px 6px #061326;animation:ttrArrowPulse 3s infinite;pointer-events:none}
+@keyframes ttrArrowPulse{0%,12%,88%,100%{opacity:.25}40%,70%{opacity:1}}
+.orientation-overlay h2,.orientation-overlay p{flex:none;position:relative!important;z-index:3;margin:0!important;max-width:95vw!important}
+.orientation-overlay h2{font-size:clamp(20px,7.2vw,34px)!important;line-height:1.1!important}
+.orientation-overlay p{font-size:clamp(12px,3.3vw,16px)!important;line-height:1.4!important}
+@media(max-height:490px){.rotate-phone{height:118px!important;min-height:118px!important}.phone-shell{width:52px!important;height:96px!important}}
+
+/* No concept image on the race-loading screen. Minimap is the focus. */
+.circuit-load-content{display:flex!important;justify-content:center!important;align-items:center!important;gap:0!important}
+.circuit-load-side{width:min(100%,600px)!important;max-width:600px!important;flex:1 1 auto!important;min-width:0!important}
+.circuit-load-side canvas{display:block;width:100%!important;max-width:500px!important;height:auto!important;max-height:27vh!important;object-fit:contain;margin:0 auto}
+.circuit-load-card{max-width:min(760px,95vw)!important}
+
+/* Keep race results and the action buttons inside a single landscape viewport. */
+#screen:has(.resultsPanel.compact){padding:4px 8px!important;align-items:center!important;justify-content:center!important;overflow:hidden!important}
+.panel.resultsPanel.compact{display:flex;flex-direction:column;box-sizing:border-box;width:min(840px,100%)!important;height:calc(100dvh - 8px)!important;max-height:calc(100dvh - 8px)!important;overflow:hidden!important;padding:9px 13px max(9px,env(safe-area-inset-bottom))!important;border-radius:13px!important;gap:2px;min-height:0}
+.resultsPanel.compact .flag-tape,.resultsPanel.compact .eyebrow{display:none!important}
+.resultsPanel.compact .resultTitle{font-size:clamp(17px,4.3vh,23px)!important;line-height:1.05!important;margin:2px 0!important;flex:none!important}
+.resultsPanel.compact .resultSummary{display:flex!important;gap:6px!important;margin:2px 0!important;flex:none!important}
+.resultsPanel.compact .resultCard{display:flex!important;align-items:center!important;gap:6px!important;flex:1;min-width:0;padding:4px 8px!important;font-size:clamp(10px,2.6vh,13px)!important}
+.resultsPanel.compact .resultCard b{font-size:clamp(8px,2.1vh,10px)!important;margin:0!important;white-space:nowrap}
+.resultsPanel.compact .results{width:100%!important;flex:1 1 auto!important;min-height:0!important;table-layout:fixed!important;font-size:clamp(10px,2.3vh,13px)!important;line-height:1.05!important}
+.resultsPanel.compact .results tbody{height:100%!important}
+.resultsPanel.compact .results tr{height:12%!important}
+.resultsPanel.compact .results td{padding:0 4px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;max-height:28px!important}
+.resultsPanel.compact .menu-row{margin:2px 0 0!important;display:flex!important;flex:none!important;justify-content:center!important;gap:8px!important;flex-wrap:nowrap!important;min-height:35px!important}
+.resultsPanel.compact .menu-row .btn{display:inline-flex!important;align-items:center;justify-content:center;font-size:clamp(10px,2.5vh,13px)!important;padding:4px 16px!important;min-height:34px!important;box-shadow:none!important;white-space:nowrap}
+@media(max-height:410px){.panel.resultsPanel.compact{padding:5px 10px 6px!important;gap:0!important}.resultsPanel.compact .resultTitle{font-size:16px!important}.resultsPanel.compact .resultSummary{margin:0!important}.resultsPanel.compact .resultCard{padding:2px 5px!important}.resultsPanel.compact .menu-row{min-height:30px!important}.resultsPanel.compact .menu-row .btn{min-height:29px!important;font-size:11px!important}}
+
+/* v0.13.6.14 orientation: only the handset rotates, no arrows, circles or glyphs. */
+#orientationLock .rotate-phone::before,#orientationLock .rotate-phone::after,
+#orientationLock .rotate-phone span{display:none!important;content:none!important;animation:none!important}
+#orientationLock .phone-wheel,#orientationLock .phone-track{display:none!important}
+#orientationLock .phone-shell{animation:ttrRotateScreen 3s cubic-bezier(.65,.02,.27,1) infinite!important}
+
+/* The complete splash artwork stays visible. The transparent full-image tap target
+   contains plain floating lettering, never a CTA button panel. */
+#splash #enterGame{position:absolute!important;inset:0!important;z-index:4!important;width:100%!important;height:100%!important;max-width:none!important;margin:0!important;padding:0 12px max(18px,env(safe-area-inset-bottom))!important;
+ display:flex!important;align-items:flex-end!important;justify-content:center!important;background:transparent!important;border:0!important;outline:none!important;box-shadow:none!important;border-radius:0!important;
+ font:900 clamp(15px,3vw,24px)/1.4 system-ui,sans-serif!important;letter-spacing:.15em!important;color:#fff9d7!important;text-shadow:0 3px 7px #041024,0 1px 2px #020614,0 0 13px #091529!important;
+ -webkit-tap-highlight-color:transparent!important;animation:floatStartWords 2.5s ease-in-out infinite!important;cursor:pointer}
+#splash #enterGame[hidden]{display:none!important}
+#splash #enterGame:focus-visible{outline:2px dashed #fff3af!important;outline-offset:-10px!important}
+@keyframes floatStartWords{0%,100%{color:#fff9d7}50%{color:#fce2a2}}
+#splash .splash-inner{background:none!important}
+#splash .flag-stripe{display:none!important}
+
+/* Pre-race: three available power-ups in the upper-right header slots. */
+.circuit-load-head{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:10px!important}
+.circuit-load-head .load-powerups{display:grid!important;grid-template-columns:repeat(3,minmax(55px,1fr));gap:4px!important;flex:0 0 min(47%,270px);margin:0!important;padding:0!important;min-height:0!important;justify-content:end!important;background:none!important}
+.circuit-load-head .load-powerups b{display:none!important}
+.circuit-load-head .power-chip{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;text-align:center;
+ padding:5px 3px!important;border:1px solid #86b1db!important;border-radius:6px!important;background:linear-gradient(#143865,#081936)!important;font-size:clamp(8px,1.45vw,12px)!important;line-height:1.08;white-space:nowrap}
+.circuit-load-head .power-chip .up-icon{font-size:clamp(15px,2.9vw,23px);line-height:1.2}
+.circuit-load-head .power-chip.unavailable{opacity:.35;filter:grayscale(1)}
+@media(max-height:400px) and (orientation:landscape){.circuit-load-head .power-chip{padding:1px 2px!important}}
+
+/* v0.13.6.15: minimal race HUD and thumb-friendly safe-area controls. */
+#hud #mini,#hud .hudTop .itemBlock{display:none!important}
+#controls{left:max(21px,calc(env(safe-area-inset-left) + 13px))!important;right:max(21px,calc(env(safe-area-inset-right) + 13px))!important;bottom:max(17px,calc(env(safe-area-inset-bottom) + 13px))!important}
+#hud #pauseBtn,#hud #muteBtn{right:max(20px,calc(env(safe-area-inset-right) + 13px))!important}
+/* Removing manual jump frees the right-hand control cluster. */
+#controls #jump{display:none!important}
+
+/* v0.13.6.34 — approved v0.13.6.15 art restored byte-for-byte.
+   Dedicated wide artwork only stretches peripheral background, never cars or logo.
+   No blur, gradients, fades, masks, bars, or replacement illustration. */
+#splash{background:#101b32!important;isolation:isolate}
+#splash::before,#splash::after{display:none!important;content:none!important;filter:none!important}
+#splash>.ttr-splash-picture{position:absolute!important;inset:0!important;display:block!important;width:100%!important;height:100%!important;z-index:1!important;overflow:hidden!important;pointer-events:none!important}
+#splash>.ttr-splash-picture>.splash-wallpaper{display:block!important;position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center!important;filter:none!important;image-rendering:auto!important}
+#splash>.splash-inner{position:relative!important;z-index:2!important;background:none!important;pointer-events:none!important}
+#splash #enterGame{pointer-events:auto!important;position:absolute!important;inset:0!important;
+ width:100%!important;height:100%!important;max-width:none!important;margin:0!important;
+ padding:0 14px max(14px,env(safe-area-inset-bottom))!important;
+ display:flex!important;align-items:flex-end!important;justify-content:center!important;
+ border:0!important;outline:none!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;
+ font:900 clamp(12px,2.2vw,23px)/1.35 system-ui,sans-serif!important;letter-spacing:.12em!important;
+ color:#fff8df!important;text-shadow:0 2px 3px #0e1931,0 0 8px #111e32!important;
+ animation:none!important;cursor:pointer;-webkit-tap-highlight-color:transparent!important}
+#splash #enterGame[hidden]{display:none!important}
+#splash #enterGame:focus-visible{outline:3px dashed #ffe18c!important;outline-offset:-7px!important}
+
+/* v0.13.6.34 — pause in its own top-right HUD slot, not on top of timer.
+   Deliberately reserve horizontal space for the icon. */
+#hud .hudTop{right:max(88px,calc(env(safe-area-inset-right) + 80px))!important;top:max(12px,calc(env(safe-area-inset-top) + 8px))!important}
+#hud #pauseBtn{position:absolute!important;top:max(12px,calc(env(safe-area-inset-top) + 8px))!important;
+ right:max(23px,calc(env(safe-area-inset-right) + 14px))!important;
+ display:flex!important;align-items:center!important;justify-content:center!important;
+ width:48px!important;height:46px!important;min-width:48px!important;min-height:46px!important;
+ padding:0!important;border:2px solid #77c9e1!important;border-radius:11px!important;
+ background:#071c30ee!important;box-shadow:0 3px 8px #05102380!important;
+ font:900 21px/1 system-ui,sans-serif!important;touch-action:manipulation!important;z-index:2}
+#hud #muteBtn{display:none!important}
+/* A compact secondary pane inside pause so it works on short landscape phones. */
+.pause-card{overflow-y:auto;overscroll-behavior:contain}
+.pause-audio{flex:0 0 auto;min-height:34px;border-top:1px solid #6278bc;margin-top:2px;touch-action:manipulation}
+.pause-audio summary{display:flex;align-items:center;justify-content:center;cursor:pointer;list-style:none;
+ min-height:35px;padding:5px 12px;border:1px solid #729ccb;background:#172a66;
+ font:900 clamp(12px,3vh,15px)/1.2 system-ui,sans-serif;letter-spacing:.06em;color:#d2f6ff}
+.pause-audio summary::-webkit-details-marker{display:none}
+.pause-audio summary:focus-visible{outline:2px solid #ffe681;outline-offset:-3px}
+.pause-audio-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px;padding:10px 2px 2px}
+.pause-audio-controls label{display:flex;flex-direction:column;gap:5px;min-width:0;color:#d7ecfc;
+ font:750 11px/1.1 system-ui,sans-serif}
+.pause-audio-controls input[type=range]{display:block;width:100%;height:24px;margin:0;accent-color:#ffe681;touch-action:pan-x;cursor:pointer}
+.pause-audio-mute{grid-column:1/-1;min-height:37px;touch-action:manipulation;border:1px solid #75bee1;
+ background:#153657;color:#e3f8ff;border-radius:5px;font:850 13px system-ui,sans-serif}
+.pause-card.audio-open{justify-content:center;gap:clamp(4px,.9vh,8px)}
+.pause-card.audio-open .pause-preview,.pause-card.audio-open .pause-choices,.pause-card.audio-open .pause-footer{display:none!important}
+@media(max-height:400px) and (orientation:landscape){.pause-card{padding:8px 15px!important;gap:4px!important}
+ .pause-audio-controls{gap:4px 12px;padding:5px 2px 2px}
+ .pause-audio-controls label{gap:1px;font-size:10px}
+ .pause-audio-controls input[type=range]{height:20px}
+ .pause-audio-mute{min-height:31px}
+ .pause-audio summary{min-height:30px}
+}
+
+/* v0.13.6.34 — translucent control SURFACES, with fully opaque text and generous touch targets. */
+#controls .control{
+ background:linear-gradient(155deg,rgba(19,61,90,.46),rgba(4,21,41,.56))!important;
+ border:1.5px solid rgba(180,223,250,.68)!important;
+ box-shadow:inset 0 1px 2px rgba(255,255,255,.15),0 2px 5px rgba(1,7,19,.26)!important;
+ color:#f6fbff!important;
+ text-shadow:0 1px 3px rgba(0,10,20,.92)!important;
+ opacity:1!important;
+}
+#controls .control.active{
+ background:linear-gradient(155deg,rgba(244,184,59,.77),rgba(220,127,43,.81))!important;
+ border-color:rgba(255,235,160,.9)!important;
+ color:#13263c!important;
+ text-shadow:none!important;
+ box-shadow:0 1px 4px rgba(3,14,27,.34)!important;
+}
+#hud .statBlock{
+ background:rgba(4,22,42,.43)!important;
+ border:1px solid rgba(115,192,226,.45)!important;
+ box-shadow:0 2px 5px rgba(0,0,0,.17)!important;
+}
+#hud #pauseBtn{
+ background:rgba(5,29,50,.48)!important;
+ border-color:rgba(144,216,237,.62)!important;
+ box-shadow:0 2px 5px rgba(0,0,0,.2)!important;
+ color:#f9ffff!important;
+}
+
+/* v0.13.6.50: fixed-label, fixed-width ten-segment stat scale. */
+#garageBars{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;column-gap:12px!important;row-gap:5px!important;min-width:0!important;}
+#garageBars .garage-stats{display:grid!important;grid-template-columns:minmax(82px,96px) minmax(0,1fr) 37px!important;align-items:center!important;gap:5px!important;min-width:0!important;width:100%!important;margin:0!important;font-size:10px!important;}
+#garageBars .garage-stat-label{white-space:nowrap!important;overflow:visible!important;font-size:10px!important;}
+#garageBars .rail{display:grid!important;grid-template-columns:repeat(10,minmax(0,1fr))!important;gap:1px!important;width:100%!important;height:11px!important;padding:1px!important;box-sizing:border-box!important;overflow:hidden!important;background:#071525!important;border:1px solid #5a7893!important;border-radius:2px!important;}
+#garageBars .rail i{display:block!important;min-width:0!important;background:#243b51!important;border-radius:1px!important;}
+#garageBars .rail i.filled{background:linear-gradient(#ffe68a,#e9a641)!important;}
+#garageBars .garage-stat-value{text-align:right!important;white-space:nowrap!important;font-size:9px!important;}
+@media(max-height:470px) and (orientation:landscape){#garageBars{column-gap:9px!important;row-gap:3px!important;}#garageBars .garage-stats{grid-template-columns: minmax(76px,88px) minmax(0,1fr) 34px!important;gap:4px!important;}#garageBars .garage-stat-label{font-size:9px!important;}#garageBars .rail{height:10px!important;}}
+@media(max-width:680px){#garageBars{grid-template-columns:minmax(0,1fr)!important;}#garageBars .garage-stats{grid-template-columns: minmax(85px,100px) minmax(0,1fr) 37px!important;}}
+
+/* v75 · Tuono V8: correct GARAGE LIST ICON only. Main-menu animation and turntable untouched. */
+#garageScreen .car-choice-preview[data-image="tuono"]{transform:scaleX(-1);transform-origin:50% 50%;}

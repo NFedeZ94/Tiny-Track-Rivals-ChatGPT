@@ -1,0 +1,16 @@
+
+#garageScreen .garage-panel{display:flex!important;flex-direction:column!important;gap:4px!important}
+#garageScreen .garage-header{display:flex!important;flex:0 0 auto!important;align-items:center!important;justify-content:space-between!important;gap:6px!important;min-height:34px!important;position:relative!important;z-index:3!important;padding:0 4px 4px!important;border-bottom:1px solid #587c9a!important}
+#garageScreen .garage-header h2{margin:0!important;flex:1 1 auto!important;min-width:0!important;font-size:clamp(15px,2.9vw,25px)!important}
+#garageScreen .garage-header button{position:static!important;transform:none!important;flex:0 0 auto!important;margin:0!important;max-width:38%!important;white-space:nowrap!important;font-size:clamp(9px,1.35vw,12px)!important;padding:5px 7px!important;min-height:28px!important}
+#garageScreen .garage-layout{flex:1!important;height:auto!important;min-height:0!important;grid-template-columns:minmax(0,1.03fr) minmax(0,1.42fr)!important;margin-top:0!important;gap:7px!important}
+#garageScreen .garage-stage{display:flex!important;flex-direction:column!important;padding:5px!important;min-height:0!important}
+#garageScreen #garageCanvas{height:clamp(110px,43dvh,265px)!important;flex:1 1 auto!important;min-height:0!important;object-fit:contain!important}
+#garageScreen .garage-specs{flex:0 0 auto!important;max-height:65px!important;overflow:hidden!important}
+#garageScreen .garage-specs h3{font-size:clamp(12px,2.2vw,17px)!important;margin:2px 0!important}
+#garageScreen .garage-stats{margin:1px 0!important;font-size:9px!important;grid-template-columns:65px 1fr 16px!important}
+#garageScreen .garage-list{min-height:0!important;overflow:auto!important;overscroll-behavior:contain!important;gap:3px!important}
+#garageScreen .car-choice-list{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:4px!important}
+#garageScreen .car-choice{min-height:33px!important;padding:3px!important}
+#garageScreen .car-choice-preview{max-height:32px!important}
+@media(max-height:420px) and (orientation:landscape){#garageScreen .garage-specs{max-height:54px!important}#garageScreen .garage-header{min-height:29px!important}}

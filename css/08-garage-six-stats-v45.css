@@ -1,0 +1,16 @@
+
+#garageScreen #garageBars{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:3px 8px!important;min-height:0!important}
+#garageScreen #garageBars .garage-stats{display:grid!important;grid-template-columns:minmax(0,86px) minmax(0,1fr) 30px!important;gap:4px!important;min-width:0!important;align-items:center!important;margin:0!important;font-size:9px!important}
+#garageScreen #garageBars .garage-stat-label{font-size:9px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:clip!important}
+#garageScreen #garageBars .rail{height:10px!important;min-width:0!important}
+#garageScreen #garageBars .garage-stat-value{font-size:9px!important}
+#garageScreen .garage-specs{flex:0 0 auto!important;min-height:0!important;padding:2px 0!important}
+#garageScreen .garage-specs h3{margin:0 0 2px!important;line-height:1.1!important}
+@media (max-height:430px) and (orientation:landscape){#garageScreen #garageBars{gap:2px 5px!important}#garageScreen #garageBars .garage-stats{grid-template-columns:minmax(0,76px) minmax(0,1fr) 27px!important;gap:3px!important}#garageScreen #garageBars .garage-stat-label{font-size:8px!important}#garageScreen #garageBars .rail{height:9px!important}}
+/* v0.13.6.61: static stage, vehicle animation rendered inside canvas, fixed ground plane. */
+#screen.v11-screen #menuCar,#garageScreen #garageCanvas{animation:none!important;transform:none!important;filter:none!important;will-change:auto!important;}
+.garage-stage:before,.v11-car-stage:before{display:none!important;}
+
+/* v60: garage keeps ONLY the internal 360-degree rotation. */
+#screen.v11-screen #menuCar,#garageScreen #garageCanvas{animation:none!important;transform:none!important;filter:none!important;will-change:auto!important;}
+#garageScreen .garage-stage:before,#screen.v11-screen .v11-car-stage:before{display:none!important;content:none!important;box-shadow:none!important;}

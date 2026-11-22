@@ -1,0 +1,25 @@
+
+/* All SEVEN mode/navigation glyphs obey the same foreground palette, contrast and dimensions. */
+#screen.v11-screen .v11-options #garageBtn:not(.selected),
+#screen.v11-screen .v11-options #settingsBtn:not(.selected){color:#fff0b4!important;}
+#screen.v11-screen .v11-options #garageBtn.selected,
+#screen.v11-screen .v11-options #settingsBtn.selected{color:#152451!important;}
+#screen.v11-screen .v11-options #garageBtn::after,
+#screen.v11-screen .v11-options #settingsBtn::after{
+  content:""!important;background-color:currentColor!important;opacity:.95!important;
+  width:clamp(18px,3.9vh,25px)!important;height:clamp(18px,3.9vh,25px)!important;
+  mask-repeat:no-repeat;mask-position:center;mask-size:contain;
+  -webkit-mask-repeat:no-repeat;-webkit-mask-position:center;-webkit-mask-size:contain;
+}
+#screen.v11-screen .v11-options #garageBtn::after{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m5%2015%201.5-6a2%202%200%200%201%202-1.5h7a2%202%200%200%201%202%201.5L19%2015%22%2F%3E%3Cpath%20d%3D%22M4%2015h16v5H4zM7%2020v2m10-2v2M8%2011h8%22%2F%3E%3Cpath%20d%3D%22M7.2%2017.5h.8m8%200h.8%22%2F%3E%3C%2Fsvg%3E")!important;
+  mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m5%2015%201.5-6a2%202%200%200%201%202-1.5h7a2%202%200%200%201%202%201.5L19%2015%22%2F%3E%3Cpath%20d%3D%22M4%2015h16v5H4zM7%2020v2m10-2v2M8%2011h8%22%2F%3E%3Cpath%20d%3D%22M7.2%2017.5h.8m8%200h.8%22%2F%3E%3C%2Fsvg%3E")!important;
+}
+#screen.v11-screen .v11-options #settingsBtn::after{
+  -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10%202h4l.5%202.1%202%201.1%202-.7%202%203.5-1.5%201.6v2.8l1.5%201.6-2%203.5-2-.7-2%201.1L14%2020h-4l-.5-2.1-2-1.1-2%20.7-2-3.5L5%2012.4V9.6L3.5%208l2-3.5%202%20.7%202-1.1z%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2211%22%20r%3D%223%22%2F%3E%3C%2Fsvg%3E")!important;
+  mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%222.15%22%20stroke-linecap%3D%22square%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M10%202h4l.5%202.1%202%201.1%202-.7%202%203.5-1.5%201.6v2.8l1.5%201.6-2%203.5-2-.7-2%201.1L14%2020h-4l-.5-2.1-2-1.1-2%20.7-2-3.5L5%2012.4V9.6L3.5%208l2-3.5%202%20.7%202-1.1z%22%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2211%22%20r%3D%223%22%2F%3E%3C%2Fsvg%3E")!important;
+}
+@media(max-width:620px) and (orientation:landscape){
+  #screen.v11-screen .v11-options #garageBtn::after,
+  #screen.v11-screen .v11-options #settingsBtn::after{width:18px!important;height:18px!important;}
+}

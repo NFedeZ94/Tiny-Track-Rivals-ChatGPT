@@ -1,0 +1,47 @@
+
+/* v0.13.6.68: six modes + garage remain; Settings is alone in the bottom bar. */
+#screen.v11-screen .v11-options{gap:clamp(4px,1.65vh,8px);}
+#screen.v11-screen .v11-options .retro-option{padding-left:clamp(33px,4vw,40px)!important;}
+#screen.v11-screen .v11-foot .ttr-settings-launch{display:inline-flex;align-items:center;gap:7px;min-height:23px;padding:2px 11px;letter-spacing:.085em;border-color:#ffe8a4;background:linear-gradient(#344586,#18275e);color:#fff1ac;font-size:clamp(10px,2.2vh,14px);}
+#screen.v11-screen .v11-foot .ttr-settings-launch:focus-visible{outline:2px solid #fff7cc;outline-offset:1px;}
+.ttr-settings-gear{font-family:Arial,sans-serif;line-height:1;display:inline-block;font-size:1.18em;color:inherit;}
+/* Legacy mouse-cursor silhouette from the early selection style: white fill + navy stroke.
+   Animate only the cursor; menu item/underline remain fixed. */
+#screen.v11-screen .v11-options .retro-option::before{
+ content:''!important;display:none!important;
+ position:absolute!important;left:5px!important;top:50%!important;
+ width:clamp(17px,3.4vh,21px)!important;height:clamp(22px,4vh,27px)!important;
+ background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2230%22%20viewBox%3D%220%200%2024%2030%22%3E%3Cpath%20d%3D%22M2%202V24L8.7%2018.2L13.2%2028L17.4%2026L12.8%2016.4H22Z%22%20fill%3D%22%23fef5d5%22%20stroke%3D%22%2310214e%22%20stroke-width%3D%222.5%22%20stroke-linejoin%3D%22miter%22%2F%3E%3Cpath%20d%3D%22M4.6%205.3V18.6L7.9%2015.4L14.5%2023.4%22%20fill%3D%22none%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.5%22%2F%3E%3C%2Fsvg%3E")!important;
+ background-size:contain!important;background-repeat:no-repeat!important;background-position:center!important;
+ color:transparent!important;text-shadow:none!important;
+ opacity:1!important;pointer-events:none!important;
+ transform:translate3d(0,-50%,0)!important;
+ animation:none!important;
+}
+#screen.v11-screen .v11-options .retro-option.selected::before,
+#screen.v11-screen .v11-options .retro-option:focus-visible::before{display:block!important;animation:ttrV66MouseCursor .65s steps(2,end) infinite!important;}
+@keyframes ttrV66MouseCursor{0%,100%{transform:translate3d(0,-50%,0)}50%{transform:translate3d(4px,-50%,0)}}
+@media(prefers-reduced-motion:reduce){#screen.v11-screen .v11-options .retro-option.selected::before,#screen.v11-screen .v11-options .retro-option:focus-visible::before{animation:none!important;}}
+/* Self-contained viewport dialog, including when reparented to <body> for mobile Safari. */
+body #retroSettings[open]{position:fixed!important;inset:0!important;z-index:70!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:10px!important;background:rgba(2,8,29,.9)!important;overflow:auto!important;box-shadow:none!important;}
+body #retroSettings:not([open]){display:none!important;}
+body #retroSettings .v11-settings-card{width:min(750px,96vw);max-height:calc(100dvh - 20px);overflow-y:auto;overscroll-behavior:contain;display:block;padding:clamp(9px,2vh,14px);}
+body #retroSettings .v11-settings-head{font-size:clamp(19px,4.4vh,25px);}
+body #retroSettings .ttr-v66-settings-common{display:grid;grid-template-columns:minmax(170px,1.3fr) minmax(110px,.9fr) minmax(120px,.9fr);gap:8px;align-items:end;margin:9px 0 5px;}
+body #retroSettings .ttr-v66-settings-common label{color:#f9e9ae;font:800 12px system-ui,sans-serif;display:flex;flex-direction:column;gap:4px;min-width:0;}
+body #retroSettings #settingsLanguage{min-height:31px;width:100%;padding:4px 8px;color:#f2f6ff;background:#101e4a;border:2px solid #88bada;font:750 12px system-ui,sans-serif;}
+body #retroSettings .ttr-v66-settings-common .mini-btn{min-height:31px;padding:4px 6px;background:#293f7c;color:#ffe7a4;border:2px solid #a3caff;font:800 clamp(10px,2.4vh,13px) Impact,Arial,sans-serif;cursor:pointer;}
+body #retroSettings .ttr-v66-audio-status{grid-column:1/-1;min-height:14px;color:#cdeaf6;font:750 10px system-ui,sans-serif;}
+body #retroSettings .ttr-v66-settings-group{border-top:1px solid #788ac2;padding-top:6px;margin:6px 0 5px;color:#ffe5a6;font:900 clamp(12px,2.7vh,16px) Impact,Arial,sans-serif;letter-spacing:.07em;}
+body #retroSettings .settings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 12px;margin:0 0 7px;}
+body #retroSettings .settings label,body #retroSettings .audio-settings label{min-width:0;font-size:clamp(10px,2.5vh,13px);}
+body #retroSettings .settings select{min-width:0;width:100%;}
+body #retroSettings .audio-settings{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px 11px;border-top:1px solid #6574ad;padding-top:8px;}
+@media (max-width:740px) and (orientation:landscape){
+ #screen.v11-screen .v11-options .retro-option{padding-left:31px!important;}
+ #screen.v11-screen .v11-options .retro-option::before{width:16px!important;height:21px!important;left:5px!important;}
+ body #retroSettings .ttr-v66-settings-common{grid-template-columns:minmax(135px,1.4fr) repeat(2,minmax(95px,1fr));gap:6px;}
+ body #retroSettings .settings{grid-template-columns:repeat(3,minmax(0,1fr));}
+ body #retroSettings .audio-settings{grid-template-columns:repeat(2,minmax(0,1fr));}
+}
+@media (orientation:portrait){body #retroSettings .ttr-v66-settings-common{grid-template-columns:1fr 1fr;}body #retroSettings .ttr-v66-language{grid-column:1/-1;}body #retroSettings .audio-settings{grid-template-columns:1fr 1fr;}body #retroSettings .settings{grid-template-columns:1fr 1fr;}}

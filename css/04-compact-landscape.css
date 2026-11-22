@@ -1,0 +1,19 @@
+
+/* v0.13.6.39 compact landscape screens */
+#garageScreen{inset:0!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;padding:0!important;align-items:stretch!important;justify-content:stretch!important;overflow:hidden!important}
+#garageScreen .garage-panel{width:100%!important;max-width:none!important;height:100%!important;max-height:100dvh!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;overflow:auto!important}
+#careerScreen,#careerMissionsScreen{inset:0!important;width:100vw!important;height:100dvh!important;overflow:hidden!important;padding:0!important;align-items:stretch!important;justify-content:stretch!important}
+#careerScreen .career-panel,#careerMissionsScreen .career-panel{width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;margin:0!important;border-radius:0!important;box-sizing:border-box!important;overflow:hidden!important;display:flex;flex-direction:column;padding:clamp(6px,1.7vh,12px)!important}
+#careerScreen .career-layout{flex:1;min-height:0;margin-top:5px;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+#careerScreen .career-overview{min-height:0;overflow:hidden;gap:5px}
+#careerScreen .career-block{padding:6px}
+#careerScreen .career-sub{display:none}
+#careerScreen .career-missions{min-height:0;overflow:hidden}
+#careerScreen .career-list{max-height:none;flex:1;min-height:0;overflow:hidden;grid-template-columns:1fr}
+#careerScreen .career-mission{padding:9px}
+#careerScreen #careerAllMissions{margin-top:8px}
+#careerMissionsScreen .career-all-list{flex:1;min-height:0;max-height:none;overflow:auto;grid-template-columns:repeat(2,minmax(0,1fr))}
+#careerScreen .career-overview>.career-block:nth-of-type(2){display:none}
+#careerScreen #careerSaveNote{display:none}
+@media(max-height:440px) and (orientation:landscape){#careerScreen .career-header h2{font-size:19px}#careerScreen .career-block h3{font-size:12px;margin-bottom:3px}#careerScreen .career-stat{padding:3px}#careerScreen .career-select{min-height:31px;padding:4px}#careerScreen .career-btn{min-height:32px;padding:4px}#careerScreen .career-hint{display:none}#garageScreen .garage-panel{padding:5px 9px!important}#garageScreen #garageCanvas{height:clamp(115px,32vh,200px)!important}}
+@media(max-width:520px) and (orientation:portrait){#careerScreen .career-layout{grid-template-columns:1fr;overflow:auto}#careerScreen .career-overview{overflow:visible}#careerScreen .career-missions{min-height:150px}#careerMissionsScreen .career-all-list{grid-template-columns:1fr}}
