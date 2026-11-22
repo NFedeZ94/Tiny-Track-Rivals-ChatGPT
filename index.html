@@ -1,6 +1,6 @@
 <!-- Tiny Track Rivals v0.13.6.81: entry ramp overpass depth, diamond power-up map legend, wide animated jam spill; based on 78. Previous notes: v0.13.6.78: legal corner overtake camera, top-down victory 360, bridge exit overpass and minimap shortcut; based on 77. Previous notes: v0.13.6.77: ramp/bridge underpass, elimination smooth group camera, milk layering, coffee and jam motion; based on 76. Previous notes: v0.13.6.76: Aero R race facing +180, 384-frame seam-continuous 360 and garage silhouette-size match. Based on v75. Original notes: Tuono V8 garage thumbnail isolated orientation fix; Aero R V6.4 solid fender shell and sporty five twin-spoke wheels, updated 192-frame garage, equalized presentation size; unchanged menu Tuono and race physics. -->
 <!doctype html>
-<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1a2e"><meta name="ttr-build" content="v0.13.6.80"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tiny Track Rivals"><meta name="application-name" content="Tiny Track Rivals"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><link rel="manifest" href="manifest.webmanifest"><title>Tiny Track Rivals — Colazione Turbo</title><style>
+<html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0c1a2e"><meta name="ttr-build" content="v0.13.6.82"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Tiny Track Rivals"><meta name="application-name" content="Tiny Track Rivals"><link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png"><link rel="icon" type="image/png" sizes="64x64" href="favicon-64.png"><link rel="manifest" href="manifest.webmanifest"><title>Tiny Track Rivals — Colazione Turbo</title><style>
 
 :root{color-scheme:dark;--cyan:#60d9ff;--yellow:#ffd55d;--ink:#071326;--line:#345577;--orange:#f39b43}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#081324;color:#f0f7ff;font-family:system-ui,-apple-system,'Arial Black',sans-serif;touch-action:none;user-select:none}#game{position:fixed;inset:0;width:100vw;height:100dvh;display:block;background:#7a5842}.screen{position:absolute;inset:0;z-index:8;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,rgba(3,10,24,.94),rgba(8,36,62,.84)),repeating-linear-gradient(45deg,#061b2b 0 35px,#122b43 35px 70px);padding:12px;overflow:auto;touch-action:pan-y}.panel{width:min(840px,100%);border:2px solid #5092bc;border-radius:22px;background:linear-gradient(170deg,#162f4e,#0a1a30 80%);box-shadow:0 18px 70px #000a,inset 0 0 35px #23688d22;padding:clamp(18px,4vw,40px);max-height:calc(100dvh - 24px);overflow-y:auto}.panel.resultsPanel{width:min(760px,100%);padding:clamp(16px,3vw,26px)}.panel.resultsPanel.compact{width:min(800px,100%);padding:16px 18px;overflow:hidden}.eyebrow{font-size:11px;letter-spacing:.2em;color:#86dfff;font-weight:850;margin:0 0 10px;text-transform:uppercase}.logo{font-weight:1000;font-style:italic;font-size:clamp(35px,8vw,83px);letter-spacing:-.055em;line-height:.94;color:#ffd054;text-shadow:3px 4px 0 #9f3c24,7px 8px 0 #06111e}.logo span{display:block;color:#fff;font-size:.48em;letter-spacing:.08em;text-shadow:3px 4px 0 #385a76}.sub{color:#bed1e2;line-height:1.45;font-size:14px;max-width:680px;margin:16px 0 22px}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.chip{padding:7px 10px;border-radius:99px;border:1px solid #446b86;background:#102e4b;color:#c8e2f8;font-size:12px;font-weight:700}.menu-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:20px}.resultsPanel .menu-row{margin-top:14px}.btn{touch-action:manipulation;border:2px solid #eccd76;border-radius:13px;background:linear-gradient(#fff3a5,#f5b73f);box-shadow:0 4px 0 #ab5d1f;color:#17203a;font-size:15px;font-weight:950;padding:13px 22px;cursor:pointer;text-align:center;min-height:48px}.btn.secondary{background:linear-gradient(#20466a,#123250);color:#e5f5ff;border-color:#5293b8;box-shadow:0 4px 0 #07182b}.btn:active{transform:translateY(3px);box-shadow:none}.settings{display:flex;flex-wrap:wrap;gap:14px;margin-top:19px}.settings label{display:flex;flex-direction:column;gap:5px;color:#add7ef;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.settings select{font-size:15px;background:#102943;color:#fff;border:1px solid #497ca2;padding:10px;border-radius:9px;min-width:130px}.note{font-size:12px;color:#a9c1d2;line-height:1.55;margin:17px 0 0}.resultTitle{font-size:clamp(28px,5vw,45px);font-weight:950;color:#ffe17d;margin:0 0 14px}.results{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}.results td{border-bottom:1px solid #3b5972;padding:8px 4px;vertical-align:middle}.results tr.me{color:#ffe395;font-weight:850}.results.compact{font-size:12px}.results.compact td{padding:5px 3px}.results td:first-child{width:44px}.resultSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 12px;margin:10px 0 14px}.resultCard{border:1px solid #36617d;background:#0b1f36;border-radius:12px;padding:8px 10px}.resultCard b{display:block;color:#8fe5fd;font-size:10px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}.variantDot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:7px;vertical-align:-1px;border:1px solid #ffffff99;box-shadow:0 0 0 1px #0a1325}#hud{position:fixed;inset:0;pointer-events:none;z-index:4;display:none}.hudTop{position:absolute;left:8px;right:8px;top:max(7px,env(safe-area-inset-top));display:flex;align-items:flex-start;justify-content:space-between;gap:5px}.statBlock{border:1px solid #3f829e;background:#071831df;border-radius:10px;padding:8px 11px;box-shadow:0 3px 0 #0008;min-width:82px}.statBlock small{font-size:9px;display:block;color:#8ce3ff;font-weight:850;letter-spacing:.08em}.statBlock strong{font-size:clamp(15px,2.8vw,23px);color:#fff}.itemBlock{border-color:#b78b41}.itemBlock strong{color:#ffde79}#hint{position:absolute;left:50%;top:23%;transform:translate(-50%,-50%);background:#04172bcf;border:1px solid #6bc9e8;color:#fff;font-size:clamp(17px,4vw,33px);font-weight:950;border-radius:12px;padding:12px 19px;text-align:center;opacity:0;transition:opacity .15s;white-space:nowrap}#hint.show{opacity:1}#controls{position:fixed;z-index:5;bottom:max(10px,env(safe-area-inset-bottom));left:10px;right:10px;display:none;pointer-events:none;justify-content:space-between;gap:10px}.ctrlGroup{display:flex;align-items:end;gap:8px;pointer-events:none}.control{border:2px solid #b1d7ef;background:linear-gradient(155deg,#214666d9,#07192de6);color:#fff;box-shadow:inset 0 1px 8px #ffffff25,0 4px 0 #010711bd;border-radius:18px;width:clamp(52px,12vw,76px);height:clamp(56px,14vw,81px);font-size:28px;font-weight:950;touch-action:none;pointer-events:auto;display:flex;align-items:center;justify-content:center}.control.small{font-size:14px;width:clamp(56px,12vw,72px);color:#ffdb7c}.control.active{background:#eabf52;color:#0a1c28;transform:translateY(3px);box-shadow:0 1px #010711}.hudBottom{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);font-size:10px;white-space:nowrap;color:#e3f5ff;background:#071c30bd;padding:5px 10px;border-radius:8px}#pauseBtn{pointer-events:auto;position:absolute;right:9px;top:calc(63px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:8px 13px}#mini{position:absolute;top:calc(70px + env(safe-area-inset-top));left:10px;width:140px;height:90px;background:#071b2acb;border:1px solid #417fa8;border-radius:8px}#orientation{display:none;position:fixed;inset:auto 20px 100px;z-index:3;text-align:center;color:#f5f9ff;font-size:11px;opacity:.8}#muteBtn{pointer-events:auto;position:absolute;right:9px;top:calc(101px + env(safe-area-inset-top));border-radius:9px;border:1px solid #77c9e1;background:#071c30dc;color:#f6ffff;font-weight:900;padding:7px 11px}@media(orientation:portrait){#mini{width:96px;height:64px;top:calc(68px + env(safe-area-inset-top))}#pauseBtn{top:calc(68px + env(safe-area-inset-top))}#muteBtn{top:calc(105px + env(safe-area-inset-top))}#orientation{display:block}.hudBottom{bottom:99px;font-size:9px}.control{height:62px;width:58px}.control.small{width:57px}}@media(max-height:500px){.panel{padding:15px}.sub{margin:7px 0}.menu-row{margin-top:8px}.settings{margin-top:8px}.note{margin-top:9px}.control{height:58px}.hudBottom{display:none}#mini{top:calc(58px + env(safe-area-inset-top))}}
 
@@ -1227,7 +1227,7 @@ body #trackSelect:not([hidden]){position:fixed;inset:0;z-index:81;display:flex;a
    
   </aside>
  </div>
- <footer class="v11-foot"><div class="v11-footer-btns"><button class="mini-btn ttr-settings-launch" id="settingsBtn" type="button" aria-controls="retroSettings" aria-haspopup="dialog"><span class="ttr-settings-gear" aria-hidden="true">⚙︎</span><span data-i18n="settings">IMPOSTAZIONI</span></button></div><span class="v11-version">v0.13.6.74</span></footer>
+ <footer class="v11-foot"><div class="v11-footer-btns"><button class="mini-btn ttr-settings-launch" id="settingsBtn" type="button" aria-controls="retroSettings" aria-haspopup="dialog"><span class="ttr-settings-gear" aria-hidden="true">⚙︎</span><span data-i18n="settings">IMPOSTAZIONI</span></button></div><span class="v11-version">v0.13.6.82</span></footer>
 </div>
 <details class="v11-settings" id="retroSettings" role="dialog" aria-modal="true" aria-label="Impostazioni"><summary data-i18n="settings">IMPOSTAZIONI</summary>
  <div class="v11-settings-card"><div class="v11-settings-head"><b data-i18n="settings">IMPOSTAZIONI</b><button id="closeSettings" type="button" aria-label="Chiudi">✕</button></div>
@@ -2650,6 +2650,139 @@ function drawRamp(ctx,o){
  // The bread lip is raised; an understated front-edge highlight makes it legible.
  ctx.strokeStyle='#ffe9c5b8';ctx.lineWidth=2.1;ctx.lineCap='round';
  ctx.beginPath();ctx.moveTo(-23,-39);ctx.quadraticCurveTo(0,-45,23,-39);ctx.stroke();
+ ctx.restore();
+}
+// v0.13.6.82: restore world/bridge/milk drawing helpers accidentally removed in v81.
+function paintBridgeDeck(){const ctx=bridgeCtx;
+ ctx.clearRect(0,0,WORLD_W,WORLD_H);
+ // Keep the identical toasted-bread bridge shape, but with raised deck lighting.
+  // The shortcut is visibly separate: a narrower raised wooden-toast bridge between
+  // two points of the course. It has a ramp at entry but is NEVER mandatory.
+  const bridge=()=>{ctx.beginPath();shortcutSamples.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));};
+  ctx.save();bridge();ctx.lineCap='round';ctx.lineJoin='round';ctx.shadowColor='#442c228a';ctx.shadowBlur=18;ctx.shadowOffsetY=13;ctx.strokeStyle='#905f3f';ctx.lineWidth=82;ctx.stroke();ctx.restore();
+  ctx.save();bridge();ctx.lineCap='round';ctx.lineJoin='round';ctx.strokeStyle='#e29f56';ctx.lineWidth=74;ctx.stroke();
+  bridge();ctx.strokeStyle='#c77736';ctx.lineWidth=66;ctx.stroke();bridge();ctx.strokeStyle='#f7d39a';ctx.lineWidth=58;ctx.stroke();ctx.restore();
+  for(let i=5;i<shortcutSamples.length-5;i+=3){const p=shortcutSamples[i],q=shortcutSamples[i+1],a=Math.atan2(q.y-p.y,q.x-p.x),nx=-Math.sin(a),ny=Math.cos(a);
+    ctx.strokeStyle=i%2===0?'#b67b4b7a':'#eac080ad';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(p.x-nx*26,p.y-ny*26);ctx.lineTo(p.x+nx*26,p.y+ny*26);ctx.stroke();
+  }
+ // A slight dark underside along the edges helps distinguish the underpass.
+}
+ // Entire burgundy puddle: tangent is X, jarward track normal is +Y.
+ // Single silhouette extends from the drivable lane to the tipped jar mouth.
+ function jamSpillPath(ctx){
+   ctx.beginPath();ctx.moveTo(-5,-98);
+   ctx.bezierCurveTo(-39,-103,-64,-74,-63,-31);
+   ctx.bezierCurveTo(-69,5,-59,48,-45,84);
+   ctx.bezierCurveTo(-53,108,-43,139,-27,165);
+   ctx.bezierCurveTo(-12,158,9,153,27,165);
+   ctx.bezierCurveTo(44,136,42,108,49,83);
+   ctx.bezierCurveTo(65,39,69,-10,57,-48);
+   ctx.bezierCurveTo(51,-87,20,-102,-5,-98);
+   ctx.closePath();
+ }
+ function paintWorld(){const ctx=trackCtx,W=WORLD_W,H=WORLD_H;
+  // Original cartoon breakfast-table world; no external sprites or copyrighted materials.
+  const wood=ctx.createLinearGradient(0,0,W,H);wood.addColorStop(0,'#a86a48');wood.addColorStop(.47,'#d19a65');wood.addColorStop(1,'#875638');
+  ctx.fillStyle=wood;ctx.fillRect(0,0,W,H);
+  for(let y=0;y<H;y+=91){ctx.fillStyle=y%182===0?'#fff3d00c':'#54382712';ctx.fillRect(0,y,W,90);ctx.strokeStyle='#65412531';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // A vast red gingham tablecloth and stitched hem, with warm, soft colours.
+  ctx.save();ctx.shadowColor='#412f30a1';ctx.shadowBlur=22;ctx.shadowOffsetY=18;
+  ctx.fillStyle='#f7e6d7';ctx.fillRect(70,65,W-140,H-120);ctx.restore();
+  for(let y=65;y<H-55;y+=74)for(let x=70;x<W-70;x+=74){
+    const xx=Math.floor((x-70)/74),yy=Math.floor((y-65)/74);
+    ctx.fillStyle=(xx+yy)%2?'#f0c8bc':'#fbf0e5';ctx.fillRect(x,y,74,74);
+    ctx.fillStyle='#a8554a1b';ctx.fillRect(x,y,74,2);ctx.fillRect(x,y,2,74);
+  }
+  ctx.strokeStyle='#e9dad0';ctx.lineWidth=8;ctx.setLineDash([7,9]);ctx.strokeRect(89,82,W-178,H-154);ctx.setLineDash([]);
+  // The course IS the uninterrupted gingham cloth. No tinted pavement or translucent curbs.
+  // The crumb edges alone define the winding route and reveal its driving direction.
+  // Pixel-toon racing boundary: hand-placed bread and biscuit crumbs, never plastic curbs.
+  // The lane remains the same softly compressed gingham fabric beneath them.
+  ctx.lineCap='round';ctx.lineJoin='round';
+  // Render ONLY individually validated marker positions (including tiny chips):
+  // no unchecked decorative scatter can invade the cloth driving corridor.
+  for(const marker of K.crumbMarkers(points,8)){
+    drawCrumb(ctx,marker.x,marker.y,marker.r,marker.seed);
+  }
+  // A single wide, irregular puddle runs from the jar lip to the race lane.
+  // Its central part still matches the existing sticky physics footprint.
+  ctx.save();ctx.translate(jamPatch.x,jamPatch.y);ctx.rotate(jamPatch.angle);
+  jamSpillPath(ctx);
+  const jamBase=ctx.createLinearGradient(-42,-75,48,158);
+  jamBase.addColorStop(0,'#79183b');jamBase.addColorStop(.45,'#a51f53');
+  jamBase.addColorStop(.82,'#bd2b60');jamBase.addColorStop(1,'#8a1a45');
+  ctx.fillStyle=jamBase;ctx.strokeStyle='#61152fcf';ctx.lineWidth=3.5;ctx.fill();ctx.stroke();
+  jamSpillPath(ctx);ctx.clip();
+  // Semi-opaque cooked fruit pulp: many irregular translucent lobes suspended
+  // inside darker syrup. Deterministic positions prevent shimmer or flicker.
+  for(let i=0;i<78;i++){
+    const h=n=>{const x=Math.sin(i*83.29+n*19.17)*43758.5453;return x-Math.floor(x);};
+    const x=(h(1)-.5)*112,y=-94+h(2)*254,rx=2.5+h(3)*7.6,ry=2+h(4)*6.3;
+    ctx.save();ctx.translate(x,y);ctx.rotate((h(5)-.5)*1.3);
+    ctx.fillStyle=i%5===0?'#e66677a8':i%3===0?'#781b35c4':'#c63b58a5';
+    ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#e67b8892';ctx.beginPath();ctx.ellipse(-rx*.18,-ry*.18,rx*.35,ry*.29,0,0,Math.PI*2);ctx.fill();ctx.restore();
+  }
+  // Tiny fruit flecks and embedded seeds, not reflective paint spots.
+  for(let i=0;i<54;i++){
+    const hash=n=>{const x=Math.sin(i*127.12+n*9.67)*17643.312;return x-Math.floor(x);};
+    const x=(hash(1)-.5)*109,y=-90+hash(2)*245;
+    ctx.fillStyle=i%4===0?'#e78e91c4':'#61213cd0';ctx.beginPath();
+    ctx.ellipse(x,y,.8+hash(3)*1.15,1.4+hash(4)*1.25,hash(5)*3,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+  // Elevated toast bridge lives in an independent overpass layer; ground cars
+  // going across the original track can pass visually UNDER its deck.
+  // Start/finish spans the actual full lane, including both sides of the line.
+  const f=trackPoint(0),ang=tangent(0),nx=-Math.sin(ang),ny=Math.cos(ang),fx=Math.cos(ang),fy=Math.sin(ang);
+  for(let row=0;row<3;row++)for(let col=-12;col<12;col++){
+    const cx=f.x+nx*(col*10+5)+fx*(row*10-10),cy=f.y+ny*(col*10+5)+fy*(row*10-10);
+    drawPoly(ctx,[[cx-nx*5-fx*5,cy-ny*5-fy*5],[cx+nx*5-fx*5,cy+ny*5-fy*5],[cx+nx*5+fx*5,cy+ny*5+fy*5],[cx-nx*5+fx*5,cy-ny*5+fy*5]],(row+col)%2?'#f9f5e9':'#292d3b');
+  }
+}
+
+// The milk is drawn from smoothly joined asymmetric lobes, not circles.
+// Rotation and deterministic waviness make the scattered splashes look poured.
+function milkOrganicPath(ctx,rx,ry,shape){
+ // Intentional uneven silhouette with rounded corners (no repeated circles or identical outlines).
+ const left=[
+  [.86,-.36],[1,.02],[.75,.32],[.37,.42],[.17,.84],[-.17,.63],
+  [-.43,.48],[-.99,.38],[-1.04,-.05],[-.68,-.25],[-.81,-.60],[-.27,-.78],[.11,-.57],[.48,-.54]
+ ];
+ const right=[
+  [1.02,-.25],[.90,.18],[.70,.38],[.43,.28],[.22,.74],[-.04,.56],
+  [-.30,.43],[-.53,.69],[-.70,.25],[-1.02,.32],[-1.07,-.14],
+  [-.82,-.28],[-.62,-.73],[-.35,-.46],[-.08,-.79],[.17,-.46],
+  [.46,-.64],[.74,-.32]
+ ];
+ const verts=(shape==='left'?left:right).map(([x,y])=>({x:x*rx,y:y*ry}));
+ const last=verts[verts.length-1],first=verts[0];
+ ctx.beginPath();ctx.moveTo((last.x+first.x)/2,(last.y+first.y)/2);
+ for(let i=0;i<verts.length;i++){
+  const p=verts[i],q=verts[(i+1)%verts.length];
+  ctx.quadraticCurveTo(p.x,p.y,(p.x+q.x)/2,(p.y+q.y)/2);
+ }
+ ctx.closePath();
+}
+function drawMilkCerealSpill(ctx,o){
+ ctx.save();ctx.translate(o.x,o.y);ctx.rotate(o.angle||0);
+ const rx=o.rx||o.r,ry=o.ry||o.r*.7,shape=o.spillShape||'left';
+ ctx.translate(2,3);milkOrganicPath(ctx,rx,ry,shape);
+ ctx.fillStyle='#5b463941';ctx.fill();ctx.translate(-2,-3);
+ milkOrganicPath(ctx,rx,ry,shape);
+ ctx.fillStyle='#fff3da';ctx.fill();ctx.strokeStyle='#e3cba8';ctx.lineWidth=1.8;ctx.stroke();
+ // Translucent gloss is small and cannot hide the vehicle (decals draw beneath cars).
+ ctx.save();ctx.translate(-rx*.09,-ry*.15);ctx.scale(.86,.65);
+ milkOrganicPath(ctx,rx,ry,shape);ctx.fillStyle='#ffffff48';ctx.fill();ctx.restore();
+ const pieces=shape==='left'?7:15;
+ for(let i=0;i<pieces;i++){
+  const a=i*2.3999632+(shape==='left'?.7:.25),
+   q=.17+.53*((i*7%13)/12),x=Math.cos(a)*rx*q,y=Math.sin(a)*ry*q;
+  ctx.save();ctx.translate(x,y);ctx.rotate(a*.35);
+  ctx.fillStyle=i%3===0?'#ba853e':i%3===1?'#d9ab5b':'#edc986';
+  ctx.beginPath();ctx.moveTo(-3.2,-2.6);ctx.quadraticCurveTo(2.1,-5,5.1,-1.1);
+  ctx.quadraticCurveTo(6,3.5,0,4);ctx.quadraticCurveTo(-5,2.5,-3.2,-2.6);ctx.fill();ctx.restore();
+ }
  ctx.restore();
 }
 function drawMilkOverflow(ctx,o){
