@@ -1,0 +1,1 @@
+window.TTRVisualPatch56=Object.freeze({version:'0.13.6.58',base:'0.13.6.55',vehicles:['lampo','tuono'],lampIdle:'menu-fixed-angle-bob',lampGarage:'192-frame-spin',lampLighting:'paint-luminance-normalized',tuonoBumpers:'closed-solid-geometry',racePhysicsChanged:false,onlineChanged:false,engineAudioChanged:false});
