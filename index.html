@@ -3036,15 +3036,24 @@ function drawShowroom(canvas,index,view='menu'){
    // Track the visible sprite centre as it revolves: avoid Aero's off-axis wobble.
    const pivotX=bounds?(bounds[0]+bounds[2])*.5:metrics.pivotX;
    const pivotY=bounds?(bounds[1]+bounds[3])*.5:metrics.pivotY;
-   // Inquadratura condivisa basata sulla sagoma visibile, non sulla misura
-   // del foglio (Tuono usa frame da 256, gli altri da 192 pixel).
-   // Aero R V6.4: its 192px cells have transparent padding; normalize from the
-   // visible silhouette. Garage matches Tuono/Lampo without per-frame zoom;
-    // menu retains the established vehicle presentation scale.
+   // Hotfix showroom v0.13.6.86: scale only the affected presentations.
+   // Aero R: match the visible size of Lampo ZX and Tuono V8 in BOTH menu
+   // and garage. Its 192x192 atlas cells have large transparent margins;
+   // limiting scale by the *full cell* had kept the car abnormally small.
+   // Enduro SP: its atlas cells are 192x128 instead of 192x144/192x192,
+   // which made it oversized in the garage; match Scatto GT there ONLY.
+   // Size by the measured car silhouette, not by transparent atlas padding.
+   // These ratios are of the unchanged canvas viewport and preserve aspect
+   // ratio, per-frame centering, rotation and the approved race sprites.
+   const calibratedFill=key==='aero'
+      ? (menu?{width:.43,height:.54}:{width:.48,height:.66})
+      : (key==='enduro'&&!menu?{width:.42,height:.61}:null);
    const relativeSize=menu?1:ttrRelativeRaceFootprint(key);
-   const scale=menu
-      ? Math.min((key==='aero'?w*.39:w*.43)/metrics.visibleW,
-                 (key==='aero'?h*.48:h*.54)/metrics.visibleH,w*.88/sw,h*.95/sh)
+   const scale=calibratedFill
+      ? Math.min(w*calibratedFill.width/metrics.visibleW,
+                 h*calibratedFill.height/metrics.visibleH)
+      : menu
+      ? Math.min(w*.43/metrics.visibleW,h*.54/metrics.visibleH,w*.88/sw,h*.95/sh)
       : Math.min(w*.64*relativeSize/metrics.visibleW,h*.72*relativeSize/metrics.visibleH,
                  w*.90/metrics.visibleW,h*.88/metrics.visibleH,w*.94/sw,h*.99/sh);
    const launchStretch=menu&&hop>0?1+.013*Math.min(1,hop/Math.max(1,TTRShowroom60.hopPixels)):1;
