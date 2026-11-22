@@ -1,4 +1,4 @@
-<!-- HOTFIX post-Fase 4 | v0.13.6.86 | 2026-11-22: Aero R duplicati in Gara veloce, Tuono V8 anteprime Collezione, rotazione Aero R Garage. Solo index.html; asset e gameplay invariati. -->
+<!-- v0.13.6.86 HOTFIX: roster previews normalized from real turntables; consistent garage alignment, Enduro rotation, portrait collection lock, safe duplicate vehicle palettes. -->
 <!-- v0.13.6.86: elimination jump-safe restarts, stable course-leader camera, reliable sustained far-offscreen KOs; based on 85. -->
 <!-- v0.13.6.85: Enduro SP race sprite reoriented; elimination multi-KO, legal bend camera, recovery-loop, round HUD, physical jam jar. -->
 <!-- Tiny Track Rivals v0.13.6.84: legal corner overtakes, fixed elimination grid camera, adaptive pickups, six-stat impact balancing. 82 remains intact. -->
@@ -840,7 +840,7 @@ function drawVehicle(ctx,car,clock){
   if(car.boost>0&&!mini){ctx.fillStyle='#72e7ffce';for(const k of [-8,8]){ctx.beginPath();ctx.moveTo(k,28);ctx.lineTo(k-4,39+Math.sin(clock*27)*4);ctx.lineTo(k+4,38);ctx.fill();}}
   ctx.restore();return true;
 }
-root.TTRAssets={images,status,ready,has,draw,drawVehicle};
+root.TTRAssets={images,status,ready,has,draw,drawVehicle,raceVisualScale:spriteVisualScale};
 })(typeof window==='undefined'?globalThis:window);
 
 </script><script>
@@ -2299,9 +2299,7 @@ const duplicateColourSchemes={
  tuono:['#ad62e3','#e89b50','#4bbb91'],
  polvere:['#b759d9','#3bbba9','#de597f'],
  lampo:['#e29a46','#9068df','#e65b88'],
- // Aero R has three existing colour sprites; previously no accent list existed,
- // so a six/eight-car Quick Race with Aero R in slot 0 crashed on slot 4.
- aero:['#4db3ca','#9974db','#e2b751'],
+ aero:['#33a7ce','#f5d760','#bd7adb'],
  enduro:['#9951d6','#3cbdad','#e5a14e']
 };
 const duplicateColourOffsets={scatto:0,tuono:1,polvere:1,lampo:2};
@@ -2313,8 +2311,7 @@ function assignDuplicateAccents(){
   // Keep the first car canonical. For duplicate models, change the actual body colour.
   const variant=i===0?0:((i-1+(duplicateColourOffsets[model]||0))%3+1);
   c.variantSprite=variant?`${model}_color${variant}`:null;
-  // Defensive fallback: an expansion car without a palette must never abort race setup.
-  c.variantAccent=variant?(duplicateColourSchemes[model]?.[variant-1]||c.profile.accent||c.profile.color):null;
+  c.variantAccent=variant?(duplicateColourSchemes[model]?.[variant-1]||c.profile.color):null;
   c.variantLabel=variant?String.fromCharCode(65+i):'';
  }));
 }
@@ -2953,6 +2950,32 @@ const TTRShowroom60=Object.freeze({version:'0.13.6.76',reference:'scatto',column
   contactShadows:false,cssStageAnimation:false,source:'approved-turntables-aero-r-384frame-seamless'});
 window.TTRShowroomPresentation=TTRShowroom60;
 const TTRShowroomFrameMetrics=Object.create(null);
+const TTRRaceFootprintCache=Object.create(null);
+function ttrVisibleRaceFootprint(key){
+ if(Object.hasOwn(TTRRaceFootprintCache,key))return TTRRaceFootprintCache[key];
+ const image=window.TTRAssets?.images?.[key],mult=window.TTRAssets?.raceVisualScale?.[key]??1;
+ if(!image?.complete||!image.naturalWidth||!image.naturalHeight)return null;
+ try{
+   const sampling=document.createElement('canvas'),factor=Math.min(1,256/Math.max(image.naturalWidth,image.naturalHeight));
+   sampling.width=Math.max(1,Math.round(image.naturalWidth*factor));
+   sampling.height=Math.max(1,Math.round(image.naturalHeight*factor));
+   const c=sampling.getContext('2d',{willReadFrequently:true});
+   c.drawImage(image,0,0,sampling.width,sampling.height);
+   const data=c.getImageData(0,0,sampling.width,sampling.height).data;
+   let x0=sampling.width,y0=sampling.height,x1=-1,y1=-1;
+   for(let y=0;y<sampling.height;y++)for(let x=0;x<sampling.width;x++){
+     if(data[(y*sampling.width+x)*4+3]<=16)continue;
+     x0=Math.min(x0,x);x1=Math.max(x1,x);y0=Math.min(y0,y);y1=Math.max(y1,y);
+   }
+   const coverage=x1<0?1:Math.max((x1-x0+1)/sampling.width,(y1-y0+1)/sampling.height);
+   return TTRRaceFootprintCache[key]=mult*coverage;
+ }catch(_){return null;}
+}
+function ttrRelativeRaceFootprint(key){
+ const actual=ttrVisibleRaceFootprint(key),reference=ttrVisibleRaceFootprint('scatto');
+ return actual&&reference?Math.max(.78,Math.min(1.28,actual/reference)):1;
+}
+window.TTRVehiclePresentationSize=ttrRelativeRaceFootprint;
 function getTTRShowroomMetrics(key){
  if(TTRShowroomFrameMetrics[key])return TTRShowroomFrameMetrics[key];
  const fallback=(window.TTRAssets?.images?.[key+'_turntable']?.naturalWidth===3072?256:192);
@@ -3005,36 +3028,29 @@ function drawShowroom(canvas,index,view='menu'){
    // Solo il garage ruota a 360°: nessun roll, pitch, bob o variazione di scala.
    const rotation=menu?0:Math.max(0,clock-garageRotationOrigin)*TTRShowroom60.rotationFramesPerSecond*(aeroSmooth?2:1);
    const rotationStep=Math.floor(rotation);
-   const frame=((start+rotationStep)%count+count)%count;
+   const frame=((start+(key==='enduro'?-rotationStep:rotationStep))%count+count)%count;
    const metrics=getTTRShowroomMetrics(key);
-   // Aero's 384-view atlas contains twice the number of views of its 192-view
-   // silhouette measurements. Interpolate the actual silhouette centre at the
-   // current viewing angle so its garage rotation stays around a fixed screen
-   // axis, without changing the image frames, size, or any race sprite.
-   let centreX=metrics.pivotX,centreY=metrics.pivotY;
-   if(key==='aero'&&!menu){
-     const samples=TTRTurntableAlphaBounds.aero;
-     if(samples?.length===192){
-       const t=frame*.5,idx=Math.floor(t)%samples.length,blend=t-Math.floor(t);
-       const a=samples[idx],b=samples[(idx+1)%samples.length];
-       centreX=((a[0]+a[2])*(1-blend)+(b[0]+b[2])*blend)*.5;
-       centreY=((a[1]+a[3])*(1-blend)+(b[1]+b[3])*blend)*.5;
-     }
-   }
+   const boxes=key==='enduro'?TTREnduroFrameBounds:TTRTurntableAlphaBounds[key];
+   const bounds=boxes?.[aeroSmooth?Math.floor(frame/2):frame];
+   // Aero has 384 interpolated frames but 192 measured silhouette centres.
+   // Track the visible sprite centre as it revolves: avoid Aero's off-axis wobble.
+   const pivotX=bounds?(bounds[0]+bounds[2])*.5:metrics.pivotX;
+   const pivotY=bounds?(bounds[1]+bounds[3])*.5:metrics.pivotY;
    // Inquadratura condivisa basata sulla sagoma visibile, non sulla misura
    // del foglio (Tuono usa frame da 256, gli altri da 192 pixel).
    // Aero R V6.4: its 192px cells have transparent padding; normalize from the
    // visible silhouette. Garage matches Tuono/Lampo without per-frame zoom;
     // menu retains the established vehicle presentation scale.
-   const scale=(key==='aero'
-      ? (menu
-         ? Math.min(w*.39/metrics.visibleW,h*.48/metrics.visibleH,w*.88/sw)
-         : Math.min(w*.43/metrics.visibleW,h*.54/metrics.visibleH,w*.88/sw))
-     : Math.min(w*.43/metrics.visibleW,h*.54/metrics.visibleH,w*.88/sw,h*.95/sh));
+   const relativeSize=menu?1:ttrRelativeRaceFootprint(key);
+   const scale=menu
+      ? Math.min((key==='aero'?w*.39:w*.43)/metrics.visibleW,
+                 (key==='aero'?h*.48:h*.54)/metrics.visibleH,w*.88/sw,h*.95/sh)
+      : Math.min(w*.64*relativeSize/metrics.visibleW,h*.72*relativeSize/metrics.visibleH,
+                 w*.90/metrics.visibleW,h*.88/metrics.visibleH,w*.94/sw,h*.99/sh);
    const launchStretch=menu&&hop>0?1+.013*Math.min(1,hop/Math.max(1,TTRShowroom60.hopPixels)):1;
    const drawW=sw*scale*launchStretch,drawH=sh*scale*launchStretch;
-   const destX=w*.5-centreX*scale*launchStretch+(menu?drive*TTRShowroom60.drivePixels:0);
-   const destY=h*.585-centreY*scale*launchStretch-(menu?hop:0);
+   const destX=w*.5-pivotX*scale*launchStretch+(menu?drive*TTRShowroom60.drivePixels:0);
+   const destY=h*(menu ? .585 : .50)-pivotY*scale*launchStretch-(menu?hop:0);
    ctx.drawImage(sheet,(frame%cols)*sw,Math.floor(frame/cols)*sh,sw,sh,destX,destY,drawW,drawH);
    // v76: Aero R has 384 motion-compensated single-image views at 60fps, including
    // the cyclic 383 -> 0 transition. No live crossfade, CSS motion or zoom.
@@ -3045,7 +3061,7 @@ function drawShowroom(canvas,index,view='menu'){
       const ratio=pic.naturalWidth/pic.naturalHeight;
       const dw=Math.min(w*.78,h*.65*ratio),dh=dw/ratio;
       ctx.drawImage(pic,w*.5-dw*.5+(menu?drive*TTRShowroom60.drivePixels:0),
-        h*.585-dh*.5-(menu?hop:0),dw,dh);
+        h*(menu ? .585 : .50)-dh*.5-(menu?hop:0),dw,dh);
    }
  }
 }
@@ -3572,18 +3588,43 @@ const modal=document.createElement('div');modal.id='ttrRosterModal';modal.hidden
 modal.innerHTML=`<div class="ttr-roster-panel"><div class="ttr-roster-head"><div><strong>COLLEZIONE · 20 VEICOLI</strong><div class="ttr-roster-count">4 INIZIALI · 16 SBLOCCABILI · 5 MODELLI GIOCABILI IN PROVA</div></div><button class="ttr-roster-close" id="ttrRosterClose" aria-label="Chiudi collezione">×</button></div><div class="ttr-roster-tabs" id="ttrRosterTabs"><button class="ttr-roster-tab" data-filter="all" aria-pressed="true">TUTTI 20</button><button class="ttr-roster-tab" data-filter="initial" aria-pressed="false">INIZIALI 4</button><button class="ttr-roster-tab" data-filter="unlockable" aria-pressed="false">SBLOCCABILI 16</button><button class="ttr-roster-tab" data-filter="playable" aria-pressed="false">IN PROVA 5</button></div><div class="ttr-roster-body"><div class="ttr-roster-list" id="ttrRosterList"></div><div class="ttr-roster-detail" id="ttrRosterDetail"></div></div><div class="ttr-roster-footer">I veicoli senza GLB non sono ancora giocabili. Le ricompense sono collegate alle medaglie; i modelli non ancora realizzati restano non giocabili.</div></div>`;
 document.body.appendChild(modal);
 let selected='scatto',filter='all';
-function imageFor(id){const img=window.TTRAssets?.images?.[id+'_showroom']||window.TTRAssets?.images?.[id];return img?.src||'';}
-// The Collection uses its own static images. Never modify the garage/menu
-// turntable, race sprites, or shared source files for these display corrections.
-function alignCollectionImage(image,id){
- if(id==='tuono'){
-   // The archived Tuono V8 static portrait faces left; other cars face right.
-   image.style.transform='scaleX(-1)';
- }else if(id==='aero'){
-   // Original Aero R artwork has extra transparent space on its upper-left.
-   // Compensate only for this portrait layout, never for the 3D turntable.
-   image.style.transform='translate(-7%, -5%) scale(.94)';
+const rosterImageCache=new Map();
+function imageFor(id){
+ const assets=window.TTRAssets?.images||{},atlas=assets[id+'_turntable'];
+ if(atlas?.complete&&atlas.naturalWidth>=12&&atlas.naturalHeight>=16){
+   if(rosterImageCache.has(id))return rosterImageCache.get(id);
+   try{
+     // Use the same first orientation as the garage (Tuono V8 included).
+     const columns=id==='aero'?24:12,rows=16;
+     const fw=Math.floor(atlas.naturalWidth/columns),fh=Math.floor(atlas.naturalHeight/rows);
+     const start=({scatto:0,tuono:168,polvere:0,lampo:0,aero:0,enduro:0})[id]||0;
+     const sample=document.createElement('canvas');sample.width=fw;sample.height=fh;
+     const s=sample.getContext('2d',{willReadFrequently:true});
+     s.drawImage(atlas,(start%columns)*fw,Math.floor(start/columns)*fh,fw,fh,0,0,fw,fh);
+     const raw=s.getImageData(0,0,fw,fh).data;
+     let minX=fw,minY=fh,maxX=-1,maxY=-1;
+     for(let y=0;y<fh;y++)for(let x=0;x<fw;x++){
+       if(raw[(y*fw+x)*4+3]<16)continue;
+       if(x<minX)minX=x;if(x>maxX)maxX=x;
+       if(y<minY)minY=y;if(y>maxY)maxY=y;
+     }
+     if(maxX<minX||maxY<minY)throw new Error('Turntable frame is transparent');
+     const pad=Math.max(2,Math.round(Math.min(fw,fh)*.012));
+     minX=Math.max(0,minX-pad);minY=Math.max(0,minY-pad);
+     maxX=Math.min(fw-1,maxX+pad);maxY=Math.min(fh-1,maxY+pad);
+     const bw=maxX-minX+1,bh=maxY-minY+1;
+     const out=document.createElement('canvas');out.width=480;out.height=260;
+     const g=out.getContext('2d');g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';
+     const relative=window.TTRVehiclePresentationSize?.(id)??1;
+     const size=Math.min(out.width*.73*relative/bw,out.height*.80*relative/bh,
+                         out.width*.88/bw,out.height*.89/bh);
+     const dw=bw*size,dh=bh*size;
+     // Preserve the source proportions; centre the opaque 3D model on a uniform canvas.
+     g.drawImage(sample,minX,minY,bw,bh,(out.width-dw)/2,(out.height-dh)/2,dw,dh);
+     const url=out.toDataURL('image/png');rosterImageCache.set(id,url);return url;
+   }catch(err){console.warn('Roster preview fallback:',id,err);}
  }
+ const poster=assets[id+'_showroom']||assets[id];return poster?.src||'';
 }
 function status(v){if(v.index<=4)return 'INIZIALE · GIOCABILE';const won=window.TTRCareer?.isUnlocked(v.id);return v.status==='playable'?(won?'SBLOCCATO · GIOCABILE':'SBLOCCABILE · DISPONIBILE IN PROVA'):(won?'MISSIONE COMPLETATA · MODELLO IN SVILUPPO':'SBLOCCABILE · MODELLO IN SVILUPPO');}
 function filtered(){return vehicles.filter(v=>filter==='all'||(filter==='initial'&&v.availability==='initial')||(filter==='unlockable'&&v.availability==='unlockable')||(filter==='playable'&&v.status==='playable'));}
@@ -3592,7 +3633,7 @@ function paint(){
  for(const v of filtered()){
    const btn=document.createElement('button');btn.type='button';btn.className='ttr-roster-card'+(v.id===selected?' active':'');btn.dataset.vehicle=v.id;btn.setAttribute('aria-label',v.name+', '+status(v));
    const src=v.status==='playable'?imageFor(v.id):'';
-   if(src){const img=document.createElement('img');img.src=src;img.alt='';alignCollectionImage(img,v.id);btn.appendChild(img);}else{const icon=document.createElement('span');icon.className='ttr-roster-placeholder';icon.classList.add('ttr-v69-upcoming');icon.setAttribute('aria-hidden','true');btn.appendChild(icon);}
+   if(src){const img=document.createElement('img');img.src=src;img.alt='';btn.appendChild(img);}else{const icon=document.createElement('span');icon.className='ttr-roster-placeholder';icon.classList.add('ttr-v69-upcoming');icon.setAttribute('aria-hidden','true');btn.appendChild(icon);}
    const label=document.createElement('span');label.className='nameblock';
    const nm=document.createElement('b');nm.textContent=String(v.index).padStart(2,'0')+' · '+v.name;
    const sub=document.createElement('small');sub.textContent=v.index<=4?'GIOCABILE':v.status==='playable'?'IN PROVA':'DA MODELLARE';
@@ -3604,7 +3645,7 @@ function paint(){
  const title=document.createElement('h3');title.textContent=v.name;det.appendChild(title);
  const st=document.createElement('div');st.className='ttr-roster-status';st.textContent=status(v);det.appendChild(st);
  const src=v.status==='playable'?imageFor(v.id):'';
- if(src){const img=document.createElement('img');img.className='ttr-roster-img';img.src=src;img.alt='Modello 3D di '+v.name;alignCollectionImage(img,v.id);det.appendChild(img);}
+ if(src){const img=document.createElement('img');img.className='ttr-roster-img';img.src=src;img.alt='Modello 3D di '+v.name;det.appendChild(img);}
  const desc=document.createElement('p');desc.textContent=v.identity;det.appendChild(desc);
  const engine=document.createElement('p');engine.className='ttr-roster-muted';engine.textContent='Motore: '+v.sound;det.appendChild(engine);
  const vals=window.TTRVehicleDesignStats?.[v.id];
@@ -3623,11 +3664,13 @@ function paint(){
  const progress=document.createElement('p');progress.className='ttr-roster-plan';progress.textContent='Skin: base + 3 slot previsti · Missioni attive in Carriera';det.appendChild(progress);
  if(v.status!=='playable'){const warn=document.createElement('p');warn.className='ttr-roster-muted';warn.textContent='Il suo modello 3D, le prestazioni e lo sblocco saranno realizzati e verificati nelle prossime fasi.';det.appendChild(warn);}
 }
-open.onclick=()=>{filter='all';selected='scatto';modal.hidden=false;document.querySelectorAll('.ttr-roster-tab').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter===filter)));paint();};
-$('ttrRosterClose').onclick=()=>modal.hidden=true;
-modal.addEventListener('click',e=>{if(e.target===modal)modal.hidden=true;});
+function setCollectionVisible(visible){modal.hidden=!visible;document.body.classList.toggle('ttr-roster-open',visible);}
+open.onclick=()=>{filter='all';selected='scatto';setCollectionVisible(true);document.querySelectorAll('.ttr-roster-tab').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.filter===filter)));paint();};
+$('ttrRosterClose').onclick=()=>setCollectionVisible(false);
+modal.addEventListener('click',e=>{if(e.target===modal)setCollectionVisible(false);});
 modal.querySelectorAll('.ttr-roster-tab').forEach(b=>b.onclick=()=>{filter=b.dataset.filter;const first=filtered()[0];if(!filtered().some(x=>x.id===selected))selected=first.id;modal.querySelectorAll('.ttr-roster-tab').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));paint();});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)modal.hidden=true;});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)setCollectionVisible(false);});
+window.TTRAssets?.ready?.then(()=>{rosterImageCache.clear();if(!modal.hidden)paint();});
 })();
 </script><script>
 /* Career medals v2: 12 circuits x Race / Challenge / Mastery. */
