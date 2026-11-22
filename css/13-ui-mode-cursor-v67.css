@@ -4,7 +4,7 @@
  content:''!important;position:absolute!important;display:none!important;
  left:clamp(5px,.85vw,10px)!important;top:50%!important;right:auto!important;
  width:clamp(17px,3.9vh,28px)!important;height:clamp(17px,3.9vh,28px)!important;
- background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2036%2036%22%3E%3Cpath%20d%3D%22M9.6%205.2c-2.3-1.4-5.1.2-5.1%203v19.6c0%202.9%202.8%204.5%205.2%203.1l19.1-10c2.6-1.5%202.6-4.2%200-5.7L9.6%205.2z%22%20fill%3D%22%2310214e%22%20stroke%3D%22%2310214e%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E")!important;background-size:100% 100%!important;
+ background-image:url("../assets/images/ui/cursor-play.svg")!important;background-size:100% 100%!important;
  background-position:center!important;background-repeat:no-repeat!important;
  color:transparent!important;text-shadow:none!important;opacity:1!important;
  transform:translate3d(0,-50%,0)!important;animation:none!important;pointer-events:none!important;

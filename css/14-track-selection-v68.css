@@ -28,7 +28,7 @@ body #trackSelect:not([hidden]){position:fixed;inset:0;z-index:81;display:flex;a
 #raceConfig #raceConfigStart,#loadingTrack #ttrLaunchRace,#trackSelect #trackSelectNext{position:relative!important;padding-left:clamp(33px,5.5vw,46px)!important;}
 #raceConfig #raceConfigStart::before,#loadingTrack #ttrLaunchRace::before,#trackSelect #trackSelectNext::before{
  content:'';position:absolute;left:clamp(5px,.85vw,10px);top:50%;width:clamp(17px,3.9vh,28px);height:clamp(17px,3.9vh,28px);
- background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2036%2036%22%3E%3Cpath%20d%3D%22M9.6%205.2c-2.3-1.4-5.1.2-5.1%203v19.6c0%202.9%202.8%204.5%205.2%203.1l19.1-10c2.6-1.5%202.6-4.2%200-5.7L9.6%205.2z%22%20fill%3D%22%2310214e%22%20stroke%3D%22%2310214e%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");background-size:100% 100%;background-repeat:no-repeat;background-position:center;
+ background-image:url("../assets/images/ui/cursor-play.svg");background-size:100% 100%;background-repeat:no-repeat;background-position:center;
  transform:translate3d(0,-50%,0);animation:ttrV67Selector .78s ease-in-out infinite;pointer-events:none;
 }
 #trackSelect #trackSelectNext:disabled{opacity:.5;cursor:not-allowed;}
