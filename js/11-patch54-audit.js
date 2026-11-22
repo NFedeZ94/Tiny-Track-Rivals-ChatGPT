@@ -1,0 +1,1 @@
+window.TTRPatch54=Object.freeze({version:'0.13.6.58',vehicle:'Lampo ZX',vehicleSource:'V4.2_RACE_GLb',topView:'orthographic_90deg',garageSource:'V4.2_192frames',raceArtOnly:true,onlineBetaServerChanged:false,changes:['camera_leader','elimination_trail_guard','collision_impulse','offtrack_return_grace','ramp_tip','explicit_launch']});

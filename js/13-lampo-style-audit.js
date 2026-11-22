@@ -1,0 +1,1 @@
+window.TTRLampoStyle58=Object.freeze({version:'0.13.6.58',base:'0.13.6.57',asset:'lampo_turntable',frames:192,render:'prebaked-palette-calibration',menuGarageShared:true,raceUntouched:true,physicsUntouched:true});

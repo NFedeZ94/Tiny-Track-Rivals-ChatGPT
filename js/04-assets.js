@@ -1,0 +1,86 @@
+
+/* Tiny Track Rivals v0.13.6.51 - Tuono V8 v11 + Lampo ZX v4.2; deferred asset loader. */
+(function(root){'use strict';
+const inlineAssets={'aero_turntable':'assets/images/aero_turntable.webp','aero_showroom':'assets/images/aero_showroom.png','aero':'assets/images/aero.png','aero_color3':'assets/images/aero_color3.png','aero_color2':'assets/images/aero_color2.png','aero_color1':'assets/images/aero_color1.png','toast':'assets/images/toast.png','tuono':'assets/images/tuono.png','scatto_showroom':'assets/images/scatto_showroom.png','scatto':'assets/images/scatto.png','polvere_showroom':'assets/images/polvere_showroom.png','tuono_showroom':'assets/images/tuono_showroom.png','scatto_turntable':'assets/images/scatto_turntable.webp','tuono_turntable':'assets/images/tuono_turntable.webp','cookie':'assets/images/cookie.png','knife':'assets/images/knife.png','polvere_turntable':'assets/images/polvere_turntable.webp','lampo_turntable':'assets/images/lampo_turntable.webp','lampo_showroom':'assets/images/lampo_showroom.png','plate_croissant':'assets/images/plate_croissant.png','pickup_sheet':'assets/images/pickup_sheet.png','polvere':'assets/images/polvere.png','cookie_alt':'assets/images/cookie_alt.png','jam_tipped':'assets/images/jam_tipped.png','jam':'assets/images/jam.png','mug':'assets/images/mug.png','cereal':'assets/images/cereal.png','orange':'assets/images/orange.png','glass':'assets/images/glass.png','lampo':'assets/images/lampo.png','ramp':'assets/images/ramp.png'};Object.assign(inlineAssets,{'scatto_color1':'assets/images/scatto_color1.png','scatto_color2':'assets/images/scatto_color2.png','scatto_color3':'assets/images/scatto_color3.png','tuono_color1':'assets/images/tuono_color1.png','tuono_color2':'assets/images/tuono_color2.png','tuono_color3':'assets/images/tuono_color3.png','polvere_color1':'assets/images/polvere_color1.png','polvere_color2':'assets/images/polvere_color2.png','polvere_color3':'assets/images/polvere_color3.png','lampo_color1':'assets/images/lampo_color1.png','lampo_color2':'assets/images/lampo_color2.png','lampo_color3':'assets/images/lampo_color3.png'}); const names=['scatto','tuono','polvere','lampo','scatto_color1','scatto_color2','scatto_color3','tuono_color1','tuono_color2','tuono_color3','polvere_color1','polvere_color2','polvere_color3','lampo_color1','lampo_color2','lampo_color3','scatto_showroom','scatto_turntable','tuono_showroom','tuono_turntable','polvere_showroom','polvere_turntable','lampo_showroom','lampo_turntable','aero','aero_color1','aero_color2','aero_color3','aero_showroom','aero_turntable','enduro','enduro_color1','enduro_color2','enduro_color3','enduro_showroom','enduro_turntable','mug','knife','jam_tipped','cookie','cookie_alt','toast','ramp','pickup_sheet','plate_croissant','cereal','orange','jam','glass'];
+inlineAssets['enduro']='assets/images/enduro.png';
+inlineAssets['enduro_color1']='assets/images/enduro_color1.png';
+inlineAssets['enduro_color2']='assets/images/enduro_color2.png';
+inlineAssets['enduro_color3']='assets/images/enduro_color3.png';
+inlineAssets['enduro_showroom']='assets/images/enduro_showroom.png';
+inlineAssets['enduro_turntable']='assets/images/enduro_turntable.webp';
+const images={}; const status={};
+const promises=names.map(name=>new Promise(resolve=>{
+  const img=new Image();images[name]=img;
+  img.onload=()=>{status[name]='ready';resolve(true);};
+  img.onerror=()=>{status[name]='failed';console.warn('Asset unavailable:',name);resolve(false);};
+  img.src=inlineAssets[name]||'assets/'+name+((name.includes('_concept_')||name.includes('_menu_clean'))?'.jpg':'.png');
+}));
+const ready=Promise.all(promises);
+// v0.13.6.34: visual-only race scale, measured from the opaque footprint of each top-down sprite.
+// No modifications to physics widths/lengths, track, or GLB meshes.
+window.TTRArtRevision='AeroRV6Race180-EnduroV3Race180-v85';
+const spriteVisualScale=Object.freeze({scatto:.70034,tuono:1,polvere:0.78634,lampo:0.8765,aero:0.841,enduro:.95});
+const has=name=>status[name]==='ready';
+const draw=(ctx,name,x,y,w,h)=>{if(!has(name))return false;ctx.drawImage(images[name],x,y,w,h);return true;};
+function drawVehicle(ctx,car,clock){
+  if(!car||!car.profile||!has(car.profile.id))return false;
+  const art=images[car.variantSprite]||images[car.profile.id];
+  ctx.save();ctx.translate(car.x,car.y);
+  const mini=car.mini;
+  const size=(mini?77:70)*(spriteVisualScale[car.profile.id]??1);
+  const total=car.jumpTotal||.72;
+  const t=car.jump>0?Math.max(0,Math.min(1,1-car.jump/total)):0;
+  const lift=car.jump>0?Math.sin(Math.PI*t):0;
+  const flip=car.elimCelebration>0&&!mini?Math.max(0,Math.min(1,1-car.elimCelebration/1.56)):0;
+  const jump=lift*44+(car.elimCelebration>0?Math.sin(Math.PI*flip)*46:0);
+  const slipAmt=Math.max(0,Math.min(1,(car.slip||0)/1.9));
+  const wobble=slipAmt>0&&!mini?Math.sin(clock*26+car.id*1.7)*0.17*slipAmt:0;
+  const rolling=!mini&&!(car.tableFalling>0)&&car.jump<=0;
+  const rollSpeed=Math.min(1,Math.abs(car.speed||0)/190);
+  const wheelPhase=car.wheelPhase||0;
+  ctx.save();ctx.rotate(car.a+Math.PI/2);
+  // Two faint, moving tyre traces stay below the body; no fake circle under the car.
+  if(rolling&&rollSpeed>.18){
+    const trail=9+16*rollSpeed;
+    ctx.lineWidth=1.4;ctx.strokeStyle='rgba(41,36,33,'+(0.08+rollSpeed*.13)+')';
+    for(const side of [-1,1]){
+      const x=side*size*.29;
+      ctx.beginPath();ctx.moveTo(x,size*.28);ctx.lineTo(x+Math.sin(wheelPhase*.38+side)*.4,size*.29+trail);ctx.stroke();
+    }
+  }
+  ctx.fillStyle='rgba(23,16,15,.28)';ctx.beginPath();ctx.ellipse(4,9,20*(1-lift*.30),32*(1-lift*.30),0,0,Math.PI*2);ctx.fill();
+  if(slipAmt>.12&&!mini){
+    ctx.globalAlpha=.55*slipAmt;
+    ctx.strokeStyle='rgba(245,245,245,.88)';ctx.lineWidth=5;
+    for(const side of [-1,1]){ctx.beginPath();ctx.moveTo(side*11,22);ctx.quadraticCurveTo(side*18,28+Math.sin(clock*18+side)*4,side*22,37);ctx.stroke();}
+    ctx.globalAlpha=1;
+  }
+  ctx.restore();
+  ctx.translate(0,-jump);ctx.rotate(car.a+Math.PI/2+wobble);
+  if(car.elimCelebration>0&&!mini)ctx.rotate(flip*2*Math.PI);if(car.tableFalling>0){ctx.scale(car.tableFallImpact?.89:1,car.tableFallImpact?.89:1);}
+  if(lift>0.1)ctx.scale(1+lift*.13,1+lift*.13);
+  if(rolling&&rollSpeed>.3){
+    const bob=Math.sin(wheelPhase*2)*.32*rollSpeed;
+    ctx.translate(0,bob);
+  }
+  ctx.drawImage(art,-size/2,-size/2,size,size);
+  // The separate tyres in a 2D sprite cannot rotate in 3D. Short glints run along
+  // their visible outside edges, synchronised with speed, so stationary cars remain still.
+  if(rolling&&rollSpeed>.07){
+    ctx.fillStyle='rgba(171,209,216,'+(.13+.47*rollSpeed)+')';
+    for(const side of [-1,1])for(const axle of [-1,1]){
+      const x=side*size*.34,y=axle*size*.28;
+      const phase=wheelPhase+(axle>0?1.3:0)+side*.45;
+      ctx.save();ctx.translate(x,y);
+      if(axle<0)ctx.rotate((car.steer||0)*.19);
+      const tick=Math.max(1.0,size*.028),slide=Math.sin(phase)*Math.max(.8,size*.04);
+      ctx.fillRect(-tick/2,slide-1.0,tick,2.1);
+      ctx.restore();
+    }
+  }
+  if(car.boost>0&&!mini){ctx.fillStyle='#72e7ffce';for(const k of [-8,8]){ctx.beginPath();ctx.moveTo(k,28);ctx.lineTo(k-4,39+Math.sin(clock*27)*4);ctx.lineTo(k+4,38);ctx.fill();}}
+  ctx.restore();return true;
+}
+root.TTRAssets={images,status,ready,has,draw,drawVehicle,raceVisualScale:spriteVisualScale};
+})(typeof window==='undefined'?globalThis:window);
+
