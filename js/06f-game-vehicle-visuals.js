@@ -121,8 +121,20 @@ function drawShowroom(canvas,index,view='menu',clock,garageRotationOrigin,profil
    const bounds=boxes?.[aeroSmooth?Math.floor(frame/2):frame];
    // Aero has 384 interpolated frames but 192 measured silhouette centres.
    // Track the visible sprite centre as it revolves: avoid Aero's off-axis wobble.
-   const pivotX=bounds?(bounds[0]+bounds[2])*.5:metrics.pivotX;
-   const pivotY=bounds?(bounds[1]+bounds[3])*.5:metrics.pivotY;
+   // Enduro: average nearby measured centres to suppress frame-to-frame jitter.
+   // The cyclic window preserves a continuous full 360-degree turn.
+   let pivotX=bounds?(bounds[0]+bounds[2])*.5:metrics.pivotX;
+   let pivotY=bounds?(bounds[1]+bounds[3])*.5:metrics.pivotY;
+   if(key==='enduro'&&!menu&&boxes?.length){
+     let sumX=0,sumY=0;
+     for(let offset=-3;offset<=3;offset++){
+       const b=boxes[(frame+offset+boxes.length)%boxes.length];
+       sumX+=(b[0]+b[2])*.5;
+       sumY+=(b[1]+b[3])*.5;
+     }
+     pivotX=sumX/7;
+     pivotY=sumY/7;
+   }
    // Hotfix showroom v0.13.6.86: scale only the affected presentations.
    // Aero R: match the visible size of Lampo ZX and Tuono V8 in BOTH menu
    // and garage. Its 192x192 atlas cells have large transparent margins;
@@ -132,9 +144,11 @@ function drawShowroom(canvas,index,view='menu',clock,garageRotationOrigin,profil
    // Size by the measured car silhouette, not by transparent atlas padding.
    // These ratios are of the unchanged canvas viewport and preserve aspect
    // ratio, per-frame centering, rotation and the approved race sprites.
+   // Garage-only sizing corrections after on-device visual QA.
+   // Keep the approved menu presentation and every other car unchanged.
    const calibratedFill=key==='aero'
-      ? (menu?{width:.43,height:.54}:{width:.48,height:.66})
-      : (key==='enduro'&&!menu?{width:.42,height:.61}:null);
+      ? (menu?{width:.43,height:.54}:{width:.56,height:.76})
+      : (key==='enduro'&&!menu?{width:.49,height:.70}:null);
    const relativeSize=menu?1:ttrRelativeRaceFootprint(key);
    const scale=calibratedFill
       ? Math.min(w*calibratedFill.width/metrics.visibleW,
