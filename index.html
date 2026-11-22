@@ -1,3 +1,4 @@
+<!-- HOTFIX post-Fase 4 | v0.13.6.86 | 2026-11-22: Aero R duplicati in Gara veloce, Tuono V8 anteprime Collezione, rotazione Aero R Garage. Solo index.html; asset e gameplay invariati. -->
 <!-- v0.13.6.86: elimination jump-safe restarts, stable course-leader camera, reliable sustained far-offscreen KOs; based on 85. -->
 <!-- v0.13.6.85: Enduro SP race sprite reoriented; elimination multi-KO, legal bend camera, recovery-loop, round HUD, physical jam jar. -->
 <!-- Tiny Track Rivals v0.13.6.84: legal corner overtakes, fixed elimination grid camera, adaptive pickups, six-stat impact balancing. 82 remains intact. -->
@@ -2298,6 +2299,9 @@ const duplicateColourSchemes={
  tuono:['#ad62e3','#e89b50','#4bbb91'],
  polvere:['#b759d9','#3bbba9','#de597f'],
  lampo:['#e29a46','#9068df','#e65b88'],
+ // Aero R has three existing colour sprites; previously no accent list existed,
+ // so a six/eight-car Quick Race with Aero R in slot 0 crashed on slot 4.
+ aero:['#4db3ca','#9974db','#e2b751'],
  enduro:['#9951d6','#3cbdad','#e5a14e']
 };
 const duplicateColourOffsets={scatto:0,tuono:1,polvere:1,lampo:2};
@@ -2309,7 +2313,8 @@ function assignDuplicateAccents(){
   // Keep the first car canonical. For duplicate models, change the actual body colour.
   const variant=i===0?0:((i-1+(duplicateColourOffsets[model]||0))%3+1);
   c.variantSprite=variant?`${model}_color${variant}`:null;
-  c.variantAccent=variant?duplicateColourSchemes[model][variant-1]:null;
+  // Defensive fallback: an expansion car without a palette must never abort race setup.
+  c.variantAccent=variant?(duplicateColourSchemes[model]?.[variant-1]||c.profile.accent||c.profile.color):null;
   c.variantLabel=variant?String.fromCharCode(65+i):'';
  }));
 }
@@ -3002,6 +3007,20 @@ function drawShowroom(canvas,index,view='menu'){
    const rotationStep=Math.floor(rotation);
    const frame=((start+rotationStep)%count+count)%count;
    const metrics=getTTRShowroomMetrics(key);
+   // Aero's 384-view atlas contains twice the number of views of its 192-view
+   // silhouette measurements. Interpolate the actual silhouette centre at the
+   // current viewing angle so its garage rotation stays around a fixed screen
+   // axis, without changing the image frames, size, or any race sprite.
+   let centreX=metrics.pivotX,centreY=metrics.pivotY;
+   if(key==='aero'&&!menu){
+     const samples=TTRTurntableAlphaBounds.aero;
+     if(samples?.length===192){
+       const t=frame*.5,idx=Math.floor(t)%samples.length,blend=t-Math.floor(t);
+       const a=samples[idx],b=samples[(idx+1)%samples.length];
+       centreX=((a[0]+a[2])*(1-blend)+(b[0]+b[2])*blend)*.5;
+       centreY=((a[1]+a[3])*(1-blend)+(b[1]+b[3])*blend)*.5;
+     }
+   }
    // Inquadratura condivisa basata sulla sagoma visibile, non sulla misura
    // del foglio (Tuono usa frame da 256, gli altri da 192 pixel).
    // Aero R V6.4: its 192px cells have transparent padding; normalize from the
@@ -3014,8 +3033,8 @@ function drawShowroom(canvas,index,view='menu'){
      : Math.min(w*.43/metrics.visibleW,h*.54/metrics.visibleH,w*.88/sw,h*.95/sh));
    const launchStretch=menu&&hop>0?1+.013*Math.min(1,hop/Math.max(1,TTRShowroom60.hopPixels)):1;
    const drawW=sw*scale*launchStretch,drawH=sh*scale*launchStretch;
-   const destX=w*.5-metrics.pivotX*scale*launchStretch+(menu?drive*TTRShowroom60.drivePixels:0);
-   const destY=h*.585-metrics.pivotY*scale*launchStretch-(menu?hop:0);
+   const destX=w*.5-centreX*scale*launchStretch+(menu?drive*TTRShowroom60.drivePixels:0);
+   const destY=h*.585-centreY*scale*launchStretch-(menu?hop:0);
    ctx.drawImage(sheet,(frame%cols)*sw,Math.floor(frame/cols)*sh,sw,sh,destX,destY,drawW,drawH);
    // v76: Aero R has 384 motion-compensated single-image views at 60fps, including
    // the cyclic 383 -> 0 transition. No live crossfade, CSS motion or zoom.
@@ -3554,6 +3573,18 @@ modal.innerHTML=`<div class="ttr-roster-panel"><div class="ttr-roster-head"><div
 document.body.appendChild(modal);
 let selected='scatto',filter='all';
 function imageFor(id){const img=window.TTRAssets?.images?.[id+'_showroom']||window.TTRAssets?.images?.[id];return img?.src||'';}
+// The Collection uses its own static images. Never modify the garage/menu
+// turntable, race sprites, or shared source files for these display corrections.
+function alignCollectionImage(image,id){
+ if(id==='tuono'){
+   // The archived Tuono V8 static portrait faces left; other cars face right.
+   image.style.transform='scaleX(-1)';
+ }else if(id==='aero'){
+   // Original Aero R artwork has extra transparent space on its upper-left.
+   // Compensate only for this portrait layout, never for the 3D turntable.
+   image.style.transform='translate(-7%, -5%) scale(.94)';
+ }
+}
 function status(v){if(v.index<=4)return 'INIZIALE · GIOCABILE';const won=window.TTRCareer?.isUnlocked(v.id);return v.status==='playable'?(won?'SBLOCCATO · GIOCABILE':'SBLOCCABILE · DISPONIBILE IN PROVA'):(won?'MISSIONE COMPLETATA · MODELLO IN SVILUPPO':'SBLOCCABILE · MODELLO IN SVILUPPO');}
 function filtered(){return vehicles.filter(v=>filter==='all'||(filter==='initial'&&v.availability==='initial')||(filter==='unlockable'&&v.availability==='unlockable')||(filter==='playable'&&v.status==='playable'));}
 function paint(){
@@ -3561,7 +3592,7 @@ function paint(){
  for(const v of filtered()){
    const btn=document.createElement('button');btn.type='button';btn.className='ttr-roster-card'+(v.id===selected?' active':'');btn.dataset.vehicle=v.id;btn.setAttribute('aria-label',v.name+', '+status(v));
    const src=v.status==='playable'?imageFor(v.id):'';
-   if(src){const img=document.createElement('img');img.src=src;img.alt='';btn.appendChild(img);}else{const icon=document.createElement('span');icon.className='ttr-roster-placeholder';icon.classList.add('ttr-v69-upcoming');icon.setAttribute('aria-hidden','true');btn.appendChild(icon);}
+   if(src){const img=document.createElement('img');img.src=src;img.alt='';alignCollectionImage(img,v.id);btn.appendChild(img);}else{const icon=document.createElement('span');icon.className='ttr-roster-placeholder';icon.classList.add('ttr-v69-upcoming');icon.setAttribute('aria-hidden','true');btn.appendChild(icon);}
    const label=document.createElement('span');label.className='nameblock';
    const nm=document.createElement('b');nm.textContent=String(v.index).padStart(2,'0')+' · '+v.name;
    const sub=document.createElement('small');sub.textContent=v.index<=4?'GIOCABILE':v.status==='playable'?'IN PROVA':'DA MODELLARE';
@@ -3573,7 +3604,7 @@ function paint(){
  const title=document.createElement('h3');title.textContent=v.name;det.appendChild(title);
  const st=document.createElement('div');st.className='ttr-roster-status';st.textContent=status(v);det.appendChild(st);
  const src=v.status==='playable'?imageFor(v.id):'';
- if(src){const img=document.createElement('img');img.className='ttr-roster-img';img.src=src;img.alt='Modello 3D di '+v.name;det.appendChild(img);}
+ if(src){const img=document.createElement('img');img.className='ttr-roster-img';img.src=src;img.alt='Modello 3D di '+v.name;alignCollectionImage(img,v.id);det.appendChild(img);}
  const desc=document.createElement('p');desc.textContent=v.identity;det.appendChild(desc);
  const engine=document.createElement('p');engine.className='ttr-roster-muted';engine.textContent='Motore: '+v.sound;det.appendChild(engine);
  const vals=window.TTRVehicleDesignStats?.[v.id];
