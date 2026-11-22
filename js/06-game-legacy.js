@@ -4,6 +4,7 @@
 (()=>{'use strict';
 const K=window.TTRCore,{clamp,mod,angleDiff,distance,trackPoint,tangent,nearestTrack,nearestTrackWindow,junctionPhaseHop,phaseGap,circleRotatedRect,clawTarget,jamHit,profiles,pickupCount,rampEntryVisual,rampLaunch,resolveCarContacts,resolveCarObstacle,resolveBorderContact,stepDriveSpeed,pickupSegments,pickupType,offTrackDynamics,wideCornerRecovery,spoonContactZone,insideTrackLoop,shortcutViolation,illegalRouteGain,mugBendGate,finishGateCrossing,finishLinePlane,edgeOfTable,stuckRecoveryStep,oilHit,clawPullStep,bridgeLaneViolation,WORLD_W,WORLD_H,TRACK_LENGTH,LANE_HALF,shortcutFrom,shortcutTo,shortcutPoint,shortcutSamples,shortcutNearest,nearestCourse,sectionNames,sectionRanges,ttrCalibratedProfile}=K;
 const {drawKnife,drawRamp}=window.TTRGameParts;
+const {drawClawCable,renderOil,renderEffect}=window.TTRGameEffectsVisuals;
 const $=id=>document.getElementById(id);
 const canvas=$('game'),g=canvas.getContext('2d',{alpha:false}),mini=$('mini'),mg=mini.getContext('2d');
 let sw=0,sh=0,dpr=0,scale=1,camX=WORLD_W/2,camY=WORLD_H/2,world=null;
@@ -2101,58 +2102,6 @@ function syncPauseAudioControls(){const st=SND.getSettings();
 function togglePause(){if(!race||race.finished)return;race.paused=!race.paused;releaseAllControls();$('pauseOverlay').hidden=!race.paused;$('hint').classList.remove('show');lastHint=0;
  if(race.paused){$('pauseAudio').open=false;document.querySelector('.pause-card').classList.remove('audio-open');syncPauseAudioControls();SND.stopMusic();SND.sfx('select');}
  else SND.music('race');syncAudio();}
-function drawClawCable(ctx,user,target){
- const angle=Math.atan2(target.y-user.y,target.x-user.x),fx=Math.cos(angle),fy=Math.sin(angle);
- const sx=user.x+fx*24,sy=user.y+fy*24,tx=target.x-fx*15,ty=target.y-fy*15;
- ctx.save();ctx.lineCap='round';
- ctx.strokeStyle='#142331';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(tx,ty);ctx.stroke();
- ctx.strokeStyle='#d1e3ec';ctx.lineWidth=3;ctx.setLineDash([7,5]);ctx.lineDashOffset=-clock*37;
- ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(tx,ty);ctx.stroke();ctx.setLineDash([]);
- // A gripping metal claw, with two opposing curved pincers around the rival's bumper.
- ctx.translate(tx,ty);ctx.rotate(angle);ctx.shadowColor='#061222';ctx.shadowBlur=5;
- ctx.fillStyle='#e9eff4';ctx.strokeStyle='#243648';ctx.lineWidth=2.8;
- ctx.beginPath();ctx.moveTo(-13,-7);ctx.lineTo(0,-14);ctx.lineTo(11,-14);ctx.lineTo(16,-7);ctx.lineTo(5,-4);ctx.lineTo(-2,-7);ctx.closePath();ctx.fill();ctx.stroke();
- ctx.beginPath();ctx.moveTo(-13,7);ctx.lineTo(0,14);ctx.lineTo(11,14);ctx.lineTo(16,7);ctx.lineTo(5,4);ctx.lineTo(-2,7);ctx.closePath();ctx.fill();ctx.stroke();
- ctx.fillStyle='#f6bd4b';ctx.strokeStyle='#1b2737';ctx.beginPath();ctx.roundRect(-16,-6,18,12,3);ctx.fill();ctx.stroke();
- ctx.fillStyle='#a4bbc7';ctx.beginPath();ctx.arc(-8,0,3,0,Math.PI*2);ctx.fill();
- ctx.restore();
-}
-function renderOil(ctx,o){
- ctx.save();ctx.translate(o.x,o.y);ctx.rotate(.14);const b=Math.sin(clock*4+(o.phase||0));
- ctx.fillStyle='#18142373';ctx.beginPath();ctx.ellipse(3,7,39,24,0,0,Math.PI*2);ctx.fill();
- ctx.beginPath();ctx.moveTo(-36,-5);ctx.bezierCurveTo(-40,-20,-16,-27,1,-19);ctx.bezierCurveTo(22,-31,41,-12,37,2);
- ctx.bezierCurveTo(51,18,10,26,-6,22);ctx.bezierCurveTo(-34,28,-43,12,-36,-5);ctx.closePath();
- ctx.fillStyle='#14192bed';ctx.strokeStyle='#151524';ctx.lineWidth=5;ctx.lineJoin='round';ctx.fill();ctx.stroke();
- ctx.strokeStyle='#85a9c5a8';ctx.lineWidth=2.6;ctx.beginPath();ctx.ellipse(-4,-3,22+b,10,0,3.3,5.95);ctx.stroke();
- ctx.fillStyle='#e8e9f1bb';for(const [x,y,r] of [[-16,-8,3],[9,8,2.4],[22,-7,1.6]]){ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
- ctx.restore();
-}
-function renderEffect(ctx,e){ctx.save();const life=clamp(e.t/e.ttl,0,1);
- if(e.kind==='impactBurst'){
-   const p=1-life,energy=e.intensity||.4;
-   ctx.translate(e.x,e.y);ctx.globalAlpha=.68*life;
-   ctx.strokeStyle=energy>.68?'#ffe29b':'#c8d8dc';ctx.lineWidth=1.4+energy;
-   for(let i=0;i<6;i++){
-     const angle=i*Math.PI/3+p*.7,length=(5+energy*14)*(1+p*.8);
-     ctx.beginPath();ctx.moveTo(Math.cos(angle)*5,Math.sin(angle)*5);
-     ctx.lineTo(Math.cos(angle)*length,Math.sin(angle)*length);ctx.stroke();
-   }
-   ctx.restore();return;
- }
- if(e.kind==='fallCloud'){
-   const p=1-life;
-   for(let i=0;i<12;i++){
-     const a=(i/12)*Math.PI*2+e.x*.031;
-     const radius=23+i%3*9+p*39;
-     const px=e.x+Math.cos(a)*radius,py=e.y+Math.sin(a)*radius*.75;
-     ctx.globalAlpha=.84*Math.pow(life,.55);
-     ctx.fillStyle=i%4===0?'#d5bdaa':i%3===0?'#f0f0ed':'#cdd3d8';
-     ctx.beginPath();ctx.arc(px,py,14+(i%4)*4+Math.sin(p*Math.PI)*16,0,Math.PI*2);ctx.fill();
-   }
-   ctx.globalAlpha=.62*life;ctx.fillStyle='#eff2f1';ctx.beginPath();ctx.ellipse(e.x,e.y,38+p*38,27+p*25,0,0,Math.PI*2);ctx.fill();
-   ctx.restore();return;
- }
- if(e.kind==='poof'){const p=1-life;ctx.globalAlpha=.48*life;for(let i=0;i<6;i++){const ang=i*(Math.PI/3)+p*1.6;ctx.fillStyle=i<3?'rgba(240,242,245,.8)':'rgba(201,176,144,.45)';ctx.beginPath();ctx.arc(e.x+Math.cos(ang)*(12+p*26),e.y+Math.sin(ang*.8)*(10+p*18),8+i+p*7,0,Math.PI*2);ctx.fill();}ctx.restore();return;}ctx.globalAlpha=life;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='900 19px system-ui';ctx.strokeStyle='#0a1325';ctx.lineWidth=4;ctx.strokeText(e.text,e.x,e.y-30*(1-life));ctx.fillStyle=e.color;ctx.fillText(e.text,e.x,e.y-30*(1-life));ctx.restore();}
 const miniBase=document.createElement('canvas');miniBase.width=280;miniBase.height=180;
 const miniBg=miniBase.getContext('2d');miniBg.save();miniBg.translate(140,90);miniBg.scale(245/WORLD_W,153/WORLD_H);miniBg.translate(-WORLD_W/2,-WORLD_H/2);
 miniBg.beginPath();points.forEach((p,i)=>i?miniBg.lineTo(p.x,p.y):miniBg.moveTo(p.x,p.y));miniBg.closePath();
@@ -2186,7 +2135,7 @@ function render(){const ratio=Math.min(race?.mode==='online'&&onlineSession&&!on
  const viewLeft=Math.max(0,Math.floor(camX-halfW-60)),viewTop=Math.max(0,Math.floor(camY-halfH-60));
  const viewRight=Math.min(WORLD_W,Math.ceil(camX+halfW+60)),viewBottom=Math.min(WORLD_H,Math.ceil(camY+halfH+60));
  if(viewRight>viewLeft&&viewBottom>viewTop)g.drawImage(track,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop);
- if(race){race.oils.forEach(o=>renderOil(g,o));race.pickups.forEach(p=>drawBox(g,p));
+ if(race){race.oils.forEach(o=>renderOil(g,o,clock));race.pickups.forEach(p=>drawBox(g,p));
    // Genuine ramp-entry cars render ABOVE the ramp even before jump starts.
   const visibleProp=o=>Math.abs(o.x-camX)<halfW+145&&Math.abs(o.y-camY)<halfH+145;
   // Floor spills are decals below all four wheels, irrespective of their y-sort position.
@@ -2203,8 +2152,8 @@ function render(){const ratio=Math.min(race?.mode==='online'&&onlineSession&&!on
    if(viewRight>viewLeft&&viewBottom>viewTop)g.drawImage(bridgeLayer,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop);
    props.filter(o=>o.type==='ramp'&&visibleProp(o)).forEach(o=>drawObstacle(g,o));
    race.cars.filter(c=>!c.eliminated&&(c.onBridge||c.jump>0||c.rampEntryVisual||c.bridgeExitVisual>0)).forEach(c=>carSprite(g,c));
- for(const c of race.cars){if(!c.eliminated&&c.claw>0&&c.clawTarget)drawClawCable(g,c,c.clawTarget);}
- race.effects.forEach(e=>renderEffect(g,e));if(race.countdown>0){g.save();g.setTransform(dpr,0,0,dpr,0,0);g.textAlign='center';g.textBaseline='middle';g.lineWidth=7;g.strokeStyle='#142438';g.font=`950 ${Math.min(90,sw/5)}px system-ui`;const v=Math.ceil(race.countdown);g.strokeText(String(v),sw/2,sh/2);g.fillStyle='#ffe67f';g.fillText(String(v),sw/2,sh/2);g.restore();}}else gameObstacles(g);
+ for(const c of race.cars){if(!c.eliminated&&c.claw>0&&c.clawTarget)drawClawCable(g,c,c.clawTarget,clock);}
+ race.effects.forEach(e=>renderEffect(g,e,clamp));if(race.countdown>0){g.save();g.setTransform(dpr,0,0,dpr,0,0);g.textAlign='center';g.textBaseline='middle';g.lineWidth=7;g.strokeStyle='#142438';g.font=`950 ${Math.min(90,sw/5)}px system-ui`;const v=Math.ceil(race.countdown);g.strokeText(String(v),sw/2,sh/2);g.fillStyle='#ffe67f';g.fillText(String(v),sw/2,sh/2);g.restore();}}else gameObstacles(g);
  if(clock>lastHint&&lastHint!==0){$('hint').classList.remove('show');lastHint=0;}
 }
 function frame(t){
