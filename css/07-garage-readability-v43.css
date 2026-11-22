@@ -1,0 +1,25 @@
+
+/* Keep controls below the decorative start tape, without absolute positioning. */
+#garageScreen .garage-panel{box-sizing:border-box!important;padding-top:15px!important;overflow:hidden!important}
+#garageScreen .flag-tape{top:0!important;pointer-events:none!important}
+#garageScreen .garage-header{min-height:37px!important;box-sizing:border-box!important;padding:2px 5px 6px!important;z-index:5!important;overflow:visible!important}
+#garageScreen .garage-header .eyebrow{display:none!important}
+#garageScreen .garage-header h2{font-size:clamp(13px,2.5vw,20px)!important;line-height:1.1!important}
+#garageScreen .garage-header button{min-height:27px!important;padding:4px 7px!important;line-height:1.1!important;max-width:none!important}
+#garageScreen .garage-layout{min-height:0!important;gap:6px!important;grid-template-columns:minmax(0,1.16fr) minmax(0,1.25fr)!important}
+#garageScreen .garage-stage{min-height:0!important;overflow:hidden!important;padding:4px!important}
+#garageScreen #garageCanvas{min-height:80px!important;height:auto!important;flex:1 1 auto!important;max-height:none!important}
+#garageScreen .garage-specs{max-height:none!important;min-height:0!important;overflow:visible!important;flex:0 0 auto!important}
+#garageScreen .garage-specs h3{font-size:clamp(12px,1.8vw,16px)!important;line-height:1.1!important;margin:1px 0 3px!important}
+#garageScreen .garage-specs p{display:none!important}
+#garageScreen #garageBars{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;column-gap:8px!important;row-gap:2px!important}
+#garageScreen .garage-stats{min-width:0!important;margin:0!important;display:grid!important;grid-template-columns:minmax(53px,auto) minmax(12px,1fr) 15px!important;gap:3px!important;min-height:15px!important;line-height:1.1!important;font-size:clamp(9px,1.15vw,11px)!important;align-items:center!important}
+#garageScreen .garage-stats .rail{height:6px!important}
+#garageScreen .garage-stats>*{min-width:0}
+#garageScreen .garage-list{min-height:0!important;overflow-y:auto!important}
+@media(max-height:380px) and (orientation:landscape){
+ #garageScreen .garage-panel{padding-top:12px!important}
+ #garageScreen .garage-header{min-height:30px!important;padding-bottom:3px!important}
+ #garageScreen .garage-stats{min-height:13px!important;font-size:9px!important}
+ #garageScreen #garageCanvas{min-height:66px!important}
+}

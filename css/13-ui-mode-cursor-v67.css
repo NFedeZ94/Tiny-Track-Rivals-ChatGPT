@@ -1,0 +1,40 @@
+
+/* Final approved thick play-triangle from the user screenshot; overrides the legacy white mouse cursor. */
+#screen.v11-screen .v11-options .retro-option::before{
+ content:''!important;position:absolute!important;display:none!important;
+ left:clamp(5px,.85vw,10px)!important;top:50%!important;right:auto!important;
+ width:clamp(17px,3.9vh,28px)!important;height:clamp(17px,3.9vh,28px)!important;
+ background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2036%2036%22%3E%3Cpath%20d%3D%22M9.6%205.2c-2.3-1.4-5.1.2-5.1%203v19.6c0%202.9%202.8%204.5%205.2%203.1l19.1-10c2.6-1.5%202.6-4.2%200-5.7L9.6%205.2z%22%20fill%3D%22%2310214e%22%20stroke%3D%22%2310214e%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E")!important;background-size:100% 100%!important;
+ background-position:center!important;background-repeat:no-repeat!important;
+ color:transparent!important;text-shadow:none!important;opacity:1!important;
+ transform:translate3d(0,-50%,0)!important;animation:none!important;pointer-events:none!important;
+}
+#screen.v11-screen .v11-options .retro-option.selected::before,
+#screen.v11-screen .v11-options .retro-option:focus-visible::before{
+ display:block!important;animation:ttrV67Selector .78s ease-in-out infinite!important;
+}
+@keyframes ttrV67Selector{0%,100%{transform:translate3d(0,-50%,0)}50%{transform:translate3d(4px,-50%,0)}}
+@media(prefers-reduced-motion:reduce){#screen.v11-screen .v11-options .retro-option.selected::before,#screen.v11-screen .v11-options .retro-option:focus-visible::before{animation:none!important;}}
+/* Animate only the car in drawShowroom(); don't move its entire background or the garage stage. */
+#screen.v11-screen #menuCar,#garageScreen #garageCanvas{animation:none!important;transform:none!important;filter:none!important;}
+#raceConfig[hidden]{display:none!important;}
+body #raceConfig:not([hidden]){position:fixed;inset:0;z-index:82;display:flex;justify-content:center;align-items:center;
+ padding:10px;overflow:auto;background:rgba(2,8,29,.91);box-sizing:border-box;}
+body #raceConfig .ttr-mode-config-card{width:min(670px,96vw);max-height:calc(100dvh - 20px);overflow:auto;
+ padding:clamp(10px,2vh,17px);border:3px solid #ffe6a0;
+ background:linear-gradient(135deg,#36498e,#132650);box-shadow:0 8px 26px #000a;color:#fff1b1;box-sizing:border-box;}
+body #raceConfig .ttr-mode-config-head{display:flex;align-items:center;justify-content:space-between;gap:9px;}
+body #raceConfig h2{font:900 clamp(20px,4.2vh,28px) Impact,Arial,sans-serif;letter-spacing:.07em;margin:0;}
+body #raceConfig .ttr-mode-config-tip{font:600 clamp(11px,2.3vh,13px) system-ui,sans-serif;color:#d7e5fd;margin:5px 0 12px;}
+body #raceConfig .ttr-mode-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}
+body #raceConfig label{font:800 clamp(12px,2.5vh,15px) system-ui,sans-serif;display:flex;flex-direction:column;gap:5px;min-width:0;}
+body #raceConfig select{width:100%;min-height:34px;padding:4px 6px;border:2px solid #9bb8e9;background:#17275b;color:#f8f8ff;}
+body #raceConfig #eliminationGoalField[hidden]{display:none!important;}
+body #raceConfig button{border:2px solid #f9dea5;background:linear-gradient(#34498e,#19295d);color:#fff4bd;cursor:pointer;
+ font:900 clamp(12px,2.5vh,15px) Impact,Arial,sans-serif;padding:7px 14px;}
+body #raceConfig #raceConfigStart{background:linear-gradient(#ffe881,#f3a52a);color:#182653;}
+body #raceConfig .ttr-mode-config-actions{display:flex;justify-content:space-between;gap:9px;margin-top:13px;}
+@media(max-width:570px){body #raceConfig .ttr-mode-fields{gap:6px;} body #raceConfig .ttr-mode-config-card{padding:8px;}}
+/* Six language choices must stay reachable in portrait and on compact phones. */
+#languageScreen .language-options{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-height:54dvh;overflow-y:auto;}
+#languageScreen .language-btn{flex:0 1 170px;min-width:128px;}

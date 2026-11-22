@@ -1,0 +1,80 @@
+
+/* v0.13.6.68 -- unified seven-glyph alignment and restored early-retro menu selector.
+   The in-game selection line is part of the button border; leave >=6px visual clearance. */
+#screen.v11-screen .v11-options .retro-option {
+  position:relative;
+  box-sizing:border-box;
+  padding-right:clamp(36px,5.4vw,46px)!important;
+}
+#screen.v11-screen .v11-options .retro-option::after,
+#screen.v11-screen .v11-options #garageBtn::after,
+#screen.v11-screen .v11-options #settingsBtn::after {
+  content:""!important;
+  position:absolute!important;
+  display:block!important;
+  box-sizing:border-box!important;
+  width:clamp(14px,3.6vh,19px)!important;
+  height:clamp(14px,3.6vh,19px)!important;
+  top:calc(50% - 1px)!important;
+  right:clamp(10px,1.45vw,14px)!important;
+  bottom:auto!important;
+  left:auto!important;
+  transform:translateY(-50%)!important;
+  margin:0!important;
+  padding:0!important;
+  opacity:1!important;
+  background-color:currentColor!important;
+  background-position:center!important;
+  -webkit-mask-position:center center!important;
+  mask-position:center center!important;
+  -webkit-mask-size:contain!important;
+  mask-size:contain!important;
+  -webkit-mask-repeat:no-repeat!important;
+  mask-repeat:no-repeat!important;
+  pointer-events:none;
+  animation:none!important;
+}
+/* Original triangular cursor from the older retro menu, replacing v62's thin ➜ glyph.
+   Movement belongs ONLY to the cursor, not to the selection button. */
+#screen.v11-screen .v11-options .retro-option::before {
+  content:'▶'!important;
+  position:absolute!important;
+  display:none!important;
+  left:7px!important;
+  right:auto!important;
+  top:calc(50% - 1px)!important;
+  font-family:Impact,'Arial Black',sans-serif!important;
+  font-style:normal!important;
+  font-size:clamp(13px,3.6vh,17px)!important;
+  font-weight:900!important;
+  line-height:1!important;
+  color:currentColor!important;
+  text-shadow:none!important;
+  opacity:1!important;
+  transform:translate3d(0,-50%,0);
+  animation:none!important;
+  pointer-events:none;
+}
+#screen.v11-screen .v11-options .retro-option.selected::before,
+#screen.v11-screen .v11-options .retro-option:focus-visible::before {
+  display:block!important;
+  animation:ttrV65RetroPointer .55s steps(2,end) infinite!important;
+}
+@keyframes ttrV65RetroPointer {
+  0%,100% {transform:translate3d(0,-50%,0)}
+  50% {transform:translate3d(3px,-50%,0)}
+}
+@media (max-width:620px) and (orientation:landscape) {
+  #screen.v11-screen .v11-options .retro-option {padding-right:29px!important}
+  #screen.v11-screen .v11-options .retro-option::after,
+  #screen.v11-screen .v11-options #garageBtn::after,
+  #screen.v11-screen .v11-options #settingsBtn::after {
+    width:14px!important;height:14px!important;right:8px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  #screen.v11-screen .v11-options .retro-option.selected::before,
+  #screen.v11-screen .v11-options .retro-option:focus-visible::before {
+    animation:none!important;
+  }
+}

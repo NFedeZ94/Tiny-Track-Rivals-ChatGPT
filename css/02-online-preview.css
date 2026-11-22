@@ -1,0 +1,55 @@
+
+#screen .v11-options .retro-option{font-size:clamp(12px,3vh,20px);line-height:1.06;padding-top:1px;padding-bottom:1px}#onlineModal[hidden]{display:none!important}#onlineModal{position:fixed;inset:0;z-index:30;background:rgba(3,12,29,.89);display:flex;align-items:center;justify-content:center;padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));font-family:system-ui,sans-serif}
+#onlineModal .online-panel{width:min(680px,96vw);max-height:96dvh;overflow:auto;background:linear-gradient(145deg,#233454,#0e1b36);border:2px solid #65c9cf;border-radius:16px;box-shadow:0 10px 40px #000a;padding:clamp(10px,2vw,20px);color:white}
+#onlineModal h2{font-size:clamp(18px,3vw,28px);margin:0 0 4px;color:#ffe1a1}#onlineModal .online-sub{font-size:11px;color:#bbd7df;margin:0 0 10px;line-height:1.4}
+#onlineModal label{font-size:11px;font-weight:800;display:flex;flex-direction:column;gap:3px;color:#e4f3f8;min-width:0;flex:1}
+#onlineModal input,#onlineModal select{background:#071c30;color:#fff;border:1px solid #76b9c7;border-radius:7px;padding:7px;max-width:100%;font-size:13px;min-height:35px}
+#onlineModal .online-row{display:flex;gap:7px;flex-wrap:wrap;align-items:end;margin-bottom:8px}
+#onlineModal button{min-height:35px;border-radius:8px;padding:7px 10px;background:#276172;border:1px solid #7ac9df;color:#faffff;font-size:12px;font-weight:800;cursor:pointer}
+#onlineModal button:disabled{opacity:.37;cursor:not-allowed}#onlineModal #onlineClose{background:#54263a;border-color:#c77e91}
+#onlineModal .room-code{letter-spacing:.16em;font-size:19px;color:#ffe18a;font-weight:900}#onlineModal #onlineMembers{display:flex;gap:5px;flex-wrap:wrap;font-size:11px;margin:8px 0;min-height:18px}
+#onlineModal .online-member{padding:4px 7px;background:#102b42;border:1px solid #557c9b;border-radius:7px}#onlineModal .online-member.ready{border-color:#74d5a1}
+#onlineModal #onlineStatus{font-size:11px;min-height:28px;color:#f9deaf;line-height:1.35;margin:6px 0}
+/* v0.13.6.37: online status is a SINGLE inline HUD chip between POS and GIRO. */
+#hud .hudTop #onlineGameTag{display:none;position:relative;z-index:1;top:auto;left:auto;right:auto;bottom:auto;transform:none;align-self:center;
+ flex:0 1 auto;min-width:0;max-width:36%;font:800 10px/1.2 system-ui,sans-serif;letter-spacing:0;
+ background:rgba(6,26,45,.75);padding:5px 7px;border:1px solid #70c6d6a3;border-radius:7px;
+ color:#d6f2fe;pointer-events:none;white-space:nowrap;align-items:center;justify-content:center;gap:5px;
+ overflow:hidden;text-overflow:clip}
+#hud .hudTop #onlineGameLabel{display:inline-block;min-width:0;overflow:hidden;text-overflow:ellipsis}
+#hud .hudTop #onlineGameRole{color:#9fcadd}
+#hud .hudTop #onlineGameTag .online-game-latency{display:inline-block;flex:0 0 auto;border-left:1px solid #6e9da9;
+ padding-left:5px;color:#acdfec;font-variant-numeric:tabular-nums}
+#hud .hudTop #onlineGameTag .online-game-latency[data-quality="good"]{color:#abf5c1}
+#hud .hudTop #onlineGameTag .online-game-latency[data-quality="high"]{color:#ffe59b}
+#hud .hudTop #onlineGameTag .online-game-latency[data-quality="poor"]{color:#ffc0bc}
+@media(max-width:760px){
+ #hud .hudTop #onlineGameTag{font-size:9px;max-width:33%;padding:4px 5px;gap:4px}
+ #hud .hudTop #onlineGameRole{display:none}
+ #hud .hudTop #onlineGameTag .online-game-latency{padding-left:4px}
+}
+@media(max-width:610px){
+ #hud .hudTop #onlineGameTag{font-size:8px;max-width:32%;padding:3px 4px;gap:3px}
+}
+@media(max-height:400px){#onlineModal .online-panel{padding:9px}#onlineModal .online-row{margin-bottom:4px}#onlineModal h2{font-size:18px}}
+
+/* v0.13.6.34 — 5th garage vehicle, use vertical space responsibly on landscape phones. */
+#garageScreen .car-choice-list{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+#garageScreen .car-choice{min-height:48px;padding:4px!important}
+#garageScreen .garage-list{gap:5px}
+#garageScreen .upcoming-grid figure{width:100%}
+@media(max-height:470px) and (orientation:landscape){
+ #garageScreen .panel{max-height:calc(100dvh - 10px);overflow-y:auto;padding:7px 10px!important}
+ #garageScreen .garage-layout{margin-top:4px;gap:8px}
+ #garageScreen .garage-header h2{font-size:clamp(17px,3vw,23px)!important}
+ #garageScreen .garage-header{gap:5px}
+ #garageScreen .car-choice-list{gap:3px}
+ #garageScreen .car-choice{min-height:39px!important;padding:2px 4px!important}
+ #garageScreen .car-choice-preview{width:34px!important;height:32px!important}
+ #garageScreen .garage-lock,#garageScreen .upcoming-preview{display:none!important}
+ #garageScreen #garageCanvas{height:100px!important}
+ #garageScreen .garage-specs h3{font-size:15px!important;margin:2px 0!important}
+ #garageScreen .garage-specs p{margin:2px 0!important}
+ #garageScreen .garage-stats{margin:1px 0!important}
+ #garageScreen .garage-list>.btn{margin-top:0!important;min-height:34px!important}
+}

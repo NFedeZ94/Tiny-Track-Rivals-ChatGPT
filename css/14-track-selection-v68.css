@@ -1,0 +1,42 @@
+
+/* v68: Two-step race setup: track -> mode-specific options. Consistent approved selector. */
+#trackSelect[hidden]{display:none!important}
+body #trackSelect:not([hidden]){position:fixed;inset:0;z-index:81;display:flex;align-items:center;justify-content:center;padding:max(6px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left));background:rgba(2,8,29,.94);}
+#trackSelect .ttr-track-panel{width:min(1040px,98vw);height:min(520px,95dvh);display:flex;flex-direction:column;gap:7px;min-height:0;border:3px solid #ffe6a0;background:linear-gradient(146deg,#344b95,#0d1a49);color:#f5f4fa;box-shadow:0 9px 32px #000b;padding:clamp(8px,1.5vh,14px);box-sizing:border-box;}
+#trackSelect .ttr-track-head{display:flex;gap:10px;align-items:center;justify-content:space-between;flex:none;min-height:34px;}
+#trackSelect .ttr-track-head h2{font:900 clamp(17px,4.6vh,29px)/1 Impact,Arial,sans-serif;letter-spacing:.07em;color:#ffdf81;margin:0;}
+#trackSelect .ttr-track-subtitle{font:700 clamp(9px,2.3vh,12px)/1.2 system-ui,sans-serif;color:#c4e6f7;}
+#trackSelect .ttr-track-dismiss{flex:none;min-width:36px;height:30px;background:#152353;border:2px solid #c3d8ff;color:#fff4c1;font:900 20px Arial;cursor:pointer;}
+#trackSelect .ttr-track-body{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(205px,1fr);gap:9px;flex:1;min-height:0;}
+#trackSelect .ttr-track-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;align-content:start;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:2px;min-height:0;}
+#trackSelect .ttr-track-card{display:flex;align-items:center;gap:7px;text-align:left;min-width:0;min-height:57px;padding:5px 7px;border:2px solid #698eb7;background:#172c5e;color:#f5f3ee;border-radius:4px;font:800 clamp(10px,2.3vh,13px) system-ui,sans-serif;cursor:pointer;}
+#trackSelect .ttr-track-card.is-selected{background:#ffdc86;color:#162753;border-color:#fff4c1;box-shadow:0 0 0 1px #ffdc86;}
+#trackSelect .ttr-track-card:disabled{opacity:.58;cursor:not-allowed;background:#182445;border-color:#5e6e8e;color:#c8d5e4;}
+#trackSelect .ttr-track-card canvas,#trackSelect .ttr-track-empty{display:block;flex:none;width:clamp(54px,8.4vw,83px);height:43px;border-radius:2px;background:#0a1736;border:1px solid #657ca7;}
+#trackSelect .ttr-track-empty{font-size:17px;text-align:center;line-height:41px;color:#8392b6;}
+#trackSelect .ttr-track-card span.ttr-track-info{min-width:0;display:flex;flex-direction:column;gap:3px;}
+#trackSelect .ttr-track-card b{font-size:clamp(10px,2.3vh,13px);line-height:1.05;}
+#trackSelect .ttr-track-card small{font-size:clamp(8px,1.7vh,10px);font-weight:850;letter-spacing:.04em;}
+#trackSelect .ttr-track-preview{border:2px solid #6184b5;background:#0b1b40;padding:8px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:5px;min-width:0;min-height:0;}
+#trackSelect .ttr-track-preview h3{margin:0;font:900 clamp(14px,3vh,20px) Impact,Arial,sans-serif;color:#ffdf81;text-align:center;letter-spacing:.05em;}
+#trackSelect .ttr-track-preview canvas{display:block;width:100%;max-height:56%;aspect-ratio:440/260;object-fit:contain;background:#09142d;border:1px solid #466c91;}
+#trackSelect .ttr-track-preview p{color:#d1e1ee;font:700 clamp(9px,2vh,12px)/1.25 system-ui,sans-serif;margin:0;text-align:center;}
+#trackSelect .ttr-track-bottom{display:flex;justify-content:space-between;align-items:center;gap:10px;flex:none;min-height:34px;}
+#trackSelect .ttr-track-bottom button{min-height:33px;border:2px solid #ecdbab;background:#243973;color:#ffe8aa;font:900 clamp(11px,2.6vh,15px) Impact,Arial,sans-serif;padding:5px 12px;cursor:pointer;}
+#trackSelect .ttr-track-bottom .ttr-track-continue{background:#ffe5a5;color:#142447;min-width:160px;}
+/* Same SVG, dimensions, translation and animation as selected options on the main menu. */
+#raceConfig #raceConfigStart,#loadingTrack #ttrLaunchRace,#trackSelect #trackSelectNext{position:relative!important;padding-left:clamp(33px,5.5vw,46px)!important;}
+#raceConfig #raceConfigStart::before,#loadingTrack #ttrLaunchRace::before,#trackSelect #trackSelectNext::before{
+ content:'';position:absolute;left:clamp(5px,.85vw,10px);top:50%;width:clamp(17px,3.9vh,28px);height:clamp(17px,3.9vh,28px);
+ background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2036%2036%22%3E%3Cpath%20d%3D%22M9.6%205.2c-2.3-1.4-5.1.2-5.1%203v19.6c0%202.9%202.8%204.5%205.2%203.1l19.1-10c2.6-1.5%202.6-4.2%200-5.7L9.6%205.2z%22%20fill%3D%22%2310214e%22%20stroke%3D%22%2310214e%22%20stroke-width%3D%221.2%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E");background-size:100% 100%;background-repeat:no-repeat;background-position:center;
+ transform:translate3d(0,-50%,0);animation:ttrV67Selector .78s ease-in-out infinite;pointer-events:none;
+}
+#trackSelect #trackSelectNext:disabled{opacity:.5;cursor:not-allowed;}
+#trackSelect #trackSelectNext:disabled::before{animation:none;}
+#raceConfig .ttr-selected-track{border:1px solid #728ebe;background:#10214e;color:#ffdea5;padding:7px 10px;font:900 12px system-ui,sans-serif;margin:0 0 9px;}
+#careerCircuitCatalog{display:grid;grid-template-columns:1fr 1fr;gap:3px 8px;max-height:110px;overflow-y:auto;margin-top:5px;}
+#careerCircuitCatalog .ttr-career-circuit{font:750 10px system-ui,sans-serif;color:#bfcfea;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+#careerCircuitCatalog .ttr-career-circuit.ready{color:#ffe18d;}
+@media(max-width:700px){#trackSelect .ttr-track-body{grid-template-columns:minmax(0,1.35fr) minmax(150px,1fr);gap:6px;}#trackSelect .ttr-track-grid{grid-template-columns:1fr;}#trackSelect .ttr-track-panel{padding:6px;gap:4px;}#trackSelect .ttr-track-card{min-height:48px;padding:3px 5px;}#trackSelect .ttr-track-card canvas,#trackSelect .ttr-track-empty{width:51px;height:36px;line-height:35px;}#trackSelect .ttr-track-preview{padding:4px;}}
+@media(orientation:portrait){#trackSelect .ttr-track-body{grid-template-columns:1fr;grid-template-rows:minmax(110px,35%) minmax(0,1fr);}#trackSelect .ttr-track-grid{grid-row:2;grid-template-columns:repeat(2,minmax(0,1fr));}#trackSelect .ttr-track-preview{grid-row:1;}#trackSelect .ttr-track-preview canvas{width:65%;max-height:60%;}#trackSelect .ttr-track-card{min-height:50px;}#trackSelect .ttr-track-subtitle{font-size:9px;}}
+@media(prefers-reduced-motion:reduce){#raceConfig #raceConfigStart::before,#loadingTrack #ttrLaunchRace::before,#trackSelect #trackSelectNext::before{animation:none;}}

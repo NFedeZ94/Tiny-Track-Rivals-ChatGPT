@@ -1,0 +1,37 @@
+
+/* All three menus use the main menu's viewport and identical safe-area geometry. */
+#garageScreen,#careerScreen,#careerMissionsScreen{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;max-height:100dvh!important;box-sizing:border-box!important;padding:max(5px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(5px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left))!important;overflow:hidden!important;align-items:stretch!important;justify-content:stretch!important;background:linear-gradient(140deg,#161d78,#312477 55%,#15103d)!important}
+#garageScreen .garage-panel,#careerScreen .career-panel,#careerMissionsScreen .career-panel{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;min-height:0!important;box-sizing:border-box!important;overflow:hidden!important;border:3px solid #f1ce72!important;border-radius:4px!important;box-shadow:inset 0 0 0 3px #101d52!important;margin:0!important;padding:clamp(5px,1.6vh,12px)!important}
+#garageScreen .garage-layout{height:calc(100% - 40px);min-height:0;overflow:hidden;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)!important;gap:clamp(5px,1vw,12px)!important;margin-top:3px!important}
+#garageScreen .garage-stage,#garageScreen .garage-list{min-width:0;min-height:0;overflow:hidden}
+#garageScreen .garage-header{min-height:0}
+#garageScreen .garage-header h2{font-size:clamp(16px,3.3vw,26px)!important}
+#garageScreen #garageCanvas{height:clamp(110px,43dvh,265px)!important}
+#garageScreen .car-choice-list{gap:3px!important}
+#garageScreen .car-choice{min-height:clamp(28px,8.7dvh,42px)!important}
+#garageScreen .garage-specs p{display:none!important}
+#careerScreen .career-layout{height:100%;flex:1;min-height:0;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)!important;gap:6px!important;overflow:hidden!important}
+#careerScreen .career-overview{min-height:0;overflow:hidden!important}
+#careerScreen .career-list{min-height:0;overflow:hidden!important;display:grid;grid-template-columns:1fr!important;grid-template-rows:repeat(3,minmax(0,1fr));gap:4px!important}
+#careerScreen .career-mission{min-height:0;overflow:hidden;padding:5px!important}
+#careerScreen .career-mission-icon{min-width:27px!important;width:27px!important;font-size:14px!important}
+#careerScreen .career-mission-desc,#careerScreen .career-state{font-size:9px!important;line-height:1.1}
+#careerScreen .career-mission-top{font-size:10px!important}
+#careerScreen .career-header{padding-bottom:3px!important}
+#careerScreen .career-header h2{font-size:clamp(17px,3.5vw,26px)!important}
+#careerScreen .career-overview>.career-block{padding:5px!important}
+#careerScreen .career-block h3{margin:0 0 3px!important;font-size:12px!important}
+#careerScreen .career-stat{padding:3px!important}
+#careerScreen .career-select,#careerScreen .career-btn{min-height:30px!important;padding:3px 7px!important}
+#careerMissionsScreen .career-all-list{overflow:auto!important;min-height:0!important;flex:1}
+/* The score strip occupies its own lane, between safe-area margins and the pause control. */
+#elimBoard{top:max(17px,calc(env(safe-area-inset-top) + 8px))!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:min(63vw,560px)!important;max-height:32px!important;display:none;flex-wrap:nowrap!important;gap:clamp(3px,1vw,9px)!important;align-items:center;justify-content:center!important}
+#elimBoard .e-score{display:inline-flex;align-items:center;justify-content:center;gap:3px;min-width:clamp(28px,5vw,50px);padding:3px 5px!important;border:1px solid var(--car-color)!important;border-radius:5px;background:#061a2de0!important;color:#fff!important;font:900 clamp(9px,1.3vw,13px)/1 system-ui,sans-serif}
+#elimBoard .e-color{display:inline-block;width:11px;height:11px;flex:0 0 11px;border-radius:3px;background:var(--car-color);border:1px solid #fff9}
+#elimBoard .e-score.is-me{outline:1px solid #ffe68c}
+#elimBoard .e-score.is-out{opacity:.32}
+#elimBoard .e-score b{font-size:9px;color:#ffe58b}
+#hud.hud-elimination .hudTop{display:flex!important;gap:5px!important;justify-content:flex-start!important}
+#hud.hud-elimination .hudTop .statBlock:has(#position),#hud.hud-elimination .hudTop .statBlock:has(#lap){display:flex!important}
+#hud.hud-elimination .hudTop .statBlock:has(#time){display:none!important}
+@media(max-height:390px) and (orientation:landscape){#garageScreen .garage-header .eyebrow{display:none}#garageScreen #garageCanvas{height:23dvh!important}#careerScreen .career-mission-desc{display:none!important}#careerScreen .career-mission{padding:3px!important}#careerScreen .career-state{margin-top:1px!important}#elimBoard{top:max(49px,calc(env(safe-area-inset-top) + 43px))!important}}

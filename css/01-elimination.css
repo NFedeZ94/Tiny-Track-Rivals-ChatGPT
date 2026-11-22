@@ -1,0 +1,14 @@
+
+#elimBoard{position:fixed;top:max(4px,env(safe-area-inset-top));left:25%;width:50%;z-index:6;display:none;justify-content:center;align-content:start;gap:3px;flex-wrap:wrap;pointer-events:none;font:800 clamp(8px,1.15vw,11px) system-ui,sans-serif;line-height:1.08;max-height:42px;overflow:hidden}
+#elimBoard .e-score{border:1px solid #a6d6e2a0;border-radius:5px;background:#061a2dbf;color:#fff;padding:3px 5px;box-shadow:0 1px 4px #0006;white-space:nowrap}
+#elimBoard .e-score.is-out{opacity:.43}#elimBoard .e-score.is-me{color:#ffe88e;border-color:#ffe88e}
+#elimBanner{position:fixed;inset:0;z-index:7;display:none;pointer-events:none;align-items:center;justify-content:center;text-align:center;background:linear-gradient(90deg,#07162c00,#07162c8a,#07162c00)}
+#elimBanner .elim-message{background:#071b32d9;border:2px solid #f9dc72;border-radius:16px;box-shadow:0 15px 45px #0007;padding:13px 30px;max-width:90vw}
+#elimBanner strong{color:#ffe17e;font:bold clamp(24px,5vw,48px) system-ui;display:block;text-shadow:1px 2px 0 #9b5320}#elimBanner span{color:#e4f3ff;font:700 13px system-ui;display:block;margin-top:4px}
+#screen .elimResults{max-height:calc(100dvh - 12px);padding:13px 18px;overflow:hidden;width:min(760px,100%)}
+#screen .elimResults .eyebrow{margin:0 0 3px}#screen .elimResults h2{font-size:clamp(20px,4.6vh,30px);margin:3px 0 5px}
+#screen .elimResults .sub{font-size:12px;margin:2px 0 6px}#screen .elimResults table{font-size:11px}
+#screen .elimResults table td{padding:4px 4px}#screen .elimResults .menu-row{margin-top:9px;gap:10px}
+#screen .elimResults .btn{font-size:13px;padding:7px 17px;min-height:35px}
+#screen .elimResults .note{font-size:10px;margin-top:5px}
+@media(max-height:400px){#screen .elimResults{padding:7px 12px}#screen .elimResults table td{padding:2px 3px}#screen .elimResults .menu-row{margin-top:5px}}
