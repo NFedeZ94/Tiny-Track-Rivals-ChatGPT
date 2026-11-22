@@ -8,3 +8,17 @@
 .ttr-roster-detail{min-height:0;overflow:auto;display:flex;flex-direction:column;align-items:stretch;gap:6px;background:#0c253caa;padding:9px;border-radius:9px;border:1px solid #315a70}.ttr-roster-detail h3{margin:0;font-size:clamp(17px,3vw,22px);color:#ffe69b}.ttr-roster-status{font-size:10px;letter-spacing:.05em;color:#a6ebbf}.ttr-roster-detail .ttr-roster-img{width:100%;height:clamp(55px,16vh,132px);object-fit:contain;background:#101d37;border-radius:7px;box-shadow:inset 0 0 22px #0009}.ttr-roster-detail p{margin:2px 0;font-size:11px;line-height:1.4}.ttr-roster-muted{color:#b5d0e0}.ttr-roster-plan{font-size:10px;color:#bfecbf}.ttr-roster-play{align-self:stretch;min-height:33px;background:#fbd17a;border:1px solid #fff3bf;border-radius:7px;font-weight:900;color:#183040}.ttr-roster-footer{font-size:9px;color:#a7c9d5;flex:none}
 @media(max-width:680px),(max-height:410px){.ttr-roster-panel{padding:7px;gap:4px}.ttr-roster-body{grid-template-columns:1.04fr 1fr;gap:5px}.ttr-roster-list{grid-template-columns:1fr;gap:3px}.ttr-roster-card{min-height:37px;padding:3px;gap:4px}.ttr-roster-card img,.ttr-roster-placeholder{height:28px;width:32px;flex-basis:32px}.ttr-roster-detail{padding:5px;gap:3px}.ttr-roster-detail .ttr-roster-img{height:57px}.ttr-roster-detail p{font-size:10px}.ttr-roster-head strong{font-size:17px}.ttr-roster-footer{font-size:8px}.ttr-roster-play{min-height:29px}.ttr-roster-tab{min-height:26px}}
 @media(max-width:450px) and (orientation:portrait){.ttr-roster-body{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}.ttr-roster-detail .ttr-roster-img{height:85px}.ttr-roster-detail{max-height:210px}.ttr-roster-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* v0.13.6.86 post-phase-4: uniform uncropped 3D turntable previews. */
+.ttr-roster-card{min-height:62px;overflow:hidden;}
+.ttr-roster-card img{display:block;object-fit:contain;object-position:center center;width:58px;height:48px;flex:0 0 58px;max-width:58px;background:transparent;}
+.ttr-roster-detail .ttr-roster-img{display:block;width:100%;height:clamp(110px,23vh,175px);object-fit:contain;object-position:center center;flex:none;}
+@media (max-width:680px),(max-height:410px){
+ .ttr-roster-card{min-height:44px;}
+ .ttr-roster-card img{width:42px;height:36px;flex-basis:42px;max-width:42px;}
+ .ttr-roster-detail .ttr-roster-img{height:clamp(70px,19vh,108px);}
+}
+/* The existing orientation warning is also visible on collection, not only races. */
+@media(orientation:portrait){
+ body.ttr-roster-open #orientationLock{display:flex!important;visibility:visible!important;opacity:1!important;z-index:9999!important;pointer-events:auto!important;}
+}
