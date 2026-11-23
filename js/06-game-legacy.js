@@ -1069,10 +1069,25 @@ const ttrRaceSafety=window.TTRRaceSafety.create({
 // Fase 8 — stessa closure privata della gara: dipendenze esplicite, nessuna copia dello stato.
 const ttrRaceProgress=window.TTRRaceProgress.create({
  getRace:()=>race,nearestCourse,points,eliminationProgressUpdate,finishEdgeTolerance,
- finishLinePlane,trackPoint,tangent,showHint,t,SND
+ finishLinePlane,trackPoint,tangent,showHint,t:(...args)=>t(...args),SND
 });
 const ttrRaceTiming=window.TTRRaceTiming.create({
- getRace:()=>race,showHint,t,SND
+ getRace:()=>race,showHint,t:(...args)=>t(...args),SND
+});
+
+// Fase 9 — blocchi di comportamento estratti senza alterare l'ordine in update(dt).
+const ttrRaceCPU=window.TTRRaceCPU.create({
+ getRace:()=>race,getOnlineSession:()=>onlineSession,distance,recoverCar,clawTarget,props,useItem
+});
+const ttrRaceOil=window.TTRRaceOil.create({
+ getRace:()=>race,milkCerealSpills,oilHit,SND
+});
+const ttrRacePickups=window.TTRRacePickups.create({
+ getRace:()=>race,circleRotatedRect,pickupType,K,SND
+});
+const ttrRaceCollisions=window.TTRRaceCollisions.create({
+ getRace:()=>race,props,contactWithProp,stuckRecoveryStep,recoverCar,
+ resolveCarContacts,eliminationActive,edgeOfTable,startTableFall,SND
 });
 
 function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSession&&!onlineSession.host)return;if(race.paused||race.finished||innerHeight>innerWidth){syncAudio();return;}
@@ -1162,14 +1177,7 @@ function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSes
      }
    }
  }
- // CPU recovery: attempt steering and reversing before checkpoint respawn.
- if(c!==race.player&&!(race.mode==='online'&&onlineSession?.members[c.id])){const progress=distance(c,{x:c.lastMoveX??c.x,y:c.lastMoveY??c.y});
-  c.stuckTime=(c.stuckTime||0)+(Math.abs(c.speed)<24&&progress<3?dt:-dt*.65);
-  c.stuckTime=Math.max(0,c.stuckTime);
-  if(c.stuckTime>2.3&&c.reverseRecovery<=0)c.reverseRecovery=.75;
-  if(c.stuckTime>5){recoverCar(c,'cpu-stuck');c.speed=48;}
-  c.lastMoveX=c.x;c.lastMoveY=c.y;
- }
+ ttrRaceCPU.updateRecovery(c,dt);
  // On-road snapshots are only written after complete frame of verified lane contact.
  // No penalty for a normal outside detour at the finish-line seam (p=1 -> p=0).
  let near=nearestCourse(c,points);
@@ -1292,41 +1300,13 @@ function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSes
       c.onBridge=true;c.bridgeOffSeconds=0;
     }
   }
- // Orange rind in v62 is a solid obstacle: no auto-launch and no jump award.
- // Static object collisions; jump avoids low obstacles.
- let touchedObstacle=false;
- for(const o of props){if(contactWithProp(c,o,{x:oldX,y:oldY})){
-   touchedObstacle=true;
-   if(c===race.player&&c.jump<=0&&race.time-(c.lastPropHit||-10)>.35){c.lastPropHit=race.time;SND.sfx('impact');}
- }}
- if(stuckRecoveryStep(c,dt,race.time,touchedObstacle))recoverCar(c,'stuck');
- // No invisible lane barrier; low-friction cloth instead of teleporting on contact.
- // Oil reduces grip but never forces a full spin.
- // Reuse oil physics for both deployed power-up oil and the fixed cereal-milk spills.
- for(let si=0,n=race.oils.length+milkCerealSpills.length;si<n;si++){
-  const oil=si<race.oils.length?race.oils[si]:milkCerealSpills[si-race.oils.length];
-  if(!(c.oilCooldown>0)&&!(c.oilSpin>0)&&oilHit(c,oldX,oldY,oil)){
-   c.slip=Math.max(c.slip,1.22);c.oilCooldown=1.55;c.oilSpin=1.16;
-   const sign=Math.abs(c.steer)>.16?Math.sign(c.steer):(c.id%2?1:-1);
-   c.oilSpinDir=sign;
-   c.skidVX=(c.skidVX||0)-Math.sin(c.a)*sign*65;
-   c.skidVY=(c.skidVY||0)+Math.cos(c.a)*sign*65;
-   c.speed*=.80;
-   if(c===race.player)SND.sfx('oilSkid');
- }}
- // Pickup collision: a fixed 1.5× visible-box diameter (22 * 1.5 / 2).
- for(const p of race.pickups){if(p.cool>0||c.item||c.jump>0)continue;if(circleRotatedRect(p,c,p.r)){c.item=pickupType(race.mode,Math.random());p.cool=K.pickupRespawnSeconds(race.cars.length);if(c===race.player){if(race.mode==='career'&&race.careerStats)race.careerStats.pickups++;SND.sfx('pickup');}}}
+ ttrRaceCollisions.handleObstacles(c,oldX,oldY,dt);
+ ttrRaceOil.handleOilContact(c,oldX,oldY);
+ ttrRacePickups.collect(c);
  ttrRaceProgress.updateCarProgress(c,dt,oldX,oldY);
- // AI uses boosts tactically, not excessive oil spam.
- if(c!==race.player&&!(race.mode==='online'&&onlineSession?.members[c.id])&&c.item){if(c.item==='turbo'&&c.speed>95&&Math.random()<.005)useItem(c);else if(c.item==='oil'&&Math.random()<.0008)useItem(c);else if(c.item==='claw'&&clawTarget(c,race.cars,props,162,.30)&&Math.random()<.09)useItem(c);}
+ ttrRaceCPU.useTacticalPowerup(c);
  }
- // SAT collision response: no overlap and no sticky joints, with temporary lateral knockback.
- const contacts=resolveCarContacts(race.mode==='elimination'?eliminationActive():race.cars);
- // A strong bump can physically carry another car beyond the tabletop boundary;
- // run the fall detector AFTER collision resolution, not only before it.
- for(const c of race.cars)if(!c.done&&!(c.tableFalling>0)&&edgeOfTable(c))startTableFall(c);
- for(const hit of contacts.hits){race.effects.push({kind:'impactBurst',x:hit.x,y:hit.y,t:.32,ttl:.32,nx:hit.nx,ny:hit.ny,intensity:hit.intensity});}
- if(contacts.impacts>0&&contacts.maxImpulse>24&&race.time-race.lastImpactSound>.24){SND.sfx('impact');race.lastImpactSound=race.time;}
+ ttrRaceCollisions.handleCars();
  if(race.mode==='elimination'){eliminationEvaluate(dt);syncAudio();}
  else if(race.mode==='online'&&onlineSession?.host){
   const members=onlineSession.members.filter(Boolean);const humans=members.map(m=>race.cars[m.slot]).filter(Boolean);
