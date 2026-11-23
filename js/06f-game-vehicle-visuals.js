@@ -121,19 +121,19 @@ function drawShowroom(canvas,index,view='menu',clock,garageRotationOrigin,profil
    const bounds=boxes?.[aeroSmooth?Math.floor(frame/2):frame];
    // Aero has 384 interpolated frames but 192 measured silhouette centres.
    // Track the visible sprite centre as it revolves: avoid Aero's off-axis wobble.
-   // Enduro: average nearby measured centres to suppress frame-to-frame jitter.
-   // The cyclic window preserves a continuous full 360-degree turn.
+   // Enduro garage: centre the actual visible silhouette vertically on EVERY
+   // frame. Averaging vertical pivots from neighbouring frames caused bobbing
+   // whenever their silhouettes had different heights or positions.
+   // Retain the existing horizontal smoothing; do not affect menu or other cars.
    let pivotX=bounds?(bounds[0]+bounds[2])*.5:metrics.pivotX;
-   let pivotY=bounds?(bounds[1]+bounds[3])*.5:metrics.pivotY;
+   const pivotY=bounds?(bounds[1]+bounds[3])*.5:metrics.pivotY;
    if(key==='enduro'&&!menu&&boxes?.length){
-     let sumX=0,sumY=0;
+     let sumX=0;
      for(let offset=-3;offset<=3;offset++){
        const b=boxes[(frame+offset+boxes.length)%boxes.length];
        sumX+=(b[0]+b[2])*.5;
-       sumY+=(b[1]+b[3])*.5;
      }
      pivotX=sumX/7;
-     pivotY=sumY/7;
    }
    // Hotfix showroom v0.13.6.86: scale only the affected presentations.
    // Aero R: match the visible size of Lampo ZX and Tuono V8 in BOTH menu
@@ -148,7 +148,7 @@ function drawShowroom(canvas,index,view='menu',clock,garageRotationOrigin,profil
    // Keep the approved menu presentation and every other car unchanged.
    const calibratedFill=key==='aero'
       ? (menu?{width:.43,height:.54}:{width:.56,height:.76})
-      : (key==='enduro'&&!menu?{width:.49,height:.70}:null);
+      : (key==='enduro'&&!menu?{width:.55,height:.79}:null);
    const relativeSize=menu?1:ttrRelativeRaceFootprint(key);
    const scale=calibratedFill
       ? Math.min(w*calibratedFill.width/metrics.visibleW,
