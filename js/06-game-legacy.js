@@ -10,7 +10,7 @@ const canvas=$('game'),g=canvas.getContext('2d',{alpha:false}),mini=$('mini'),mg
 let sw=0,sh=0,dpr=0,scale=1,camX=WORLD_W/2,camY=WORLD_H/2,world=null;
 let elimCameraId=null,elimCameraProgress=0,elimFocusWeight=0,elimCandidateId=null,elimCandidateSince=0,renderDelta=1/60;
 let elimGridCamera={x:WORLD_W/2,y:WORLD_H/2};
-let race=null,lastRaceSettings=null,frameTime=performance.now(),clock=0,lastHint=0,hint='',resultsMusicTimer=null;
+let race=null,lastRaceSettings=null,frameTime=performance.now(),clock=0,lastHint=0,hint='';
 const SND=window.TTRSound;
 const points=Array.from({length:520},(_,i)=>trackPoint(i/520));
 const controls={left:false,right:false,gas:false,brake:false};
@@ -789,37 +789,8 @@ function eliminationEvaluate(dt){return ttrEliminationMode.eliminationEvaluate(d
 function eliminationEndPoint(dt){return ttrEliminationMode.eliminationEndPoint(dt);}
 // Results hotfix: preserve each model's approved garage angle and distinguish
 // same-model racers by the actual race paint, not artificial name suffixes.
-function ttrResultCarCell(car,isPlayer=false){
- const accent=car.variantAccent||car.profile.color;
- return `<span class="result-car-identity"><canvas class="result-car-thumb" data-racer-id="${car.id}" width="192" height="108" aria-hidden="true"></canvas><span class="result-car-label"><span class="variantDot" style="background:${accent}" aria-hidden="true"></span><span class="result-car-name">${car.profile.name}${isPlayer?' ('+t('you')+')':''}</span></span></span>`;
-}
-function ttrRenderResultThumbnails(panel,completedRace){
- const paint=()=>{
-  if(race!==completedRace||!panel.isConnected)return;
-  panel.querySelectorAll('.result-car-thumb').forEach(canvas=>{
-   const car=completedRace.cars.find(c=>c.id===Number(canvas.dataset.racerId));
-   if(car)window.TTRResultVisuals.drawResultThumbnail(canvas,car,TTRShowroomStarts);
-  });
- };
- paint();window.TTRAssets?.ready?.then(paint);
-}
-function showEliminationResults(){
- if(!race||race.mode!=='elimination')return;
- const e=race.elim;const sorted=race.cars.slice().sort((a,b)=>(e.points[b.id]-e.points[a.id])||(a.id-b.id));
- const champion=sorted[0];const won=champion===race.player;
- SND.stopMusic();SND.sfx(won?'victoryJingle':'defeatJingle');
- if(resultsMusicTimer!==null)clearTimeout(resultsMusicTimer);
- const completedRace=race;resultsMusicTimer=setTimeout(()=>{resultsMusicTimer=null;if(race===completedRace&&race.finished)SND.music('menu');},4900);
- const panel=document.createElement('div');panel.className='panel resultsPanel compact elimResults';
- panel.innerHTML=`<div class="flag-tape"></div><p class="eyebrow">ELIMINAZIONE · BETA · COLAZIONE TURBO</p><h2>${won?'VITTORIA!':'FINE SFIDA'}</h2><p class="sub">${champion.profile.name} · ${e.points[champion.id]} punti · ${e.roundsCompleted} manche</p>
- <table class="results compact"><tbody>${sorted.map((c,i)=>`<tr class="${c===race.player?'me':''}"><td>${i+1}°</td><td class="result-car-td">${ttrResultCarCell(c,c===race.player)}</td><td><b>${e.points[c.id]} / ${e.goal} pt.</b></td></tr>`).join('')}</tbody></table>
- <div class="menu-row"><button class="btn" id="again">${t('again')}</button><button class="btn secondary" id="toMenu">${t('menu')}</button></div>
- <p class="note">Regole di punteggio provvisorie · non ancora canoniche</p>`;
- $('screen').innerHTML='';$('screen').appendChild(panel);$('screen').hidden=false;$('screen').style.display='flex';
- $('controls').style.display='none';$('hud').style.display='none';hideEliminationUI();
- ttrRenderResultThumbnails(panel,completedRace);
- $('again').onclick=()=>openCircuitLoading('elimination');$('toMenu').onclick=mainMenu;
-}
+// Fase 11a: i risultati sono ora renderizzati nel modulo dedicato.
+function showEliminationResults(){return ttrRaceResults.showEliminationResults();}
 
 function createCar(index,p,t=0){return ttrRaceGrid.createCar(index,p,t);}
 
@@ -827,7 +798,7 @@ function createCar(index,p,t=0){return ttrRaceGrid.createCar(index,p,t);}
 function assignDuplicateAccents(){return ttrRaceGrid.assignDuplicateAccents();}
 let loadingToken=0;
 function openCircuitLoading(mode){
- if(resultsMusicTimer!==null){clearTimeout(resultsMusicTimer);resultsMusicTimer=null;}
+ ttrRaceResults.cancelMusicTimer();
   const token=++loadingToken,wrap=$('loadingTrack');
   if(!wrap){initRace(mode);return;}
   const startButton=$('ttrLaunchRace');
@@ -877,11 +848,7 @@ function openCircuitLoading(mode){
 function initRace(mode){
  releaseAllControls();
  const cfg=TTRModeConfigs[mode]||null;
- const modeSettings=mode==='race'?window.TTRModeRace.settings(cfg,selectedCar):
-  mode==='trial'?window.TTRModeTrial.settings(selectedCar):
-  mode==='elimination'?window.TTRModeElimination.settings(cfg,selectedCar):
-  {num:mode==='online'&&onlineSession?onlineSession.capacity:mode==='career'?4:Number(cfg?.racers||4),
-   pr:selectedCar,aiFactor:mode==='career'?TTRCareerDifficulty():1,auto:true};
+ const modeSettings=window.TTRRaceFlow.modeSettings(mode,cfg,selectedCar,onlineSession,mode==='career'?TTRCareerDifficulty():1);
  const {num,pr,aiFactor,auto}=modeSettings;
  lastRaceSettings={num,pr,aiFactor,auto};
  onlineFinishDeadline=0;race={mode,cars:[],player:null,pickups:[],oils:[],effects:[],time:0,countdown:3.2,paused:false,auto,aiFactor,finished:false,pauseOverlay:false,collisionCount:0,lastImpactSound:-10,careerStats:{pickups:0,turbos:0,oils:0,claws:0},careerRecorded:false};
@@ -1210,33 +1177,14 @@ function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSes
  }else if(race.player.done){race.finished=true;syncAudio();SND.stopMusic();SND.sfx('finish');const completedRace=race;setTimeout(()=>{if(race===completedRace&&race.finished)showResults();},850);}else syncAudio();
  hud();
 }
-function showResults(){
- if(!race)return;
- if(race.mode==='elimination')return showEliminationResults();const c=race.player,mode=race.mode,finished=race.cars.slice().sort((a,b)=>a.finishTime==null?1:b.finishTime==null?-1:a.finishTime-b.finishTime);let best='';
- if(mode==='trial'&&c.finishTime!=null)best=window.TTRModeTrial.recordBest(c,fmtTime,t);
- const place=finished.indexOf(c)+1,compact=finished.length>=6;
- let careerAward=null;
- if(mode==='career'&&c.done&&!race.careerRecorded){
-  race.careerRecorded=true;
-  careerAward=window.TTRCareer?.recordResult({mode:'career',finished:true,laps:c.lapsCompleted,place,racerCount:finished.length,
-   carId:c.profile.id,respawns:c.shortcutRespawns||0,pickups:race.careerStats?.pickups||0,
-   turbos:race.careerStats?.turbos||0,oils:race.careerStats?.oils||0,claws:race.careerStats?.claws||0});
- }
-
- SND.stopMusic();
- const outcome=mode==='trial'?'podiumJingle':place===1?'victoryJingle':place<=3?'podiumJingle':'defeatJingle';
- SND.sfx(outcome);
- if(resultsMusicTimer!==null)clearTimeout(resultsMusicTimer);
- const completedRace=race;
- resultsMusicTimer=setTimeout(()=>{resultsMusicTimer=null;if(race===completedRace&&race.finished)SND.music('menu');},4600);
- const rows=finished.map((r,i)=>`<tr class="${r===c?'me':''}"><td>${i+1}°</td><td class="result-car-td">${ttrResultCarCell(r,r===c)}</td><td>${r.done?fmtTime(r.finishTime):t('racing')}</td></tr>`).join('');
- const panel=document.createElement('div');panel.className=`panel resultsPanel${compact?' compact':''}`;panel.innerHTML=`<div class="flag-tape"></div><p class="eyebrow">${t('trackName')} · ${t('results')}</p><h2 class="resultTitle">${mode==='trial'?t('trialDone'):`${t('finish')}: ${place}° ${t('place')}`}</h2><div class="resultSummary"><div class="resultCard"><b>${t('place')}</b>${place}° / ${finished.length}</div><div class="resultCard"><b>${t('yourTime')}</b>${fmtTime(race.time)}</div>${best?`<div class="resultCard" style="grid-column:${compact?'1 / -1':'auto'}"><b>${mode==='trial'?'TIME TRIAL':'INFO'}</b>${best}</div>`:''}</div>${mode==='career'?`<div class="career-result">${careerAward?.newUnlocks?.length?'🏆 MISSIONE COMPLETATA · '+careerAward.newUnlocks.map(id=>(window.TTRVehicleRoster||[]).find(v=>v.id===id)?.name||id).join(', '):'🏁 Progressi Carriera aggiornati'}</div>`:''}<table class="results ${compact?'compact':''}"><tbody>${rows}</tbody></table><div class="menu-row"><button class="btn" id="again">${t('again')}</button><button class="btn secondary" id="toMenu">${t('menu')}</button></div>${compact?'':`<p class="note">${t('demoNote')}</p>`}`;
- $('screen').innerHTML='';$('screen').appendChild(panel);$('screen').hidden=false;$('screen').style.display='flex';$('controls').style.display='none';$('hud').style.display='none';
- ttrRenderResultThumbnails(panel,completedRace);
- $('again').onclick=()=>{if(mode==='online'){onlineQuit();mainMenu();onlineOpenPanel();}else openCircuitLoading(mode)};$('toMenu').onclick=mode==='career'?()=>{mainMenu();window.TTRCareer?.open();}:mainMenu;
-}
+function showResults(){return ttrRaceResults.showResults();}
 const I18N=window.TTRI18N;
 const t=I18N.t;
+const ttrRaceResults=window.TTRRaceResults.create({
+ getRace:()=>race,$,SND,t,fmtTime,hideEliminationUI,
+ getShowroomStarts:()=>TTRShowroomStarts,flow:window.TTRRaceFlow,
+ navigation:{mainMenu,openCircuitLoading,onlineQuit,onlineOpenPanel,openCareer:()=>window.TTRCareer?.open()}
+});
 let selectedCar=0,garagePreview=0,menuTimer=null,menuStep=0,lastShowroomDraw=0,garageRotationOrigin=0;
 
 // v0.13.6.68 — Canonical first-season circuit catalog. Locked tracks have no driving geometry,
@@ -1300,7 +1248,7 @@ function TTRAdvanceTrackSelect(){const c=TTRCircuitCatalog.find(t=>t.id===select
 const TTRModeDefaults=Object.freeze({race:Object.freeze({racers:'4',difficulty:'1',auto:'1',elimGoal:'5'}),elimination:Object.freeze({racers:'4',difficulty:'1',auto:'1',elimGoal:'5'})});
 let TTRModeConfigs={race:{...TTRModeDefaults.race},elimination:{...TTRModeDefaults.elimination}},activeConfigMode=null;
 try{const saved=JSON.parse(localStorage.getItem('ttr_mode_config_v67')||'null');if(saved&&typeof saved==='object')for(const m of ['race','elimination'])if(saved[m])for(const k of Object.keys(TTRModeDefaults[m])){const val=String(saved[m][k]);if(({racers:['4','6','8'],difficulty:['0.8','1','1.13'],auto:['0','1'],elimGoal:['3','5','7']})[k].includes(val))TTRModeConfigs[m][k]=val;}}catch(_){}
-function TTRCareerDifficulty(){const state=window.TTRCareer?.getState?.()||{};const wins=Math.max(0,Number(state.wins)||0),medals=window.TTRCareerCore?.medalCount?.(state)||0;return Math.min(1.13,.88+Math.min(7,wins)*.028+Math.min(10,medals)*.007);}
+function TTRCareerDifficulty(){const state=window.TTRCareer?.getState?.()||{};return window.TTRRaceFlow.careerDifficulty(state,window.TTRCareerCore?.medalCount);}
 function TTRCloseRaceConfig(returnToTracks=false){const mode=activeConfigMode;const panel=$('raceConfig');if(panel)panel.hidden=true;activeConfigMode=null;if(returnToTracks&&mode)TTROpenTrackSelect(mode);}
 function TTROpenRaceConfig(mode){if(!TTRModeConfigs[mode])return;const chosen=TTRCircuitCatalog.find(c=>c.id===selectedTrackId);if(!chosen?.ready||!chosen.scene)return;
  activeConfigMode=mode;const panel=$('raceConfig'),cfg=TTRModeConfigs[mode];if(!panel)return;
@@ -1318,7 +1266,7 @@ try{selectedCar=+localStorage.getItem('ttr_selected_car')||0;}catch(e){}selected
 const initialMenu=$('screen').innerHTML;
 function mainMenu(){
  if(onlineSession)onlineQuit();
- if(resultsMusicTimer!==null){clearTimeout(resultsMusicTimer);resultsMusicTimer=null;}
+ ttrRaceResults.cancelMusicTimer();
  loadingToken++;$('loadingTrack').hidden=true;race=null;releaseAllControls();hideEliminationUI();$('pauseOverlay').hidden=true;syncAudio();$('garageScreen').hidden=true;$('languageScreen').hidden=true;if($('careerScreen'))$('careerScreen').hidden=true;if($('careerMissionsScreen'))$('careerMissionsScreen').hidden=true;
  const oldSettings=$('retroSettings');if(oldSettings)oldSettings.remove();const oldRaceConfig=$('raceConfig');if(oldRaceConfig)oldRaceConfig.remove();const oldTrackSelect=$('trackSelect');if(oldTrackSelect)oldTrackSelect.remove();
  $('screen').innerHTML=initialMenu;$('screen').hidden=false;$('screen').style.display='flex';$('controls').style.display='none';$('hud').style.display='none';
