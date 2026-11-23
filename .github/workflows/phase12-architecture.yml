@@ -1,0 +1,25 @@
+name: TTR - Fase 12 Architecture Audit
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  architecture-audit:
+    name: Validate JS modules and load order
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check modules, script order, and JS syntax
+        run: node scripts/phase12-architecture-audit.mjs
