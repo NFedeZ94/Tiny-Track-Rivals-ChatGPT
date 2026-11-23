@@ -1066,11 +1066,19 @@ const ttrRaceSafety=window.TTRRaceSafety.create({
  getRace:()=>race,setLastHint:value=>{lastHint=value;},trackPoint,tangent,mod,ELIM_RULES_TEST,SND,$,junctionPhaseHop,nearestTrackWindow,phaseGap,points
 });
 
+// Fase 8 — stessa closure privata della gara: dipendenze esplicite, nessuna copia dello stato.
+const ttrRaceProgress=window.TTRRaceProgress.create({
+ getRace:()=>race,nearestCourse,points,eliminationProgressUpdate,finishEdgeTolerance,
+ finishLinePlane,trackPoint,tangent,showHint,t,SND
+});
+const ttrRaceTiming=window.TTRRaceTiming.create({
+ getRace:()=>race,showHint,t,SND
+});
+
 function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSession&&!onlineSession.host)return;if(race.paused||race.finished||innerHeight>innerWidth){syncAudio();return;}
  if(race.mode==='elimination'&&eliminationEndPoint(dt)){syncAudio();return;}
- if(race.countdown>0){const old=Math.ceil(race.countdown);race.countdown-=dt;if(Math.ceil(Math.max(0,race.countdown))!==old){SND.sfx(old>1?'count':'go');}if(race.countdown<=0){showHint(t('go'),.9);SND.music('race');}syncAudio();return;}
- race.time+=dt;
- race.pickups.forEach(p=>p.cool=Math.max(0,p.cool-dt));race.oils=race.oils.filter(p=>(p.t-=dt)>0);race.effects=race.effects.filter(p=>(p.t-=dt)>0);
+ if(race.countdown>0){ttrRaceTiming.advanceCountdown(dt);syncAudio();return;}
+ ttrRaceTiming.advanceLiveFrame(dt);
  for(const c of race.cars){if(c.done)continue;
   if((c.tableFalling||0)>0){
     c.tableFalling=Math.max(0,c.tableFalling-dt);
@@ -1308,36 +1316,7 @@ function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSes
  }}
  // Pickup collision: a fixed 1.5× visible-box diameter (22 * 1.5 / 2).
  for(const p of race.pickups){if(p.cool>0||c.item||c.jump>0)continue;if(circleRotatedRect(p,c,p.r)){c.item=pickupType(race.mode,Math.random());p.cool=K.pickupRespawnSeconds(race.cars.length);if(c===race.player){if(race.mode==='career'&&race.careerStats)race.careerStats.pickups++;SND.sfx('pickup');}}}
- // Checkpoint and three-lap progress.
- let closest=c.routeResolvedNear||nearestCourse(c,points),pr=closest.p;c.p=pr;const oldP=c.lastP;
- if(race.mode==='elimination')eliminationProgressUpdate(c,pr,dt);
- // Checkpoints demand valid forward road progress; finish has a generous gate across
- // the full usable width so an imperfect racing line does not forfeit the lap.
- const clearLane=!c.offtrack&&!c.bridgeMissActive&&!(c.respawnGrace>0)&&!(c.tableFalling>0);
- if(clearLane&&closest.distance<=150){
-   if(pr>.81)c.lapGateBlocked=false;
-   if(pr>.17&&pr<.36)c.flags[0]=true;
-   if(pr>.43&&pr<.62)c.flags[1]=true;
-   if(pr>.68&&pr<.86)c.flags[2]=true;
- }
- // True finish-line intersection from position, also if the inner racing line
- // makes nearest-track phase fail to wrap at this particular curve.
- // Outside the crumbs (road-edge distance 138), allow up to 48 additional
- // world units only at the finish and only before the respawn/cut threshold.
- // Checkpoints are still earned on road. This never grants a shortcut lap.
- const legalOuterFinish=c.offtrack&&finishEdgeTolerance(c,closest);
- const finishSurfaceOk=clearLane||legalOuterFinish;
- const blockedGate=c.lapGateBlocked||!finishSurfaceOk;
- const gateReady=c.flags.every(Boolean);
- const planeCrossed=finishLinePlane({x:oldX,y:oldY},c,trackPoint(0),tangent(0),186,blockedGate,gateReady,c.speed);
- // Legacy phase-based seam is retained for comparison in tests, NOT used for laps:
- // finishGateCrossing(oldP,pr,closest.distance,blockedGate,gateReady,c.speed)
- const crossed=planeCrossed;
- if(crossed){c.lapsCompleted++;c.flags=[false,false,false];c.mugApexPassed=false;c.lapGateBlocked=true;
-   if(c.lapsCompleted>=3&&race.mode!=='elimination'){c.done=true;c.finishTime=race.time;}
-   else if(c===race.player){showHint(`${t('lapNotice')} ${c.lapsCompleted+1}!`,1.1);SND.sfx('lap');}
- }
- c.lastP=pr;
+ ttrRaceProgress.updateCarProgress(c,dt,oldX,oldY);
  // AI uses boosts tactically, not excessive oil spam.
  if(c!==race.player&&!(race.mode==='online'&&onlineSession?.members[c.id])&&c.item){if(c.item==='turbo'&&c.speed>95&&Math.random()<.005)useItem(c);else if(c.item==='oil'&&Math.random()<.0008)useItem(c);else if(c.item==='claw'&&clawTarget(c,race.cars,props,162,.30)&&Math.random()<.09)useItem(c);}
  }
