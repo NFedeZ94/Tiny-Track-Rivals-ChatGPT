@@ -1101,12 +1101,9 @@ function junctionContinuity(c,near,oldX,oldY,dt){
   c.routeStableP=near.p;return {near,penalty:false};
 }
 function hud(){if(!race)return;const c=race.player;const rank=race.cars.slice().sort((a,b)=>K.racePosition(b)-K.racePosition(a)).indexOf(c)+1;
- if(race.mode==='elimination'){$('position').textContent=`${eliminationActive().length} / ${race.cars.length}`;$('lap').textContent=`${race.elim.round}ª`;}
- else {$('position').textContent=`${rank} / ${race.cars.length}`;$('lap').textContent=`${Math.min(3,c.lapsCompleted+1)} / 3`;}
- $('time').textContent=fmtTime(race.time);$('item').textContent=c.item?typeNames[c.item]:'—';
- const power=$('use');if(power){const clawGraphic='<svg aria-hidden="true" viewBox="0 0 64 64" width="32" height="32"><path fill="#90aabe" stroke="#13283a" stroke-width="4" d="M26 6h12l5 22-5 9H26l-5-9z"/><path fill="#dce5e8" stroke="#173043" stroke-width="4" stroke-linejoin="round" d="M23 30C11 28 5 37 7 48c2 9 13 12 21 4l-5-9c-5 5-10 3-10-3 1-5 5-7 10-6zM41 30c12-2 18 7 16 18-2 9-13 12-21 4l5-9c5 5 10 3 10-3-1-5-5-7-10-6z"/><circle cx="32" cy="24" r="7" fill="#e8b84d" stroke="#173043" stroke-width="3"/></svg>';
- const icons={turbo:'⚡',oil:'🛢',claw:clawGraphic};const key=c.item||'empty';if(power.dataset.power!==key){power.dataset.power=key;power.innerHTML='<span class="power-token '+key+'">'+(icons[key]||'?')+'</span>';power.setAttribute('aria-label',c.item?'Attiva '+typeNames[c.item]:'Nessun power-up');}}
-
+ const position=race.mode==='elimination'?`${eliminationActive().length} / ${race.cars.length}`:`${rank} / ${race.cars.length}`;
+ const lap=race.mode==='elimination'?`${race.elim.round}ª`:`${Math.min(3,c.lapsCompleted+1)} / 3`;
+ window.TTRHudVisuals.render({position,lap,time:fmtTime(race.time),item:c.item,typeNames});
 }
 function fmtTime(s){const m=Math.floor(s/60).toString().padStart(2,'0'),ss=Math.floor(s%60).toString().padStart(2,'0'),ms=Math.floor(s*10%10);return `${m}:${ss}.${ms}`;}
 function showHint(s,t=1.1){hint=s;lastHint=clock+t;$('hint').textContent=s;$('hint').classList.add('show');}
