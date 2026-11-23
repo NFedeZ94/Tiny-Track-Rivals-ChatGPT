@@ -532,22 +532,9 @@ function drawBox(ctx,p){if(p.cool>0)return;
  }else{ctx.fillStyle='#29b4d4';ctx.fillRect(-10,-hover-10,20,20);}
  ctx.restore();
 }
-function hexToRgb(hex){const h=hex.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
 // Four genuinely independent silhouettes; Canvas 2D paints light and side depth consistently.
-function carWheels(ctx,positions,tireW=12,tireH=21,steer=0,offroad=false){
- for(const side of [-1,1])for(const y of positions){ctx.save();ctx.translate(side*(offroad?26:24),y);if(y<0)ctx.rotate(steer*.34);
-  shadow(ctx,3,'#0009',2,3);rounded(ctx,-tireW/2,-tireH/2,tireW,tireH,3,'#11131a','#454953');ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;
-  if(offroad){ctx.strokeStyle='#656166';ctx.lineWidth=1.8;for(let i=-1;i<=1;i++){ctx.beginPath();ctx.moveTo(-tireW/2,i*5);ctx.lineTo(tireW/2,i*5+2);ctx.stroke();}}
-  ctx.fillStyle='#a4adbb';ctx.beginPath();ctx.ellipse(0,0,tireW*.24,tireH*.32,0,0,Math.PI*2);ctx.fill();
-  ctx.strokeStyle='#37435a';ctx.lineWidth=1.1;for(let a=0;a<5;a++){let p=a*Math.PI*2/5;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(p)*tireW*.22,Math.sin(p)*tireH*.28);ctx.stroke();}ctx.restore();
- }
-}
-function bodyLayer(ctx,shape,color,stroke='#501d28'){shadow(ctx,8,'#0007',3,5);drawPoly(ctx,shape,color,stroke,1.5);ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;}
 function glass(ctx,shape){drawPoly(ctx,shape,'#15314a','#a1d6e055',1);}
-function carDetailRect(ctx,x,y,w,h,fill,r=1){rounded(ctx,x,y,w,h,r,fill);}
-function headlight(ctx,x,y,w,h,color='#ffe2a6'){shadow(ctx,4,'#ffe7a66b',0,0);rounded(ctx,x,y,w,h,1.1,color,'#745d4f');ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;ctx.fillStyle='#ffffdd55';ctx.fillRect(x+1,y+.5,w-2,2);}
 function carSprite(ctx,car){return window.TTRVehicleVisuals.carSprite(ctx,car,clock);}
-function effectText(x,y,s,color='#fff'){if(!race)return;race.effects.push({x,y,t:0.65,ttl:.65,text:s,color});}
 
 // ELIMINAZIONE PROTOTIPO v0.1 — not canonical rules.
 // The master design bible (2026-11-17) confirms points, jingle, side flip and a longer final victory,
@@ -887,7 +874,6 @@ function hud(){if(!race)return;const c=race.player;const rank=race.cars.slice().
 }
 function fmtTime(s){const m=Math.floor(s/60).toString().padStart(2,'0'),ss=Math.floor(s%60).toString().padStart(2,'0'),ms=Math.floor(s*10%10);return `${m}:${ss}.${ms}`;}
 function showHint(s,t=1.1){hint=s;lastHint=clock+t;$('hint').textContent=s;$('hint').classList.add('show');}
-function initAudio(){return SND.unlock();}
 function syncAudio(){SND.syncEngine(race?.player,!!(race&&!race.paused&&!race.finished&&race.countdown<=0&&innerWidth>=innerHeight&&!(race.elim&&race.elim.state!=='race')&&!race.player?.eliminated));}
 function ping(freq=660,dur=.09,vol=.1){SND.sfx(freq>800?'pickup':freq<300?'impact':'select');}
 function refreshAudioUI(){const st=SND.status(),el=$('audioStatus');if(el)el.textContent=st.supported?(st.context==='running'?t('audioReady'):t('audioBlocked')):t('audioUnavailable');
@@ -1422,7 +1408,6 @@ function togglePause(){if(!race||race.finished)return;race.paused=!race.paused;r
  if(race.paused){$('pauseAudio').open=false;document.querySelector('.pause-card').classList.remove('audio-open');syncPauseAudioControls();SND.stopMusic();SND.sfx('select');}
  else SND.music('race');syncAudio();}
 const miniBase=window.TTRMinimapVisuals.createRaceMiniBase(points,shortcutSamples,WORLD_W,WORLD_H);
-function renderMini(){window.TTRMinimapVisuals.renderRaceMini(mg,miniBase,race,WORLD_W,WORLD_H);}
 function render(){const ratio=Math.min(race?.mode==='online'&&onlineSession&&!onlineSession.host?1.38:1.65,devicePixelRatio||1);if(sw!==innerWidth||sh!==innerHeight||dpr!==ratio){sw=innerWidth;sh=innerHeight;dpr=ratio;canvas.width=Math.ceil(sw*dpr);canvas.height=Math.ceil(sh*dpr);}g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#6e4a37';g.fillRect(0,0,sw,sh);
  // Real follow camera: the circuit extends beyond the mobile viewport.
  // Keep the player just behind centre, giving sight of the upcoming corner.
