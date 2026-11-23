@@ -944,30 +944,10 @@ function showEliminationResults(){
  $('again').onclick=()=>openCircuitLoading('elimination');$('toMenu').onclick=mainMenu;
 }
 
-function createCar(index,p,t=0){const base=profiles[((p%profiles.length)+profiles.length)%profiles.length],pr=ttrCalibratedProfile(base),pos=trackPoint(t),a=tangent(t);const n={x:-Math.sin(a),y:Math.cos(a)};let lane=index%2===0?-29:29;
- return {id:index,profile:pr,color:index===0?pr.color:pr.color,x:pos.x+n.x*lane,y:pos.y+n.y*lane,a,speed:0,steer:0,width:pr.shape==='muscle'?39:pr.shape==='buggy'?41:pr.shape==='sport'?37:36,length:pr.shape==='muscle'?69:pr.shape==='buggy'?63:pr.shape==='sport'?67:61,boost:0,slip:0,jump:0,jumpTotal:.72,jumpCd:0,rampEntryVisual:false,claw:0,clawTarget:null,item:null,lapsCompleted:0,lastP:t,p:t,flags:[false,false,false],done:false,finishTime:null,lastCheckpoint:0,stuckTime:0,hitVX:0,hitVY:0,reverseRecovery:0,knifeCd:0,offtrack:false,offtrackSeconds:0,mode:'race',mugApexPassed:false,wheelPhase:0,hitYaw:0,impactGrace:0,variantAccent:null,variantLabel:'',variantSprite:null,auditP:mod(t,1),auditTravel:0,auditCleanTime:0,auditBridge:false,auditOutsideTime:0,oilSpin:0,oilSpinDir:1,routeStableP:mod(t,1),routePinch:null,routeResolvedNear:null};
-}
-const duplicateColourSchemes={
- scatto:['#9544eb','#3cb8ad','#dfad5a'],
- tuono:['#ad62e3','#e89b50','#4bbb91'],
- polvere:['#b759d9','#3bbba9','#de597f'],
- lampo:['#e29a46','#9068df','#e65b88'],
- aero:['#33a7ce','#f5d760','#bd7adb'],
- enduro:['#9951d6','#3cbdad','#e5a14e']
-};
-const duplicateColourOffsets={scatto:0,tuono:1,polvere:1,lampo:2};
-function assignDuplicateAccents(){
- if(!race||!race.cars)return;
- const groups={};race.cars.forEach(c=>((groups[c.profile.id]??=[]).push(c)));
- Object.values(groups).forEach(group=>group.forEach((c,i)=>{
-  const model=c.profile.id;
-  // Keep the first car canonical. For duplicate models, change the actual body colour.
-  const variant=i===0?0:((i-1+(duplicateColourOffsets[model]||0))%3+1);
-  c.variantSprite=variant?`${model}_color${variant}`:null;
-  c.variantAccent=variant?(duplicateColourSchemes[model]?.[variant-1]||c.profile.color):null;
-  c.variantLabel=variant?String.fromCharCode(65+i):'';
- }));
-}
+function createCar(index,p,t=0){return ttrRaceGrid.createCar(index,p,t);}
+
+
+function assignDuplicateAccents(){return ttrRaceGrid.assignDuplicateAccents();}
 let loadingToken=0;
 function openCircuitLoading(mode){
  if(resultsMusicTimer!==null){clearTimeout(resultsMusicTimer);resultsMusicTimer=null;}
@@ -1045,61 +1025,11 @@ function initRace(mode){
 }
 // One recovery path for excessive shortcut, tabletop edge and blocked obstacles.
 // All recoveries are silent on the HUD; the audio cue is subtle and never prints text.
-function recoverCar(c,reason='edge'){
- const safe=c.lastValidPosition||c.offtrackEntry||{...trackPoint(c.lastCheckpoint||0),p:c.lastCheckpoint||0,a:tangent(c.lastCheckpoint||0),speed:42,laps:c.lapsCompleted,flags:c.flags.slice()};
- const p=mod(safe.p||0,1),place=trackPoint(p);
- c.x=place.x;c.y=place.y;c.a=tangent(p);c.p=p;c.lastP=p;
- c.lapsCompleted=safe.laps??c.lapsCompleted;c.flags=(safe.flags||c.flags).slice();
- c.speed=46;c.jump=0;c.jumpCd=.45;c.boost=0;c.claw=0;c.clawTarget=null;
- c.hitVX=0;c.hitVY=0;c.hitYaw=0;c.impactGrace=0;c.slip=0;c.skidVX=0;c.skidVY=0;c.oilCooldown=0;c.oilSpin=0;
- c.offtrack=false;c.offtrackSeconds=0;c.offtrackEntry=null;c.maxInteriorCut=0;c.offtrackReturnGrace=0;c.offtrackLastDistance=0;c.onBridge=false;c.rampEntryVisual=false;c.bridgeOffSeconds=0;c.bridgeExitVisual=0;
- c.lapGateBlocked=true;c.respawnGrace=.75;c.stuckAnchor=null;c.obstacleStuckSeconds=0;
- c.stuckTime=0;c.reverseRecovery=0;c.lastObstacleContact=-100;
- if(race?.mode==='elimination'){
-   const now=race.time,progress=c.elimDistance||0;
-   const recent=Number.isFinite(c.elimRecoveryWindowStart)&&
-     now-c.elimRecoveryWindowStart<ELIM_RULES_TEST.recoveryLoopSeconds&&
-     progress-(c.elimRecoveryStartDistance||0)<ELIM_RULES_TEST.recoveryLoopProgress;
-   if(!recent){c.elimRecoveryWindowStart=now;c.elimRecoveryStartDistance=progress;c.elimRecoveryCount=1;}
-   else c.elimRecoveryCount=(c.elimRecoveryCount||0)+1;
-   c.elimLastRecoveryAt=now;
-   c.elimLag=0;c.elimProtection=ELIM_RULES_TEST.respawnProtectionSeconds;
-   c.elimPrevP=p;c.elimPrevX=c.x;c.elimPrevY=c.y;c.elimTravelSinceCredit=0;
- }
- c.shortcutRespawns=(c.shortcutRespawns||0)+1;c.lastPenaltyReason=reason;c.routeStableP=p;c.routePinch=null;c.routeResolvedNear=null;c.tableFalling=0;c.tableSpin=0;c.tableFallDir=0;c.auditP=p;c.auditTravel=0;c.auditCleanTime=0;c.auditBridge=false;c.auditOutsideTime=0;c.oilSpin=0;c.bridgeLandingActive=false;c.mugApexPassed=safe.mugApexPassed===true||(safe.mugApexPassed===undefined&&p>.32&&p<.93);
- 
- if(c===race.player){SND.sfx('respawn');lastHint=0;const h=$('hint');if(h){h.textContent='';h.classList.remove('show');}/* Recovery stays silent: no PENALITÀ banner in any mode. */}
-}
+function recoverCar(c,reason='edge'){return ttrRaceSafety.recoverCar(c,reason);}
 // Guard a real geometric crossing between two non-adjacent curves.
 // An abrupt phase jump is only suspicious at the known adjacent hairpin pair.
 // Legitimate inside lines are allowed until the car physically commits to the other arm.
-function junctionContinuity(c,near,oldX,oldY,dt){
-  const step=Math.hypot(c.x-oldX,c.y-oldY);
-  if(c.onBridge||c.bridgeLandingActive||c.bridgeMissActive||c.tableFalling>0||c.respawnGrace>0||c.impactGrace>0){
-    c.routePinch=null;c.routeStableP=near.p;return {near,penalty:false};
-  }
-  const anchor=c.routeStableP??c.lastP??near.p;
-  if(!c.routePinch && !near.shortcut && junctionPhaseHop(anchor,near.p,step)){
-    c.routePinch={phase:anchor,elapsed:0,travel:0};
-  }
-  if(c.routePinch){
-    const pending=c.routePinch;
-    const legal=nearestTrackWindow(c,points,pending.phase,.07);
-    pending.elapsed+=dt;pending.travel+=Math.min(step,40);
-    if(phaseGap(near.p,pending.phase)<.066 && near.distance<118){
-      c.routePinch=null;c.routeStableP=near.p;return {near,penalty:false};
-    }
-    // Strong evidence from geometry + sustained actual travel, not a noisy nearest-phase projection.
-    // Require sustained, substantial travel away from the *previous* arm:
-    // tiny inside-corner cuts must not trigger an instant teleport.
-    const illegal=(pending.travel>66&&pending.elapsed>.38&&legal.distance>185&&near.distance<105) ||
-      (pending.travel>88&&pending.elapsed>.65&&legal.distance>159&&near.distance<42);
-    if(illegal)return {near:legal,penalty:true};
-    c.routeStableP=legal.p;
-    return {near:{...legal,shortcut:false},penalty:false,pending:true};
-  }
-  c.routeStableP=near.p;return {near,penalty:false};
-}
+function junctionContinuity(c,near,oldX,oldY,dt){return ttrRaceSafety.junctionContinuity(c,near,oldX,oldY,dt);}
 function hud(){if(!race)return;const c=race.player;const rank=race.cars.slice().sort((a,b)=>K.racePosition(b)-K.racePosition(a)).indexOf(c)+1;
  const position=race.mode==='elimination'?`${eliminationActive().length} / ${race.cars.length}`:`${rank} / ${race.cars.length}`;
  const lap=race.mode==='elimination'?`${race.elim.round}ª`:`${Math.min(3,c.lapsCompleted+1)} / 3`;
@@ -1113,56 +1043,28 @@ function ping(freq=660,dur=.09,vol=.1){SND.sfx(freq>800?'pickup':freq<300?'impac
 function refreshAudioUI(){const st=SND.status(),el=$('audioStatus');if(el)el.textContent=st.supported?(st.context==='running'?t('audioReady'):t('audioBlocked')):t('audioUnavailable');
  const mute=$('menuMute');if(mute){mute.textContent=t(st.muted?'audioOff':'audioOn');mute.setAttribute('aria-pressed',String(!st.muted));}const pMute=$('pauseMute');if(pMute){pMute.textContent=t(st.muted?'audioOff':'audioOn');pMute.setAttribute('aria-pressed',String(!st.muted));}}
 function enableSound(){return SND.unlock().then(ok=>{refreshAudioUI();return ok;});}
-function useItem(c){if(!c||!c.item||c.done)return;
- if(race?.mode==='online'&&onlineSession&&!onlineSession.host&&c===race.player){onlineSend({type:'action',action:'item'});return;}const type=c.item;c.item=null;
- if(c===race.player&&race.mode==='career'&&race.careerStats&&Object.prototype.hasOwnProperty.call(race.careerStats,{turbo:'turbos',oil:'oils',claw:'claws'}[type]))race.careerStats[{turbo:'turbos',oil:'oils',claw:'claws'}[type]]++;
- if(type==='turbo'){c.boost=1.05;if(c===race.player)SND.sfx('turbo');}
- if(type==='oil'){let x=c.x-Math.cos(c.a)*56,y=c.y-Math.sin(c.a)*56;race.oils.push({x,y,t:9,r:34,owner:c.id,phase:Math.random()*6.28});if(c===race.player)SND.sfx('oil');}
- if(type==='claw'){
-   const target=clawTarget(c,race.cars,props,162,.30);
-   if(target){c.claw=1.28;c.clawTarget=target;c.clawStartDist=distance(c,target);if(c===race.player)SND.sfx('claw');}
-   else if(c===race.player){SND.sfx('clawFail');showHint(t('noClaw'),1.25);}
- }
-}
-function inputFor(c){if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInput(c);if(net)return net;}if(c===race.player){const steer=(controls.right||keys.ArrowRight||keys.KeyD?1:0)-(controls.left||keys.ArrowLeft||keys.KeyA?1:0);return {steer,gas:race.auto||controls.gas||keys.ArrowUp||keys.KeyW,brake:controls.brake||keys.ArrowDown||keys.KeyS};}
- const target=trackPoint(mod(c.p+.027,1)),desired=Math.atan2(target.y-c.y,target.x-c.x),d=angleDiff(desired,c.a);let steer=clamp(d*2.8,-1,1);const near=nearestTrack(c,points),tooFar=near.distance>55;
- if(tooFar){const go=Math.atan2(near.y-c.y,near.x-c.x),turn=angleDiff(go,c.a);steer=clamp(turn*2.8,-1,1);}
- const v=Math.abs(d);
-  if(c.reverseRecovery>0)return {steer:-steer||1,gas:false,brake:true};
-  return {steer,gas:v<.58||c.speed<92,brake:v>.75&&c.speed>120};
-}
-function bridgeFall(c){
- if(c.bridgeMissGrace>0)return false;
- c.bridgeTakeoff=false;
- c.onBridge=false;c.rampEntryVisual=false;c.bridgeOffSeconds=0;c.bridgeExitVisual=0;c.bridgeMissGrace=10.0;c.bridgeMissPenalty=1.60;c.bridgeMissActive=true;c.bridgeLandingActive=true;
- c.bridgeFalling=.48;c.jump=0;c.jumpCd=.85;c.boost=0;
- c.speed=Math.min(40,Math.max(12,Math.abs(c.speed)*.22));
- c.hitVX=(c.hitVX||0)*.18;c.hitVY=(c.hitVY||0)*.18;
- c.lapGateBlocked=true;
- if(c===race?.player)SND.sfx('impact');
- return true;
-}
-function startTableFall(c){
- if((c.tableFalling||0)>0)return false;
- c.tableFalling=1.22;c.tableFallImpact=false;c.tableFallX=c.x;c.tableFallY=c.y;c.tableSpin=(Math.random()<.5?-1:1)*(7.8+Math.random()*1.5);
- c.tableFallDir=(Math.random()<.5?-1:1);
- c.jump=0;c.jumpCd=Math.max(c.jumpCd||0,.92);c.boost=0;c.claw=0;c.clawTarget=null;
- c.speed=Math.min(Math.max(Math.abs(c.speed),42),120);
- c.hitVX=(c.hitVX||0)*.25;c.hitVY=(c.hitVY||0)*.25;c.lapGateBlocked=true;
- if(c===race?.player)SND.sfx('fall');
- return true;
-}
+function useItem(c){return ttrRacePowerups.useItem(c);}
+function inputFor(c){return ttrRaceDrivers.inputFor(c);}
+function bridgeFall(c){return ttrRaceSafety.bridgeFall(c);}
+function startTableFall(c){return ttrRaceSafety.startTableFall(c);}
 
  // v0.13.6.71 — A short, controlled crossing just beyond the crumb border is legal.
  // Outside the respawn/safety corridor, the old checkpoint and shortcut rules remain.
- function finishEdgeTolerance(c,near){
-   return !!near && !near.shortcut && (near.p>.905 || near.p<.065)
-     && near.distance<=186 && (c.offtrackSeconds||0)<=1.6
-     && (!c.offtrackEntry || c.offtrackEntry.p>.80)
-     && (c.maxInteriorCut||0)<205 && (c.auditOutsideTime||0)<1.65
-     && !c.onBridge && !c.bridgeMissActive && !c.bridgeLandingActive
-     && !c.routePinch && !(c.respawnGrace>0) && !(c.tableFalling>0);
- }
+ function finishEdgeTolerance(c,near){return ttrRaceSafety.finishEdgeTolerance(c,near);}
+
+// Fase 7 — adapter per la closure privata: stato condiviso, dipendenze esplicite, nessuna copia di race.
+const ttrRaceGrid=window.TTRRaceGrid.create({
+ profiles,ttrCalibratedProfile,trackPoint,tangent,mod,getRace:()=>race
+});
+const ttrRacePowerups=window.TTRRacePowerups.create({
+ getRace:()=>race,getOnlineSession:()=>onlineSession,onlineSend,SND,clawTarget,props,distance,showHint,t:(...args)=>t(...args)
+});
+const ttrRaceDrivers=window.TTRRaceDrivers.create({
+ getRace:()=>race,getOnlineSession:()=>onlineSession,onlineHostInput,controls,keys,trackPoint,mod,angleDiff,clamp,nearestTrack,points
+});
+const ttrRaceSafety=window.TTRRaceSafety.create({
+ getRace:()=>race,setLastHint:value=>{lastHint=value;},trackPoint,tangent,mod,ELIM_RULES_TEST,SND,$,junctionPhaseHop,nearestTrackWindow,phaseGap,points
+});
 
 function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSession&&!onlineSession.host)return;if(race.paused||race.finished||innerHeight>innerWidth){syncAudio();return;}
  if(race.mode==='elimination'&&eliminationEndPoint(dt)){syncAudio();return;}
