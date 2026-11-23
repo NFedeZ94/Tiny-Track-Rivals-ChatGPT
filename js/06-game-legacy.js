@@ -1514,20 +1514,7 @@ const TTRTrackCopy=Object.freeze({
  fr:{title:'CHOISIR UN CIRCUIT',ready:'JOUABLE',locked:'EN DÉVELOPPEMENT',info:'Vraie carte · Bonus sur tout le parcours',back:'← RETOUR',continue:'CONTINUER',launch:'LANCER LA COURSE',lockedInfo:'Circuit en développement · carte non disponible'},
  pt:{title:'ESCOLHER PISTA',ready:'JOGÁVEL',locked:'EM DESENVOLVIMENTO',info:'Minimapa real · Itens em toda a pista',back:'← VOLTAR',continue:'CONTINUAR',launch:'INICIAR CORRIDA',lockedInfo:'Pista em desenvolvimento · minimapa indisponível'}
 });
-function TTRDrawActualMinimap(canvas){
- if(!canvas||!Array.isArray(points)||!points.length)return;
- const ctx=canvas.getContext('2d');if(!ctx)return;
- const W=canvas.width,H=canvas.height;ctx.clearRect(0,0,W,H);
- ctx.fillStyle='#091a39';ctx.fillRect(0,0,W,H);
- const x0=Math.min(...points.map(p=>p.x)),x1=Math.max(...points.map(p=>p.x));
- const y0=Math.min(...points.map(p=>p.y)),y1=Math.max(...points.map(p=>p.y));
- const k=Math.min((W-30)/Math.max(1,x1-x0),(H-24)/Math.max(1,y1-y0));
- ctx.save();ctx.translate(W/2,H/2);ctx.scale(k,k);ctx.translate(-(x0+x1)/2,-(y0+y1)/2);
- ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();
- ctx.strokeStyle='#274f86';ctx.lineWidth=85;ctx.stroke();ctx.strokeStyle='#f2d78e';ctx.lineWidth=23;ctx.stroke();
- const start=trackPoint(0);ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(start.x,start.y,38,0,Math.PI*2);ctx.fill();
- ctx.fillStyle='#132f53';ctx.beginPath();ctx.arc(start.x,start.y,19,0,Math.PI*2);ctx.fill();ctx.restore();
-}
+const TTRDrawActualMinimap=canvas=>window.TTRMinimapVisuals.drawActualMinimap(canvas,points,trackPoint);
 function TTRPaintCareerTracks(){const root=$('careerCircuitCatalog');if(!root)return;root.replaceChildren();TTRCircuitCatalog.forEach(c=>{const label=document.createElement('span');label.className='ttr-career-circuit'+(c.ready?' ready':'');label.textContent=String(c.index).padStart(2,'0')+' · '+c.name+(c.ready?' ✓':'');root.append(label);});}
 TTRPaintCareerTracks();
 function TTROpenTrackSelect(mode){
@@ -1735,15 +1722,8 @@ function syncPauseAudioControls(){const st=SND.getSettings();
 function togglePause(){if(!race||race.finished)return;race.paused=!race.paused;releaseAllControls();$('pauseOverlay').hidden=!race.paused;$('hint').classList.remove('show');lastHint=0;
  if(race.paused){$('pauseAudio').open=false;document.querySelector('.pause-card').classList.remove('audio-open');syncPauseAudioControls();SND.stopMusic();SND.sfx('select');}
  else SND.music('race');syncAudio();}
-const miniBase=document.createElement('canvas');miniBase.width=280;miniBase.height=180;
-const miniBg=miniBase.getContext('2d');miniBg.save();miniBg.translate(140,90);miniBg.scale(245/WORLD_W,153/WORLD_H);miniBg.translate(-WORLD_W/2,-WORLD_H/2);
-miniBg.beginPath();points.forEach((p,i)=>i?miniBg.lineTo(p.x,p.y):miniBg.moveTo(p.x,p.y));miniBg.closePath();
-miniBg.strokeStyle='#dce8e9';miniBg.lineWidth=52;miniBg.stroke();miniBg.strokeStyle='#5d778c';miniBg.lineWidth=37;miniBg.stroke();
-miniBg.save();miniBg.beginPath();shortcutSamples.forEach((q,i)=>i?miniBg.lineTo(q.x,q.y):miniBg.moveTo(q.x,q.y));
-miniBg.lineCap='round';miniBg.lineJoin='round';miniBg.strokeStyle='#083d55';miniBg.lineWidth=33;miniBg.stroke();
-miniBg.strokeStyle='#46f5e2';miniBg.lineWidth=20;miniBg.stroke();miniBg.restore();miniBg.restore();
-function renderMini(){if(!race)return;mg.clearRect(0,0,280,180);mg.drawImage(miniBase,0,0);mg.save();mg.translate(140,90);mg.scale(245/WORLD_W,153/WORLD_H);mg.translate(-WORLD_W/2,-WORLD_H/2);
-for(const c of race.cars){mg.fillStyle=c===race.player?'#ffdc76':'#ff766f';mg.beginPath();mg.arc(c.x,c.y,c===race.player?20:14,0,Math.PI*2);mg.fill();}mg.restore();}
+const miniBase=window.TTRMinimapVisuals.createRaceMiniBase(points,shortcutSamples,WORLD_W,WORLD_H);
+function renderMini(){window.TTRMinimapVisuals.renderRaceMini(mg,miniBase,race,WORLD_W,WORLD_H);}
 function render(){const ratio=Math.min(race?.mode==='online'&&onlineSession&&!onlineSession.host?1.38:1.65,devicePixelRatio||1);if(sw!==innerWidth||sh!==innerHeight||dpr!==ratio){sw=innerWidth;sh=innerHeight;dpr=ratio;canvas.width=Math.ceil(sw*dpr);canvas.height=Math.ceil(sh*dpr);}g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#6e4a37';g.fillRect(0,0,sw,sh);
  // Real follow camera: the circuit extends beyond the mobile viewport.
  // Keep the player just behind centre, giving sight of the upcoming corner.
