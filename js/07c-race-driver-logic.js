@@ -4,7 +4,7 @@
 window.TTRRaceDrivers=Object.freeze({create(deps){
   const {getRace,getOnlineSession,onlineHostInput,controls,keys,trackPoint,mod,angleDiff,clamp,nearestTrack,points,K,props}=deps;
 
-function inputFor(c){
+function legacyInputFor(c){
  const race=getRace(),onlineSession=getOnlineSession();
 if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInput(c);if(net)return net;}if(c===race.player){const steer=(controls.right||window.TTRKeyboard.down('right')?1:0)-(controls.left||window.TTRKeyboard.down('left')?1:0);return {steer,gas:true,brake:controls.brake||window.TTRKeyboard.down('brake')};}
  const difficulty=race.aiFactor||1,level=difficulty<.95?0:difficulty<1.1?1:2;
@@ -29,6 +29,81 @@ if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInp
  const brake=v>[.53,.65,.75][level]&&c.speed>[93,108,120][level];
  return {steer,gas:!brake&&(v<[.46,.53,.58][level]||c.speed<92),brake};
 }
- return Object.freeze({inputFor});
+ // Offline skill is shared by race, elimination and progressive career.
+ // Physics remains identical; no speed or acceleration beyond vehicle limits.
+ const skillProfiles=Object.freeze([
+   Object.freeze({pace:.80,look:105,line:0,steer:2.1,curveSpeed:.77,pass:0,shortcut:.10,aim:49}),
+   Object.freeze({pace:.95,look:125,line:.45,steer:2.55,curveSpeed:.89,pass:34,shortcut:.45,aim:27}),
+   Object.freeze({pace:1,look:145,line:.85,steer:2.9,curveSpeed:1,pass:52,shortcut:.85,aim:8})
+ ]);
+ function skillFor(race){
+   const f=race.aiFactor||1;
+   if(race.mode!=='career')return skillProfiles[f<.95?0:f<1.1?1:2];
+   if(race.aiSkillProfile?.factor===f)return race.aiSkillProfile.profile;
+   const t=clamp((f-.8)/.33,0,1)*2,i=Math.min(1,Math.floor(t)),u=t-i;
+   const a=skillProfiles[i],b=skillProfiles[i+1],profile=Object.fromEntries(Object.keys(a).map(k=>[k,a[k]+(b[k]-a[k])*u]));race.aiSkillProfile={factor:f,profile};return profile;
+ }
+ const length=K.TRACK_LENGTH;
+ const ramp=()=>props.find(o=>o.type==='ramp');
+ function linePoint(p,strength){
+   const q=trackPoint(p),a=trackPoint(p-.014),b=trackPoint(p+.014),heading=K.tangent(p);
+   // A bounded chord through the bend, still well inside the drivable lane.
+   const n={x:-Math.sin(heading),y:Math.cos(heading)};
+   const off=clamp(((a.x+b.x)/2-q.x)*n.x+((a.y+b.y)/2-q.y)*n.y,-42,42)*strength;
+   return {x:q.x+n.x*off,y:q.y+n.y*off};
+ }
+ function inputFor(c){
+   const race=getRace();if(c===race.player||race.mode==='online')return legacyInputFor(c);
+   const s=skillFor(race),r=ramp(),inZone=c.p>.515&&c.p<.63,visit=(race.elim?.round||0)+':'+c.lapsCompleted;
+   if(r&&inZone&&c.shortcutDecisionLap!==visit&&!c.bridgeMissActive){
+     c.shortcutDecisionLap=visit;c.tryShortcut=Math.random()<s.shortcut;c.shortcutDecisionCount=(c.shortcutDecisionCount||0)+1;
+     if(c.tryShortcut)c.shortcutAttemptCount=(c.shortcutAttemptCount||0)+1;
+     c.rampAimOffset=(Math.random()*2-1)*s.aim;
+   }
+   if(c.bridgeMissActive||c.respawnGrace>0||c.p>.82||c.p<.50||c.aiRecoveryUntil>race.time)c.tryShortcut=false;
+   const phase=mod(c.p+(s.look+Math.max(0,c.speed)*.12)/length,1);
+   let target=linePoint(phase,s.line),plannedBranch=false;
+   const a=K.tangent(phase),nx=-Math.sin(a),ny=Math.cos(a);
+   if(c.onBridge){const b=K.shortcutNearest(c);target=K.shortcutPoint(Math.min(1,b.t+.075));if(b.t>.96)target=trackPoint(mod(K.shortcutTo+.025,1));plannedBranch=true;}
+   else if(c.tryShortcut&&r&&inZone){const along=(c.x-r.x)*Math.cos(r.a)+(c.y-r.y)*Math.sin(r.a),lead=along< -105?-90:38,off=c.rampAimOffset||0;target={x:r.x+Math.cos(r.a)*lead-Math.sin(r.a)*off,y:r.y+Math.sin(r.a)*lead+Math.cos(r.a)*off};plannedBranch=true;}
+   else if(r&&c.p>.54&&c.p<.67){const ref=trackPoint(K.shortcutFrom),ra=K.tangent(K.shortcutFrom),side=(ref.x-r.x)*-Math.sin(ra)+(ref.y-r.y)*Math.cos(ra)>=0?1:-1;const weight=clamp((phase-.55)/.03,0,1)*clamp((.675-phase)/.035,0,1);target={x:target.x+nx*side*82*weight,y:target.y+ny*side*82*weight};plannedBranch=true;}
+   let obstacle=null,offset=0,blocked=false;
+   if(!plannedBranch){
+     for(const o of props){if(!o.solid||o.type==='knife')continue;const dx=o.x-c.x,dy=o.y-c.y,dist=Math.hypot(dx,dy);if(dist>o.r+110||dx*Math.cos(c.a)+dy*Math.sin(c.a)<0)continue;
+       const ahead=Math.hypot(target.x-o.x,target.y-o.y);if(ahead>o.r+65)continue;
+       const side=(o.x-target.x)*nx+(o.y-target.y)*ny>0?-1:1;offset=side*45;obstacle=o;break;
+     }
+     // Choose one passing side and hold it; do not weave every simulation step.
+     let front=null,frontGap=Infinity;
+     for(const other of race.cars){if(other===c||other.eliminated||other.done||other.onBridge||other.jump>0)continue;const dx=other.x-c.x,dy=other.y-c.y,f=dx*Math.cos(c.a)+dy*Math.sin(c.a),side=-dx*Math.sin(c.a)+dy*Math.cos(c.a);if(f>12&&f<140&&Math.abs(side)<46&&f<frontGap){front=other;frontGap=f;}}
+     if(front&&front.speed<c.speed+16&&s.pass>0&&!obstacle){
+       if(!(c.aiPassUntil>race.time)&&!(c.aiPassCooldown>race.time)){const side=(front.x-target.x)*nx+(front.y-target.y)*ny>0?-1:1;c.aiPassSide=side;c.aiPassUntil=race.time+1.15;c.aiPassCooldown=race.time+2.1;c.aiPassAttempts=(c.aiPassAttempts||0)+1;}
+     }
+     if(c.aiPassUntil>race.time&&!obstacle)offset=c.aiPassSide*s.pass;
+     else if(front&&frontGap<58)blocked=true;
+     target={x:target.x+nx*offset,y:target.y+ny*offset};
+   }
+   const near=nearestTrack(c,points);
+   if(c.aiRecoveryUntil>race.time&&!c.onBridge){const q=trackPoint(near.p+.012);target={x:q.x,y:q.y};plannedBranch=false;}
+   if(near.distance>83&&!plannedBranch&&!(c.aiRecoveryUntil>race.time)){target={x:near.x,y:near.y};}
+   const d=angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a),v=Math.abs(d);
+   const steer=clamp(d*s.steer,-1,1);
+   if(c.reverseRecovery>0)return {steer:-steer||1,gas:false,brake:true};
+   // Predict turn severity ahead, not merely current heading error. Preserve
+   // full throttle on straights and a useful speed on the approved ramp.
+   const bend=Math.abs(angleDiff(K.tangent(c.p+.033),K.tangent(c.p+.008)));
+   const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);
+   let desired=cap*(1-clamp((bend-.30)*.34,0,.38)*(.10+(1-s.curveSpeed)*3.3));
+   const turnThreshold=.65+(s.curveSpeed-.77)*.9;
+   if(v>turnThreshold)desired=Math.min(desired,cap*(1-clamp((v-turnThreshold+.10)*.46,0,.55)));
+   if(obstacle)desired=Math.min(desired,cap*(.78+(s.curveSpeed-.77)*.5));
+   if(blocked)desired=Math.min(desired,Math.max(75,frontSpeedFallback(c,race)));
+   if(plannedBranch&&c.tryShortcut&&v<.45)desired=cap;
+   const brake=c.speed>desired+12&&c.speed>85;
+   return {steer,gas:!brake&&c.speed<desired+3,brake};
+ }
+ function frontSpeedFallback(c,race){let speed=c.speed;for(const other of race.cars){if(other!==c&&!other.done&&!other.eliminated&&Math.hypot(other.x-c.x,other.y-c.y)<90)speed=Math.min(speed,other.speed);}return speed;}
+ return Object.freeze({inputFor,skillFor});
+
 }});
 })();

@@ -35,10 +35,10 @@ function recoverCar(c,reason='edge'){
  if(c===race.player){SND.sfx('respawn');setLastHint(0);const h=$('hint');if(h){h.textContent='';h.classList.remove('show');}/* Recovery stays silent: no PENALITÀ banner in any mode. */}
 }
 
-// 14.14b: Orange Jump inside racing line. This bounded local corridor is not
-// a bridge or a general exemption. Credit requires a continuous entry and traversal.
-const orangeStart=.485,orangeEnd=.610,orangeWidth=82;
-const orangePoints=[trackPoint(orangeStart),{x:1450,y:480},{x:1412,y:412},{x:1374,y:343},{x:1358,y:284},trackPoint(orangeEnd)];
+// 14.15: bounded inner route. Arm on the approach, then validate actual
+// continuous movement through the corridor; never credit an unrelated arm.
+const orangeStart=.460,orangeEnd=.640,orangeWidth=105;
+const orangePoints=[trackPoint(orangeStart),{x:1440,y:505},{x:1410,y:426},{x:1370,y:362},{x:1330,y:335},{x:1290,y:320},{x:1225,y:315},trackPoint(orangeEnd)];
 const orangeLengths=[0];for(let i=1;i<orangePoints.length;i++)orangeLengths.push(orangeLengths[i-1]+Math.hypot(orangePoints[i].x-orangePoints[i-1].x,orangePoints[i].y-orangePoints[i-1].y));
 const orangeLength=orangeLengths[orangeLengths.length-1];
 function orangeProject(c){
@@ -51,15 +51,14 @@ function orangeProject(c){
   }return best;
 }
 function orangeContinuity(c,near,anchor,step,dt){
-  if(near.shortcut||anchor<.45||anchor>.635){c.orangeLine=null;return null;}
+  if(near.shortcut||anchor<.425||anchor>.665){c.orangeLine=null;return null;}
   const q=orangeProject(c);let state=c.orangeLine;
   if(!state){
-    // Arm only while actually on the preceding road, never on the exit arm.
-    if(anchor<.472||anchor>.515||near.p<.465||near.p>.525||near.distance>138||q.distance>orangeWidth||q.u>orangeLength*.30||step>35)return null;
-    state=c.orangeLine={u:q.u,travel:0,entryU:q.u,entryPhase:anchor,active:false,safe:c.lastValidPosition?{...c.lastValidPosition,flags:c.lastValidPosition.flags.slice()}:null};
+    if(anchor<.435||anchor>.525||near.p<.43||near.p>.53||near.distance>145||q.distance>orangeWidth||q.u>orangeLength*.30||step>35)return null;
+    state=c.orangeLine={u:q.u,travel:0,entryU:q.u,entryPhase:anchor,active:false,elapsed:0,safe:c.lastValidPosition?{...c.lastValidPosition,flags:c.lastValidPosition.flags.slice()}:null};
   }
-  // A large jump or departure from this corridor cannot earn its progress.
-  if(q.distance>orangeWidth||step>40||Math.abs(q.u-state.u)>step*2+24){
+  const forward=q.u-state.u;state.elapsed+=dt;
+  if(q.distance>orangeWidth||step>40||Math.abs(forward)>step*2+22||state.elapsed>12){
     c.orangeLine=null;
     if(!state.active)return null;
     if(near.distance<=138&&phaseGap(near.p,anchor)<.025){c.routePinch=null;c.routeStableP=near.p;return {near,penalty:false};}
@@ -67,19 +66,18 @@ function orangeContinuity(c,near,anchor,step,dt){
   }
   state.travel+=step;state.u=q.u;
   if(!state.active){
-    const local=nearestTrackWindow(c,points,anchor,.022);
-    // Leave the main centreline only if the alternative is actually being followed.
-    if(state.travel>=35&&q.u-state.entryU>=24&&q.p>anchor+.012&&(local.distance>90||phaseGap(anchor,near.p)>.035))state.active=true;
+    const local=nearestTrackWindow(c,points,anchor,.025);
+    // Arm before the nearest projection jumps, and switch only after real movement.
+    if(state.travel>=18&&q.u-state.entryU>=15&&q.p>anchor+.007&&(local.distance>65||phaseGap(anchor,near.p)>.025))state.active=true;
     else return null;
   }
   c.routePinch=null;
-  // A complete traversal, not just landing near a coordinate on the exit arm.
-  if(q.u>=orangeLength*.72&&state.travel>=orangeLength*.50&&q.u-state.entryU>=orangeLength*.43&&near.p>=.585&&near.p<=.625&&near.distance<=138&&Math.abs(near.p-anchor)<.0045){
+  if(q.u>=orangeLength*.65&&state.travel>=orangeLength*.40&&q.u-state.entryU>=orangeLength*.40&&near.p>=.57&&near.p<=.655&&near.distance<=138&&Math.abs(near.p-anchor)<.017){
     c.orangeLine=null;c.routeStableP=near.p;c.auditP=near.p;c.auditTravel=0;c.auditCleanTime=0;c.auditOutsideTime=0;return {near,penalty:false};
   }
-  const limit=Math.max(.001,step*.00085),delta=Math.max(-limit,Math.min(limit,q.p-anchor));
+  const limit=step*.00072,delta=Math.max(-limit,Math.min(limit,q.p-anchor));
   const phase=anchor+delta;c.routeStableP=phase;
-  return {near:{...q,p:phase,distance:Math.min(138,Math.max(q.distance,near.distance)),shortcut:false,orangeLine:true},penalty:false};
+  return {near:{...q,p:phase,distance:q.distance,shortcut:false,orangeLine:true},penalty:false};
 }
 
 function junctionContinuity(c,near,oldX,oldY,dt){

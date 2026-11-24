@@ -4,7 +4,7 @@
 (()=>{'use strict';
  function careerDifficulty(state,medalCount){
   const wins=Math.max(0,Number(state.wins)||0),medals=medalCount?.(state)||0;
-  return Math.min(1.13,.88+Math.min(7,wins)*.028+Math.min(10,medals)*.007);
+  return Math.min(1.13,.80+Math.min(12,wins)*.0125+Math.min(36,medals)*.005);
  }
  function modeSettings(mode,cfg,selectedCar,onlineSession,careerFactor){
   return mode==='race'?window.TTRModeRace.settings(cfg,selectedCar):
