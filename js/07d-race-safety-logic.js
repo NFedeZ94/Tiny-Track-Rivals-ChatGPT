@@ -6,6 +6,7 @@ window.TTRRaceSafety=Object.freeze({create(deps){
 
 function recoverCar(c,reason='edge'){
  const race=getRace();
+ if(race){const log=race.recoveryHistory??=[];if(log.length<512)log.push({car:c.id,reason,time:+race.time.toFixed(3),lap:c.lapsCompleted+1,x:+c.x.toFixed(2),y:+c.y.toFixed(2),phase:c.p,stablePhase:c.routeStableP,pendingPhase:c.routePinch?.phase??null});else race.recoveryHistoryDropped=(race.recoveryHistoryDropped||0)+1;}
 
  const anchor=c.routePinch?.phase??c.lastCheckpoint??c.lastP??0;
  let safe=c.routePinch?.safe||c.offtrackEntry||c.lastValidPosition||{...trackPoint(anchor),p:anchor,a:tangent(anchor),speed:42,laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};
@@ -40,9 +41,15 @@ function junctionContinuity(c,near,oldX,oldY,dt){
     c.routePinch=null;if(c.respawnGrace>0){const legal=nearestTrackWindow(c,points,c.routeStableP??c.lastP??near.p,.055);return {near:legal,penalty:false};}c.routeStableP=near.p;return {near,penalty:false};
   }
   const anchor=c.routeStableP??c.lastP??near.p;
-  if(anchor>.455&&anchor<.575&&!near.shortcut&&phaseGap(anchor,near.p)>.065){
-    const local=nearestTrackWindow(c,points,anchor,.055);
-    if(local.distance<=138&&phaseGap(anchor,local.p)<.04){c.routePinch=null;c.routeStableP=local.p;return {near:{...local,shortcut:false},penalty:false};}
+  const orangeBend=anchor>.44&&anchor<.61;
+  if(orangeBend&&!near.shortcut&&(c.routePinch||phaseGap(anchor,near.p)>.025)){
+    const local=nearestTrackWindow(c,points,anchor,.012);
+    // A narrow projection follows the car, not the original suspicion point.
+    // Never credit the other arm while it is geometrically closer.
+    if(local.distance<=158){
+      c.routePinch=null;c.routeStableP=local.p;
+      return {near:{...local,shortcut:false},penalty:false};
+    }
   }
   if(!c.routePinch && !near.shortcut && (junctionPhaseHop(anchor,near.p,step)||(step<55&&phaseGap(anchor,near.p)>.075))){
     c.routePinch={phase:anchor,elapsed:0,travel:0,safe:c.lastValidPosition?{...c.lastValidPosition,flags:c.lastValidPosition.flags.slice()}:null};
@@ -50,6 +57,7 @@ function junctionContinuity(c,near,oldX,oldY,dt){
   if(c.routePinch){
     const pending=c.routePinch;
     const legal=nearestTrackWindow(c,points,pending.phase,.07);
+    const moving=nearestTrackWindow(c,points,anchor,.012);
     pending.elapsed+=dt;pending.travel+=Math.min(step,40);
     if(phaseGap(near.p,pending.phase)<.066 && near.distance<118){
       c.routePinch=null;c.routeStableP=near.p;return {near,penalty:false};
@@ -60,8 +68,10 @@ function junctionContinuity(c,near,oldX,oldY,dt){
     const illegal=(pending.travel>66&&pending.elapsed>.38&&legal.distance>185&&near.distance<105) ||
       (pending.travel>88&&pending.elapsed>.65&&legal.distance>159&&near.distance<42);
     if(illegal||(pending.elapsed>.35&&near.distance<120&&legal.distance>165&&phaseGap(near.p,pending.phase)>.10)){if(pending.safe)c.offtrackEntry=pending.safe;return {near:legal,penalty:true};}
-    c.routeStableP=legal.p;
-    return {near:{...legal,shortcut:false},penalty:false,pending:true};
+    // Keep the pending origin for evidence and recovery; do not let a wide
+    // search silently migrate the accepted route to an unrelated arm.
+    if(moving.distance<=158)c.routeStableP=moving.p;
+    return {near:{...moving,shortcut:false},penalty:false,pending:true};
   }
   c.routeStableP=near.p;return {near,penalty:false};
 }

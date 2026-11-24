@@ -741,3 +741,9 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
 @media(max-width:700px){#hud.hud-trial .hudTop .statBlock strong{font-size:clamp(12px,2.32vw,17px)!important;-webkit-text-stroke:2px #090c12}#hud.hud-trial .hudTop .statBlock small{font-size:clamp(8px,1.55vw,11px)!important;-webkit-text-stroke:1.4px #090c12;letter-spacing:0}}
 #hud #pauseBtn{background:rgba(15,32,49,.13)!important;border:1px solid rgba(255,255,255,.35)!important;box-shadow:none!important;text-shadow:0 1px 2px #000,1px 0 #14283c,-1px 0 #14283c;touch-action:manipulation}
 #hud #pauseBtn:active{background:rgba(235,245,255,.23)!important;border-color:rgba(255,255,255,.72)!important}
+
+/* 14.14 — true outline for yellow race labels; reuse the main-menu trophy asset. */
+#hud .hudTop .statBlock small{font-weight:950!important;-webkit-text-stroke:2.5px #07090d!important;paint-order:stroke fill;text-shadow:-1px 0 #07090d,1px 0 #07090d,0 -1px #07090d,0 1px #07090d!important}
+#hud .hudTop .statBlock .trial-notice:not(.trial-fast):not(.trial-slow){-webkit-text-stroke:2.5px #07090d!important;paint-order:stroke fill}
+#elimBanner strong{-webkit-text-stroke:3px #07090d;paint-order:stroke fill}
+#careerScreen .career-header h2 .career-title-icon{display:inline-block;width:.93em;height:.93em;vertical-align:-.06em;background:currentColor;-webkit-mask:url('../assets/images/ui/career.svg') center/contain no-repeat;mask:url('../assets/images/ui/career.svg') center/contain no-repeat}
