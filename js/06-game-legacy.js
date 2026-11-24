@@ -22,7 +22,7 @@ function measurePerfInput(){if(!perfTouchAt)return;const delta=performance.now()
 function resetPerf(){perfCars={};perfStats=emptyPerf();perfTotal=emptyPerf();perfReport='';perfTouchAt=0;perfInputDelay=null;perfInputSamples=[];perfRecoveries=[];perfRecoveryDropped=0;}
 
 const perfPanel=document.createElement('div');perfPanel.className='ttr-perf';perfPanel.hidden=true;document.body.appendChild(perfPanel);
-function perfSnapshot(){const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.88 · 14.14b",quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(m=>({...m,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)})),raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
+function perfSnapshot(){const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.89 · 14.15",quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(m=>({...m,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)})),raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
 window.TTRPerformance={snapshot:perfSnapshot};
 const points=Array.from({length:520},(_,i)=>trackPoint(i/520));
 const controls={left:false,right:false,brake:false};
@@ -654,7 +654,7 @@ function eliminationChooseGrid(p,count,first=false){
 }
 function eliminationApplyGrid(fresh,point,index){
  Object.assign(fresh,{x:point.x,y:point.y,a:point.a,p:point.p,lastP:point.p,
-  auditP:point.p,routeStableP:point.p,orangeLine:null,lastCheckpoint:point.p});
+  auditP:point.p,routeStableP:point.p,orangeLine:null,aiPassUntil:0,aiPassCooldown:0,aiPassSide:0,aiItemCheckAt:0,aiProgressWindow:null,aiRecoveryUntil:0,lastCheckpoint:point.p});
  fresh.elimDistance=-Math.floor(index/2)*ELIM_ROW_SPACING;fresh.mugApexPassed=point.p>.306&&point.p<.93;
  fresh.elimPrevP=point.p;fresh.elimPrevX=point.x;fresh.elimPrevY=point.y;
  fresh.elimTravelSinceCredit=0;fresh.elimLag=0;fresh.elimProtection=0;
@@ -962,7 +962,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
     }
     if(c.tableFalling<=0){recoverCar(c,'table-fall');}
     continue;
-  }const ctl=inputFor(c),mul=race.mode==='online'&&onlineSession?.members[c.id]?1:(c===race.player?1:Math.min(1,race.aiFactor));let vmax=c.profile.max*mul,accelerate=c.profile.acc*mul;if(perfEnabled){const m=perfCars[c.id]??=( {id:c.id,model:c.profile.name,seconds:0,sum:0,max:0,gas:0,brake:0,mul,cap:vmax,acc:accelerate,ramps:0} );m.decisions=c.shortcutDecisionCount||0;m.attempts=c.shortcutAttemptCount||0;m.respawns=c.shortcutRespawns||0;m.lastPenalty=c.lastPenaltyReason||'';m.seconds+=dt;m.sum+=Math.abs(c.speed)*dt;m.max=Math.max(m.max,Math.abs(c.speed));m.gas+=ctl.gas?dt:0;m.brake+=ctl.brake?dt:0;m.respawns=c.shortcutRespawns||0;m.reason=c.lastPenaltyReason||'';}
+  }const ctl=inputFor(c),mul=race.mode==='online'&&onlineSession?.members[c.id]?1:(c===race.player?1:(race.mode==='online'?Math.min(1,race.aiFactor):ttrRaceDrivers.skillFor(race).pace));let vmax=c.profile.max*mul,accelerate=c.profile.acc*mul;if(perfEnabled){const m=perfCars[c.id]??=( {id:c.id,model:c.profile.name,seconds:0,sum:0,max:0,gas:0,brake:0,mul,cap:vmax,acc:accelerate,ramps:0} );m.lapTimes??=[];m.lapStart??=0;m.passAttempts=c.aiPassAttempts||0;m.decisions=c.shortcutDecisionCount||0;m.attempts=c.shortcutAttemptCount||0;m.respawns=c.shortcutRespawns||0;m.lastPenalty=c.lastPenaltyReason||'';m.seconds+=dt;m.sum+=Math.abs(c.speed)*dt;m.max=Math.max(m.max,Math.abs(c.speed));m.gas+=ctl.gas?dt:0;m.brake+=ctl.brake?dt:0;m.respawns=c.shortcutRespawns||0;m.reason=c.lastPenaltyReason||'';}
  // Sticky jam has a lasting, measurable slowdown and reduced acceleration.
  // It is not another oil patch: grip remains predictable, speed is limited.
  const inJam=c.jump<=0&&jamHit(c,jamPatch);
@@ -1165,7 +1165,9 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  if((c.shortcutRespawns||0)!==recoveryBefore)continue;
  ttrRaceOil.handleOilContact(c,oldX,oldY);
  ttrRacePickups.collect(c);
+ const lapBefore=c.lapsCompleted;
  ttrRaceProgress.updateCarProgress(c,dt,oldX,oldY);
+ if(perfEnabled&&perfCars[c.id]&&c.lapsCompleted===lapBefore+1){const m=perfCars[c.id];m.lapTimes.push(+(race.time-m.lapStart).toFixed(3));m.lapStart=race.time;}
  if(race.mode==='elimination'&&c.lastValidPosition&&K.phaseGap(c.lastValidPosition.p,c.elimPrevP)<.008){const d=((K.forwardProgress(c.elimPrevP,c.lastValidPosition.p)+.5)%1-.5)*TRACK_LENGTH;c.lastValidPosition.elimDistance=c.elimDistance+d;}
  ttrRaceCPU.useTacticalPowerup(c);
  }
@@ -1307,10 +1309,10 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
  drawShowroom($('garageCanvas'),garagePreview,'garage');
 }
 function wireMenu(){
- // 14.14b: tolerate a cached pre-14.14 HTML shell; manual acceleration is no longer supported.
+ // 14.15: tolerate a cached pre-14.14 HTML shell; manual acceleration is no longer supported.
  const obsoleteAuto=$('auto');if(obsoleteAuto){const label=obsoleteAuto.closest('label');if(label)label.remove();else obsoleteAuto.remove();}
- document.documentElement.dataset.ttrJsBuild='0.13.6.88';
- const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.88 · 14.14b';
+ document.documentElement.dataset.ttrJsBuild='0.13.6.89';
+ const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.89 · 14.15';
  // A transformed menu creates a non-viewport containing block for fixed dialogs.
  // Move Options to document.body, so the overlay is genuinely viewport-sized on iPhone.
  const settingsDialog=$('retroSettings');if(settingsDialog&&settingsDialog.parentNode!==document.body)document.body.appendChild(settingsDialog);const configDialog=$('raceConfig');if(configDialog&&configDialog.parentNode!==document.body)document.body.appendChild(configDialog);const trackDialog=$('trackSelect');if(trackDialog&&trackDialog.parentNode!==document.body)document.body.appendChild(trackDialog);
@@ -1759,7 +1761,7 @@ window.TTRDebug={
  c.lastValidPosition={x:safe.x,y:safe.y,a:tangent(from),p:from,laps:c.lapsCompleted,flags:c.flags.slice()};
  c.auditP=from;c.auditTravel=350;c.auditCleanTime=0;c.x=pos.x;c.y=pos.y;c.p=from;c.lastP=from;c.a=tangent(to);c.speed=0;c.offtrack=false;c.respawnGrace=0;race.countdown=0;
  const before=c.shortcutRespawns||0;update(1/60);return {before,after:c.shortcutRespawns||0,phase:c.p,expectedPhase:from};
-},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.88',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
+},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.89',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
 })();
 
 
