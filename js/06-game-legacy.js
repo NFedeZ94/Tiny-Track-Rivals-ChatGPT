@@ -1456,7 +1456,7 @@ function render(){const ratio=Math.min(race?.mode==='online'&&onlineSession&&!on
 function frame(t){
  const dt=Math.min(.04,Math.max(0,(t-frameTime)/1000));frameTime=t;renderDelta=dt||1/60;
  onlinePingTick(t);
- if(race){if(race.mode==='online'&&onlineSession&&!onlineSession.host){clock+=dt;onlineGuestStep(dt);}else{update(dt);window.TTRCPUDiagnostics?.sample(race);onlineBroadcast(dt);}render();}
+ if(race){if(race.mode==='online'&&onlineSession&&!onlineSession.host){clock+=dt;onlineGuestStep(dt);}else{update(dt);onlineBroadcast(dt);}render();}
  else {clock+=dt;
    // Lightweight canvas-only 60fps turntable: the rest of the game stays paused while in the garage.
    if(t-lastShowroomDraw>8){lastShowroomDraw=t;
