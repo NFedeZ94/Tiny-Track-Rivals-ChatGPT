@@ -726,3 +726,9 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
 @media (orientation:landscape) and (pointer:coarse) and (max-height:500px){#controls #left,#controls #right,#controls #brake,#controls #gas,#controls #use{height:87px;}}
 .ttr-trial-menu select{background:#102943;color:#fff;border:1px solid #497ca2;border-radius:6px;padding:6px;max-width:100%;font-size:14px;touch-action:manipulation;}
 .ttr-ghost-status{display:block;margin-top:3px;color:#dce9ff;}
+
+/* 14.12: subtle touch boundaries; no blur or heavy effects. */
+#controls .control{background:rgba(15,32,49,.10)!important;border:1px solid rgba(255,255,255,.27)!important;border-radius:16px!important;box-shadow:none!important}
+#controls .control.active{background:rgba(235,245,255,.23)!important;border:1px solid rgba(255,255,255,.72)!important;filter:none!important}
+#controls .control.active::before,#controls #use.active .power-token{filter:none!important}
+.ttr-quality-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;margin:5px 0;color:#fff}.ttr-quality-row select{color:#fff;background:#172e49;border:1px solid #8296b2;border-radius:4px;padding:4px}.ttr-perf{position:fixed;top:max(42px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:21;pointer-events:none;background:#102038d9;color:#fff;padding:4px 8px;border-radius:5px;font:11px monospace;white-space:pre;max-width:92vw;text-align:center}.ttr-perf[hidden]{display:none!important}
