@@ -638,32 +638,32 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
  .resultsPanel.compact .result-car-thumb{width:clamp(38px,14vh,68px);height:clamp(20px,7vh,35px);}
 }
 
-/* Fase 14.3 — comandi di guida touch +25%, solo in landscape.
+/* Fase 14.3C — comandi di guida touch +37,5% rispetto alla 14.2, solo in landscape.
    Solo i quattro pulsanti di gara; menu e HUD invariati. */
 @media (orientation: landscape) and (pointer: coarse) {
   #controls #left, #controls #right {
-    width: clamp(65px, 15vw, 95px);
-    height: clamp(70px, 17.5vw, 101.25px);
-    font-size: 35px;
+    width: clamp(71.5px, 16.5vw, 104.5px);
+    height: clamp(77px, 19.25vw, 111.375px);
+    font-size: 38.5px;
   }
   #controls #brake, #controls #use {
-    width: clamp(70px, 15vw, 90px);
-    height: clamp(70px, 17.5vw, 101.25px);
-    font-size: 17.5px;
+    width: clamp(77px, 16.5vw, 99px);
+    height: clamp(77px, 19.25vw, 111.375px);
+    font-size: 19.25px;
   }
 }
 @media (orientation: landscape) and (pointer: coarse) and (max-height: 500px) {
   #controls #left, #controls #right,
   #controls #brake, #controls #use {
-    height: 72.5px;
+    height: 79.75px;
   }
 }
 
-/* Fase 14.3B - gruppi touch 10px verso i bordi, solo in landscape.
-   Mantiene un margine minimo di 3px oltre le aree sicure. */
+/* Fase 14.3C - gruppi touch fino a 5px piu verso i bordi rispetto alla 14.3B.
+   Margine minimo 6px dal bordo, senza invadere le aree sicure. */
 @media (orientation: landscape) and (pointer: coarse) {
   #controls {
-    left: max(11px, calc(env(safe-area-inset-left) + 3px)) !important;
-    right: max(11px, calc(env(safe-area-inset-right) + 3px)) !important;
+    left: max(6px, env(safe-area-inset-left)) !important;
+    right: max(6px, env(safe-area-inset-right)) !important;
   }
 }
