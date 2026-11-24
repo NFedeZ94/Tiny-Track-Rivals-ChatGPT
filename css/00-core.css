@@ -658,3 +658,12 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
     height: 72.5px;
   }
 }
+
+/* Fase 14.3B - gruppi touch 10px verso i bordi, solo in landscape.
+   Mantiene un margine minimo di 3px oltre le aree sicure. */
+@media (orientation: landscape) and (pointer: coarse) {
+  #controls {
+    left: max(11px, calc(env(safe-area-inset-left) + 3px)) !important;
+    right: max(11px, calc(env(safe-area-inset-right) + 3px)) !important;
+  }
+}
