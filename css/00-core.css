@@ -706,3 +706,23 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
 @media (orientation:landscape) and (pointer:coarse) and (max-height:500px){#controls #left,#controls #right,#controls #brake,#controls #use{height:75.7625px}}
 .ttr-key-panel{position:fixed;inset:0;z-index:90;background:#08132bf5;display:flex;align-items:center;justify-content:center;padding:10px;touch-action:manipulation}
 .ttr-key-panel .panel{max-height:95dvh;overflow:auto;max-width:550px;padding:15px}.ttr-key-row{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;gap:5px;margin:4px 0}.ttr-key-row button{min-height:30px;padding:3px 8px}.ttr-key-panel .menu-row{margin-top:8px}.ttr-key-panel p{margin:5px 0}
+
+/* 14.11 — borderless arcade controls; hit targets larger than artwork. */
+#controls .control,#controls .control.active{background:none!important;border:0!important;box-shadow:none!important;transform:none!important;touch-action:none;transition:none!important;position:relative;}
+#controls #left,#controls #right,#controls #brake,#controls #gas{font-size:0!important;color:transparent!important;text-shadow:none!important;}
+#controls #left::before,#controls #right::before,#controls #brake::before,#controls #gas::before{content:"";display:block;width:72%;height:76%;background-size:contain;background-position:center;background-repeat:no-repeat;pointer-events:none;}
+#controls #left::before{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cpath%20d%3D%22M44%209%2013%2032l31%2023V9Z%22%20fill%3D%22%23fff%22%20stroke%3D%22%2314283c%22%20stroke-width%3D%224%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E")}
+#controls #right::before{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cpath%20d%3D%22M20%209%2051%2032%2020%2055V9Z%22%20fill%3D%22%23fff%22%20stroke%3D%22%2314283c%22%20stroke-width%3D%224%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fsvg%3E")}
+#controls #brake::before{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cg%20transform%3D%22rotate%2813%2032%2032%29%22%3E%3Crect%20x%3D%2218%22%20y%3D%226%22%20width%3D%2228%22%20height%3D%2252%22%20rx%3D%226%22%20fill%3D%22%23edf2f6%22%20stroke%3D%22%2314283c%22%20stroke-width%3D%224%22%2F%3E%3Cpath%20d%3D%22M25%2016h14M25%2026h14M25%2036h14M25%2046h14%22%20stroke%3D%22%23536b80%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E")}
+#controls #gas::before{background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Cg%20transform%3D%22rotate%2813%2032%2032%29%22%3E%3Crect%20x%3D%2222%22%20y%3D%225%22%20width%3D%2220%22%20height%3D%2254%22%20rx%3D%225%22%20fill%3D%22%23e1f1df%22%20stroke%3D%22%2314283c%22%20stroke-width%3D%224%22%2F%3E%3Cpath%20d%3D%22M32%2014v36%22%20stroke%3D%22%2350775a%22%20stroke-width%3D%224%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E")}
+#controls .control.active::before,#controls #use.active .power-token{filter:brightness(1.4);}
+#controls #use .power-token.empty{border:2px solid #fff!important;border-radius:50%;width:56%;height:auto;aspect-ratio:1;display:flex;align-items:center;justify-content:center;color:#fff;font-size:clamp(24px,6vh,38px);text-shadow:0 1px 3px #14283c!important;outline:2px solid #14283c;}
+#controls #use .power-token:not(.empty){width:72%;height:76%;}
+@media (orientation:landscape) and (pointer:coarse){
+#controls .ctrlGroup{gap:4px;}
+#controls #left,#controls #right{width:clamp(76px,17.8vw,115px);height:clamp(81px,20vw,122px);}
+#controls #brake,#controls #gas,#controls #use{width:clamp(79px,17vw,109px);height:clamp(81px,20vw,122px);}
+}
+@media (orientation:landscape) and (pointer:coarse) and (max-height:500px){#controls #left,#controls #right,#controls #brake,#controls #gas,#controls #use{height:87px;}}
+.ttr-trial-menu select{background:#102943;color:#fff;border:1px solid #497ca2;border-radius:6px;padding:6px;max-width:100%;font-size:14px;touch-action:manipulation;}
+.ttr-ghost-status{display:block;margin-top:3px;color:#dce9ff;}
