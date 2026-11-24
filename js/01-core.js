@@ -280,7 +280,9 @@
   function nearestTrackWindow(point,waypoints,anchor,window=.06){
     let best={distance:Infinity,p:mod(anchor,1),x:point.x,y:point.y,nx:0,ny:0};
     const n=waypoints.length;
-    for(let i=0;i<n;i++){
+    const center=mod(anchor,1)*n-.5,span=Math.ceil(window*n)+2;
+    const indices=[];if(span*2+1>=n){for(let i=0;i<n;i++)indices.push(i);}else{for(let i=Math.floor(center)-span;i<=Math.floor(center)+span;i++)indices.push(mod(i,n));indices.sort((a,b)=>a-b);}
+    for(const i of indices){
       const pa=(i+.5)/n;if(phaseGap(pa,anchor)>window)continue;
       const a=waypoints[i],b=waypoints[(i+1)%n],dx=b.x-a.x,dy=b.y-a.y,len=dx*dx+dy*dy||1;
       const t=clamp(((point.x-a.x)*dx+(point.y-a.y)*dy)/len,0,1);
@@ -418,7 +420,7 @@
   }
   // SAT for two oriented toy-car rectangles, with mass-weighted positional correction
   // and short-lived lateral impulse. This avoids the overlap/sticky-pair artefact.
-  function resolveCarContacts(cars){let impacts=0,maxOverlap=0,maxImpulse=0;const hits=[];
+  function resolveCarContacts(cars){let impacts=0,maxOverlap=0,maxImpulse=0;const hits=[],deckContacts=new Map();
     for(let iteration=0;iteration<3;iteration++)for(let i=0;i<cars.length;i++)for(let j=i+1;j<cars.length;j++){
       const a=cars[i],b=cars[j];if(a.done||b.done||a.tableFalling>0||b.tableFalling>0)continue;
       const aDeck=!!a.onBridge,bDeck=!!b.onBridge;
@@ -438,8 +440,11 @@
       if(minOverlap<=0)continue;
       const ma=a.profile?.mass||1,mb=b.profile?.mass||1,invA=1/ma,invB=1/mb,total=invA+invB;
       const correction=(minOverlap+.25)/total;
+      const ax=a.x,ay=a.y,bx=b.x,by=b.y;
       a.x-=nx*correction*invA;a.y-=ny*correction*invA;
       b.x+=nx*correction*invB;b.y+=ny*correction*invB;
+      // Contacts on the same narrow deck must not propel a legal driver off its edge.
+      if(aDeck&&bDeck){for(const [c,x,y] of [[a,ax,ay],[b,bx,by]]){if(!deckContacts.has(c))deckContacts.set(c,shortcutNearest({x,y}).distance<=44);c.bridgeContactGrace=Math.max(c.bridgeContactGrace||0,.25);}}
       maxOverlap=Math.max(maxOverlap,minOverlap);
       const vax=ca*a.speed+(a.hitVX||0),vay=sa*a.speed+(a.hitVY||0);
       const vbx=cb*b.speed+(b.hitVX||0),vby=sb*b.speed+(b.hitVY||0);
@@ -479,6 +484,7 @@
         if(iteration===0 && closing>55)hits.push({x:(a.x+b.x)/2,y:(a.y+b.y)/2,nx,ny,intensity:Math.min(1,closing/240)});
       }
     }
+    for(const [c,wasOnDeck] of deckContacts){if(!wasOnDeck)continue;const after=shortcutNearest(c);if(after.t>.04&&after.t<.97&&after.distance>44){const f=44/after.distance;c.x=after.x+(c.x-after.x)*f;c.y=after.y+(c.y-after.y)*f;}}
     return {impacts,maxOverlap,maxImpulse,hits};
   }
   function racePosition(car){const laps=Math.max(0,car.lapsCompleted||0),p=mod(car.p||0,1);return laps+p-(laps===0&&p>.90&&!car.flags?.some(Boolean)?1:0);}

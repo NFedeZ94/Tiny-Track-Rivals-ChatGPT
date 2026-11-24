@@ -732,3 +732,12 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
 #controls .control.active{background:rgba(235,245,255,.23)!important;border:1px solid rgba(255,255,255,.72)!important;filter:none!important}
 #controls .control.active::before,#controls #use.active .power-token{filter:none!important}
 .ttr-quality-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;margin:5px 0;color:#fff}.ttr-quality-row select{color:#fff;background:#172e49;border:1px solid #8296b2;border-radius:4px;padding:4px}.ttr-perf{position:fixed;top:max(42px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:21;pointer-events:none;background:#102038d9;color:#fff;padding:4px 8px;border-radius:5px;font:11px monospace;white-space:pre;max-width:92vw;text-align:center}.ttr-perf[hidden]{display:none!important}
+
+/* 14.13 — high contrast race HUD; no extra panels or menu changes. */
+#hud .hudTop .statBlock{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+#hud .hudTop .statBlock small{font-weight:950!important;font-size:clamp(9px,2.35vh,13px)!important;letter-spacing:.04em;-webkit-text-stroke:1.7px #090c12;paint-order:stroke fill;text-shadow:0 1px 2px #000,0 2px 3px #000;line-height:1.2}
+#hud .hudTop .statBlock strong{font-weight:1000!important;font-size:clamp(15px,4.3vh,24px)!important;-webkit-text-stroke:2.8px #090c12;paint-order:stroke fill;text-shadow:0 1px 2px #000,0 2px 3px #000;line-height:1.18;font-variant-numeric:tabular-nums}
+#hud .trial-notice{font-weight:950!important;-webkit-text-stroke:1.8px #090c12;paint-order:stroke fill;text-shadow:0 2px 3px #000}
+@media(max-width:700px){#hud.hud-trial .hudTop .statBlock strong{font-size:clamp(12px,2.32vw,17px)!important;-webkit-text-stroke:2px #090c12}#hud.hud-trial .hudTop .statBlock small{font-size:clamp(8px,1.55vw,11px)!important;-webkit-text-stroke:1.4px #090c12;letter-spacing:0}}
+#hud #pauseBtn{background:rgba(15,32,49,.13)!important;border:1px solid rgba(255,255,255,.35)!important;box-shadow:none!important;text-shadow:0 1px 2px #000,1px 0 #14283c,-1px 0 #14283c;touch-action:manipulation}
+#hud #pauseBtn:active{background:rgba(235,245,255,.23)!important;border-color:rgba(255,255,255,.72)!important}

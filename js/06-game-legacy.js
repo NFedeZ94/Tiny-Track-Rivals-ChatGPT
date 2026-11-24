@@ -346,7 +346,7 @@ function worldInit(){
   // Interactive props are deliberately few: props not marked solid never obstruct racing.
   addProp(.231,'mug',-188,58,true);props.at(-1).tall=true;        // Mug Bend
   // Removed confusing spiral/cereal decoration at the end of the second bend.
-  addProp(.512,'orange',163,49,true);    // Orange Jump background
+  addProp(.512,'orange',163,49,false);    // Orange Jump background
   const op=trackPoint(.502),oa=tangent(.502);props.push({type:'orange_bump',x:op.x+Math.sin(oa)*32,y:op.y-Math.cos(oa)*32,r:29,solid:false,jump:false,interactive:true});
   // v0.13.6.68: upright physical bowl; TWO irregular, rounded-edge milk stains.
   // Left stain is small; right stain is elongated and extends further from the bowl.
@@ -364,7 +364,7 @@ function worldInit(){
   // Tipped jar attached to the jam spill, not a standing jar floating elsewhere.
   const jnx=-Math.sin(stickyAngle),jny=Math.cos(stickyAngle);
   props.push({type:'jam_spill_jar',x:jamPatch.x+jnx*198,y:jamPatch.y+jny*198,r:64,solid:true,scenery:false,interactive:true,tall:true});
-  addProp(.913,'cookie',168,44,false);    // Placemat Return
+  addProp(.913,'cookie',168,44,true);    // Placemat Return
   // A low breakfast knife lies transversally across the lane just before the jam.
   const sp=knifePhase,at=trackPoint(sp),a=tangent(sp),nx=-Math.sin(a),ny=Math.cos(a);
   const knifeLength=168,knifeBladeInLane=102.4; // 2/5 of 256-unit lane; stainless handle outside
@@ -385,10 +385,13 @@ function worldInit(){
     // Move decorative pieces if they would overlap a lane: clearance uses real route/shortcut.
     const near=nearestCourse({x,y},points);
     if(near.distance<r*.70+97)continue;
-    const tall=['mug','glass','plate_croissant'].includes(type);props.push({type,x,y,r,solid:tall,tall,scenery:!tall,interactive:tall});
+    const tall=['mug','glass','plate_croissant','cereal'].includes(type),solid=tall||['cookie','cookie_alt','toast'].includes(type);props.push({type,x,y,r,solid,tall,scenery:!solid,interactive:solid});
   }
-  props.filter(o=>o.type==='cookie').forEach((o,i)=>{o.cookieKind=i%2?'cookie_alt':'cookie';});
+  props.filter(o=>o.type==='cookie'||o.type==='cookie_alt').forEach((o,i)=>{o.cookieKind=o.type==='cookie_alt'?'cookie_alt':i%2?'cookie_alt':'cookie';o.collisionR=o.r*.83;});
+  props.filter(o=>o.type==='toast').forEach(o=>{o.collisionR=o.r*.77;});
   paintWorld();paintBridgeDeck();
+  // Prepare static sprites outside the race loop; assets-ready rebuild replaces fallbacks.
+  for(const o of props)prepareRaceProp(o);
 }
 
 function drawMug(ctx,x,y,r,fill='#f3efe7'){
@@ -463,11 +466,19 @@ function drawObstacle(ctx,o){
   }
   ctx.restore();ctx.restore();
  }
- else if(o.type==='crumb')drawCrumb(ctx,o.x,o.y,o.r,o.x|0);else if(o.type==='cookie')drawCookie(ctx,o.x,o.y,o.r,(o.x+o.y)*.004,o.cookieKind||'cookie');else if(o.type==='mug'){drawMug(ctx,o.x,o.y,o.r,'#f1ddd6');if(!race||qualityMode==='high'||(!ttrLowGraphics&&qualityMode!=='low'&&qualityMode!=='balanced'))drawCoffeeAnimation(ctx,o);}else if(o.type==='toast')drawToast(ctx,o.x,o.y,o.r*1.7,.35);else if(o.type==='orange_bump'){window.TTRAssets?.draw(ctx,'orange',o.x-33,o.y-30,66,60);}else if(['plate_croissant','cereal','orange','jam','glass'].includes(o.type)){const width=o.r*2.8;if(o.type==='jam'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(.93);window.TTRAssets?.draw(ctx,o.type,-width/2,-width*.52,width,width*.92);ctx.restore();}else window.TTRAssets?.draw(ctx,o.type,o.x-width/2,o.y-width*.52,width,width*.92);}else if(o.type==='knife'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(o.angle??0);if(o.interactive)drawKnife(ctx,0,0,o.length||120,28);else drawKnife(ctx,0,0,157,38);ctx.restore();}else if(o.type==='ramp')drawRamp(ctx,o);
+ else if(o.type==='crumb')drawCrumb(ctx,o.x,o.y,o.r,o.x|0);else if(o.type==='cookie'||o.type==='cookie_alt')drawCookie(ctx,o.x,o.y,o.r,(o.x+o.y)*.004,o.cookieKind||'cookie');else if(o.type==='mug'){drawMug(ctx,o.x,o.y,o.r,'#f1ddd6');if(!race||qualityMode==='high'||(!ttrLowGraphics&&qualityMode!=='low'&&qualityMode!=='balanced'))drawCoffeeAnimation(ctx,o);}else if(o.type==='toast')drawToast(ctx,o.x,o.y,o.r*1.7,.35);else if(o.type==='orange_bump'){window.TTRAssets?.draw(ctx,'orange',o.x-33,o.y-30,66,60);}else if(['plate_croissant','cereal','orange','jam','glass'].includes(o.type)){const width=o.r*2.8;if(o.type==='jam'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(.93);window.TTRAssets?.draw(ctx,o.type,-width/2,-width*.52,width,width*.92);ctx.restore();}else window.TTRAssets?.draw(ctx,o.type,o.x-width/2,o.y-width*.52,width,width*.92);}else if(o.type==='knife'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(o.angle??0);if(o.interactive)drawKnife(ctx,0,0,o.length||120,28);else drawKnife(ctx,0,0,157,38);ctx.restore();}else if(o.type==='ramp')drawRamp(ctx,o);
 }
 
 // A knife near the jam is a low, visible obstacle. A fast, centred crossing
 // triggers a short hop over the sticky patch; only the knife and ramp launch cars.
+function prepareRaceProp(o){
+ const cacheable=['cookie','cookie_alt','orange','orange_bump','toast','glass','plate_croissant','cereal','knife','ramp'].includes(o.type);
+ if(!cacheable)return;
+ if(!o.staticSprite){const pad=Math.ceil(Math.max(96,o.r*2.25,(o.length||0)+22)),density=1.5;const cv=document.createElement('canvas');cv.width=cv.height=Math.ceil(pad*2*density);const cx=cv.getContext('2d');cx.scale(density,density);cx.translate(pad-o.x,pad-o.y);drawObstacle(cx,o);o.staticSprite={cv,pad};}
+}
+function drawRaceProp(ctx,o){
+ if(!o.staticSprite){drawObstacle(ctx,o);return;}const {cv,pad}=o.staticSprite;ctx.drawImage(cv,o.x-pad,o.y-pad,pad*2,pad*2);
+}
 function contactWithProp(c,o,previous=null){
   // Both the high bowl and the tipped glass jar must be solid, even to a jumping car.
   if(o.tall&&o.solid&&c.jump>0){
@@ -475,16 +486,10 @@ function contactWithProp(c,o,previous=null){
       c.jump=0;c.jumpTotal=0;c.jumpCd=Math.max(c.jumpCd,.4);
     }else return false;
   }
- // Orange rind remains physical even on an airborne contact: prevent phasing through.
- if(o.type==='orange_bump'){if(c.jump<=0&&K.segmentCircle(previous||c,c,o,(o.r||29)+(c.width||36)*.30)){c.speed*=.976;if(c===race?.player&&race.time-(c.lastRindSound??-10)>.7){c.lastRindSound=race.time;SND.sfx('slowSurface');}}return false;}
- if(o.type==='orange'&&o.solid&&c.jump>0){
-   const from=previous||c;
-   if(K.segmentCircle(from,c,o,(o.r||29)+(c.width||36)*.38)){
-     c.jump=0;c.jumpTotal=0;c.jumpCd=Math.max(c.jumpCd,.45);
-   }else return false;
- }
+ // Both rinds are floor obstacles, not solid walls.
+ if(o.type==='orange_bump'||o.type==='orange'){if(c.jump<=0&&K.segmentCircle(previous||c,c,o,(o.r||29)+(c.width||36)*.30)){c.speed*=.982;if(c===race?.player&&race.time-(c.lastRindSound??-10)>.7){c.lastRindSound=race.time;SND.sfx('slowSurface');}}return false;}
  if(!o.solid||c.jump>0)return false;
- if(o.type!=='knife')return resolveCarObstacle(c,o);
+ if(o.type!=='knife')return resolveCarObstacle(c,o.collisionR?{...o,r:o.collisionR}:o);
  if(o.interactive!==true)return false;
  const ca=Math.cos(o.angle),sa=Math.sin(o.angle),dx=c.x-o.x,dy=c.y-o.y;
  const along=dx*ca+dy*sa,across=-dx*sa+dy*ca;
@@ -667,7 +672,7 @@ function eliminationNewRound(){
  race.cars.forEach((c,i)=>{
   const profileIndex=profiles.findIndex(pr=>pr.id===c.profile.id);
   const fresh=eliminationApplyGrid(createCar(i,profileIndex,placement.grid[i].p),placement.grid[i],i);
-  const keep={variantAccent:c.variantAccent,variantLabel:c.variantLabel,variantSprite:c.variantSprite};
+  const keep={variantAccent:c.variantAccent,variantLabel:c.variantLabel,variantSprite:c.variantSprite,shortcutDecisionCount:c.shortcutDecisionCount||0,shortcutAttemptCount:c.shortcutAttemptCount||0};
   // Reuse the object identity (player and UI references), not stale recovery/bridge state.
    for(const key of Object.keys(c))if(!(key in fresh))delete c[key];
    Object.assign(c,fresh,keep);c.eliminated=false;c.elimCelebration=0;
@@ -950,7 +955,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
     }
     if(c.tableFalling<=0){recoverCar(c,'table-fall');}
     continue;
-  }const ctl=inputFor(c),mul=race.mode==='online'&&onlineSession?.members[c.id]?1:(c===race.player?1:Math.min(1,race.aiFactor));let vmax=c.profile.max*mul,accelerate=c.profile.acc*mul;if(perfEnabled){const m=perfCars[c.id]??=( {id:c.id,model:c.profile.name,seconds:0,sum:0,max:0,gas:0,brake:0,mul,cap:vmax,acc:accelerate,ramps:0} );m.seconds+=dt;m.sum+=Math.abs(c.speed)*dt;m.max=Math.max(m.max,Math.abs(c.speed));m.gas+=ctl.gas?dt:0;m.brake+=ctl.brake?dt:0;m.respawns=c.shortcutRespawns||0;m.reason=c.lastPenaltyReason||'';}
+  }const ctl=inputFor(c),mul=race.mode==='online'&&onlineSession?.members[c.id]?1:(c===race.player?1:Math.min(1,race.aiFactor));let vmax=c.profile.max*mul,accelerate=c.profile.acc*mul;if(perfEnabled){const m=perfCars[c.id]??=( {id:c.id,model:c.profile.name,seconds:0,sum:0,max:0,gas:0,brake:0,mul,cap:vmax,acc:accelerate,ramps:0} );m.decisions=c.shortcutDecisionCount||0;m.attempts=c.shortcutAttemptCount||0;m.respawns=c.shortcutRespawns||0;m.lastPenalty=c.lastPenaltyReason||'';m.seconds+=dt;m.sum+=Math.abs(c.speed)*dt;m.max=Math.max(m.max,Math.abs(c.speed));m.gas+=ctl.gas?dt:0;m.brake+=ctl.brake?dt:0;m.respawns=c.shortcutRespawns||0;m.reason=c.lastPenaltyReason||'';}
  // Sticky jam has a lasting, measurable slowdown and reduced acceleration.
  // It is not another oil patch: grip remains predictable, speed is limited.
  const inJam=c.jump<=0&&jamHit(c,jamPatch);
@@ -971,7 +976,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  c.bridgeMissPenalty=Math.max(0,(c.bridgeMissPenalty||0)-dt);
  if(c.bridgeMissActive&&c.bridgeMissPenalty<=0)c.bridgeMissActive=false;
  c.bridgeFalling=Math.max(0,(c.bridgeFalling||0)-dt);
-  c.bridgeExitVisual=Math.max(0,(c.bridgeExitVisual||0)-dt);
+  c.bridgeExitVisual=Math.max(0,(c.bridgeExitVisual||0)-dt);c.bridgeContactGrace=Math.max(0,(c.bridgeContactGrace||0)-dt);
  c.oilCooldown=Math.max(0,(c.oilCooldown||0)-dt);
  c.respawnGrace=Math.max(0,(c.respawnGrace||0)-dt);
  c.impactGrace=Math.max(0,(c.impactGrace||0)-dt);
@@ -1016,7 +1021,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
        c.jump=.96;c.jumpTotal=.96;c.jumpCd=1.85;
        c.speed=Math.min(vmax*1.36,Math.max(Math.min(152,vmax),c.speed)*1.17);
        c.boost=Math.max(c.boost,.68);
-       c.onBridge=true;c.bridgeTakeoff=true;c.rampEntryVisual=false;c.bridgeOffSeconds=0;if(perfEnabled&&perfCars[c.id])perfCars[c.id].ramps++;
+       c.onBridge=true;c.bridgeTakeoff=true;c.rampEntryVisual=false;c.bridgeOffSeconds=0;c.offtrack=false;c.offtrackEntry=null;c.offtrackSeconds=0;c.routePinch=null;if(perfEnabled&&perfCars[c.id]){perfCars[c.id].ramps++;if(c!==race.player&&!c.tryShortcut)perfCars[c.id].unplannedRamps=(perfCars[c.id].unplannedRamps||0)+1;}
        if(c===race.player)SND.sfx('ramp');
        break;
      }
@@ -1025,12 +1030,13 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  ttrRaceCPU.updateRecovery(c,dt);
  // On-road snapshots are only written after complete frame of verified lane contact.
  // No penalty for a normal outside detour at the finish-line seam (p=1 -> p=0).
- let near=nearestCourse(c,points);
+ let near=c.onBridge?{...shortcutNearest(c),shortcut:true}:nearestCourse(c,points);
  if(near.shortcut&&!c.onBridge&&!c.bridgeTakeoff&&!c.bridgeLandingActive&&!c.bridgeMissActive)near={...nearestTrack(c,points),shortcut:false};
  const routeCheck=junctionContinuity(c,near,oldX,oldY,dt);
  if(routeCheck.penalty){recoverCar(c,'junction-cut');continue;}
  near=routeCheck.near;c.routeResolvedNear=near;
  let surface=offTrackDynamics(near.distance);
+ if(c.onBridge)surface={...surface,outside:false};
  // In the first two bends, the cloth is visually continuous but nearest-track
  // projection can briefly overshoot its nominal 138u centreline distance.
  // A 20u edge cushion avoids false respawns on legitimate inside racing lines.
@@ -1122,12 +1128,12 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  // On the narrow toast, the edge is a real fall rather than an instant respawn.
  if(c.onBridge){
    const branch=shortcutNearest(c);
-   if(branch.t>.96 && branch.distance<65){c.onBridge=false;c.bridgeOffSeconds=0;c.bridgeExitVisual=.34;}
+   if(branch.t>.96 && branch.distance<65){c.onBridge=false;c.bridgeOffSeconds=0;c.bridgeExitVisual=.80;c.bridgeTakeoff=false;c.offtrack=false;c.offtrackEntry=null;c.offtrackSeconds=0;c.routePinch=null;c.routeStableP=shortcutTo;c.auditP=shortcutTo;c.auditTravel=0;c.auditOutsideTime=0;c.bridgeMissGrace=Math.max(c.bridgeMissGrace||0,.55);}
    else if(c.jump>0){
      // Do not judge airborne steering as a failed landing: measure contact only
      // after the wheels touch the lower tablecloth / toast bridge.
      c.bridgeOffSeconds=0;
-   }else if(bridgeLaneViolation(c,47)){
+   }else if(bridgeLaneViolation(c,47)&&!(c.bridgeContactGrace>0)){
      c.bridgeOffSeconds=(c.bridgeOffSeconds||0)+dt;
      if(c.bridgeOffSeconds>.22){bridgeFall(c);near=nearestCourse(c,points);}
    }else c.bridgeOffSeconds=0;
@@ -1141,7 +1147,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
   if(c.bridgeTakeoff && c.jump<=0){
     c.bridgeTakeoff=false;
     const landing=shortcutNearest(c);
-    if(landing.t>.94&&landing.distance<=65&&nearestTrack(c,points).distance<138){c.onBridge=false;c.bridgeExitVisual=.34;}else if(!(landing.t>=.012&&landing.t<=.94&&landing.distance<=45)){
+    if(landing.t>.94&&landing.distance<=65&&nearestTrack(c,points).distance<138){c.onBridge=false;c.bridgeExitVisual=.80;c.offtrack=false;c.offtrackEntry=null;c.offtrackSeconds=0;c.routePinch=null;c.routeStableP=shortcutTo;c.auditP=shortcutTo;c.auditTravel=0;c.auditOutsideTime=0;c.bridgeMissGrace=Math.max(c.bridgeMissGrace||0,.55);}else if(!(landing.t>=.012&&landing.t<=.94&&landing.distance<=45)){
       bridgeFall(c);near=nearestCourse(c,points);
     }else{
       c.onBridge=true;c.bridgeOffSeconds=0;
@@ -1420,7 +1426,7 @@ let ttrFrameMean=1/60,ttrLowGraphics=false,ttrQualityTimer=0;let perfQuality=1.6
  function visualCar(c){const p=simPrevious.get(c.id);if(!p||p.round!==race.elim?.round||p.recovery!==(c.shortcutRespawns||0)||Math.hypot(c.x-p.x,c.y-p.y)>100)return c;const u=renderFraction;return {...c,x:p.x+(c.x-p.x)*u,y:p.y+(c.y-p.y)*u,a:p.a+angleDiff(c.a,p.a)*u};}
  function resetSim(){simDebt=0;simPrevious.clear();renderFraction=1;lastHudAt=-Infinity;}
  document.addEventListener('visibilitychange',()=>{resetSim();frameTime=performance.now();});
-function render(){const qualityCap=qualityMode==='low'?.72:qualityMode==='balanced'?1:qualityMode==='high'?1.65:perfQuality;const ratio=Math.min(qualityCap,race?.mode==='online'&&onlineSession&&!onlineSession.host?1.38:1.65,devicePixelRatio||1);if(sw!==innerWidth||sh!==innerHeight||dpr!==ratio){sw=innerWidth;sh=innerHeight;dpr=ratio;canvas.width=Math.ceil(sw*dpr);canvas.height=Math.ceil(sh*dpr);}g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#6e4a37';g.fillRect(0,0,sw,sh);
+function render(){const qualityCap=qualityMode==='low'?1.25:qualityMode==='balanced'?1.45:qualityMode==='high'?1.65:perfQuality;const ratio=Math.min(qualityCap,race?.mode==='online'&&onlineSession&&!onlineSession.host?1.38:1.65,devicePixelRatio||1);if(sw!==innerWidth||sh!==innerHeight||dpr!==ratio){sw=innerWidth;sh=innerHeight;dpr=ratio;canvas.width=Math.ceil(sw*dpr);canvas.height=Math.ceil(sh*dpr);}g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#6e4a37';g.fillRect(0,0,sw,sh);
  // Real follow camera: the circuit extends beyond the mobile viewport.
  // Keep the player just behind centre, giving sight of the upcoming corner.
  const gridLocked=race?.mode==='elimination'&&race.elim.state==='race'&&race.countdown>0;
@@ -1457,27 +1463,27 @@ function render(){const qualityCap=qualityMode==='low'?.72:qualityMode==='balanc
  const ghostCar=ghostPose?{profile:race.player.profile,id:-1,...ghostPose,jumpTotal:ghostPose.jumpTotal||.96,onBridge:!!ghostPose.onBridge,rampEntryVisual:!!ghostPose.rampEntryVisual,bridgeExitVisual:ghostPose.bridgeExitVisual||0,speed:0,slip:0,boost:0,claw:0,tableFalling:ghostPose.tableFalling||0}:null;
  const elevated=c=>c.onBridge||c.jump>0||c.rampEntryVisual||c.bridgeExitVisual>0;
  const drawGhost=()=>{if(!ghostCar||!visibleProp(ghostCar))return;g.save();g.globalAlpha=.35;carSprite(g,ghostCar);g.restore();};
- props.filter(o=>o.type==='orange_bump'&&visibleProp(o)).forEach(o=>drawObstacle(g,o));
+ props.filter(o=>(o.type==='orange_bump'||o.type==='orange')&&visibleProp(o)).forEach(o=>drawRaceProp(g,o));
  if(ghostCar&&!elevated(ghostCar))drawGhost();
    // Road cars are drawn first. The opaque raised bread deck then occludes them
    // at crossings, while vehicles actually ON the bridge stay visible on top.
-   [...props.filter(o=>o.type!=='ramp'&&o.type!=='milk_cereal_spill'&&o.type!=='orange_bump'&&visibleProp(o)).map(o=>({y:o.y,prop:o})),
+   [...props.filter(o=>o.type!=='ramp'&&o.type!=='milk_cereal_spill'&&o.type!=='orange_bump'&&o.type!=='orange'&&visibleProp(o)).map(o=>({y:o.y,prop:o})),
     ...race.cars.filter(c=>!c.eliminated&&visibleProp(c)&&c.jump<=0&&!c.onBridge&&!c.rampEntryVisual&&!(c.bridgeExitVisual>0)).map(c=>({y:c.y,car:visualCar(c)}))]
-     .sort((a,b)=>a.y-b.y).forEach(e=>e.prop?drawObstacle(g,e.prop):carSprite(g,e.car));
+     .sort((a,b)=>a.y-b.y).forEach(e=>e.prop?drawRaceProp(g,e.prop):carSprite(g,e.car));
    if(viewRight>viewLeft&&viewBottom>viewTop)g.drawImage(bridgeLayer,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop);
-   props.filter(o=>o.type==='ramp'&&visibleProp(o)).forEach(o=>drawObstacle(g,o));
+   props.filter(o=>o.type==='ramp'&&visibleProp(o)).forEach(o=>drawRaceProp(g,o));
    if(ghostCar&&elevated(ghostCar))drawGhost();
    race.cars.filter(c=>!c.eliminated&&visibleProp(c)&&elevated(c)).map(visualCar).sort((a,b)=>a.y-b.y).forEach(c=>carSprite(g,c));
 
  for(const c of race.cars){if(!c.eliminated&&c.claw>0&&c.clawTarget)drawClawCable(g,visualCar(c),visualCar(c.clawTarget),clock);}
- race.effects.forEach(e=>{if(Math.abs(e.x-camX)<halfW+160&&Math.abs(e.y-camY)<halfH+160)renderEffect(g,e,clamp);});if(race.countdown>0){g.save();g.setTransform(dpr,0,0,dpr,0,0);g.textAlign='center';g.textBaseline='middle';g.lineWidth=7;g.strokeStyle='#142438';g.font=`950 ${Math.min(90,sw/5)}px system-ui`;const v=Math.ceil(race.countdown);g.strokeText(String(v),sw/2,sh/2);g.fillStyle='#ffe67f';g.fillText(String(v),sw/2,sh/2);g.restore();}}else gameObstacles(g);
+ let impactBudget=(ttrLowGraphics||qualityMode==='low')?5:12;race.effects.forEach(e=>{if(e.kind==='impactBurst'&&impactBudget--<=0)return;if(Math.abs(e.x-camX)<halfW+160&&Math.abs(e.y-camY)<halfH+160)renderEffect(g,e,clamp);});if(race.countdown>0){g.save();g.setTransform(dpr,0,0,dpr,0,0);g.textAlign='center';g.textBaseline='middle';g.lineWidth=7;g.strokeStyle='#142438';g.font=`950 ${Math.min(90,sw/5)}px system-ui`;const v=Math.ceil(race.countdown);g.strokeText(String(v),sw/2,sh/2);g.fillStyle='#ffe67f';g.fillText(String(v),sw/2,sh/2);g.restore();}}else gameObstacles(g);
  if(clock>lastHint&&lastHint!==0){$('hint').classList.remove('show');lastHint=0;}
 }
 function frame(t){
   const raw=Math.max(0,(t-frameTime)/1000);frameTime=t;
   const dt=document.hidden?0:Math.min(.5,raw);renderDelta=dt||1/60;
   if(simRace!==race){simRace=race;resetSim();if(race){perfContext={mode:race.mode,difficulty:race.aiFactor};perfCars={};perfStats={frames:0,elapsed:0,physics:0,render:0,steps:0,slow:0};perfLast=t;}}
-  if(race&&raw>0&&raw<.5){ttrFrameMean+=.10*(raw-ttrFrameMean);ttrQualityTimer+=raw;if(ttrQualityTimer>(ttrLowGraphics?2:.6)){if(ttrFrameMean>.026){ttrLowGraphics=true;perfQuality=ttrFrameMean>.041?.72:1;}else if(ttrFrameMean<.019){ttrLowGraphics=false;perfQuality=1.65;}ttrQualityTimer=0;}}
+  if(race&&raw>0&&raw<.5){ttrFrameMean+=.10*(raw-ttrFrameMean);ttrQualityTimer+=raw;if(ttrQualityTimer>(ttrLowGraphics?2:.6)){if(ttrFrameMean>.026){ttrLowGraphics=true;perfQuality=ttrFrameMean>.041?1.25:1.45;}else if(ttrFrameMean<.019){ttrLowGraphics=false;perfQuality=1.65;}ttrQualityTimer=0;}}
   onlinePingTick(t);
   if(race){
    const perfStart=performance.now();let perfSteps=0;
