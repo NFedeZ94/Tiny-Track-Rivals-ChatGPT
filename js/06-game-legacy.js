@@ -22,7 +22,7 @@ function measurePerfInput(){if(!perfTouchAt)return;const delta=performance.now()
 function resetPerf(){perfCars={};perfStats=emptyPerf();perfTotal=emptyPerf();perfReport='';perfTouchAt=0;perfInputDelay=null;perfInputSamples=[];perfRecoveries=[];perfRecoveryDropped=0;}
 
 const perfPanel=document.createElement('div');perfPanel.className='ttr-perf';perfPanel.hidden=true;document.body.appendChild(perfPanel);
-function perfSnapshot(){const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.87 · 14.14a",quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(m=>({...m,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)})),raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
+function perfSnapshot(){const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.88 · 14.14b",quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(m=>({...m,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)})),raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
 window.TTRPerformance={snapshot:perfSnapshot};
 const points=Array.from({length:520},(_,i)=>trackPoint(i/520));
 const controls={left:false,right:false,brake:false};
@@ -654,7 +654,7 @@ function eliminationChooseGrid(p,count,first=false){
 }
 function eliminationApplyGrid(fresh,point,index){
  Object.assign(fresh,{x:point.x,y:point.y,a:point.a,p:point.p,lastP:point.p,
-  auditP:point.p,routeStableP:point.p,lastCheckpoint:point.p});
+  auditP:point.p,routeStableP:point.p,orangeLine:null,lastCheckpoint:point.p});
  fresh.elimDistance=-Math.floor(index/2)*ELIM_ROW_SPACING;fresh.mugApexPassed=point.p>.306&&point.p<.93;
  fresh.elimPrevP=point.p;fresh.elimPrevX=point.x;fresh.elimPrevY=point.y;
  fresh.elimTravelSinceCredit=0;fresh.elimLag=0;fresh.elimProtection=0;
@@ -1089,7 +1089,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
    c.mugApexPassed=gate.passed;
    if(gate.penalty){recoverCar(c,'cup-cut');continue;}
  }
- if(!c.routePinch&&near.distance<64&&!near.shortcut&&!c.offtrack&&!(c.respawnGrace>0)&&!c.stuckAnchor&&
+ if(!c.routePinch&&!near.orangeLine&&near.distance<64&&!near.shortcut&&!c.offtrack&&!(c.respawnGrace>0)&&!c.stuckAnchor&&
     Math.cos(angleDiff(c.a,tangent(near.p)))>.23&&c.speed>=0&&!c.bridgeMissActive){
    if(c.lastValidPosition&&(!c.previousValidPosition||K.phaseGap(c.previousValidPosition.p,c.lastValidPosition.p)>.025))c.previousValidPosition={...c.lastValidPosition,flags:c.lastValidPosition.flags.slice()};
    c.lastValidPosition={x:near.x,y:near.y,a:tangent(near.p),p:near.p,speed:Math.abs(c.speed),laps:c.lapsCompleted,flags:c.flags.slice(),mugApexPassed:!!c.mugApexPassed,elimDistance:c.elimDistance};
@@ -1307,10 +1307,10 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
  drawShowroom($('garageCanvas'),garagePreview,'garage');
 }
 function wireMenu(){
- // 14.14a: tolerate a cached pre-14.14 HTML shell; manual acceleration is no longer supported.
+ // 14.14b: tolerate a cached pre-14.14 HTML shell; manual acceleration is no longer supported.
  const obsoleteAuto=$('auto');if(obsoleteAuto){const label=obsoleteAuto.closest('label');if(label)label.remove();else obsoleteAuto.remove();}
- document.documentElement.dataset.ttrJsBuild='0.13.6.87';
- const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.87 · 14.14a';
+ document.documentElement.dataset.ttrJsBuild='0.13.6.88';
+ const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.88 · 14.14b';
  // A transformed menu creates a non-viewport containing block for fixed dialogs.
  // Move Options to document.body, so the overlay is genuinely viewport-sized on iPhone.
  const settingsDialog=$('retroSettings');if(settingsDialog&&settingsDialog.parentNode!==document.body)document.body.appendChild(settingsDialog);const configDialog=$('raceConfig');if(configDialog&&configDialog.parentNode!==document.body)document.body.appendChild(configDialog);const trackDialog=$('trackSelect');if(trackDialog&&trackDialog.parentNode!==document.body)document.body.appendChild(trackDialog);
@@ -1759,7 +1759,7 @@ window.TTRDebug={
  c.lastValidPosition={x:safe.x,y:safe.y,a:tangent(from),p:from,laps:c.lapsCompleted,flags:c.flags.slice()};
  c.auditP=from;c.auditTravel=350;c.auditCleanTime=0;c.x=pos.x;c.y=pos.y;c.p=from;c.lastP=from;c.a=tangent(to);c.speed=0;c.offtrack=false;c.respawnGrace=0;race.countdown=0;
  const before=c.shortcutRespawns||0;update(1/60);return {before,after:c.shortcutRespawns||0,phase:c.p,expectedPhase:from};
-},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.87',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
+},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.88',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
 })();
 
 

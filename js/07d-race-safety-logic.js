@@ -30,17 +30,75 @@ function recoverCar(c,reason='edge'){
    c.elimLag=0;c.elimProtection=ELIM_RULES_TEST.respawnProtectionSeconds;
    c.elimPrevP=p;c.elimPrevX=c.x;c.elimPrevY=c.y;c.elimTravelSinceCredit=0;
  }
- c.shortcutRespawns=(c.shortcutRespawns||0)+1;c.lastPenaltyReason=reason;c.routeStableP=p;c.routePinch=null;c.routeResolvedNear=null;c.tableFalling=0;c.tableSpin=0;c.tableFallDir=0;c.auditP=p;c.auditTravel=0;c.auditCleanTime=0;c.auditBridge=false;c.auditOutsideTime=0;c.oilSpin=0;c.bridgeLandingActive=false;c.mugApexPassed=safe.mugApexPassed===true||(safe.mugApexPassed===undefined&&p>.32&&p<.93);
+ c.shortcutRespawns=(c.shortcutRespawns||0)+1;c.lastPenaltyReason=reason;c.routeStableP=p;c.routePinch=null;c.orangeLine=null;c.routeResolvedNear=null;c.tableFalling=0;c.tableSpin=0;c.tableFallDir=0;c.auditP=p;c.auditTravel=0;c.auditCleanTime=0;c.auditBridge=false;c.auditOutsideTime=0;c.oilSpin=0;c.bridgeLandingActive=false;c.mugApexPassed=safe.mugApexPassed===true||(safe.mugApexPassed===undefined&&p>.32&&p<.93);
  
  if(c===race.player){SND.sfx('respawn');setLastHint(0);const h=$('hint');if(h){h.textContent='';h.classList.remove('show');}/* Recovery stays silent: no PENALITÀ banner in any mode. */}
+}
+
+// 14.14b: Orange Jump inside racing line. This bounded local corridor is not
+// a bridge or a general exemption. Credit requires a continuous entry and traversal.
+const orangeStart=.485,orangeEnd=.610,orangeWidth=82;
+const orangePoints=[trackPoint(orangeStart),{x:1450,y:480},{x:1412,y:412},{x:1374,y:343},{x:1358,y:284},trackPoint(orangeEnd)];
+const orangeLengths=[0];for(let i=1;i<orangePoints.length;i++)orangeLengths.push(orangeLengths[i-1]+Math.hypot(orangePoints[i].x-orangePoints[i-1].x,orangePoints[i].y-orangePoints[i-1].y));
+const orangeLength=orangeLengths[orangeLengths.length-1];
+function orangeProject(c){
+  let best=null;
+  for(let i=0;i<orangePoints.length-1;i++){
+    const a=orangePoints[i],b=orangePoints[i+1],dx=b.x-a.x,dy=b.y-a.y,len=orangeLengths[i+1]-orangeLengths[i];
+    const t=Math.max(0,Math.min(1,((c.x-a.x)*dx+(c.y-a.y)*dy)/(len*len)));
+    const x=a.x+dx*t,y=a.y+dy*t,d=Math.hypot(c.x-x,c.y-y);
+    if(!best||d<best.distance){const u=orangeLengths[i]+t*len;best={x,y,distance:d,u,p:orangeStart+(orangeEnd-orangeStart)*u/orangeLength,nx:-dy/len,ny:dx/len};}
+  }return best;
+}
+function orangeContinuity(c,near,anchor,step,dt){
+  if(near.shortcut||anchor<.45||anchor>.635){c.orangeLine=null;return null;}
+  const q=orangeProject(c);let state=c.orangeLine;
+  if(!state){
+    // Arm only while actually on the preceding road, never on the exit arm.
+    if(anchor<.472||anchor>.515||near.p<.465||near.p>.525||near.distance>138||q.distance>orangeWidth||q.u>orangeLength*.30||step>35)return null;
+    state=c.orangeLine={u:q.u,travel:0,entryU:q.u,entryPhase:anchor,active:false,safe:c.lastValidPosition?{...c.lastValidPosition,flags:c.lastValidPosition.flags.slice()}:null};
+  }
+  // A large jump or departure from this corridor cannot earn its progress.
+  if(q.distance>orangeWidth||step>40||Math.abs(q.u-state.u)>step*2+24){
+    c.orangeLine=null;
+    if(!state.active)return null;
+    if(near.distance<=138&&phaseGap(near.p,anchor)<.025){c.routePinch=null;c.routeStableP=near.p;return {near,penalty:false};}
+    c.routeStableP=state.entryPhase;c.routePinch={phase:state.entryPhase,elapsed:0,travel:0,safe:state.safe};return null;
+  }
+  state.travel+=step;state.u=q.u;
+  if(!state.active){
+    const local=nearestTrackWindow(c,points,anchor,.022);
+    // Leave the main centreline only if the alternative is actually being followed.
+    if(state.travel>=35&&q.u-state.entryU>=24&&q.p>anchor+.012&&(local.distance>90||phaseGap(anchor,near.p)>.035))state.active=true;
+    else return null;
+  }
+  c.routePinch=null;
+  // A complete traversal, not just landing near a coordinate on the exit arm.
+  if(q.u>=orangeLength*.72&&state.travel>=orangeLength*.50&&q.u-state.entryU>=orangeLength*.43&&near.p>=.585&&near.p<=.625&&near.distance<=138&&Math.abs(near.p-anchor)<.0045){
+    c.orangeLine=null;c.routeStableP=near.p;c.auditP=near.p;c.auditTravel=0;c.auditCleanTime=0;c.auditOutsideTime=0;return {near,penalty:false};
+  }
+  const limit=Math.max(.001,step*.00085),delta=Math.max(-limit,Math.min(limit,q.p-anchor));
+  const phase=anchor+delta;c.routeStableP=phase;
+  return {near:{...q,p:phase,distance:Math.min(138,Math.max(q.distance,near.distance)),shortcut:false,orangeLine:true},penalty:false};
 }
 
 function junctionContinuity(c,near,oldX,oldY,dt){
   const step=Math.hypot(c.x-oldX,c.y-oldY);
   if(c.onBridge||c.bridgeLandingActive||c.bridgeMissActive||c.tableFalling>0||c.respawnGrace>0||c.impactGrace>0){
-    c.routePinch=null;if(c.respawnGrace>0){const legal=nearestTrackWindow(c,points,c.routeStableP??c.lastP??near.p,.055);return {near:legal,penalty:false};}c.routeStableP=near.p;return {near,penalty:false};
+    c.routePinch=null;
+    if(c.respawnGrace>0&&!c.onBridge&&!c.bridgeLandingActive&&!c.bridgeMissActive&&!(c.tableFalling>0)){
+      const anchor=c.routeStableP??c.lastP??near.p;
+      const inside=orangeContinuity(c,near,anchor,step,dt);if(inside)return inside;
+      const legal=nearestTrackWindow(c,points,c.routeStableP??anchor,.018);
+      // Advance the recovery anchor along the real road, never across another arm.
+      if(legal.distance<=158)c.routeStableP=legal.p;
+      return {near:{...legal,shortcut:false},penalty:false};
+    }
+    c.orangeLine=null;c.routeStableP=near.p;return {near,penalty:false};
   }
-  const anchor=c.routeStableP??c.lastP??near.p;
+  let anchor=c.routeStableP??c.lastP??near.p;
+  const inside=orangeContinuity(c,near,anchor,step,dt);if(inside)return inside;
+  anchor=c.routeStableP??anchor;
   const orangeBend=anchor>.44&&anchor<.61;
   if(orangeBend&&!near.shortcut&&(c.routePinch||phaseGap(anchor,near.p)>.025)){
     const local=nearestTrackWindow(c,points,anchor,.012);
