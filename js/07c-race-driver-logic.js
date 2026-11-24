@@ -34,7 +34,7 @@ if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInp
  const skillProfiles=Object.freeze([
    Object.freeze({pace:.80,look:105,line:0,steer:2.1,curveSpeed:.77,pass:0,shortcut:.10,aim:49}),
    Object.freeze({pace:.95,look:125,line:.45,steer:2.55,curveSpeed:.89,pass:34,shortcut:.45,aim:27}),
-   Object.freeze({pace:1,look:145,line:.85,steer:2.9,curveSpeed:1,pass:52,shortcut:.85,aim:8})
+   Object.freeze({pace:1,look:175,line:1,steer:3.1,curveSpeed:1,pass:52,shortcut:.85,aim:8})
  ]);
  function skillFor(race){
    const f=race.aiFactor||1;
@@ -46,7 +46,7 @@ if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInp
  const length=K.TRACK_LENGTH;
  const ramp=()=>props.find(o=>o.type==='ramp');
  function linePoint(p,strength){
-   const q=trackPoint(p),a=trackPoint(p-.014),b=trackPoint(p+.014),heading=K.tangent(p);
+   const chord=strength>=.999?.019:.014;const q=trackPoint(p),a=trackPoint(p-chord),b=trackPoint(p+chord),heading=K.tangent(p);
    // A bounded chord through the bend, still well inside the drivable lane.
    const n={x:-Math.sin(heading),y:Math.cos(heading)};
    const off=clamp(((a.x+b.x)/2-q.x)*n.x+((a.y+b.y)/2-q.y)*n.y,-42,42)*strength;
@@ -85,7 +85,7 @@ if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInp
    }
    const near=nearestTrack(c,points);
    if(c.aiRecoveryUntil>race.time&&!c.onBridge){const q=trackPoint(near.p+.012);target={x:q.x,y:q.y};plannedBranch=false;}
-   if(near.distance>83&&!plannedBranch&&!(c.aiRecoveryUntil>race.time)){target={x:near.x,y:near.y};}
+   if(near.distance>(s.curveSpeed>=.999?92:83)&&!plannedBranch&&!(c.aiRecoveryUntil>race.time)){target={x:near.x,y:near.y};}
    const d=angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a),v=Math.abs(d);
    const steer=clamp(d*s.steer,-1,1);
    if(c.reverseRecovery>0)return {steer:-steer||1,gas:false,brake:true};
@@ -94,13 +94,16 @@ if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInp
    const bend=Math.abs(angleDiff(K.tangent(c.p+.033),K.tangent(c.p+.008)));
    const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);
    let desired=cap*(1-clamp((bend-.30)*.34,0,.38)*(.10+(1-s.curveSpeed)*3.3));
-   const turnThreshold=.65+(s.curveSpeed-.77)*.9;
+   const turnThreshold=.65+(s.curveSpeed-.77)*.9+(s.curveSpeed>=.999?.12:0);
    if(v>turnThreshold)desired=Math.min(desired,cap*(1-clamp((v-turnThreshold+.10)*.46,0,.55)));
    if(obstacle)desired=Math.min(desired,cap*(.78+(s.curveSpeed-.77)*.5));
    if(blocked)desired=Math.min(desired,Math.max(75,frontSpeedFallback(c,race)));
    if(plannedBranch&&c.tryShortcut&&v<.45)desired=cap;
-   const brake=c.speed>desired+12&&c.speed>85;
-   return {steer,gas:!brake&&c.speed<desired+3,brake};
+   const hard=s.curveSpeed>=.999;
+   // Avoid needless throttle/coast oscillation at the vehicle speed limiter.
+   // Only hard AI gets the tighter racing-line and throttle calibration.
+   const brake=c.speed>desired+(hard?16:12)&&c.speed>85;
+   return {steer,gas:!brake&&(hard&&desired>=cap*.96||c.speed<desired+(hard?8:3)),brake};
  }
  function frontSpeedFallback(c,race){let speed=c.speed;for(const other of race.cars){if(other!==c&&!other.done&&!other.eliminated&&Math.hypot(other.x-c.x,other.y-c.y)<90)speed=Math.min(speed,other.speed);}return speed;}
  return Object.freeze({inputFor,skillFor});
