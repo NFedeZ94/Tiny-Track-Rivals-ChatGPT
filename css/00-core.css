@@ -626,3 +626,14 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
 .resultsPanel.elimResults .sub{flex:none;font-size:clamp(10px,2.45vh,13px);line-height:1.1;margin:1px 0 4px}
 .resultsPanel.elimResults .note{flex:none;font-size:clamp(8px,1.9vh,10px);line-height:1.05;margin:0;text-align:center}
 @media(max-height:410px){.resultsPanel.compact .result-car-identity{gap:4px}.resultsPanel.compact .result-car-thumb{width:39px;height:20px}.resultsPanel.compact .results td:first-child{width:33px}.resultsPanel.compact .results td:last-child{width:24%}}
+
+/* Fase 14.2: risultati a quattro vetture, senza scroll in landscape. */
+@media (orientation:landscape){
+ #screen:has(.resultsPanel.compact){padding:max(4px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left))!important;}
+ #screen .panel.resultsPanel.compact{height:100%!important;max-height:100%!important;padding:6px 12px!important;gap:3px!important;}
+ .resultsPanel.compact .career-result{flex:none;margin:0!important;padding:3px 8px!important;font-size:clamp(10px,2.6vh,13px);line-height:1.15;}
+ .resultsPanel.compact:not(.elimResults) .results{height:0;flex:1 1 0!important;}
+ .resultsPanel.compact:not(.elimResults) .results tr{height:auto!important;}
+ .resultsPanel.compact .menu-row .btn{min-height:34px!important;padding:4px 12px!important;}
+ .resultsPanel.compact .result-car-thumb{width:clamp(38px,14vh,68px);height:clamp(20px,7vh,35px);}
+}
