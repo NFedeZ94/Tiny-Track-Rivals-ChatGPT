@@ -6,7 +6,7 @@ window.TTRRaceSafety=Object.freeze({create(deps){
 
 function recoverCar(c,reason='edge'){
  const race=getRace();
- if(race){const log=race.recoveryHistory??=[];if(log.length<512)log.push({car:c.id,reason,time:+race.time.toFixed(3),lap:c.lapsCompleted+1,x:+c.x.toFixed(2),y:+c.y.toFixed(2),phase:c.p,stablePhase:c.routeStableP,pendingPhase:c.routePinch?.phase??null});else race.recoveryHistoryDropped=(race.recoveryHistoryDropped||0)+1;}
+ if(race){const log=race.recoveryHistory??=[];if(log.length<512)log.push({car:c.id,reason,time:+race.time.toFixed(3),lap:c.lapsCompleted+1,x:+c.x.toFixed(2),y:+c.y.toFixed(2),phase:c.p,stablePhase:c.routeStableP,pendingPhase:c.routePinch?.phase??null,orangeState:c.orangeLine?{active:c.orangeLine.active,entryPhase:c.orangeLine.entryPhase,travel:c.orangeLine.travel,u:c.orangeLine.u}:null,trajectory:(c.routeTrace||[]).slice(),decision:c.routeDecision??null});else race.recoveryHistoryDropped=(race.recoveryHistoryDropped||0)+1;}
 
  const anchor=c.routePinch?.phase??c.lastCheckpoint??c.lastP??0;
  let safe=c.routePinch?.safe||c.offtrackEntry||c.lastValidPosition||{...trackPoint(anchor),p:anchor,a:tangent(anchor),speed:42,laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};
@@ -30,7 +30,7 @@ function recoverCar(c,reason='edge'){
    c.elimLag=0;c.elimProtection=ELIM_RULES_TEST.respawnProtectionSeconds;
    c.elimPrevP=p;c.elimPrevX=c.x;c.elimPrevY=c.y;c.elimTravelSinceCredit=0;
  }
- c.shortcutRespawns=(c.shortcutRespawns||0)+1;c.lastPenaltyReason=reason;c.routeStableP=p;c.routePinch=null;c.orangeLine=null;c.routeResolvedNear=null;c.tableFalling=0;c.tableSpin=0;c.tableFallDir=0;c.auditP=p;c.auditTravel=0;c.auditCleanTime=0;c.auditBridge=false;c.auditOutsideTime=0;c.oilSpin=0;c.bridgeLandingActive=false;c.mugApexPassed=safe.mugApexPassed===true||(safe.mugApexPassed===undefined&&p>.32&&p<.93);
+ c.shortcutRespawns=(c.shortcutRespawns||0)+1;c.lastPenaltyReason=reason;c.routeStableP=p;c.routePinch=null;c.orangeLine=null;c.routeTrace=[];c.routeTraceAt=null;c.routeDecision=null;c.routeResolvedNear=null;c.tableFalling=0;c.tableSpin=0;c.tableFallDir=0;c.auditP=p;c.auditTravel=0;c.auditCleanTime=0;c.auditBridge=false;c.auditOutsideTime=0;c.oilSpin=0;c.bridgeLandingActive=false;c.mugApexPassed=safe.mugApexPassed===true||(safe.mugApexPassed===undefined&&p>.32&&p<.93);
  
  if(c===race.player){SND.sfx('respawn');setLastHint(0);const h=$('hint');if(h){h.textContent='';h.classList.remove('show');}/* Recovery stays silent: no PENALITÀ banner in any mode. */}
 }
@@ -54,7 +54,10 @@ function orangeContinuity(c,near,anchor,step,dt){
   if(near.shortcut||anchor<.425||anchor>.665){c.orangeLine=null;return null;}
   const q=orangeProject(c);let state=c.orangeLine;
   if(!state){
-    if(anchor<.435||anchor>.525||near.p<.43||near.p>.53||near.distance>145||q.distance>orangeWidth||q.u>orangeLength*.30||step>35)return null;
+    // The global projection may already have jumped to the exit arm. Verify
+    // the actual approach against the original arm instead, not the global phase.
+    const entry=nearestTrackWindow(c,points,anchor,.020);
+    if(anchor<.435||anchor>.535||entry.p<.425||entry.p>.545||entry.distance>145||q.distance>orangeWidth||q.u>orangeLength*.48||step>35){c.routeDecision='orange-entry-not-verified';return null;}
     state=c.orangeLine={u:q.u,travel:0,entryU:q.u,entryPhase:anchor,active:false,elapsed:0,safe:c.lastValidPosition?{...c.lastValidPosition,flags:c.lastValidPosition.flags.slice()}:null};
   }
   const forward=q.u-state.u;state.elapsed+=dt;
@@ -68,10 +71,10 @@ function orangeContinuity(c,near,anchor,step,dt){
   if(!state.active){
     const local=nearestTrackWindow(c,points,anchor,.025);
     // Arm before the nearest projection jumps, and switch only after real movement.
-    if(state.travel>=18&&q.u-state.entryU>=15&&q.p>anchor+.007&&(local.distance>65||phaseGap(anchor,near.p)>.025))state.active=true;
-    else return null;
+    if(state.travel>=12&&q.u-state.entryU>=9&&q.p>anchor+.004&&(local.distance>55||phaseGap(anchor,near.p)>.020))state.active=true;
+    else {c.routeDecision='orange-approach';return null;}
   }
-  c.routePinch=null;
+  c.routeDecision='orange-continuous';c.routePinch=null;
   if(q.u>=orangeLength*.65&&state.travel>=orangeLength*.40&&q.u-state.entryU>=orangeLength*.40&&near.p>=.57&&near.p<=.655&&near.distance<=138&&Math.abs(near.p-anchor)<.017){
     c.orangeLine=null;c.routeStableP=near.p;c.auditP=near.p;c.auditTravel=0;c.auditCleanTime=0;c.auditOutsideTime=0;return {near,penalty:false};
   }
@@ -82,11 +85,19 @@ function orangeContinuity(c,near,anchor,step,dt){
 
 function junctionContinuity(c,near,oldX,oldY,dt){
   const step=Math.hypot(c.x-oldX,c.y-oldY);
+  const race=getRace(),now=race?.time??0;
+  if(c.routeTraceAt==null||now<c.routeTraceAt||now-c.routeTraceAt>=.10){
+    const log=c.routeTrace??=[];log.push({t:+now.toFixed(3),x:+c.x.toFixed(2),y:+c.y.toFixed(2),p:c.p,near:near.p,d:+near.distance.toFixed(1),stable:c.routeStableP,orange:c.orangeLine?.active??false,decision:c.routeDecision??null});if(log.length>40)log.shift();c.routeTraceAt=now;
+  }
+  // A valid corridor traversal takes priority over collision grace and the
+  // generic junction detector. Collision grace must not erase entry evidence.
+  if(!c.onBridge&&!c.bridgeLandingActive&&!c.bridgeMissActive&&!(c.tableFalling>0)){
+    const inside=orangeContinuity(c,near,c.routeStableP??c.lastP??near.p,step,dt);if(inside)return inside;
+  }
   if(c.onBridge||c.bridgeLandingActive||c.bridgeMissActive||c.tableFalling>0||c.respawnGrace>0||c.impactGrace>0){
     c.routePinch=null;
-    if(c.respawnGrace>0&&!c.onBridge&&!c.bridgeLandingActive&&!c.bridgeMissActive&&!(c.tableFalling>0)){
+    if((c.respawnGrace>0||(c.impactGrace>0&&(c.orangeLine||(c.routeStableP>.435&&c.routeStableP<.665))))&&!c.onBridge&&!c.bridgeLandingActive&&!c.bridgeMissActive&&!(c.tableFalling>0)){
       const anchor=c.routeStableP??c.lastP??near.p;
-      const inside=orangeContinuity(c,near,anchor,step,dt);if(inside)return inside;
       const legal=nearestTrackWindow(c,points,c.routeStableP??anchor,.018);
       // Advance the recovery anchor along the real road, never across another arm.
       if(legal.distance<=158)c.routeStableP=legal.p;
@@ -95,7 +106,6 @@ function junctionContinuity(c,near,oldX,oldY,dt){
     c.orangeLine=null;c.routeStableP=near.p;return {near,penalty:false};
   }
   let anchor=c.routeStableP??c.lastP??near.p;
-  const inside=orangeContinuity(c,near,anchor,step,dt);if(inside)return inside;
   anchor=c.routeStableP??anchor;
   const orangeBend=anchor>.44&&anchor<.61;
   if(orangeBend&&!near.shortcut&&(c.routePinch||phaseGap(anchor,near.p)>.025)){
@@ -123,7 +133,8 @@ function junctionContinuity(c,near,oldX,oldY,dt){
     // tiny inside-corner cuts must not trigger an instant teleport.
     const illegal=(pending.travel>66&&pending.elapsed>.38&&legal.distance>185&&near.distance<105) ||
       (pending.travel>88&&pending.elapsed>.65&&legal.distance>159&&near.distance<42);
-    if(illegal||(pending.elapsed>.35&&near.distance<120&&legal.distance>165&&phaseGap(near.p,pending.phase)>.10)){if(pending.safe)c.offtrackEntry=pending.safe;return {near:legal,penalty:true};}
+    c.routeDecision='junction-pending';
+    if(illegal||(pending.elapsed>.35&&near.distance<120&&legal.distance>165&&phaseGap(near.p,pending.phase)>.10)){c.routeDecision={kind:'junction-penalty',localDistance:legal.distance,globalDistance:near.distance,globalPhase:near.p,travel:pending.travel,elapsed:pending.elapsed,orangeDistance:orangeProject(c).distance};if(pending.safe)c.offtrackEntry=pending.safe;return {near:legal,penalty:true};}
     // Keep the pending origin for evidence and recovery; do not let a wide
     // search silently migrate the accepted route to an unrelated arm.
     if(moving.distance<=158)c.routeStableP=moving.p;
