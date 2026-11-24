@@ -79,7 +79,14 @@ function eliminationEvaluate(dt){const race=getRace(),e=race.elim;
  const outside=(x,y)=>Math.abs(last.x-x)>view.halfW+margin||Math.abs(last.y-y)>view.halfH+margin;
  const gap=(leader.elimDistance||0)-(last.elimDistance||0);
  const settled=race.time-(e.lastLeaderSwitchTime??-999)>=ELIM_RULES_TEST.leaderSwitchGrace;
- const safe=e.roundTime>=ELIM_RULES_TEST.minimumRoundSeconds&&last!==leader&&settled&&
+ // A racer on the normal route has a bounded chance to rejoin at the branch exit.
+ const p=last.elimPrevP??last.p,lp=leader.elimPrevP??leader.p;
+ const inBranch=p>=K.shortcutFrom-.025&&p<=K.shortcutTo+.015;
+ const leaderPastEntry=(lp>=K.shortcutFrom&&lp<=K.shortcutTo+.10)||last.elimBranchStart!=null;
+ const onNormal=inBranch&&!last.onBridge&&!last.bridgeMissActive&&!last.routePinch&&last.speed>20&&leaderPastEntry;
+ if(onNormal){if(last.elimBranchStart==null)last.elimBranchStart=race.time;}else if(!inBranch)last.elimBranchStart=null;
+ const branchProtected=onNormal&&race.time-last.elimBranchStart<8.5;
+ const safe=!branchProtected&&e.roundTime>=ELIM_RULES_TEST.minimumRoundSeconds&&last!==leader&&settled&&
    !last.tableFalling&&!last.routePinch&&outside(view.x,view.y)&&outside(leader.x,leader.y)&&
    gap>80&&Math.hypot(last.x-leader.x,last.y-leader.y)>ELIM_RULES_TEST.physicalSeparation;
  last.elimLag=safe?(last.elimLag||0)+dt:0;

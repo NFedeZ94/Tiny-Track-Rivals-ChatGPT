@@ -20,7 +20,7 @@ function updateRecovery(c,dt) {
 function useTacticalPowerup(c) {
  const race=getRace(),onlineSession=getOnlineSession();
  // AI uses boosts tactically, not excessive oil spam.
- if(c!==race.player&&!(race.mode==='online'&&onlineSession?.members[c.id])&&c.item){if(c.item==='turbo'&&c.speed>95&&Math.random()<.005)useItem(c);else if(c.item==='oil'&&Math.random()<.0008)useItem(c);else if(c.item==='claw'&&clawTarget(c,race.cars,props,162,.30)&&Math.random()<.09)useItem(c);}
+ if(c!==race.player&&!(race.mode==='online'&&onlineSession?.members[c.id])&&c.item){const f=race.aiFactor<.95?.35:race.aiFactor<1.1?.72:1;if(c.item==='turbo'&&c.speed>95&&Math.random()<.005*f)useItem(c);else if(c.item==='oil'&&Math.random()<.0008*f)useItem(c);else if(c.item==='claw'&&clawTarget(c,race.cars,props,162,.30)&&Math.random()<.09*f)useItem(c);}
 }
  return Object.freeze({updateRecovery, useTacticalPowerup});
 }});

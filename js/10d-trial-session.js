@@ -9,7 +9,7 @@
  const validTime=n=>finite(n)&&n>0;
  function pose(t,car){
   if(!car||![t,car.x,car.y,car.a].every(finite)||t<0)return null;
-  return {t,x:car.x,y:car.y,a:car.a,jump:finite(car.jump)?Math.max(0,car.jump):0};
+  return {t,x:car.x,y:car.y,a:car.a,jump:finite(car.jump)?Math.max(0,car.jump):0,jumpTotal:finite(car.jumpTotal)?Math.max(0,car.jumpTotal):.72,onBridge:!!car.onBridge,rampEntryVisual:!!car.rampEntryVisual,bridgeExitVisual:Math.max(0,car.bridgeExitVisual||0),tableFalling:Math.max(0,car.tableFalling||0)};
  }
  function formatTime(seconds){
   if(!finite(seconds)||seconds<0)return '—';
@@ -59,8 +59,8 @@
   }
   function bestLapRecording(){return lapGhosts.filter(Boolean).reduce((a,b)=>!a||b.total<a.total?b:a,null);}
   function reference(mode,historical,full){
-   const historicalPlay=playback(historical,trackId,carId),fullPlay=playback(full,trackId,carId);let active=null,localPlay=null;
-   return t=>{if(mode==='off')return null;if(mode==='race')return fullPlay(t);if(mode==='lap'||!laps.length)return historicalPlay(t-lapStart);
+   const historicalPlay=playback(historical,trackId,carId),fullPlay=playback(full,trackId,carId);let active=null,localPlay=null;const validateHistorical=validateGhost(historical,trackId,carId);
+   return t=>{if(mode==='off')return null;if(mode==='race')return fullPlay(t);if((mode==='lap'&&validateHistorical)||!laps.length)return historicalPlay(t-lapStart);
     const choice=bestLapRecording();if(choice!==active){active=choice;localPlay=playback(choice,trackId,carId);}
     return localPlay?localPlay(t-lapStart):null;};
   }
@@ -82,8 +82,18 @@
    // Never interpolate across a teleport/recovery or a missing sampling span.
    if(b.cut||b.t-a.t>0.25)return null;
    const u=(t-a.t)/(b.t-a.t),da=((b.a-a.a+Math.PI)%TAU+TAU)%TAU-Math.PI;
-   return {t,x:a.x+(b.x-a.x)*u,y:a.y+(b.y-a.y)*u,a:a.a+da*u,jump:a.jump+(b.jump-a.jump)*u};
+   return {...(u<.5?a:b),t,x:a.x+(b.x-a.x)*u,y:a.y+(b.y-a.y)*u,a:a.a+da*u,jump:a.jump+(b.jump-a.jump)*u};
   };
  }
- window.TTRTrialSession=Object.freeze({create,playback,validateGhost,formatTime,formatGap});
+ function extractLap(g,laps,trackId,carId){
+  if(!validateGhost(g,trackId,carId)||!Array.isArray(laps)||!laps.length||!laps.every(l=>validTime(l.time)))return null;
+  if(Math.abs(laps.reduce((a,l)=>a+l.time,0)-g.total)>1e-5)return null;
+  let start=0,best=null;const play=playback(g,trackId,carId);
+  for(const lap of laps){const end=start+lap.time,first=play(start),last=play(Math.min(end,g.total));
+   if(first&&last){const frames=[{...first,t:0,cut:false},...g.frames.filter(f=>f.t>start+1e-7&&f.t<end-1e-7).map(f=>({...f,t:f.t-start})),{...last,t:lap.time}];
+    const candidate={version:1,trackId,carId,total:lap.time,frames};if(validateGhost(candidate,trackId,carId)&&(!best||candidate.total<best.total))best=candidate;}
+   start=end;
+  }return best;
+ }
+ window.TTRTrialSession=Object.freeze({create,playback,validateGhost,extractLap,formatTime,formatGap});
 })();
