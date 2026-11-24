@@ -12,6 +12,11 @@ let elimCameraId=null,elimCameraProgress=0,elimFocusWeight=0,elimCandidateId=nul
 let elimGridCamera={x:WORLD_W/2,y:WORLD_H/2};
 let race=null,lastRaceSettings=null,frameTime=performance.now(),clock=0,lastHint=0,hint='';
 const SND=window.TTRSound;
+let qualityMode='auto',perfEnabled=false;try{const q=localStorage.getItem('ttr_quality');if(['auto','high','balanced','low'].includes(q))qualityMode=q;perfEnabled=localStorage.getItem('ttr_perf')==='1';}catch(_){}
+let perfContext={},perfCars={},perfStats={frames:0,elapsed:0,physics:0,render:0,steps:0,slow:0},perfReport='',perfLast=0,perfTouchAt=0,perfInputDelay=0,perfLastAudio=0,perfAudioPlaying=null;
+const perfPanel=document.createElement('div');perfPanel.className='ttr-perf';perfPanel.hidden=true;document.body.appendChild(perfPanel);
+function perfSnapshot(){return {quality:qualityMode,metrics:perfReport,cars:Object.values(perfCars).map(m=>({...m,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)})),raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
+window.TTRPerformance={snapshot:perfSnapshot};
 const points=Array.from({length:520},(_,i)=>trackPoint(i/520));
 const controls={left:false,right:false,gas:false,brake:false};
 
@@ -339,10 +344,10 @@ function drawCrumb(ctx,x,y,r,seed){ctx.save();ctx.translate(x,y);ctx.rotate((see
 function worldInit(){
   props.length=0;milkCerealSpills.length=0;
   // Interactive props are deliberately few: props not marked solid never obstruct racing.
-  addProp(.231,'mug',-188,58,true);        // Mug Bend
+  addProp(.231,'mug',-188,58,true);props.at(-1).tall=true;        // Mug Bend
   // Removed confusing spiral/cereal decoration at the end of the second bend.
   addProp(.512,'orange',163,49,true);    // Orange Jump background
-  const op=trackPoint(.502),oa=tangent(.502);props.push({type:'orange_bump',x:op.x+Math.sin(oa)*32,y:op.y-Math.cos(oa)*32,r:29,solid:true,jump:false,interactive:true});
+  const op=trackPoint(.502),oa=tangent(.502);props.push({type:'orange_bump',x:op.x+Math.sin(oa)*32,y:op.y-Math.cos(oa)*32,r:29,solid:false,jump:false,interactive:true});
   // v0.13.6.68: upright physical bowl; TWO irregular, rounded-edge milk stains.
   // Left stain is small; right stain is elongated and extends further from the bowl.
   // Neither milk puddle is an occluding sprite or a solid obstacle.
@@ -380,7 +385,7 @@ function worldInit(){
     // Move decorative pieces if they would overlap a lane: clearance uses real route/shortcut.
     const near=nearestCourse({x,y},points);
     if(near.distance<r*.70+97)continue;
-    props.push({type,x,y,r,solid:false,scenery:true,interactive:false});
+    const tall=['mug','glass','plate_croissant'].includes(type);props.push({type,x,y,r,solid:tall,tall,scenery:!tall,interactive:tall});
   }
   props.filter(o=>o.type==='cookie').forEach((o,i)=>{o.cookieKind=i%2?'cookie_alt':'cookie';});
   paintWorld();paintBridgeDeck();
@@ -458,20 +463,20 @@ function drawObstacle(ctx,o){
   }
   ctx.restore();ctx.restore();
  }
- else if(o.type==='crumb')drawCrumb(ctx,o.x,o.y,o.r,o.x|0);else if(o.type==='cookie')drawCookie(ctx,o.x,o.y,o.r,(o.x+o.y)*.004,o.cookieKind||'cookie');else if(o.type==='mug'){drawMug(ctx,o.x,o.y,o.r,'#f1ddd6');drawCoffeeAnimation(ctx,o);}else if(o.type==='toast')drawToast(ctx,o.x,o.y,o.r*1.7,.35);else if(o.type==='orange_bump'){window.TTRAssets?.draw(ctx,'orange',o.x-33,o.y-30,66,60);}else if(['plate_croissant','cereal','orange','jam','glass'].includes(o.type)){const width=o.r*2.8;if(o.type==='jam'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(.93);window.TTRAssets?.draw(ctx,o.type,-width/2,-width*.52,width,width*.92);ctx.restore();}else window.TTRAssets?.draw(ctx,o.type,o.x-width/2,o.y-width*.52,width,width*.92);}else if(o.type==='knife'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(o.angle??0);if(o.interactive)drawKnife(ctx,0,0,o.length||120,28);else drawKnife(ctx,0,0,157,38);ctx.restore();}else if(o.type==='ramp')drawRamp(ctx,o);
+ else if(o.type==='crumb')drawCrumb(ctx,o.x,o.y,o.r,o.x|0);else if(o.type==='cookie')drawCookie(ctx,o.x,o.y,o.r,(o.x+o.y)*.004,o.cookieKind||'cookie');else if(o.type==='mug'){drawMug(ctx,o.x,o.y,o.r,'#f1ddd6');if(!race||qualityMode==='high'||(!ttrLowGraphics&&qualityMode!=='low'&&qualityMode!=='balanced'))drawCoffeeAnimation(ctx,o);}else if(o.type==='toast')drawToast(ctx,o.x,o.y,o.r*1.7,.35);else if(o.type==='orange_bump'){window.TTRAssets?.draw(ctx,'orange',o.x-33,o.y-30,66,60);}else if(['plate_croissant','cereal','orange','jam','glass'].includes(o.type)){const width=o.r*2.8;if(o.type==='jam'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(.93);window.TTRAssets?.draw(ctx,o.type,-width/2,-width*.52,width,width*.92);ctx.restore();}else window.TTRAssets?.draw(ctx,o.type,o.x-width/2,o.y-width*.52,width,width*.92);}else if(o.type==='knife'){ctx.save();ctx.translate(o.x,o.y);ctx.rotate(o.angle??0);if(o.interactive)drawKnife(ctx,0,0,o.length||120,28);else drawKnife(ctx,0,0,157,38);ctx.restore();}else if(o.type==='ramp')drawRamp(ctx,o);
 }
 
 // A knife near the jam is a low, visible obstacle. A fast, centred crossing
 // triggers a short hop over the sticky patch; only the knife and ramp launch cars.
 function contactWithProp(c,o,previous=null){
   // Both the high bowl and the tipped glass jar must be solid, even to a jumping car.
-  if((o.type==='milk_cereal_cup'||o.type==='jam_spill_jar')&&o.solid&&c.jump>0){
+  if(o.tall&&o.solid&&c.jump>0){
     if(K.segmentCircle(previous||c,c,o,(o.r||70)+(c.width||36)*.42)){
       c.jump=0;c.jumpTotal=0;c.jumpCd=Math.max(c.jumpCd,.4);
     }else return false;
   }
  // Orange rind remains physical even on an airborne contact: prevent phasing through.
- if(o.type==='orange_bump'){if(c.jump<=0&&K.segmentCircle(previous||c,c,o,(o.r||29)+(c.width||36)*.30)){c.speed*=.985;if(c===race?.player&&race.time-(c.lastRindSound??-10)>.7){c.lastRindSound=race.time;SND.sfx('slowSurface');}}return false;}
+ if(o.type==='orange_bump'){if(c.jump<=0&&K.segmentCircle(previous||c,c,o,(o.r||29)+(c.width||36)*.30)){c.speed*=.976;if(c===race?.player&&race.time-(c.lastRindSound??-10)>.7){c.lastRindSound=race.time;SND.sfx('slowSurface');}}return false;}
  if(o.type==='orange'&&o.solid&&c.jump>0){
    const from=previous||c;
    if(K.segmentCircle(from,c,o,(o.r||29)+(c.width||36)*.38)){
@@ -638,10 +643,10 @@ function eliminationChooseGrid(p,count,first=false){
 function eliminationApplyGrid(fresh,point,index){
  Object.assign(fresh,{x:point.x,y:point.y,a:point.a,p:point.p,lastP:point.p,
   auditP:point.p,routeStableP:point.p,lastCheckpoint:point.p});
- fresh.elimDistance=-Math.floor(index/2)*ELIM_ROW_SPACING;
+ fresh.elimDistance=-Math.floor(index/2)*ELIM_ROW_SPACING;fresh.mugApexPassed=point.p>.306&&point.p<.93;
  fresh.elimPrevP=point.p;fresh.elimPrevX=point.x;fresh.elimPrevY=point.y;
  fresh.elimTravelSinceCredit=0;fresh.elimLag=0;fresh.elimProtection=0;
- fresh.lastValidPosition={x:point.x,y:point.y,p:point.p,a:point.a,speed:46,laps:0,flags:[false,false,false],mugApexPassed:false,elimDistance:fresh.elimDistance};fresh.previousValidPosition=null;
+ fresh.lastValidPosition={x:point.x,y:point.y,p:point.p,a:point.a,speed:46,laps:0,flags:[false,false,false],mugApexPassed:fresh.mugApexPassed,elimDistance:fresh.elimDistance};fresh.previousValidPosition=null;
  fresh.elimLastMeaningfulProgress=fresh.elimDistance;fresh.elimRecoveryCount=0;
  fresh.elimRecoveryWindowStart=-999;fresh.elimRecoveryStartDistance=fresh.elimDistance;
  fresh.elimStallSeconds=0;fresh.elimLastRecoveryAt=-999;
@@ -867,7 +872,7 @@ function hud(){if(!race)return;const c=race.player;const rank=race.cars.slice().
 }
 function fmtTime(s){const m=Math.floor(s/60).toString().padStart(2,'0'),ss=Math.floor(s%60).toString().padStart(2,'0'),ms=Math.floor(s*10%10);return `${m}:${ss}.${ms}`;}
 function showHint(s,t=1.1){hint=s;lastHint=clock+t;$('hint').textContent=s;$('hint').classList.add('show');}
-function syncAudio(){SND.syncEngine(race?.player,!!(race&&!race.paused&&!race.finished&&race.countdown<=0&&innerWidth>=innerHeight&&!(race.elim&&race.elim.state!=='race')&&!race.player?.eliminated));}
+function syncAudio(){const playing=!!(race&&!race.paused&&!race.finished&&race.countdown<=0&&innerWidth>=innerHeight&&!(race.elim&&race.elim.state!=='race')&&!race.player?.eliminated),now=performance.now();if(playing!==perfAudioPlaying||now-perfLastAudio>=50){perfAudioPlaying=playing;perfLastAudio=now;SND.syncEngine(race?.player,playing);}}
 function ping(freq=660,dur=.09,vol=.1){SND.sfx(freq>800?'pickup':freq<300?'impact':'select');}
 function refreshAudioUI(){const st=SND.status(),el=$('audioStatus');if(el)el.textContent=st.supported?(st.context==='running'?t('audioReady'):t('audioBlocked')):t('audioUnavailable');
  const mute=$('menuMute');if(mute){mute.textContent=t(st.muted?'audioOff':'audioOn');mute.setAttribute('aria-pressed',String(!st.muted));}const pMute=$('pauseMute');if(pMute){pMute.textContent=t(st.muted?'audioOff':'audioOn');pMute.setAttribute('aria-pressed',String(!st.muted));}}
@@ -945,7 +950,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
     }
     if(c.tableFalling<=0){recoverCar(c,'table-fall');}
     continue;
-  }const ctl=inputFor(c),mul=race.mode==='online'&&onlineSession?.members[c.id]?1:(c===race.player?1:race.aiFactor);let vmax=c.profile.max*mul,accelerate=c.profile.acc*mul;
+  }const ctl=inputFor(c),mul=race.mode==='online'&&onlineSession?.members[c.id]?1:(c===race.player?1:Math.min(1,race.aiFactor));let vmax=c.profile.max*mul,accelerate=c.profile.acc*mul;if(perfEnabled){const m=perfCars[c.id]??=( {id:c.id,model:c.profile.name,seconds:0,sum:0,max:0,gas:0,brake:0,mul,cap:vmax,acc:accelerate,ramps:0} );m.seconds+=dt;m.sum+=Math.abs(c.speed)*dt;m.max=Math.max(m.max,Math.abs(c.speed));m.gas+=ctl.gas?dt:0;m.brake+=ctl.brake?dt:0;m.respawns=c.shortcutRespawns||0;m.reason=c.lastPenaltyReason||'';}
  // Sticky jam has a lasting, measurable slowdown and reduced acceleration.
  // It is not another oil patch: grip remains predictable, speed is limited.
  const inJam=c.jump<=0&&jamHit(c,jamPatch);
@@ -1009,9 +1014,9 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
      if(valid&&rampEntryVisual(c,o,previous))c.rampEntryVisual=true;
      if(valid&&rampLaunch(c,o,previous)){
        c.jump=.96;c.jumpTotal=.96;c.jumpCd=1.85;
-       c.speed=Math.min(c.profile.max*1.36,Math.max(152,c.speed)*1.17);
+       c.speed=Math.min(vmax*1.36,Math.max(Math.min(152,vmax),c.speed)*1.17);
        c.boost=Math.max(c.boost,.68);
-       c.onBridge=true;c.bridgeTakeoff=true;c.rampEntryVisual=false;c.bridgeOffSeconds=0;
+       c.onBridge=true;c.bridgeTakeoff=true;c.rampEntryVisual=false;c.bridgeOffSeconds=0;if(perfEnabled&&perfCars[c.id])perfCars[c.id].ramps++;
        if(c===race.player)SND.sfx('ramp');
        break;
      }
@@ -1021,6 +1026,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  // On-road snapshots are only written after complete frame of verified lane contact.
  // No penalty for a normal outside detour at the finish-line seam (p=1 -> p=0).
  let near=nearestCourse(c,points);
+ if(near.shortcut&&!c.onBridge&&!c.bridgeTakeoff&&!c.bridgeLandingActive&&!c.bridgeMissActive)near={...nearestTrack(c,points),shortcut:false};
  const routeCheck=junctionContinuity(c,near,oldX,oldY,dt);
  if(routeCheck.penalty){recoverCar(c,'junction-cut');continue;}
  near=routeCheck.near;c.routeResolvedNear=near;
@@ -1135,7 +1141,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
   if(c.bridgeTakeoff && c.jump<=0){
     c.bridgeTakeoff=false;
     const landing=shortcutNearest(c);
-    if(!(landing.t>=.012&&landing.t<=.94&&landing.distance<=45)){
+    if(landing.t>.94&&landing.distance<=65&&nearestTrack(c,points).distance<138){c.onBridge=false;c.bridgeExitVisual=.34;}else if(!(landing.t>=.012&&landing.t<=.94&&landing.distance<=45)){
       bridgeFall(c);near=nearestCourse(c,points);
     }else{
       c.onBridge=true;c.bridgeOffSeconds=0;
@@ -1147,7 +1153,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  ttrRaceOil.handleOilContact(c,oldX,oldY);
  ttrRacePickups.collect(c);
  ttrRaceProgress.updateCarProgress(c,dt,oldX,oldY);
- if(race.mode==='elimination'&&c.lastValidPosition&&Math.abs(c.lastValidPosition.p-c.p)<1e-8&&Math.abs(c.elimPrevP-c.p)<1e-8)c.lastValidPosition.elimDistance=c.elimDistance;
+ if(race.mode==='elimination'&&c.lastValidPosition&&K.phaseGap(c.lastValidPosition.p,c.elimPrevP)<.008){const d=((K.forwardProgress(c.elimPrevP,c.lastValidPosition.p)+.5)%1-.5)*TRACK_LENGTH;c.lastValidPosition.elimDistance=c.elimDistance+d;}
  ttrRaceCPU.useTacticalPowerup(c);
  }
  ttrRaceCollisions.handleCars();
@@ -1300,6 +1306,7 @@ function wireMenu(){
   const setting=$('settingsBtn');if(setting)setting.onclick=()=>{const panel=$('retroSettings');panel.open=true;const selector=$('settingsLanguage');if(selector)selector.value=I18N.getLang();SND.sfx('select');};
   const settingsLanguage=$('settingsLanguage');if(settingsLanguage){settingsLanguage.value=I18N.getLang();settingsLanguage.onchange=()=>{I18N.setLang(settingsLanguage.value);refreshAudioUI();};}
   if(settingsDialog){settingsDialog.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();settingsDialog.open=false;setting?.focus();}});settingsDialog.addEventListener('click',event=>{if(event.target===settingsDialog){settingsDialog.open=false;setting?.focus();}});}
+ if(settingsDialog&&!$('ttrQuality')){const row=document.createElement('div');row.className='ttr-quality-row';row.innerHTML='<label>GRAFICA <select id="ttrQuality"><option value="auto">Automatica</option><option value="high">Elevata</option><option value="balanced">Bilanciata</option><option value="low">Risparmio energetico</option></select></label><label><input id="ttrPerfToggle" type="checkbox"> Diagnostica</label><button type="button" class="mini-btn" id="ttrPerfCopy">Copia report</button>';settingsDialog.querySelector('.v11-settings-card').append(row);$('ttrQuality').value=qualityMode;$('ttrPerfToggle').checked=perfEnabled;$('ttrQuality').onchange=()=>{qualityMode=$('ttrQuality').value;try{localStorage.setItem('ttr_quality',qualityMode);}catch(_){}};$('ttrPerfToggle').onchange=()=>{perfEnabled=$('ttrPerfToggle').checked;try{localStorage.setItem('ttr_perf',perfEnabled?'1':'0');}catch(_){}};$('ttrPerfCopy').onclick=async()=>{const report=JSON.stringify(perfSnapshot(),null,2);try{await navigator.clipboard.writeText(report);$('ttrPerfCopy').textContent='Copiato';}catch(_){window.prompt('Copia diagnostica',report);}};}
  if(settingsDialog&&matchMedia('(any-pointer:fine)').matches&&!$('ttrKeyboardSettings')){const b=document.createElement('button');b.id='ttrKeyboardSettings';b.type='button';b.className='btn secondary';b.textContent='COMANDI';b.onclick=openKeyboardPanel;const close=$('closeSettings');if(close)close.before(b);}
  if($('closeSettings'))$('closeSettings').onclick=()=>{$('retroSettings').open=false;setting?.focus();SND.sfx('select');};
  // Vehicle selection is exclusively handled by garageSelect (no global car selector).
@@ -1360,7 +1367,7 @@ function boot(){I18N.apply();$('loadbar').style.width='100%';$('enterGame').hidd
 }
 // iOS/Safari multitouch controller: no pointer capture, no button focus, release outside the button.
 const ttrTouchOwners=new Map(),ttrPointerOwners=new Map();
-function refreshControls(){for(const k of Object.keys(controls)){
+function refreshControls(){if(perfEnabled)perfTouchAt=performance.now();for(const k of Object.keys(controls)){
  controls[k]=[...ttrTouchOwners.values(),...ttrPointerOwners.values()].includes(k);
  const el=$(k);if(el)el.classList.toggle('active',controls[k]);
  }onlineGuestSendInput(true);
@@ -1369,7 +1376,7 @@ function releaseAllControls(){ttrTouchOwners.clear();ttrPointerOwners.clear();re
 function bindControl(id,key){const b=$(id);if(!b)return;
  b.setAttribute('draggable','false');b.setAttribute('tabindex','-1');
  b.addEventListener('touchstart',e=>{e.preventDefault();for(const t of e.changedTouches)ttrTouchOwners.set(t.identifier,key);b.blur();refreshControls();},{passive:false});
- b.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+ b.addEventListener('touchmove',e=>{e.preventDefault();let changed=false;for(const touch of e.changedTouches){const old=ttrTouchOwners.get(touch.identifier);if(old!=='left'&&old!=='right')continue;const hit=document.elementFromPoint(touch.clientX,touch.clientY)?.closest('#left,#right');if(hit&&hit.id!==old){ttrTouchOwners.set(touch.identifier,hit.id);changed=true;}}if(changed)refreshControls();},{passive:false});
  b.addEventListener('pointerdown',e=>{if(e.pointerType==='touch')return;e.preventDefault();ttrPointerOwners.set(e.pointerId,key);b.blur();refreshControls();});
  b.addEventListener('contextmenu',e=>e.preventDefault());
 }
@@ -1408,12 +1415,12 @@ function togglePause(){if(!race||race.finished)return;race.paused=!race.paused;r
  if(race.paused){$('pauseAudio').open=false;document.querySelector('.pause-card').classList.remove('audio-open');syncPauseAudioControls();SND.stopMusic();SND.sfx('select');}
  else SND.music('race');syncAudio();}
 const miniBase=window.TTRMinimapVisuals.createRaceMiniBase(points,shortcutSamples,WORLD_W,WORLD_H);
-let ttrFrameMean=1/60,ttrLowGraphics=false,ttrQualityTimer=0;
+let ttrFrameMean=1/60,ttrLowGraphics=false,ttrQualityTimer=0;let perfQuality=1.65;
  const SIM_STEP=1/60;let simDebt=0,simRace=null,simPrevious=new Map(),renderFraction=1,lastHudAt=-Infinity;
  function visualCar(c){const p=simPrevious.get(c.id);if(!p||p.round!==race.elim?.round||p.recovery!==(c.shortcutRespawns||0)||Math.hypot(c.x-p.x,c.y-p.y)>100)return c;const u=renderFraction;return {...c,x:p.x+(c.x-p.x)*u,y:p.y+(c.y-p.y)*u,a:p.a+angleDiff(c.a,p.a)*u};}
  function resetSim(){simDebt=0;simPrevious.clear();renderFraction=1;lastHudAt=-Infinity;}
  document.addEventListener('visibilitychange',()=>{resetSim();frameTime=performance.now();});
-function render(){const ratio=Math.min(ttrLowGraphics?1.0:Infinity,race?.mode==='online'&&onlineSession&&!onlineSession.host?1.38:1.65,devicePixelRatio||1);if(sw!==innerWidth||sh!==innerHeight||dpr!==ratio){sw=innerWidth;sh=innerHeight;dpr=ratio;canvas.width=Math.ceil(sw*dpr);canvas.height=Math.ceil(sh*dpr);}g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#6e4a37';g.fillRect(0,0,sw,sh);
+function render(){const qualityCap=qualityMode==='low'?.72:qualityMode==='balanced'?1:qualityMode==='high'?1.65:perfQuality;const ratio=Math.min(qualityCap,race?.mode==='online'&&onlineSession&&!onlineSession.host?1.38:1.65,devicePixelRatio||1);if(sw!==innerWidth||sh!==innerHeight||dpr!==ratio){sw=innerWidth;sh=innerHeight;dpr=ratio;canvas.width=Math.ceil(sw*dpr);canvas.height=Math.ceil(sh*dpr);}g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#6e4a37';g.fillRect(0,0,sw,sh);
  // Real follow camera: the circuit extends beyond the mobile viewport.
  // Keep the player just behind centre, giving sight of the upcoming corner.
  const gridLocked=race?.mode==='elimination'&&race.elim.state==='race'&&race.countdown>0;
@@ -1446,15 +1453,21 @@ function render(){const ratio=Math.min(ttrLowGraphics?1.0:Infinity,race?.mode===
     props.filter(o=>o.type==='milk_cereal_spill'&&visibleProp(o)).forEach(o=>drawObstacle(g,o));
     // The spreading jam is a low ground decal, always BEHIND car wheels.
     if(Math.abs(jamPatch.x-camX)<halfW+240&&Math.abs(jamPatch.y-camY)<halfH+280)drawJamPour(g);
- if(race.trialGhost&&race.countdown<=0){const pose=race.trialGhost(race.time);if(pose){g.save();g.globalAlpha=.35;carSprite(g,{...race.player,...pose,speed:0,slip:0,boost:0,claw:0,tableFalling:0});g.restore();}}
+ const ghostPose=race.trialGhost&&race.countdown<=0?race.trialGhost(race.time):null;
+ const ghostCar=ghostPose?{profile:race.player.profile,id:-1,...ghostPose,jumpTotal:ghostPose.jumpTotal||.96,onBridge:!!ghostPose.onBridge,rampEntryVisual:!!ghostPose.rampEntryVisual,bridgeExitVisual:ghostPose.bridgeExitVisual||0,speed:0,slip:0,boost:0,claw:0,tableFalling:ghostPose.tableFalling||0}:null;
+ const elevated=c=>c.onBridge||c.jump>0||c.rampEntryVisual||c.bridgeExitVisual>0;
+ const drawGhost=()=>{if(!ghostCar||!visibleProp(ghostCar))return;g.save();g.globalAlpha=.35;carSprite(g,ghostCar);g.restore();};
+ props.filter(o=>o.type==='orange_bump'&&visibleProp(o)).forEach(o=>drawObstacle(g,o));
+ if(ghostCar&&!elevated(ghostCar))drawGhost();
    // Road cars are drawn first. The opaque raised bread deck then occludes them
    // at crossings, while vehicles actually ON the bridge stay visible on top.
-   [...props.filter(o=>o.type!=='ramp'&&o.type!=='milk_cereal_spill'&&visibleProp(o)).map(o=>({y:o.y,prop:o})),
+   [...props.filter(o=>o.type!=='ramp'&&o.type!=='milk_cereal_spill'&&o.type!=='orange_bump'&&visibleProp(o)).map(o=>({y:o.y,prop:o})),
     ...race.cars.filter(c=>!c.eliminated&&visibleProp(c)&&c.jump<=0&&!c.onBridge&&!c.rampEntryVisual&&!(c.bridgeExitVisual>0)).map(c=>({y:c.y,car:visualCar(c)}))]
      .sort((a,b)=>a.y-b.y).forEach(e=>e.prop?drawObstacle(g,e.prop):carSprite(g,e.car));
    if(viewRight>viewLeft&&viewBottom>viewTop)g.drawImage(bridgeLayer,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop);
    props.filter(o=>o.type==='ramp'&&visibleProp(o)).forEach(o=>drawObstacle(g,o));
-   race.cars.filter(c=>!c.eliminated&&visibleProp(c)&&(c.onBridge||c.jump>0||c.rampEntryVisual||c.bridgeExitVisual>0)).forEach(c=>carSprite(g,visualCar(c)));
+   if(ghostCar&&elevated(ghostCar))drawGhost();
+   race.cars.filter(c=>!c.eliminated&&visibleProp(c)&&elevated(c)).map(visualCar).sort((a,b)=>a.y-b.y).forEach(c=>carSprite(g,c));
 
  for(const c of race.cars){if(!c.eliminated&&c.claw>0&&c.clawTarget)drawClawCable(g,visualCar(c),visualCar(c.clawTarget),clock);}
  race.effects.forEach(e=>{if(Math.abs(e.x-camX)<halfW+160&&Math.abs(e.y-camY)<halfH+160)renderEffect(g,e,clamp);});if(race.countdown>0){g.save();g.setTransform(dpr,0,0,dpr,0,0);g.textAlign='center';g.textBaseline='middle';g.lineWidth=7;g.strokeStyle='#142438';g.font=`950 ${Math.min(90,sw/5)}px system-ui`;const v=Math.ceil(race.countdown);g.strokeText(String(v),sw/2,sh/2);g.fillStyle='#ffe67f';g.fillText(String(v),sw/2,sh/2);g.restore();}}else gameObstacles(g);
@@ -1463,10 +1476,11 @@ function render(){const ratio=Math.min(ttrLowGraphics?1.0:Infinity,race?.mode===
 function frame(t){
   const raw=Math.max(0,(t-frameTime)/1000);frameTime=t;
   const dt=document.hidden?0:Math.min(.5,raw);renderDelta=dt||1/60;
-  if(simRace!==race){simRace=race;resetSim();}
-  if(race&&raw>0&&raw<.5){ttrFrameMean+=.10*(raw-ttrFrameMean);ttrQualityTimer+=raw;if(ttrQualityTimer>(ttrLowGraphics?12:.5)){if(ttrFrameMean>.026)ttrLowGraphics=true;else if(ttrFrameMean<.019)ttrLowGraphics=false;ttrQualityTimer=0;}}
+  if(simRace!==race){simRace=race;resetSim();if(race){perfContext={mode:race.mode,difficulty:race.aiFactor};perfCars={};perfStats={frames:0,elapsed:0,physics:0,render:0,steps:0,slow:0};perfLast=t;}}
+  if(race&&raw>0&&raw<.5){ttrFrameMean+=.10*(raw-ttrFrameMean);ttrQualityTimer+=raw;if(ttrQualityTimer>(ttrLowGraphics?2:.6)){if(ttrFrameMean>.026){ttrLowGraphics=true;perfQuality=ttrFrameMean>.041?.72:1;}else if(ttrFrameMean<.019){ttrLowGraphics=false;perfQuality=1.65;}ttrQualityTimer=0;}}
   onlinePingTick(t);
   if(race){
+   const perfStart=performance.now();let perfSteps=0;
    if(race.mode==='online'&&onlineSession&&!onlineSession.host){const netDt=raw>.25?0:Math.min(.12,dt);clock+=netDt;onlineGuestStep(netDt);renderFraction=1;}
    else if(race.paused||race.finished||innerHeight>innerWidth||document.hidden){resetSim();syncAudio();}
    else {
@@ -1474,16 +1488,19 @@ function frame(t){
     // Bounded catch-up preserves normal 30/60 Hz timing and avoids runaway CPU load.
     while(simDebt+1e-9>=SIM_STEP&&count<12){
       simPrevious=new Map(race.cars.map(c=>[c.id,{x:c.x,y:c.y,a:c.a,round:race.elim?.round,recovery:c.shortcutRespawns||0}]));
-      update(SIM_STEP,false);simDebt=Math.max(0,simDebt-SIM_STEP);count++;
+      update(SIM_STEP,false);perfSteps++;if(perfTouchAt){perfInputDelay=performance.now()-perfTouchAt;perfTouchAt=0;}simDebt=Math.max(0,simDebt-SIM_STEP);count++;
       if(race.finished){resetSim();break;}
     }
     renderFraction=Math.min(1,simDebt/SIM_STEP);
     if(race.mode==='online')onlineBroadcast(dt);
     if(t-lastHudAt>=66||lastHudAt===-Infinity){hud();lastHudAt=t;}
    }
-   render();
+   const renderStart=performance.now();render();const renderEnd=performance.now();
+   if(perfEnabled&&!race.paused&&!document.hidden){perfStats.frames++;perfStats.elapsed+=raw;perfStats.physics+=renderStart-perfStart;perfStats.render+=renderEnd-renderStart;perfStats.steps+=perfSteps;if(raw>.040)perfStats.slow++;
+    if(t-perfLast>=1000){const n=Math.max(1,perfStats.frames);perfReport=`${(n/Math.max(.001,perfStats.elapsed)).toFixed(0)} FPS | SIM ${(perfStats.physics/n).toFixed(1)} ms | GFX ${(perfStats.render/n).toFixed(1)} ms\nScatti >40ms: ${perfStats.slow}/${n} | input→sim ${perfInputDelay.toFixed(0)} ms | debito ${Math.round(simDebt*1000)} ms | DPR ${dpr}`;perfPanel.textContent=perfReport;perfStats={frames:0,elapsed:0,physics:0,render:0,steps:0,slow:0};perfLast=t;}}
+   perfPanel.hidden=!perfEnabled||race.paused||race.finished;
   }
- else {clock+=dt;
+ else {perfPanel.hidden=true;clock+=dt;
    // Lightweight canvas-only 60fps turntable: the rest of the game stays paused while in the garage.
    if(t-lastShowroomDraw>8){lastShowroomDraw=t;
      if(!$('screen').hidden && $('menuCar'))drawShowroom($('menuCar'),selectedCar,'menu');

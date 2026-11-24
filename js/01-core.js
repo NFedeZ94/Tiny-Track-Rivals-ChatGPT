@@ -293,7 +293,11 @@
     const first=p=>p>=.27&&p<=.38,second=p=>p>=.45&&p<=.565;
     return travel<55 && ((first(a)&&second(b))||(second(a)&&first(b))) && phaseGap(a,b)>.13;
   }
-  function nearestTrack(point,waypoints){let best={distance:Infinity,p:0,x:0,y:0,nx:0,ny:0};const n=waypoints.length;for(let i=0;i<n;i++){
+  const segmentBlocks=new WeakMap();
+  function nearestTrack(point,waypoints){let best={distance:Infinity,p:0,x:0,y:0,nx:0,ny:0};const n=waypoints.length;let blocks=segmentBlocks.get(waypoints);
+    if(!blocks){blocks=[];for(let i=0;i<n;i+=16){let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;for(let j=i;j<=Math.min(n,i+16);j++){const p=waypoints[j%n];minX=Math.min(minX,p.x);maxX=Math.max(maxX,p.x);minY=Math.min(minY,p.y);maxY=Math.max(maxY,p.y);}blocks.push({minX,maxX,minY,maxY});}segmentBlocks.set(waypoints,blocks);}
+    for(let i=0;i<n;i++){
+      if(i%16===0){const q=blocks[i/16],dx=Math.max(q.minX-point.x,0,point.x-q.maxX),dy=Math.max(q.minY-point.y,0,point.y-q.maxY);if(dx*dx+dy*dy>best.distance*best.distance){i+=15;continue;}}
     const a=waypoints[i],b=waypoints[(i+1)%n],dx=b.x-a.x,dy=b.y-a.y,len=dx*dx+dy*dy||1;
     const t=clamp(((point.x-a.x)*dx+(point.y-a.y)*dy)/len,0,1);
     const x=a.x+t*dx,y=a.y+t*dy,d=(point.x-x)**2+(point.y-y)**2;
@@ -416,7 +420,10 @@
   // and short-lived lateral impulse. This avoids the overlap/sticky-pair artefact.
   function resolveCarContacts(cars){let impacts=0,maxOverlap=0,maxImpulse=0;const hits=[];
     for(let iteration=0;iteration<3;iteration++)for(let i=0;i<cars.length;i++)for(let j=i+1;j<cars.length;j++){
-      const a=cars[i],b=cars[j];if(a.jump>0||b.jump>0||a.done||b.done||a.tableFalling>0||b.tableFalling>0)continue;
+      const a=cars[i],b=cars[j];if(a.done||b.done||a.tableFalling>0||b.tableFalling>0)continue;
+      const aDeck=!!a.onBridge,bDeck=!!b.onBridge;
+      if(aDeck!==bDeck&&!(a.bridgeExitVisual>0||b.bridgeExitVisual>0))continue;
+      if((a.jump>0||b.jump>0)&&!(aDeck&&bDeck))continue;
       const dx=b.x-a.x,dy=b.y-a.y;if(dx*dx+dy*dy>12000)continue;
       const ca=Math.cos(a.a),sa=Math.sin(a.a),cb=Math.cos(b.a),sb=Math.sin(b.a);
       const axes=[[ca,sa],[-sa,ca],[cb,sb],[-sb,cb]];
