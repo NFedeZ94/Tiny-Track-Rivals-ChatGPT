@@ -7,6 +7,7 @@ window.TTRRaceCPU=Object.freeze({create(deps){
 function updateRecovery(c,dt) {
  const race=getRace(),onlineSession=getOnlineSession();
  // CPU recovery: attempt steering and reversing before checkpoint respawn.
+ if(c.onBridge||c.bridgeExitVisual>0){c.stuckTime=0;c.reverseRecovery=0;c.lastMoveX=c.x;c.lastMoveY=c.y;return;}
  if(c!==race.player&&!(race.mode==='online'&&onlineSession?.members[c.id])){const progress=distance(c,{x:c.lastMoveX??c.x,y:c.lastMoveY??c.y});
   c.stuckTime=(c.stuckTime||0)+(Math.abs(c.speed)<24&&progress<3?dt:-dt*.65);
   c.stuckTime=Math.max(0,c.stuckTime);

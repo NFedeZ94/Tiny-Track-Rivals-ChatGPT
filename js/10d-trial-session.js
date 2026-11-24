@@ -73,6 +73,13 @@
  function playback(g,trackId,carId){
   if(!validateGhost(g,trackId,carId))return ()=>null;
   const fs=g.frames.map(f=>({...f})),total=g.total;
+  let holdUntil=-1,wasBridge=false;
+  for(const f of fs){if(f.cut){holdUntil=-1;wasBridge=false;}
+   if(f.onBridge||f.rampEntryVisual){wasBridge=!!f.onBridge;holdUntil=-1;}
+   else if(wasBridge){holdUntil=f.t+.75;wasBridge=false;}
+   if(f.bridgeExitVisual>0)holdUntil=Math.max(holdUntil,f.t+f.bridgeExitVisual+.35);
+   if(f.t<holdUntil)f.bridgeExitVisual=Math.max(f.bridgeExitVisual||0,holdUntil-f.t);
+  }
   return t=>{
    if(!finite(t)||t<0||t>total)return null;
    let lo=0,hi=fs.length-1;
@@ -82,7 +89,7 @@
    // Never interpolate across a teleport/recovery or a missing sampling span.
    if(b.cut||b.t-a.t>0.25)return null;
    const u=(t-a.t)/(b.t-a.t),da=((b.a-a.a+Math.PI)%TAU+TAU)%TAU-Math.PI;
-   return {...(u<.5?a:b),t,x:a.x+(b.x-a.x)*u,y:a.y+(b.y-a.y)*u,a:a.a+da*u,jump:a.jump+(b.jump-a.jump)*u};
+   return {...(u<.5?a:b),t,x:a.x+(b.x-a.x)*u,y:a.y+(b.y-a.y)*u,a:a.a+da*u,jump:a.jump+(b.jump-a.jump)*u,bridgeExitVisual:Math.max(0,(a.bridgeExitVisual||0)*(1-u),(b.bridgeExitVisual||0)*u)};
   };
  }
  function extractLap(g,laps,trackId,carId){

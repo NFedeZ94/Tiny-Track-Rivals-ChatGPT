@@ -15,7 +15,7 @@ function recoverCar(c,reason='edge'){
  c.lastValidPosition={x:c.x,y:c.y,p,a:c.a,laps:c.lapsCompleted,flags:c.flags.slice(),mugApexPassed:!!safe.mugApexPassed,elimDistance:safe.elimDistance};c.lastCheckpoint=p;c.previousValidPosition=null;
  c.speed=46;c.jump=0;c.jumpCd=.45;c.boost=0;c.claw=0;c.clawTarget=null;
  c.hitVX=0;c.hitVY=0;c.hitYaw=0;c.impactGrace=0;c.slip=0;c.skidVX=0;c.skidVY=0;c.oilCooldown=0;c.oilSpin=0;
- c.offtrack=false;c.offtrackSeconds=0;c.offtrackEntry=null;c.maxInteriorCut=0;c.offtrackReturnGrace=0;c.offtrackLastDistance=0;c.onBridge=false;c.rampEntryVisual=false;c.bridgeOffSeconds=0;c.bridgeExitVisual=0;
+ c.offtrack=false;c.offtrackSeconds=0;c.offtrackEntry=null;c.maxInteriorCut=0;c.offtrackReturnGrace=0;c.offtrackLastDistance=0;c.onBridge=false;c.rampEntryVisual=false;c.bridgeOffSeconds=0;c.bridgeExitVisual=0;c.bridgeContactGrace=0;
  c.bridgeMissActive=false;c.bridgeMissPenalty=0;c.bridgeMissGrace=0;c.bridgeTakeoff=false;c.bridgeFalling=0;c.lapGateBlocked=true;c.respawnGrace=1.1;c.stuckAnchor=null;c.obstacleStuckSeconds=0;
  c.stuckTime=0;c.reverseRecovery=0;c.lastObstacleContact=-100;c.elimDistance=safe.elimDistance??c.elimDistance;c.tryShortcut=false;c.elimBranchStart=null;
  if(race?.mode==='elimination'){
@@ -40,6 +40,10 @@ function junctionContinuity(c,near,oldX,oldY,dt){
     c.routePinch=null;if(c.respawnGrace>0){const legal=nearestTrackWindow(c,points,c.routeStableP??c.lastP??near.p,.055);return {near:legal,penalty:false};}c.routeStableP=near.p;return {near,penalty:false};
   }
   const anchor=c.routeStableP??c.lastP??near.p;
+  if(anchor>.455&&anchor<.575&&!near.shortcut&&phaseGap(anchor,near.p)>.065){
+    const local=nearestTrackWindow(c,points,anchor,.055);
+    if(local.distance<=138&&phaseGap(anchor,local.p)<.04){c.routePinch=null;c.routeStableP=local.p;return {near:{...local,shortcut:false},penalty:false};}
+  }
   if(!c.routePinch && !near.shortcut && (junctionPhaseHop(anchor,near.p,step)||(step<55&&phaseGap(anchor,near.p)>.075))){
     c.routePinch={phase:anchor,elapsed:0,travel:0,safe:c.lastValidPosition?{...c.lastValidPosition,flags:c.lastValidPosition.flags.slice()}:null};
   }
