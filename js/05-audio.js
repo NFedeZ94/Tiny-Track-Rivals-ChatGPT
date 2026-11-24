@@ -82,6 +82,7 @@
     else if(kind==='impact'){tone(170,.075,.30,'sawtooth',fxBus,at,63);tone(94,.12,.19,'triangle',fxBus,at,47);}
     else if(kind==='lap'){[440,660,880].forEach((f,i)=>tone(f,.19,.23,'triangle',fxBus,at+i*.10));}
     else if(kind==='spoon'){tone(480,.10,.13,'triangle',fxBus,at,250);tone(1020,.09,.08,'sine',fxBus,at+.04,570);}
+    else if(kind==='slowSurface'){tone(170,.19,.15,'triangle',fxBus,at,90);tone(115,.16,.10,'sawtooth',fxBus,at+.08,65);}
     else if(kind==='offtrack'){tone(134,.17,.11,'sawtooth',fxBus,at,95);}
     else if(kind==='fall'){
       // Original 1.15-second falling whistle: descending pitch, then muffled low rumble.

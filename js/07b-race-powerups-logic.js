@@ -14,7 +14,7 @@ if(!c||!c.item||c.done)return;
  if(type==='claw'){
    const target=clawTarget(c,race.cars,props,162,.30);
    if(target){c.claw=1.28;c.clawTarget=target;c.clawStartDist=distance(c,target);if(c===race.player)SND.sfx('claw');}
-   else if(c===race.player){SND.sfx('clawFail');showHint(t('noClaw'),1.25);}
+   else if(c===race.player){SND.sfx('clawFail');}
  }
 }
  return Object.freeze({useItem});
