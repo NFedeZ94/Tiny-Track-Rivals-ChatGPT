@@ -693,3 +693,16 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
 #hud .statBlock .trial-notice.trial-slow{color:#ff9c9c!important}
 @media(max-width:700px){#hud.hud-trial .statBlock{padding-inline:1px}#hud.hud-trial .statBlock strong{font-size:clamp(11px,2.15vw,16px)}#hud.hud-trial .statBlock small{font-size:clamp(7px,1.45vw,10px)}}
 .trial-car-thumb{width:clamp(24px,5vw,40px);height:23px;object-fit:contain;flex:none}
+
+/* 14.10 — safe-area HUD, neutral power-up button and -5% touch sizing */
+#hud .hudTop{left:max(16px,calc(env(safe-area-inset-left) + 10px))!important}
+#hud.hud-elimination .hudTop .statBlock{flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;gap:2px;padding:2px 10px!important}
+#controls .power-token{background:none!important;border:0!important;box-shadow:none!important;text-shadow:none!important;width:80%;height:80%;border-radius:0;opacity:1}
+#controls .power-token svg{width:85%;height:85%}
+@media (orientation:landscape) and (pointer:coarse){
+ #controls #left,#controls #right{width:clamp(67.925px,15.675vw,99.275px);height:clamp(73.15px,18.2875vw,105.80625px);font-size:36.575px}
+ #controls #brake,#controls #use{width:clamp(73.15px,15.675vw,94.05px);height:clamp(73.15px,18.2875vw,105.80625px);font-size:18.2875px}
+}
+@media (orientation:landscape) and (pointer:coarse) and (max-height:500px){#controls #left,#controls #right,#controls #brake,#controls #use{height:75.7625px}}
+.ttr-key-panel{position:fixed;inset:0;z-index:90;background:#08132bf5;display:flex;align-items:center;justify-content:center;padding:10px;touch-action:manipulation}
+.ttr-key-panel .panel{max-height:95dvh;overflow:auto;max-width:550px;padding:15px}.ttr-key-row{display:grid;grid-template-columns:1fr 1fr 1fr;align-items:center;gap:5px;margin:4px 0}.ttr-key-row button{min-height:30px;padding:3px 8px}.ttr-key-panel .menu-row{margin-top:8px}.ttr-key-panel p{margin:5px 0}
