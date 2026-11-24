@@ -3,7 +3,7 @@
  window.TTRModeElimination=Object.freeze({
   settings(cfg,selectedCar){return {
    num:Number(cfg?.racers||4),pr:selectedCar,
-   aiFactor:Number(cfg?.difficulty||1),auto:cfg?.auto!=='0'
+   aiFactor:Number(cfg?.difficulty||1),auto:true
   };},
   initialState(num,goalInput,defaultGoal){return {
    goal:Math.max(3,Math.min(7,Number(goalInput||defaultGoal))),

@@ -6,7 +6,7 @@ window.TTRRaceDrivers=Object.freeze({create(deps){
 
 function inputFor(c){
  const race=getRace(),onlineSession=getOnlineSession();
-if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInput(c);if(net)return net;}if(c===race.player){const steer=(controls.right||window.TTRKeyboard.down('right')?1:0)-(controls.left||window.TTRKeyboard.down('left')?1:0);return {steer,gas:race.auto||controls.gas||window.TTRKeyboard.down('gas'),brake:controls.brake||window.TTRKeyboard.down('brake')};}
+if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInput(c);if(net)return net;}if(c===race.player){const steer=(controls.right||window.TTRKeyboard.down('right')?1:0)-(controls.left||window.TTRKeyboard.down('left')?1:0);return {steer,gas:true,brake:controls.brake||window.TTRKeyboard.down('brake')};}
  const difficulty=race.aiFactor||1,level=difficulty<.95?0:difficulty<1.1?1:2;
  const ramp=props.find(o=>o.type==='ramp');const inZone=c.p>.515&&c.p<.63;
  const visit=(race.elim?.round||0)+':'+c.lapsCompleted;
