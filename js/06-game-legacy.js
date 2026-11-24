@@ -147,8 +147,8 @@ function onlineOnMessage(d){
  }
 }
 function onlineLocalInput(){
- const steer=(controls.right||keys.ArrowRight||keys.KeyD?1:0)-(controls.left||keys.ArrowLeft||keys.KeyA?1:0);
- return {steer,gas:race.auto||controls.gas||keys.ArrowUp||keys.KeyW,brake:!!(controls.brake||keys.ArrowDown||keys.KeyS)};
+ const steer=(controls.right||keyDown('right')?1:0)-(controls.left||keyDown('left')?1:0);
+ return {steer,gas:race.auto||controls.gas||keyDown('gas'),brake:!!(controls.brake||keyDown('brake'))};
 }
 function onlineHostInput(c){
  if(!onlineSession?.members[c.id])return null; // vacant slot => CPU
@@ -298,6 +298,26 @@ function onlineWire(){
 }
 
 const keys={};
+
+const keyDefaults={left:['ArrowLeft','KeyA'],right:['ArrowRight','KeyD'],gas:['ArrowUp','KeyW'],brake:['ArrowDown','KeyS'],power:['KeyE','Enter'],pause:['Escape']};
+const keyLabels={left:'Sinistra',right:'Destra',gas:'Acceleratore',brake:'Freno / Retro',power:'Power-up',pause:'Pausa'};
+let keyMap=JSON.parse(JSON.stringify(keyDefaults));
+const allowedKey=k=>typeof k==='string'&&/^(Arrow(Left|Right|Up|Down)|Key[A-Z]|Digit[0-9]|Space|Enter|Escape|Numpad[0-9])$/.test(k);
+try{const m=JSON.parse(localStorage.getItem('ttr_keys_v1')||'null');if(m&&Object.keys(keyDefaults).every(k=>Array.isArray(m[k])&&m[k].length===keyDefaults[k].length&&m[k].every(allowedKey))&&new Set(Object.keys(keyDefaults).flatMap(k=>m[k])).size===Object.keys(keyDefaults).flatMap(k=>m[k]).length)keyMap=m;}catch(_){}
+const keyDown=action=>keyMap[action].some(k=>keys[k]);
+window.TTRKeyboard={down:keyDown};
+function openKeyboardPanel(){
+ if(document.querySelector('.ttr-key-panel'))return;
+ releaseAllControls();for(const k in keys)delete keys[k];
+ const el=document.createElement('section');el.className='ttr-key-panel';el.innerHTML='<div class="panel"><h2>COMANDI TASTIERA</h2><p>Seleziona un tasto, poi premi il nuovo comando.</p><div data-rows></div><p data-msg aria-live="polite"></p><div class="menu-row"><button class="btn" data-reset>PREDEFINITI</button><button class="btn secondary" data-close>INDIETRO</button></div></div>';
+ document.body.append(el);let pending=null;const msg=el.querySelector('[data-msg]');
+ function save(){try{localStorage.setItem('ttr_keys_v1',JSON.stringify(keyMap));}catch(_){msg.textContent='Salvataggio non disponibile';}}
+ function draw(){const rows=el.querySelector('[data-rows]');rows.replaceChildren();for(const k of Object.keys(keyDefaults)){const row=document.createElement('div');row.className='ttr-key-row';const label=document.createElement('span');label.textContent=keyLabels[k];row.append(label);keyMap[k].forEach((code,i)=>{const b=document.createElement('button');b.className='btn secondary';b.textContent=code.replace(/^Key/,'').replace(/^Digit/,'').replace(/^Arrow/,'');b.onclick=()=>{pending=[k,i];msg.textContent='Premi un tasto per '+keyLabels[k];};row.append(b);});rows.append(row);}}
+ function close(){window.removeEventListener('keydown',capture,true);el.remove();for(const k in keys)delete keys[k];}
+ function capture(e){e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;if(!pending){if(e.code==='Escape')close();return;}if(!allowedKey(e.code)){msg.textContent='Tasto non supportato';return;}const [k,i]=pending;if(Object.keys(keyMap).some(a=>keyMap[a].some((v,j)=>v===e.code&&(a!==k||j!==i)))){msg.textContent='Tasto già assegnato';return;}keyMap[k][i]=e.code;pending=null;msg.textContent='Comando aggiornato';save();draw();}
+ window.addEventListener('keydown',capture,true);el.querySelector('[data-close]').onclick=close;el.querySelector('[data-reset]').onclick=()=>{keyMap=JSON.parse(JSON.stringify(keyDefaults));pending=null;msg.textContent='Predefiniti ripristinati';save();draw();};draw();
+}
+
 const vehiclePalette=['#ef3d3d','#2987ee','#f4b942','#31ce98','#9447b4','#ef8f35','#f2f0e8','#2ca6bb'];
 const typeNames={turbo:'TURBO',oil:'OLIO',claw:'PINZA'};
 const track=(()=>{const c=document.createElement('canvas');c.width=WORLD_W;c.height=WORLD_H;return c;})();
@@ -711,39 +731,8 @@ function eliminationProjectedAhead(challenger,incumbent){
 }
 function eliminationCameraLeader(){
  const active=eliminationActive();if(!active.length)return race.player;
- const previous=active.find(c=>c.id===elimCameraId);
- // Race distance is authoritative, not on-screen Y. Keep the current leader
- // through minor 1-frame phase/projection jitter on sharp bends.
- const baseline=previous||active[0];
- let leader=active.reduce((best,c)=>
-   (c.elimDistance||0)>(best.elimDistance||0)+(previous?19:.35)?c:best,baseline);
- if(previous){
-   for(const challenger of active){
-     if(challenger===previous)continue;
-     const legalPass=eliminationPhysicalOvertake(challenger,previous)||
-       (!eliminationPhysicalOvertake(previous,challenger)&&eliminationProjectedAhead(challenger,previous));
-     if(!legalPass)continue;
-     if((challenger.elimDistance||0)+48<(leader.elimDistance||0))continue;
-     if(leader===previous||(challenger.elimDistance||0)>(leader.elimDistance||0)+19)leader=challenger;
-   }
-   if(leader!==previous){
-     const clearGap=(leader.elimDistance||0)-(previous.elimDistance||0);
-     if(elimCandidateId!==leader.id){elimCandidateId=leader.id;elimCandidateSince=race.time;}
-     // Genuine big gaps change immediately; close overtakes must remain
-     // ahead for ~0.16 s before any camera motion or KO evaluation changes.
-     if(clearGap<90 && race.time-elimCandidateSince<.16)leader=previous;
-   }else {elimCandidateId=null;elimCandidateSince=0;}
- }
- if(elimCameraId!==leader.id){
-   // Once a legal overtaking move is confirmed, give it only the small missing
-   // route credit needed to keep the camera from bouncing back next frame.
-   if(previous&&eliminationPhysicalOvertake(leader,previous))
-     leader.elimDistance=Math.max(leader.elimDistance||0,(previous.elimDistance||0)+7);
-   if(race?.elim)race.elim.lastLeaderSwitchTime=race.time;
-   // An existing out-of-frame debt belongs to the car; changing camera
-   // leaders cannot erase it and force a second trip outside the screen.
-   elimFocusWeight=0;elimCandidateId=null;elimCandidateSince=0;
- }
+ const leader=active.slice().sort((a,b)=>(b.elimDistance||0)-(a.elimDistance||0)||a.id-b.id)[0];
+ if(elimCameraId!==leader.id){race.elim.lastLeaderSwitchTime=race.time;elimFocusWeight=0;}
  elimCameraId=leader.id;elimCameraProgress=leader.elimDistance||0;
  return leader;
 }
@@ -937,7 +926,7 @@ const ttrEliminationMode=window.TTRModeElimination.create({
  eliminationProjectedAhead,ELIM_RULES_TEST,hideEliminationUI,showResults
 });
 
-function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSession&&!onlineSession.host)return;if(race.paused||race.finished||innerHeight>innerWidth){syncAudio();return;}
+function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSession&&!onlineSession.host)return;if(race.paused||race.finished||innerHeight>innerWidth){syncAudio();return;}
  if(race.mode==='elimination'&&eliminationEndPoint(dt)){syncAudio();return;}
  if(race.countdown>0){ttrRaceTiming.advanceCountdown(dt);syncAudio();return;}
  ttrRaceTiming.advanceLiveFrame(dt);
@@ -1081,7 +1070,7 @@ function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSes
  if(!c.routePinch&&near.distance<64&&!near.shortcut&&!c.offtrack&&!(c.respawnGrace>0)&&!c.stuckAnchor&&
     Math.cos(angleDiff(c.a,tangent(near.p)))>.23&&c.speed>=0&&!c.bridgeMissActive){
    if(c.lastValidPosition&&(!c.previousValidPosition||K.phaseGap(c.previousValidPosition.p,c.lastValidPosition.p)>.025))c.previousValidPosition={...c.lastValidPosition,flags:c.lastValidPosition.flags.slice()};
-   c.lastValidPosition={x:near.x,y:near.y,a:tangent(near.p),p:near.p,speed:Math.abs(c.speed),laps:c.lapsCompleted,flags:c.flags.slice(),mugApexPassed:!!c.mugApexPassed};
+   c.lastValidPosition={x:near.x,y:near.y,a:tangent(near.p),p:near.p,speed:Math.abs(c.speed),laps:c.lapsCompleted,flags:c.flags.slice(),mugApexPassed:!!c.mugApexPassed,elimDistance:c.elimDistance};
    c.lastCheckpoint=near.p;
  }
  if(surface.outside&&!c.offtrack){
@@ -1167,7 +1156,7 @@ function update(dt){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSes
    race.finished=true;syncAudio();onlineFinish();SND.stopMusic();SND.sfx('finish');const completedRace=race;setTimeout(()=>{if(race===completedRace&&race.finished)showResults();},850);
   }else syncAudio();
  }else if(race.player.done){race.finished=true;syncAudio();SND.stopMusic();SND.sfx('finish');const completedRace=race;setTimeout(()=>{if(race===completedRace&&race.finished)showResults();},850);}else syncAudio();
- hud();
+ if(refreshHud)hud();
 }
 function showResults(){return ttrRaceResults.showResults();}
 const I18N=window.TTRI18N;
@@ -1307,6 +1296,7 @@ function wireMenu(){
   const setting=$('settingsBtn');if(setting)setting.onclick=()=>{const panel=$('retroSettings');panel.open=true;const selector=$('settingsLanguage');if(selector)selector.value=I18N.getLang();SND.sfx('select');};
   const settingsLanguage=$('settingsLanguage');if(settingsLanguage){settingsLanguage.value=I18N.getLang();settingsLanguage.onchange=()=>{I18N.setLang(settingsLanguage.value);refreshAudioUI();};}
   if(settingsDialog){settingsDialog.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();settingsDialog.open=false;setting?.focus();}});settingsDialog.addEventListener('click',event=>{if(event.target===settingsDialog){settingsDialog.open=false;setting?.focus();}});}
+ if(settingsDialog&&matchMedia('(any-pointer:fine)').matches&&!$('ttrKeyboardSettings')){const b=document.createElement('button');b.id='ttrKeyboardSettings';b.type='button';b.className='btn secondary';b.textContent='COMANDI';b.onclick=openKeyboardPanel;const close=$('closeSettings');if(close)close.before(b);}
  if($('closeSettings'))$('closeSettings').onclick=()=>{$('retroSettings').open=false;setting?.focus();SND.sfx('select');};
  // Vehicle selection is exclusively handled by garageSelect (no global car selector).
  const nav=[...document.querySelectorAll('.retro-option')];nav.forEach((el,i)=>{
@@ -1394,7 +1384,7 @@ function bindTap(id,func){const b=$(id);b.setAttribute('draggable','false');b.se
  const off=()=>b.classList.remove('active');b.addEventListener('touchend',off);b.addEventListener('touchcancel',off);b.addEventListener('pointerup',off);b.addEventListener('pointercancel',off);b.addEventListener('contextmenu',e=>e.preventDefault());
 }
 bindTap('use',()=>race&&useItem(race.player));
-addEventListener('keydown',e=>{keys[e.code]=true;onlineGuestSendInput(true);if(['Space','ArrowLeft','ArrowRight','ArrowDown','ArrowUp'].includes(e.code))e.preventDefault();if(e.repeat)return;if((e.code==='KeyE'||e.code==='Enter')&&race)useItem(race.player);if(e.code==='Escape'&&race?.mode==='online'){onlineQuit();mainMenu();return;}if(e.code==='Escape'&&race)togglePause();});addEventListener('keyup',e=>{keys[e.code]=false;onlineGuestSendInput(true)});addEventListener('blur',()=>{releaseAllControls();for(const k in keys)delete keys[k];});
+addEventListener('keydown',e=>{keys[e.code]=true;onlineGuestSendInput(true);if(race&&Object.values(keyMap).some(a=>a.includes(e.code)))e.preventDefault();if(e.repeat)return;if(keyMap.power.includes(e.code)&&race&&!race.paused&&!race.finished)useItem(race.player);if(keyMap.pause.includes(e.code)&&race?.mode==='online'){onlineQuit();mainMenu();return;}if(keyMap.pause.includes(e.code)&&race)togglePause();});addEventListener('keyup',e=>{keys[e.code]=false;onlineGuestSendInput(true)});addEventListener('blur',()=>{releaseAllControls();for(const k in keys)delete keys[k];});
 $('pauseBtn').onclick=()=>{if(race?.mode==='online'){onlineQuit();mainMenu();}else togglePause();};
  const pauseAudio=$('pauseAudio');
  const pauseCard=pauseAudio.closest('.pause-card');
@@ -1414,7 +1404,8 @@ function togglePause(){if(!race||race.finished)return;race.paused=!race.paused;r
  if(race.paused){$('pauseAudio').open=false;document.querySelector('.pause-card').classList.remove('audio-open');syncPauseAudioControls();SND.stopMusic();SND.sfx('select');}
  else SND.music('race');syncAudio();}
 const miniBase=window.TTRMinimapVisuals.createRaceMiniBase(points,shortcutSamples,WORLD_W,WORLD_H);
-function render(){const ratio=Math.min(race?.mode==='online'&&onlineSession&&!onlineSession.host?1.38:1.65,devicePixelRatio||1);if(sw!==innerWidth||sh!==innerHeight||dpr!==ratio){sw=innerWidth;sh=innerHeight;dpr=ratio;canvas.width=Math.ceil(sw*dpr);canvas.height=Math.ceil(sh*dpr);}g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#6e4a37';g.fillRect(0,0,sw,sh);
+let ttrFrameMean=1/60,ttrLowGraphics=false,ttrQualityTimer=0;
+function render(){const ratio=Math.min(ttrLowGraphics?1.0:Infinity,race?.mode==='online'&&onlineSession&&!onlineSession.host?1.38:1.65,devicePixelRatio||1);if(sw!==innerWidth||sh!==innerHeight||dpr!==ratio){sw=innerWidth;sh=innerHeight;dpr=ratio;canvas.width=Math.ceil(sw*dpr);canvas.height=Math.ceil(sh*dpr);}g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#6e4a37';g.fillRect(0,0,sw,sh);
  // Real follow camera: the circuit extends beyond the mobile viewport.
  // Keep the player just behind centre, giving sight of the upcoming corner.
  const gridLocked=race?.mode==='elimination'&&race.elim.state==='race'&&race.countdown>0;
@@ -1462,9 +1453,11 @@ function render(){const ratio=Math.min(race?.mode==='online'&&onlineSession&&!on
  if(clock>lastHint&&lastHint!==0){$('hint').classList.remove('show');lastHint=0;}
 }
 function frame(t){
- const dt=Math.min(.04,Math.max(0,(t-frameTime)/1000));frameTime=t;renderDelta=dt||1/60;
+ const raw=Math.max(0,(t-frameTime)/1000);frameTime=t;
+ const dt=raw>.25?0:Math.min(.12,raw);renderDelta=dt||1/60;
+ if(race&&raw>0&&raw<.15){ttrFrameMean+=.06*(raw-ttrFrameMean);ttrQualityTimer+=raw;if(ttrQualityTimer>(ttrLowGraphics?10:1.5)){if(ttrFrameMean>.027)ttrLowGraphics=true;else if(ttrFrameMean<.019)ttrLowGraphics=false;ttrQualityTimer=0;}}
  onlinePingTick(t);
- if(race){if(race.mode==='online'&&onlineSession&&!onlineSession.host){clock+=dt;onlineGuestStep(dt);}else{update(dt);onlineBroadcast(dt);}render();}
+ if(race){if(race.mode==='online'&&onlineSession&&!onlineSession.host){clock+=dt;onlineGuestStep(dt);}else if(dt>0){const steps=Math.max(1,Math.ceil(dt/(1/55)));for(let i=0;i<steps;i++)update(dt/steps,i===steps-1);onlineBroadcast(dt);}render();}
  else {clock+=dt;
    // Lightweight canvas-only 60fps turntable: the rest of the game stays paused while in the garage.
    if(t-lastShowroomDraw>8){lastShowroomDraw=t;

@@ -7,16 +7,17 @@ window.TTRRaceSafety=Object.freeze({create(deps){
 function recoverCar(c,reason='edge'){
  const race=getRace();
 
- let safe=c.offtrackEntry||c.lastValidPosition||{...trackPoint(c.lastCheckpoint||0),p:c.lastCheckpoint||0,a:tangent(c.lastCheckpoint||0),speed:42,laps:c.lapsCompleted,flags:c.flags.slice()};
+ const anchor=c.routePinch?.phase??c.lastCheckpoint??c.lastP??0;
+ let safe=c.routePinch?.safe||c.offtrackEntry||c.lastValidPosition||{...trackPoint(anchor),p:anchor,a:tangent(anchor),speed:42,laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};
  let p=mod(safe.p||0,1);if((reason==='cup-cut'||reason==='junction-cut'||reason==='route-cut')&&c.previousValidPosition&&c.previousValidPosition.laps===safe.laps&&mod(p-c.previousValidPosition.p,1)<.10){p=c.previousValidPosition.p;safe=c.previousValidPosition;}if(reason==='cup-cut'&&!safe.mugApexPassed&&p>.30&&p<.44)p=.21;const place=trackPoint(p);
  c.x=place.x;c.y=place.y;c.a=tangent(p);c.p=p;c.lastP=p;
  c.lapsCompleted=safe.laps??c.lapsCompleted;c.flags=(safe.flags||c.flags).slice();
- c.lastValidPosition={x:c.x,y:c.y,p,a:c.a,laps:c.lapsCompleted,flags:c.flags.slice(),mugApexPassed:!!safe.mugApexPassed};c.lastCheckpoint=p;c.previousValidPosition=null;
+ c.lastValidPosition={x:c.x,y:c.y,p,a:c.a,laps:c.lapsCompleted,flags:c.flags.slice(),mugApexPassed:!!safe.mugApexPassed,elimDistance:safe.elimDistance};c.lastCheckpoint=p;c.previousValidPosition=null;
  c.speed=46;c.jump=0;c.jumpCd=.45;c.boost=0;c.claw=0;c.clawTarget=null;
  c.hitVX=0;c.hitVY=0;c.hitYaw=0;c.impactGrace=0;c.slip=0;c.skidVX=0;c.skidVY=0;c.oilCooldown=0;c.oilSpin=0;
  c.offtrack=false;c.offtrackSeconds=0;c.offtrackEntry=null;c.maxInteriorCut=0;c.offtrackReturnGrace=0;c.offtrackLastDistance=0;c.onBridge=false;c.rampEntryVisual=false;c.bridgeOffSeconds=0;c.bridgeExitVisual=0;
  c.bridgeMissActive=false;c.bridgeMissPenalty=0;c.bridgeMissGrace=0;c.bridgeTakeoff=false;c.bridgeFalling=0;c.lapGateBlocked=true;c.respawnGrace=1.1;c.stuckAnchor=null;c.obstacleStuckSeconds=0;
- c.stuckTime=0;c.reverseRecovery=0;c.lastObstacleContact=-100;
+ c.stuckTime=0;c.reverseRecovery=0;c.lastObstacleContact=-100;c.elimDistance=safe.elimDistance??c.elimDistance;
  if(race?.mode==='elimination'){
    const now=race.time,progress=c.elimDistance||0;
    const recent=Number.isFinite(c.elimRecoveryWindowStart)&&
@@ -39,8 +40,8 @@ function junctionContinuity(c,near,oldX,oldY,dt){
     c.routePinch=null;if(c.respawnGrace>0){const legal=nearestTrackWindow(c,points,c.routeStableP??c.lastP??near.p,.055);return {near:legal,penalty:false};}c.routeStableP=near.p;return {near,penalty:false};
   }
   const anchor=c.routeStableP??c.lastP??near.p;
-  if(!c.routePinch && !near.shortcut && junctionPhaseHop(anchor,near.p,step)){
-    c.routePinch={phase:anchor,elapsed:0,travel:0};
+  if(!c.routePinch && !near.shortcut && (junctionPhaseHop(anchor,near.p,step)||(step<55&&phaseGap(anchor,near.p)>.075))){
+    c.routePinch={phase:anchor,elapsed:0,travel:0,safe:c.lastValidPosition?{...c.lastValidPosition,flags:c.lastValidPosition.flags.slice()}:null};
   }
   if(c.routePinch){
     const pending=c.routePinch;
@@ -54,7 +55,7 @@ function junctionContinuity(c,near,oldX,oldY,dt){
     // tiny inside-corner cuts must not trigger an instant teleport.
     const illegal=(pending.travel>66&&pending.elapsed>.38&&legal.distance>185&&near.distance<105) ||
       (pending.travel>88&&pending.elapsed>.65&&legal.distance>159&&near.distance<42);
-    if(illegal)return {near:legal,penalty:true};
+    if(illegal||(pending.elapsed>.35&&near.distance<120&&legal.distance>165&&phaseGap(near.p,pending.phase)>.10)){if(pending.safe)c.offtrackEntry=pending.safe;return {near:legal,penalty:true};}
     c.routeStableP=legal.p;
     return {near:{...legal,shortcut:false},penalty:false,pending:true};
   }

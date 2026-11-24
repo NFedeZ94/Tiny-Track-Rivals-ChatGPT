@@ -17,8 +17,8 @@ window.TTRRaceProgress=Object.freeze({create(deps){
  if(clearLane&&closest.distance<=150){
    if(pr>.81)c.lapGateBlocked=false;
    if(pr>.17&&pr<.36)c.flags[0]=true;
-   if(pr>.43&&pr<.62)c.flags[1]=true;
-   if(pr>.68&&pr<.86)c.flags[2]=true;
+   if(c.flags[0]&&pr>.43&&pr<.62)c.flags[1]=true;
+   if(c.flags[1]&&pr>.68&&pr<.86)c.flags[2]=true;
  }
  // True finish-line intersection from position, also if the inner racing line
  // makes nearest-track phase fail to wrap at this particular curve.
@@ -35,7 +35,7 @@ window.TTRRaceProgress=Object.freeze({create(deps){
  const crossed=planeCrossed;
  if(crossed){if(race.mode==='trial'&&c===race.player){const lap=race.trialSession?.completeLap(race.time,c);if(lap?.newBest&&lap.number>1)SND.sfx('pickup');}c.lapsCompleted++;c.flags=[false,false,false];c.mugApexPassed=false;c.lapGateBlocked=true;
    if(c.lapsCompleted>=3&&race.mode!=='elimination'){c.done=true;c.finishTime=race.time;}
-   else if(c===race.player&&race.mode!=='trial'){showHint(`${t('lapNotice')} ${c.lapsCompleted+1}!`,1.1);SND.sfx('lap');}
+   else if(c===race.player){SND.sfx('lap');}
  }
  c.lastP=pr;
  }

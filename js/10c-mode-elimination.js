@@ -55,24 +55,14 @@ function eliminationProgressUpdate(c,pr,dt){
  const recovering=(c.respawnGrace>0)||c.bridgeMissActive||c.bridgeLandingActive||!!c.routePinch;
  const legal=c.speed>9&&!recovering&&near.distance<=228&&
    (!(c.offtrack)||((c.offtrackSeconds||0)<2.2||(c.offtrackReturnGrace||0)>0));
- // Two independent, bounded measures of forward motion: phase progression
- // PLUS physical displacement along the track tangent. The latter handles
- // shallow inside-corner overtakes when projection is stationary or regresses.
- if(!legal){c.elimTravelSinceCredit=0;}
- else {
-   const frameLimit=Math.max(9,Math.abs(c.speed)*dt*1.9+5);
-   const continuous=moved<=frameLimit*1.45;
-   c.elimTravelSinceCredit=Math.min(420,(c.elimTravelSinceCredit||0)+Math.min(moved,frameLimit));
-   const plausible=Math.max(28,c.elimTravelSinceCredit*1.65+22);
-   const projected=(reverse>.5&&forward<.09&&gain<=plausible&&continuous)?gain:0;
-   const tx=Math.cos(tangent(prev)),ty=Math.sin(tangent(prev));
-   const tangentTravel=deltaX*tx+deltaY*ty;
-   // Strictly local, forward-only, no teleports, and never award shortcut
-   // progression twice. A lateral collision cannot manufacture a camera lead.
-   const physical=(!near.shortcut&&continuous&&tangentTravel>0&&
-     tangentTravel>=moved*.22)?Math.min(tangentTravel*.91,frameLimit):0;
-   const credit=Math.max(projected,physical);
-   if(credit>.01){c.elimDistance=(c.elimDistance||0)+credit;c.elimTravelSinceCredit=0;}
+ // Signed course progress, never cumulative tangent travel (which drifts on corners).
+ if(legal){
+   const signed=forward<=.5?gain:-reverse*TRACK_LENGTH;
+   const budget=Math.max(36,moved*2.5+18);
+   // The authorised toast bridge uses the course projection; ordinary jumps are rejected.
+   if(Math.abs(signed)<=budget||(c.onBridge&&Math.abs(signed)<TRACK_LENGTH*.045))c.elimDistance=(c.elimDistance||0)+signed;
+ }else if(c.speed< -9&&!recovering&&near.distance<=170){
+   if(reverse<.02)c.elimDistance=(c.elimDistance||0)-reverse*TRACK_LENGTH;
  }
  c.elimPrevP=pr;c.elimPrevX=c.x;c.elimPrevY=c.y;
 }
@@ -83,7 +73,7 @@ function eliminationEvaluate(dt){const race=getRace();
  let active=eliminationActive();
  if(active.length===1){awardEliminationPoint(active[0]);return;}
  if(active.length===0){eliminationNewRound();return;}
- const leader=eliminationCameraLeader();
+ const leader=active.slice().sort((a,b)=>(b.elimDistance||0)-(a.elimDistance||0)||a.id-b.id)[0];
  const view=eliminationViewBounds(),margin=ELIM_RULES_TEST.edgeMargin;
  const lensSettled=Math.abs(leader.x-view.x)<view.halfW*.43&&
                    Math.abs(leader.y-view.y)<view.halfH*.43;
@@ -134,7 +124,7 @@ function eliminationEvaluate(dt){const race=getRace();
      queued.push([c,'fuori schermo']);
  }
  // Commit the entire batch before checking whether only one competitor remains.
- for(const [car,reason] of queued)knockOutElimination(car,reason);
+ const last=active.slice().sort((a,b)=>(a.elimDistance||0)-(b.elimDistance||0)||b.id-a.id)[0];const candidate=queued.find(([car])=>car===last&&car!==leader);if(candidate)knockOutElimination(...candidate);
  active=eliminationActive();
  if(active.length===1)awardEliminationPoint(active[0]);
  else if(active.length===0)eliminationNewRound();

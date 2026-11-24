@@ -6,7 +6,7 @@ window.TTRRaceDrivers=Object.freeze({create(deps){
 
 function inputFor(c){
  const race=getRace(),onlineSession=getOnlineSession();
-if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInput(c);if(net)return net;}if(c===race.player){const steer=(controls.right||keys.ArrowRight||keys.KeyD?1:0)-(controls.left||keys.ArrowLeft||keys.KeyA?1:0);return {steer,gas:race.auto||controls.gas||keys.ArrowUp||keys.KeyW,brake:controls.brake||keys.ArrowDown||keys.KeyS};}
+if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInput(c);if(net)return net;}if(c===race.player){const steer=(controls.right||window.TTRKeyboard.down('right')?1:0)-(controls.left||window.TTRKeyboard.down('left')?1:0);return {steer,gas:race.auto||controls.gas||window.TTRKeyboard.down('gas'),brake:controls.brake||window.TTRKeyboard.down('brake')};}
  let target=trackPoint(mod(c.p+.027,1));
  const ramp=props.find(o=>o.type==='ramp');const difficulty=race.aiFactor||1;
  if(ramp&&race.mode!=='online'&&!c.bridgeMissActive&&c.p>.53&&c.p<.625&&c.shortcutDecisionLap!==c.lapsCompleted){c.shortcutDecisionLap=c.lapsCompleted;c.tryShortcut=Math.random()<(difficulty>=1.1?.72:difficulty>=1?.30:.08);}
