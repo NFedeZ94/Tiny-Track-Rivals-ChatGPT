@@ -23,7 +23,7 @@
  }
  function create({trackId,carId,carName,lapCount=3}={}){
   if(!trackId||!carId||!Number.isInteger(lapCount)||lapCount<1)throw new TypeError('Invalid trial configuration');
-  const laps=[],frames=[];let lapStart=0,best=null,notice=null,finished=false,overflow=false;
+  const laps=[],frames=[],lapGhosts=[];let lapStart=0,best=null,notice=null,finished=false,overflow=false,lapFrameStart=0;
   function sample(t,car,{discontinuity=false,force=false}={}){
    if(overflow||finished)return false;
    const p=pose(t,car);if(!p)return false;
@@ -39,10 +39,14 @@
    if(finished||!validTime(t)||t<=lapStart)return null;
    const duration=t-lapStart,previous=laps.at(-1),newBest=best===null||duration<best;
    const lap={number:laps.length+1,time:duration,gap:previous?duration-previous.time:null,newBest};
+   sample(t,car,{force:true});
+   const slice=frames.slice(lapFrameStart);
+   const recording=!overflow&&slice.length>1&&Math.abs(slice[0].t-lapStart)<1e-6?{version:1,trackId,carId,total:duration,frames:slice.map((f,i)=>({...f,t:i===0?0:i===slice.length-1?duration:f.t-lapStart,cut:i===0?false:f.cut}))}:null;
+   lapGhosts.push(recording);lapFrameStart=Math.max(0,frames.length-1);
    laps.push(lap);lapStart=t;if(newBest)best=duration;
    // First lap establishes a reference, not a personal-improvement alert.
    notice={gap:lap.gap,newBest:lap.number>1&&newBest,until:t+3};
-   if(laps.length===lapCount){sample(t,car,{force:true});finished=true;}
+   if(laps.length===lapCount)finished=true;
    return {...lap};
   }
   function hud(t){
@@ -51,9 +55,16 @@
   }
   function result(){
    if(!finished)return null;
-   return {trackId,carId,carName:carName||carId,total:lapStart,bestLap:best,laps:laps.map(l=>({...l})),ghost:!overflow&&frames.length>1&&frames[0].t===0&&frames.at(-1).t===lapStart?{version:1,trackId,carId,total:lapStart,frames:frames.map(f=>({...f}))}:null};
+   return {trackId,carId,carName:carName||carId,total:lapStart,bestLap:best,bestLapGhost:bestLapRecording(),laps:laps.map(l=>({...l})),ghost:!overflow&&frames.length>1&&frames[0].t===0&&frames.at(-1).t===lapStart?{version:1,trackId,carId,total:lapStart,frames:frames.map(f=>({...f}))}:null};
   }
-  return Object.freeze({sample,completeLap,hud,result});
+  function bestLapRecording(){return lapGhosts.filter(Boolean).reduce((a,b)=>!a||b.total<a.total?b:a,null);}
+  function reference(mode,historical,full){
+   const historicalPlay=playback(historical,trackId,carId),fullPlay=playback(full,trackId,carId);let active=null,localPlay=null;
+   return t=>{if(mode==='off')return null;if(mode==='race')return fullPlay(t);if(mode==='lap'||!laps.length)return historicalPlay(t-lapStart);
+    const choice=bestLapRecording();if(choice!==active){active=choice;localPlay=playback(choice,trackId,carId);}
+    return localPlay?localPlay(t-lapStart):null;};
+  }
+  return Object.freeze({sample,completeLap,hud,result,reference,bestLapRecording});
  }
  function validateGhost(g,trackId,carId){
   if(!g||g.version!==1||g.trackId!==trackId||g.carId!==carId||!validTime(g.total)||!Array.isArray(g.frames)||g.frames.length<2||g.frames.length>MAX_FRAMES)return false;

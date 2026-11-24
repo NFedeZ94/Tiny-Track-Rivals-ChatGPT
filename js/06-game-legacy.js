@@ -641,6 +641,7 @@ function eliminationApplyGrid(fresh,point,index){
  fresh.elimDistance=-Math.floor(index/2)*ELIM_ROW_SPACING;
  fresh.elimPrevP=point.p;fresh.elimPrevX=point.x;fresh.elimPrevY=point.y;
  fresh.elimTravelSinceCredit=0;fresh.elimLag=0;fresh.elimProtection=0;
+ fresh.lastValidPosition={x:point.x,y:point.y,p:point.p,a:point.a,speed:46,laps:0,flags:[false,false,false],mugApexPassed:false,elimDistance:fresh.elimDistance};fresh.previousValidPosition=null;
  fresh.elimLastMeaningfulProgress=fresh.elimDistance;fresh.elimRecoveryCount=0;
  fresh.elimRecoveryWindowStart=-999;fresh.elimRecoveryStartDistance=fresh.elimDistance;
  fresh.elimStallSeconds=0;fresh.elimLastRecoveryAt=-999;
@@ -662,7 +663,9 @@ function eliminationNewRound(){
   const profileIndex=profiles.findIndex(pr=>pr.id===c.profile.id);
   const fresh=eliminationApplyGrid(createCar(i,profileIndex,placement.grid[i].p),placement.grid[i],i);
   const keep={variantAccent:c.variantAccent,variantLabel:c.variantLabel,variantSprite:c.variantSprite};
-  Object.assign(c,fresh,keep);c.eliminated=false;c.elimCelebration=0;
+  // Reuse the object identity (player and UI references), not stale recovery/bridge state.
+   for(const key of Object.keys(c))if(!(key in fresh))delete c[key];
+   Object.assign(c,fresh,keep);c.eliminated=false;c.elimCelebration=0;
  });
  elimGridCamera=eliminationGridCameraPosition(placement.grid);
  camX=elimGridCamera.x;camY=elimGridCamera.y;
@@ -731,7 +734,7 @@ function eliminationProjectedAhead(challenger,incumbent){
 }
 function eliminationCameraLeader(){
  const active=eliminationActive();if(!active.length)return race.player;
- const leader=active.slice().sort((a,b)=>(b.elimDistance||0)-(a.elimDistance||0)||a.id-b.id)[0];
+ const leader=ttrEliminationMode.eliminationRanking()[0];
  if(elimCameraId!==leader.id){race.elim.lastLeaderSwitchTime=race.time;elimFocusWeight=0;}
  elimCameraId=leader.id;elimCameraProgress=leader.elimDistance||0;
  return leader;
@@ -832,7 +835,7 @@ function initRace(mode){
  for(let i=0;i<num;i++){const own=mode==='online'&&onlineSession?.members[i];race.cars.push(createCar(i,own?own.car:i===0?pr:i%profiles.length,mod(.005-Math.floor(i/2)*.019,1)));}
  assignDuplicateAccents();
  race.player=race.cars[mode==='online'&&onlineSession?onlineSession.slot:0];
- if(mode==='trial'){const p=race.player.profile;race.trialSession=window.TTRTrialSession.create({trackId:window.TTRModeTrial.track,carId:p.id,carName:p.name});race.trialRecovery=race.player.shortcutRespawns||0;race.trialSession.sample(0,race.player,{force:true});race.trialGhost=window.TTRModeTrial.ghost(p.id);}
+ if(mode==='trial'){const p=race.player.profile;race.trialSession=window.TTRTrialSession.create({trackId:window.TTRModeTrial.track,carId:p.id,carName:p.name});race.trialRecovery=race.player.shortcutRespawns||0;race.trialSession.sample(0,race.player,{force:true});race.trialGhost=window.TTRModeTrial.ghost(p.id,race.trialSession);}
  if(mode==='elimination'){
    const placement=eliminationChooseGrid(0,num,true);
    race.cars.forEach((c,i)=>{eliminationApplyGrid(c,placement.grid[i],i);c.eliminated=false;c.elimCelebration=0;});
@@ -1144,6 +1147,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  ttrRaceOil.handleOilContact(c,oldX,oldY);
  ttrRacePickups.collect(c);
  ttrRaceProgress.updateCarProgress(c,dt,oldX,oldY);
+ if(race.mode==='elimination'&&c.lastValidPosition&&Math.abs(c.lastValidPosition.p-c.p)<1e-8&&Math.abs(c.elimPrevP-c.p)<1e-8)c.lastValidPosition.elimDistance=c.elimDistance;
  ttrRaceCPU.useTacticalPowerup(c);
  }
  ttrRaceCollisions.handleCars();
@@ -1405,11 +1409,15 @@ function togglePause(){if(!race||race.finished)return;race.paused=!race.paused;r
  else SND.music('race');syncAudio();}
 const miniBase=window.TTRMinimapVisuals.createRaceMiniBase(points,shortcutSamples,WORLD_W,WORLD_H);
 let ttrFrameMean=1/60,ttrLowGraphics=false,ttrQualityTimer=0;
+ const SIM_STEP=1/60;let simDebt=0,simRace=null,simPrevious=new Map(),renderFraction=1,lastHudAt=-Infinity;
+ function visualCar(c){const p=simPrevious.get(c.id);if(!p||p.round!==race.elim?.round||p.recovery!==(c.shortcutRespawns||0)||Math.hypot(c.x-p.x,c.y-p.y)>100)return c;const u=renderFraction;return {...c,x:p.x+(c.x-p.x)*u,y:p.y+(c.y-p.y)*u,a:p.a+angleDiff(c.a,p.a)*u};}
+ function resetSim(){simDebt=0;simPrevious.clear();renderFraction=1;lastHudAt=-Infinity;}
+ document.addEventListener('visibilitychange',()=>{resetSim();frameTime=performance.now();});
 function render(){const ratio=Math.min(ttrLowGraphics?1.0:Infinity,race?.mode==='online'&&onlineSession&&!onlineSession.host?1.38:1.65,devicePixelRatio||1);if(sw!==innerWidth||sh!==innerHeight||dpr!==ratio){sw=innerWidth;sh=innerHeight;dpr=ratio;canvas.width=Math.ceil(sw*dpr);canvas.height=Math.ceil(sh*dpr);}g.setTransform(dpr,0,0,dpr,0,0);g.fillStyle='#6e4a37';g.fillRect(0,0,sw,sh);
  // Real follow camera: the circuit extends beyond the mobile viewport.
  // Keep the player just behind centre, giving sight of the upcoming corner.
  const gridLocked=race?.mode==='elimination'&&race.elim.state==='race'&&race.countdown>0;
- const player=race?.mode==='elimination'?(gridLocked?race.player:race.elim.state==='celebration'?race.cars[race.elim.winner]:eliminationCameraLeader()):race?.player,playerFalling=!!(player&&player.tableFalling>0);
+ const physicalPlayer=race?.mode==='elimination'?(gridLocked?race.player:race.elim.state==='celebration'?race.cars[race.elim.winner]:eliminationCameraLeader()):race?.player,player=physicalPlayer?visualCar(physicalPlayer):null,playerFalling=!!(player&&player.tableFalling>0);
  const look=player&&race.countdown<=0&&!playerFalling?(race?.mode==='elimination'?0:85):0;
  const groupTarget=race?.mode==='elimination'&&race.elim.state==='race'&&!gridLocked?{x:player.x,y:player.y}:null;
  const targetX=gridLocked?elimGridCamera.x:groupTarget?groupTarget.x:player?player.x+Math.cos(player.a)*look:WORLD_W/2;
@@ -1419,8 +1427,8 @@ function render(){const ratio=Math.min(ttrLowGraphics?1.0:Infinity,race?.mode===
  const halfW=sw/(2*scale),halfH=sh/(2*scale);
   // Progressive catch-up replaces the old instantaneous follow=1 branch.
   const gapToTarget=Math.hypot(targetX-camX,targetY-camY);
-  const response=race?.mode==='elimination'?Math.min(30,19+gapToTarget/65):6.4;
-  const follow=gridLocked?1:playerFalling?.23:1-Math.exp(-Math.min(.05,renderDelta)*response);
+  const response=race?.mode==='elimination'?Math.min(15,9+gapToTarget/110):6.4;
+  const follow=gridLocked?1:playerFalling?.23:1-Math.exp(-Math.min(.15,renderDelta)*response);
  camX+=(targetX-camX)*follow;camY+=(targetY-camY)*follow;
  const outerView=playerFalling?105:0;
  camX=halfW>=WORLD_W/2?WORLD_W/2:clamp(camX,halfW-outerView,WORLD_W-halfW+outerView);
@@ -1429,7 +1437,7 @@ function render(){const ratio=Math.min(ttrLowGraphics?1.0:Infinity,race?.mode===
  const viewLeft=Math.max(0,Math.floor(camX-halfW-60)),viewTop=Math.max(0,Math.floor(camY-halfH-60));
  const viewRight=Math.min(WORLD_W,Math.ceil(camX+halfW+60)),viewBottom=Math.min(WORLD_H,Math.ceil(camY+halfH+60));
  if(viewRight>viewLeft&&viewBottom>viewTop)g.drawImage(track,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop);
- if(race){race.oils.forEach(o=>renderOil(g,o,clock));race.pickups.forEach(p=>drawBox(g,p));
+ if(race){race.oils.forEach(o=>{if(Math.abs(o.x-camX)<halfW+100&&Math.abs(o.y-camY)<halfH+100)renderOil(g,o,clock);});race.pickups.forEach(p=>{if(Math.abs(p.x-camX)<halfW+80&&Math.abs(p.y-camY)<halfH+80)drawBox(g,p);});
    // Genuine ramp-entry cars render ABOVE the ramp even before jump starts.
   const visibleProp=o=>Math.abs(o.x-camX)<halfW+145&&Math.abs(o.y-camY)<halfH+145;
   // Floor spills are decals below all four wheels, irrespective of their y-sort position.
@@ -1442,22 +1450,39 @@ function render(){const ratio=Math.min(ttrLowGraphics?1.0:Infinity,race?.mode===
    // Road cars are drawn first. The opaque raised bread deck then occludes them
    // at crossings, while vehicles actually ON the bridge stay visible on top.
    [...props.filter(o=>o.type!=='ramp'&&o.type!=='milk_cereal_spill'&&visibleProp(o)).map(o=>({y:o.y,prop:o})),
-    ...race.cars.filter(c=>!c.eliminated&&c.jump<=0&&!c.onBridge&&!c.rampEntryVisual&&!(c.bridgeExitVisual>0)).map(c=>({y:c.y,car:c}))]
+    ...race.cars.filter(c=>!c.eliminated&&visibleProp(c)&&c.jump<=0&&!c.onBridge&&!c.rampEntryVisual&&!(c.bridgeExitVisual>0)).map(c=>({y:c.y,car:visualCar(c)}))]
      .sort((a,b)=>a.y-b.y).forEach(e=>e.prop?drawObstacle(g,e.prop):carSprite(g,e.car));
    if(viewRight>viewLeft&&viewBottom>viewTop)g.drawImage(bridgeLayer,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop);
    props.filter(o=>o.type==='ramp'&&visibleProp(o)).forEach(o=>drawObstacle(g,o));
-   race.cars.filter(c=>!c.eliminated&&(c.onBridge||c.jump>0||c.rampEntryVisual||c.bridgeExitVisual>0)).forEach(c=>carSprite(g,c));
+   race.cars.filter(c=>!c.eliminated&&visibleProp(c)&&(c.onBridge||c.jump>0||c.rampEntryVisual||c.bridgeExitVisual>0)).forEach(c=>carSprite(g,visualCar(c)));
 
- for(const c of race.cars){if(!c.eliminated&&c.claw>0&&c.clawTarget)drawClawCable(g,c,c.clawTarget,clock);}
- race.effects.forEach(e=>renderEffect(g,e,clamp));if(race.countdown>0){g.save();g.setTransform(dpr,0,0,dpr,0,0);g.textAlign='center';g.textBaseline='middle';g.lineWidth=7;g.strokeStyle='#142438';g.font=`950 ${Math.min(90,sw/5)}px system-ui`;const v=Math.ceil(race.countdown);g.strokeText(String(v),sw/2,sh/2);g.fillStyle='#ffe67f';g.fillText(String(v),sw/2,sh/2);g.restore();}}else gameObstacles(g);
+ for(const c of race.cars){if(!c.eliminated&&c.claw>0&&c.clawTarget)drawClawCable(g,visualCar(c),visualCar(c.clawTarget),clock);}
+ race.effects.forEach(e=>{if(Math.abs(e.x-camX)<halfW+160&&Math.abs(e.y-camY)<halfH+160)renderEffect(g,e,clamp);});if(race.countdown>0){g.save();g.setTransform(dpr,0,0,dpr,0,0);g.textAlign='center';g.textBaseline='middle';g.lineWidth=7;g.strokeStyle='#142438';g.font=`950 ${Math.min(90,sw/5)}px system-ui`;const v=Math.ceil(race.countdown);g.strokeText(String(v),sw/2,sh/2);g.fillStyle='#ffe67f';g.fillText(String(v),sw/2,sh/2);g.restore();}}else gameObstacles(g);
  if(clock>lastHint&&lastHint!==0){$('hint').classList.remove('show');lastHint=0;}
 }
 function frame(t){
- const raw=Math.max(0,(t-frameTime)/1000);frameTime=t;
- const dt=raw>.25?0:Math.min(.12,raw);renderDelta=dt||1/60;
- if(race&&raw>0&&raw<.15){ttrFrameMean+=.06*(raw-ttrFrameMean);ttrQualityTimer+=raw;if(ttrQualityTimer>(ttrLowGraphics?10:1.5)){if(ttrFrameMean>.027)ttrLowGraphics=true;else if(ttrFrameMean<.019)ttrLowGraphics=false;ttrQualityTimer=0;}}
- onlinePingTick(t);
- if(race){if(race.mode==='online'&&onlineSession&&!onlineSession.host){clock+=dt;onlineGuestStep(dt);}else if(dt>0){const steps=Math.max(1,Math.ceil(dt/(1/55)));for(let i=0;i<steps;i++)update(dt/steps,i===steps-1);onlineBroadcast(dt);}render();}
+  const raw=Math.max(0,(t-frameTime)/1000);frameTime=t;
+  const dt=document.hidden?0:Math.min(.5,raw);renderDelta=dt||1/60;
+  if(simRace!==race){simRace=race;resetSim();}
+  if(race&&raw>0&&raw<.5){ttrFrameMean+=.10*(raw-ttrFrameMean);ttrQualityTimer+=raw;if(ttrQualityTimer>(ttrLowGraphics?12:.5)){if(ttrFrameMean>.026)ttrLowGraphics=true;else if(ttrFrameMean<.019)ttrLowGraphics=false;ttrQualityTimer=0;}}
+  onlinePingTick(t);
+  if(race){
+   if(race.mode==='online'&&onlineSession&&!onlineSession.host){const netDt=raw>.25?0:Math.min(.12,dt);clock+=netDt;onlineGuestStep(netDt);renderFraction=1;}
+   else if(race.paused||race.finished||innerHeight>innerWidth||document.hidden){resetSim();syncAudio();}
+   else {
+    simDebt=Math.min(.75,simDebt+dt);let count=0;
+    // Bounded catch-up preserves normal 30/60 Hz timing and avoids runaway CPU load.
+    while(simDebt+1e-9>=SIM_STEP&&count<12){
+      simPrevious=new Map(race.cars.map(c=>[c.id,{x:c.x,y:c.y,a:c.a,round:race.elim?.round,recovery:c.shortcutRespawns||0}]));
+      update(SIM_STEP,false);simDebt=Math.max(0,simDebt-SIM_STEP);count++;
+      if(race.finished){resetSim();break;}
+    }
+    renderFraction=Math.min(1,simDebt/SIM_STEP);
+    if(race.mode==='online')onlineBroadcast(dt);
+    if(t-lastHudAt>=66||lastHudAt===-Infinity){hud();lastHudAt=t;}
+   }
+   render();
+  }
  else {clock+=dt;
    // Lightweight canvas-only 60fps turntable: the rest of the game stays paused while in the garage.
    if(t-lastShowroomDraw>8){lastShowroomDraw=t;

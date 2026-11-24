@@ -262,8 +262,8 @@
     let best={distance:Infinity,t:0,x:0,y:0};
     for(let i=0;i<shortcutSamples.length-1;i++){
       const a=shortcutSamples[i],b=shortcutSamples[i+1],dx=b.x-a.x,dy=b.y-a.y,den=dx*dx+dy*dy||1;
-      const t=clamp(((point.x-a.x)*dx+(point.y-a.y)*dy)/den,0,1),x=a.x+t*dx,y=a.y+t*dy,d=Math.hypot(point.x-x,point.y-y);
-      if(d<best.distance)best={distance:d,t:(i+t)/(shortcutSamples.length-1),x,y,p:shortcutFrom+(shortcutTo-shortcutFrom)*(i+t)/(shortcutSamples.length-1)};
+      const t=clamp(((point.x-a.x)*dx+(point.y-a.y)*dy)/den,0,1),x=a.x+t*dx,y=a.y+t*dy,d=(point.x-x)**2+(point.y-y)**2;
+      if(d<best.distance*best.distance)best={distance:Math.sqrt(d),t:(i+t)/(shortcutSamples.length-1),x,y,p:shortcutFrom+(shortcutTo-shortcutFrom)*(i+t)/(shortcutSamples.length-1)};
     }
     return best;
   };
@@ -284,8 +284,8 @@
       const pa=(i+.5)/n;if(phaseGap(pa,anchor)>window)continue;
       const a=waypoints[i],b=waypoints[(i+1)%n],dx=b.x-a.x,dy=b.y-a.y,len=dx*dx+dy*dy||1;
       const t=clamp(((point.x-a.x)*dx+(point.y-a.y)*dy)/len,0,1);
-      const x=a.x+t*dx,y=a.y+t*dy,d=Math.hypot(point.x-x,point.y-y);
-      if(d<best.distance){let m=Math.sqrt(len);best={distance:d,p:(i+t)/n,x,y,nx:-dy/m,ny:dx/m};}
+      const x=a.x+t*dx,y=a.y+t*dy,d=(point.x-x)**2+(point.y-y)**2;
+      if(d<best.distance*best.distance){let m=Math.sqrt(len);best={distance:Math.sqrt(d),p:(i+t)/n,x,y,nx:-dy/m,ny:dx/m};}
     }
     return Number.isFinite(best.distance)?best:nearestTrack(point,waypoints);
   }
@@ -296,8 +296,8 @@
   function nearestTrack(point,waypoints){let best={distance:Infinity,p:0,x:0,y:0,nx:0,ny:0};const n=waypoints.length;for(let i=0;i<n;i++){
     const a=waypoints[i],b=waypoints[(i+1)%n],dx=b.x-a.x,dy=b.y-a.y,len=dx*dx+dy*dy||1;
     const t=clamp(((point.x-a.x)*dx+(point.y-a.y)*dy)/len,0,1);
-    const x=a.x+t*dx,y=a.y+t*dy,d=Math.hypot(point.x-x,point.y-y);
-    if(d<best.distance){let m=Math.sqrt(len);best={distance:d,p:(i+t)/n,x,y,nx:-dy/m,ny:dx/m};}
+    const x=a.x+t*dx,y=a.y+t*dy,d=(point.x-x)**2+(point.y-y)**2;
+    if(d<best.distance*best.distance){let m=Math.sqrt(len);best={distance:Math.sqrt(d),p:(i+t)/n,x,y,nx:-dy/m,ny:dx/m};}
   }return best;}
   // v0.13.6.1 — protected crumb edging: the cloth IS the track. Never place
   // a visible crumb inside the entire drivable corridor or across another curve.
