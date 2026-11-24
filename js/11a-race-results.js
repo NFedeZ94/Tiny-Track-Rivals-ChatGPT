@@ -3,7 +3,7 @@
  */
 (()=>{'use strict';
  function create(deps){
-  const {getRace,$,SND,t,fmtTime,hideEliminationUI,getShowroomStarts,flow,navigation}=deps;
+  const {getRace,$,SND,t,fmtTime,hideEliminationUI,profiles,getShowroomStarts,flow,navigation}=deps;
   let resultsMusicTimer=null;
   function cancelMusicTimer(){if(resultsMusicTimer!==null){clearTimeout(resultsMusicTimer);resultsMusicTimer=null;}}
 
@@ -42,7 +42,7 @@ function showEliminationResults(){
 function showResults(){
  const race=getRace();if(!race)return;
  if(race.mode==='elimination')return showEliminationResults();const c=race.player,mode=race.mode,finished=race.cars.slice().sort((a,b)=>a.finishTime==null?1:b.finishTime==null?-1:a.finishTime-b.finishTime);let best='';
- if(mode==='trial'&&c.finishTime!=null)best=window.TTRModeTrial.recordBest(c,fmtTime,t);
+ 
  const place=finished.indexOf(c)+1,compact=finished.length>=4;
  let careerAward=flow.recordCareerResult(race,c,place,finished.length);
 
@@ -53,7 +53,7 @@ function showResults(){
  const completedRace=race;
  resultsMusicTimer=setTimeout(()=>{resultsMusicTimer=null;if(getRace()===completedRace&&completedRace.finished)SND.music('menu');},4600);
  const rows=finished.map((r,i)=>`<tr class="${r===c?'me':''}"><td>${i+1}°</td><td class="result-car-td">${ttrResultCarCell(r,r===c)}</td><td>${r.done?fmtTime(r.finishTime):t('racing')}</td></tr>`).join('');
- const panel=document.createElement('div');panel.className=`panel resultsPanel${compact?' compact':''}`;panel.innerHTML=`<div class="flag-tape"></div><p class="eyebrow">${t('trackName')} · ${t('results')}</p><h2 class="resultTitle">${mode==='trial'?t('trialDone'):`${t('finish')}: ${place}° ${t('place')}`}</h2><div class="resultSummary"><div class="resultCard"><b>${t('place')}</b>${place}° / ${finished.length}</div><div class="resultCard"><b>${t('yourTime')}</b>${fmtTime(race.time)}</div>${best?`<div class="resultCard" style="grid-column:${compact?'1 / -1':'auto'}"><b>${mode==='trial'?'TIME TRIAL':'INFO'}</b>${best}</div>`:''}</div>${mode==='career'?`<div class="career-result">${careerAward?.newUnlocks?.length?'🏆 MISSIONE COMPLETATA · '+careerAward.newUnlocks.map(id=>(window.TTRVehicleRoster||[]).find(v=>v.id===id)?.name||id).join(', '):'🏁 Progressi Carriera aggiornati'}</div>`:''}<table class="results ${compact?'compact':''}"><tbody>${rows}</tbody></table><div class="menu-row"><button class="btn" id="again">${t('again')}</button>${mode==='career'?`<button class="btn secondary" id="resultMissions">${({it:'MISSIONI',en:'MISSIONS',es:'MISIONES'})[window.TTRI18N?.getLang?.()]||'MISSIONI'}</button>`:''}<button class="btn secondary" id="toMenu">${t('menu')}</button></div>${compact?'':`<p class="note">${t('demoNote')}</p>`}`;
+ const panel=document.createElement('div');if(mode==='trial'){panel.className='panel resultsPanel trial-results';panel.innerHTML=`<h2>${t('trialDone')}</h2>${window.TTRModeTrial.results(race,profiles,t)}<div class="menu-row"><button class="btn" id="again">${t('again')}</button><button class="btn secondary" id="toMenu">${t('menu')}</button></div>`;$('screen').innerHTML='';$('screen').appendChild(panel);$('screen').hidden=false;$('screen').style.display='flex';$('controls').style.display='none';$('hud').style.display='none';const a=flow.resultActions(mode,navigation);$('again').onclick=a.again;$('toMenu').onclick=a.toMenu;return;}panel.className=`panel resultsPanel${compact?' compact':''}`;panel.innerHTML=`<div class="flag-tape"></div><p class="eyebrow">${t('trackName')} · ${t('results')}</p><h2 class="resultTitle">${mode==='trial'?t('trialDone'):`${t('finish')}: ${place}° ${t('place')}`}</h2><div class="resultSummary"><div class="resultCard"><b>${t('place')}</b>${place}° / ${finished.length}</div><div class="resultCard"><b>${t('yourTime')}</b>${fmtTime(race.time)}</div>${best?`<div class="resultCard" style="grid-column:${compact?'1 / -1':'auto'}"><b>${mode==='trial'?'TIME TRIAL':'INFO'}</b>${best}</div>`:''}</div>${mode==='career'?`<div class="career-result">${careerAward?.newUnlocks?.length?'🏆 MISSIONE COMPLETATA · '+careerAward.newUnlocks.map(id=>(window.TTRVehicleRoster||[]).find(v=>v.id===id)?.name||id).join(', '):'🏁 Progressi Carriera aggiornati'}</div>`:''}<table class="results ${compact?'compact':''}"><tbody>${rows}</tbody></table><div class="menu-row"><button class="btn" id="again">${t('again')}</button>${mode==='career'?`<button class="btn secondary" id="resultMissions">${({it:'MISSIONI',en:'MISSIONS',es:'MISIONES'})[window.TTRI18N?.getLang?.()]||'MISSIONI'}</button>`:''}<button class="btn secondary" id="toMenu">${t('menu')}</button></div>${compact?'':`<p class="note">${t('demoNote')}</p>`}`;
  $('screen').innerHTML='';$('screen').appendChild(panel);$('screen').hidden=false;$('screen').style.display='flex';$('controls').style.display='none';$('hud').style.display='none';
  ttrRenderResultThumbnails(panel,completedRace);
  const actions=flow.resultActions(mode,navigation);$('again').onclick=actions.again;$('toMenu').onclick=actions.toMenu;

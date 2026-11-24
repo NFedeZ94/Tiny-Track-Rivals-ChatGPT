@@ -33,9 +33,9 @@ window.TTRRaceProgress=Object.freeze({create(deps){
  // Legacy phase-based seam is retained for comparison in tests, NOT used for laps:
  // finishGateCrossing(oldP,pr,closest.distance,blockedGate,gateReady,c.speed)
  const crossed=planeCrossed;
- if(crossed){c.lapsCompleted++;c.flags=[false,false,false];c.mugApexPassed=false;c.lapGateBlocked=true;
+ if(crossed){if(race.mode==='trial'&&c===race.player){const lap=race.trialSession?.completeLap(race.time,c);if(lap?.newBest&&lap.number>1)SND.sfx('pickup');}c.lapsCompleted++;c.flags=[false,false,false];c.mugApexPassed=false;c.lapGateBlocked=true;
    if(c.lapsCompleted>=3&&race.mode!=='elimination'){c.done=true;c.finishTime=race.time;}
-   else if(c===race.player){showHint(`${t('lapNotice')} ${c.lapsCompleted+1}!`,1.1);SND.sfx('lap');}
+   else if(c===race.player&&race.mode!=='trial'){showHint(`${t('lapNotice')} ${c.lapsCompleted+1}!`,1.1);SND.sfx('lap');}
  }
  c.lastP=pr;
  }

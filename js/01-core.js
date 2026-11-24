@@ -355,13 +355,13 @@
     const tension=Math.min(355,150+Math.max(0,d-48)*2.0);
     user.x+=ux*tension*dt;user.y+=uy*tension*dt;
     user.speed=Math.min((user.profile?.max||260)*1.28,Math.max(user.speed,75)+175*dt);
-    target.speed=Math.max(-30,target.speed-105*dt);
+    target.speed=Math.max(-30,target.speed-145*dt);
     target.hitVX=(target.hitVX||0)-ux*110*dt;
     target.hitVY=(target.hitVY||0)-uy*110*dt;
     if(d<76){
       // Side-by-side lane change, not an instant teleport. Make room to pass.
       const side=user.id%2===0?1:-1,sideX=-uy*side,sideY=ux*side;
-      user.x+=sideX*135*dt;user.y+=sideY*135*dt;
+      user.x+=sideX*155*dt;user.y+=sideY*155*dt;
       user.speed=Math.min((user.profile?.max||260)*1.33,user.speed+115*dt);
     }
     if(d<39){
@@ -474,7 +474,7 @@
     }
     return {impacts,maxOverlap,maxImpulse,hits};
   }
-  function racePosition(car){return Math.max(0,car.lapsCompleted||0)+mod(car.p||0,1);}
+  function racePosition(car){const laps=Math.max(0,car.lapsCompleted||0),p=mod(car.p||0,1);return laps+p-(laps===0&&p>.90&&!car.flags?.some(Boolean)?1:0);}
   function pickupCount(referenceLapSeconds){return referenceLapSeconds<45?2:(referenceLapSeconds<=70?3:4);}
   // More rivals share the same pickups: rebalance availability, not spawn count.
   // 2/4/6/8 participants => 11/9/7/5 seconds. Solo time trial stays at 10s.
