@@ -637,3 +637,24 @@ html,body,#game,#hud,#hud *,#controls,#controls *{-webkit-user-select:none!impor
  .resultsPanel.compact .menu-row .btn{min-height:34px!important;padding:4px 12px!important;}
  .resultsPanel.compact .result-car-thumb{width:clamp(38px,14vh,68px);height:clamp(20px,7vh,35px);}
 }
+
+/* Fase 14.3 — comandi di guida touch +25%, solo in landscape.
+   Solo i quattro pulsanti di gara; menu e HUD invariati. */
+@media (orientation: landscape) and (pointer: coarse) {
+  #controls #left, #controls #right {
+    width: clamp(65px, 15vw, 95px);
+    height: clamp(70px, 17.5vw, 101.25px);
+    font-size: 35px;
+  }
+  #controls #brake, #controls #use {
+    width: clamp(70px, 15vw, 90px);
+    height: clamp(70px, 17.5vw, 101.25px);
+    font-size: 17.5px;
+  }
+}
+@media (orientation: landscape) and (pointer: coarse) and (max-height: 500px) {
+  #controls #left, #controls #right,
+  #controls #brake, #controls #use {
+    height: 72.5px;
+  }
+}
