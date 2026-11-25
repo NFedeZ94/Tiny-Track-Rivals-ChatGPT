@@ -33,7 +33,26 @@ function measurePerfInput(){if(!perfTouchAt)return;const delta=performance.now()
 function resetPerf(){perfCars={};perfStats=emptyPerf();perfTotal=emptyPerf();perfReport='';perfTouchAt=0;perfInputDelay=null;perfInputSamples=[];perfRecoveries=[];perfRecoveryDropped=0;}
 
 const perfPanel=document.createElement('div');perfPanel.className='ttr-perf';perfPanel.hidden=true;document.body.appendChild(perfPanel);
-function perfSnapshot(){const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.116 · 14.20t",quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(m=>({...m,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)})),trackId:race?.trackId??perfContext.trackId,raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
+// Diagnostics only: elimination resets the car state between rounds, not the report.
+function perfSyncCounters(c,m){
+ const round=race?.mode==='elimination'?race.elim.round:0;
+ if(m._round!==round){m._round=round;m._baseRespawns=m.respawns||0;m._basePasses=m.passAttempts||0;m._crossAt=null;m._crossRamp=m.ramps||0;m._crossRecovery=m.respawns||0;}
+ m.respawns=(m._baseRespawns||0)+(c.shortcutRespawns||0);
+ m.passAttempts=(m._basePasses||0)+(c.aiPassAttempts||0);
+ if(c.lastPenaltyReason){m.lastPenalty=c.lastPenaltyReason;m.reason=c.lastPenaltyReason;}
+ m.decisions=c.shortcutDecisionCount||0;m.attempts=c.shortcutAttemptCount||0;
+}
+function perfRecordLap(m){
+ if(race.mode==='elimination'){
+  const round=race.elim.round,now=race.time;
+  (m.lineCrossings??=[]).push({round,time:+now.toFixed(3),roundTime:+race.elim.roundTime.toFixed(3),fullLap:m._crossAt!=null});
+  if(m._crossAt!=null){const time=+(now-m._crossAt).toFixed(3);m.lapTimes.push(time);(m.lapDetails??=[]).push({round,time,ramps:m.ramps-m._crossRamp,respawns:m.respawns-m._crossRecovery});}
+  m._crossAt=now;m._crossRamp=m.ramps;m._crossRecovery=m.respawns;return;
+ }
+ const lapTime=+(race.time-m.lapStart).toFixed(3);m.lapTimes.push(lapTime);(m.lapDetails??=[]).push({time:lapTime,ramps:m.ramps-(m.lapRampStart||0),respawns:m.respawns-(m.lapRecoveryStart||0)});m.lapRampStart=m.ramps;m.lapRecoveryStart=m.respawns;m.lapStart=race.time;
+}
+function perfPublicCar(m){const out=Object.fromEntries(Object.entries(m).filter(([k])=>!k.startsWith('_')));return {...out,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)};}
+function perfSnapshot(){if(race&&perfEnabled)for(const c of race.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m);}const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.120 · 14.20x",quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(perfPublicCar),trackId:race?.trackId??perfContext.trackId,raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
 window.TTRPerformance={snapshot:perfSnapshot};
 const points=breakfastPoints.slice();
 const controls={left:false,right:false,brake:false};
@@ -689,7 +708,7 @@ function eliminationActive(){return ttrEliminationMode.eliminationActive();}
 function knockOutElimination(c,reason='distacco'){return ttrEliminationMode.knockOutElimination(c,reason);}
 function awardEliminationPoint(winner){return ttrEliminationMode.awardEliminationPoint(winner);}
 function eliminationNewRound(){
- const e=race.elim;e.state='race';e.timer=0;e.winner=null;e.round++;e.roundTime=0;
+ const e=race.elim;if(perfEnabled)for(const c of race.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m);}e.state='race';e.timer=0;e.winner=null;e.round++;e.roundTime=0;
  race.oils=[];race.effects=[];race.countdown=2.15;race.pickups.forEach(p=>p.cool=0);
  const placement=eliminationChooseGrid(e.restartPhase??0,race.cars.length);
  race.cars.forEach((c,i)=>{
@@ -965,7 +984,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  if(race.countdown>0){ttrRaceTiming.advanceCountdown(dt);syncAudio();return;}
  ttrRaceTiming.advanceLiveFrame(dt);
  for(const c of race.cars){if(c.done)continue;
-  if(isBox()&&BR.transit(c,dt,race,SND)){if(perfEnabled&&perfCars[c.id]){const m=perfCars[c.id];m.ramps=c.boxPasses||0;if(!c.boxTransit&&Number.isFinite(c.boxEntryTime)){(m.boxTunnelTimes??=[]).push(+(race.time-c.boxEntryTime).toFixed(3));if(m.boxTunnelTimes.length>30)m.boxTunnelTimes.shift();}}continue;}
+  if(isBox()&&BR.transit(c,dt,race,SND)){if(perfEnabled&&perfCars[c.id]){const m=perfCars[c.id];if(!c.boxTransit&&Number.isFinite(c.boxEntryTime)){m.ramps++;(m.boxTunnelTimes??=[]).push(+(race.time-c.boxEntryTime).toFixed(3));if(m.boxTunnelTimes.length>30)m.boxTunnelTimes.shift();}}continue;}
   if((c.tableFalling||0)>0){
     c.tableFalling=Math.max(0,c.tableFalling-dt);
     if(c.tableFalling>.56){c.a+=(c.tableSpin||8.2)*dt;c.speed=Math.max(0,c.speed*(1-dt*2.2));}
@@ -977,7 +996,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
     }
     if(c.tableFalling<=0){recoverCar(c,'table-fall');}
     continue;
-  }const ctl=inputFor(c),mul=race.mode==='online'&&onlineSession?.members[c.id]?1:(c===race.player?1:(race.mode==='online'?Math.min(1,race.aiFactor):ttrRaceDrivers.skillFor(race).pace));let vmax=c.profile.max*mul,accelerate=c.profile.acc*mul;if(perfEnabled){const m=perfCars[c.id]??=( {id:c.id,model:c.profile.name,seconds:0,sum:0,max:0,gas:0,brake:0,mul,cap:vmax,acc:accelerate,ramps:0} );m.lapTimes??=[];m.lapStart??=0;m.passAttempts=c.aiPassAttempts||0;m.personality=c.aiPersonality??null;m.decisions=c.shortcutDecisionCount||0;m.attempts=c.shortcutAttemptCount||0;m.respawns=c.shortcutRespawns||0;m.lastPenalty=c.lastPenaltyReason||'';m.seconds+=dt;m.sum+=Math.abs(c.speed)*dt;m.max=Math.max(m.max,Math.abs(c.speed));m.gas+=ctl.gas?dt:0;m.brake+=ctl.brake?dt:0;m.respawns=c.shortcutRespawns||0;m.reason=c.lastPenaltyReason||'';}
+  }const ctl=inputFor(c),mul=race.mode==='online'&&onlineSession?.members[c.id]?1:(c===race.player?1:(race.mode==='online'?Math.min(1,race.aiFactor):ttrRaceDrivers.skillFor(race).pace));let vmax=c.profile.max*mul,accelerate=c.profile.acc*mul;if(perfEnabled){const m=perfCars[c.id]??=( {id:c.id,model:c.profile.name,seconds:0,sum:0,max:0,gas:0,brake:0,mul,cap:vmax,acc:accelerate,ramps:0} );m.lapTimes??=[];m.lapStart??=0;perfSyncCounters(c,m);m.personality=c.aiPersonality??null;m.lastPenalty??='';m.reason??='';m.seconds+=dt;m.sum+=Math.abs(c.speed)*dt;m.max=Math.max(m.max,Math.abs(c.speed));m.gas+=ctl.gas?dt:0;m.brake+=ctl.brake?dt:0;}
  // Sticky jam has a lasting, measurable slowdown and reduced acceleration.
  // It is not another oil patch: grip remains predictable, speed is limited.
  const inJam=!isBox()&&c.jump<=0&&jamHit(c,jamPatch);
@@ -992,6 +1011,13 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  }
  // A fall from the toast bridge costs time; it is neither a free shortcut nor a respawn.
  if(c.bridgeMissActive){const cap=c.bridgeFalling>0?32:100;c.speed=Math.sign(c.speed)*Math.min(Math.abs(c.speed),cap);}
+ // The pocket exit is a short, controllable merge, not a launch.
+ const boxExitAssist=isBox()?Math.max(0,c.boxExitAssist||0):0;
+ if(boxExitAssist>0&&c.speed>0){
+   const u=clamp(1-boxExitAssist/BR.exitAssistDuration,0,1);
+   const cap=vmax*(.40+.60*u*u*(3-2*u));
+   c.speed=Math.min(c.speed,cap);
+ }
  c.steer=ctl.steer;
  c.knifeCd=Math.max(0,(c.knifeCd||0)-dt);
  c.bridgeMissGrace=Math.max(0,(c.bridgeMissGrace||0)-dt);
@@ -1010,14 +1036,16 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  let turn=c.profile.turn*(.24+clamp(Math.abs(c.speed)/160,0,1)*.76)*(c.slip>0?.38:1)*preSurface.grip*(c.profile.gripFactor||1);
  if((c.oilSpin||0)>0){const step=Math.min(dt,c.oilSpin);c.a+=c.oilSpinDir*2*Math.PI*(step/1.16);c.oilSpin-=step;c.speed=Math.sign(c.speed)*Math.min(Math.abs(c.speed),145);}
  else {
-   const assist=isBox()?Math.max(0,c.boxExitAssist||0):0;
-   if(assist>0){
-     // Blend steering authority back in; the player can brake throughout.
-     const blend=clamp(1-assist/.42,0,1),target=B.tangent(c.routeStableP??c.p);
-     c.a+=angleDiff(target,c.a)*Math.min(1,dt*5*(1-blend));
-     c.a+=ctl.steer*turn*(.35+.65*blend)*(c.speed>=0?1:-.7)*dt;
-     c.boxExitAssist=Math.max(0,assist-dt);
+   const assist=boxExitAssist;
+   if(assist>0&&c.speed>0&&!ctl.brake){
+     // Follow the immediate road curvature, without fighting deliberate input.
+     const blend=clamp(1-assist/BR.exitAssistDuration,0,1);
+     const target=B.tangent((c.routeStableP??c.p)+.005);
+     const correction=clamp(angleDiff(target,c.a),-.55,.55);
+     c.a+=correction*Math.min(1,dt*4*(1-blend)*(1-.65*Math.min(1,Math.abs(ctl.steer))));
+     c.a+=ctl.steer*turn*(.65+.35*blend)*dt;
    }else c.a+=ctl.steer*turn*(c.speed>=0?1:-.7)*dt;
+   if(assist>0)c.boxExitAssist=Math.max(0,assist-dt);
  }
  c.a+=(c.hitYaw||0)*dt;c.hitYaw=(c.hitYaw||0)*Math.exp(-4.0*dt);
  if(c.claw>0){
@@ -1193,11 +1221,12 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  ttrRacePickups.collect(c);
  const lapBefore=c.lapsCompleted;
  ttrRaceProgress.updateCarProgress(c,dt,oldX,oldY);
- if(perfEnabled&&perfCars[c.id]&&c.lapsCompleted===lapBefore+1){const m=perfCars[c.id];const lapTime=+(race.time-m.lapStart).toFixed(3);m.lapTimes.push(lapTime);(m.lapDetails??=[]).push({time:lapTime,ramps:m.ramps-(m.lapRampStart||0),respawns:m.respawns-(m.lapRecoveryStart||0)});m.lapRampStart=m.ramps;m.lapRecoveryStart=m.respawns;m.lapStart=race.time;}
+ if(perfEnabled&&perfCars[c.id]&&c.lapsCompleted===lapBefore+1){const m=perfCars[c.id];perfSyncCounters(c,m);perfRecordLap(m);}
  if(race.mode==='elimination'&&c.lastValidPosition&&K.phaseGap(c.lastValidPosition.p,c.elimPrevP)<.008){const d=((K.forwardProgress(c.elimPrevP,c.lastValidPosition.p)+.5)%1-.5)*TRACK_LENGTH;c.lastValidPosition.elimDistance=c.elimDistance+d;}
  ttrRaceCPU.useTacticalPowerup(c);
  }
  ttrRaceCollisions.handleCars();
+ if(perfEnabled)for(const c of race.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m);}
  if(race.trialSession)race.trialSession.sample(race.time,race.player,{discontinuity:race.trialRecovery!==(race.player.shortcutRespawns||0)});race.trialRecovery=race.player.shortcutRespawns||0;
  if(race.mode==='elimination'){eliminationEvaluate(dt);syncAudio();}
  else if(race.mode==='online'&&onlineSession?.host){
@@ -1323,7 +1352,15 @@ function showLanguage(){stopMenuMusic();$('screen').hidden=true;$('screen').styl
 // Fase 6f: wrapper di compatibilità; l'intera pittura delle vetture vive nel modulo 06f.
 const {TTRShowroomStarts,TTRShowroom60}=window.TTRVehicleVisuals;
 function drawShowroom(canvas,index,view='menu'){return window.TTRVehicleVisuals.drawShowroom(canvas,index,view,clock,garageRotationOrigin,profiles);}
-function showGarage(){
+async function showGarage(){
+ const button=$('garageBtn');
+ if(!window.TTRAssets?.isGarageReady?.()){
+   if(button){button.disabled=true;button.textContent='CARICAMENTO GARAGE…';}
+   const ok=await window.TTRAssets?.garageReady;
+   if(button){button.disabled=false;button.textContent=t('garage');}
+   if(!ok){console.warn('Garage: one or more rotation atlases failed to decode');}
+   if($('screen').hidden)return;
+ }
  stopMenuMusic();SND.music('garage');$('screen').hidden=true;$('screen').style.display='none';$('garageScreen').hidden=false;
  garagePreview=selectedCar;garageRotationOrigin=clock;refreshGarage();ping(650,.10,.13);
 }
@@ -1336,9 +1373,13 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
  const garageLabels=['Velocità','Accelerazione','Sterzo','Grip','Impatto','Stabilità'];
  const stats=garageLabels.map((label,i)=>[label,garageDesignStats[p.id]?.[i]??0]);
  $('garageBars').setAttribute('aria-label',garageDesignSource); $('garageBars').innerHTML=stats.map(([label,raw])=>{const value=Math.max(0,Math.min(10,Number(raw)||0));return `<div class="garage-stats"><span class="garage-stat-label">${label}</span><div class="rail" role="meter" aria-label="${label}" aria-valuemin="0" aria-valuemax="10" aria-valuenow="${value}">${Array.from({length:10},(_,i)=>`<i class="${i<value?'filled':''}"></i>`).join('')}</div><b class="garage-stat-value">${value}/10</b></div>`}).join('');
+ const list=$('garageChoices'),listKey=profiles.map(q=>q.id).join(',')+'|'+selectedCar;
+ if(list.dataset.rosterKey!==listKey){list.dataset.rosterKey=listKey;
  $('garageChoices').innerHTML=profiles.map((q,i)=>`<button class="car-choice ${i===garagePreview?'active':''}" data-car="${i}"><img class="car-choice-preview" data-image="${q.id}" alt="" aria-hidden="true"><span class="car-choice-info"><b>${String((window.TTRVehicleRoster||[]).find(v=>v.id===q.id)?.index??(i+1)).padStart(2,'0')} · ${q.name}</b><small>${q.id===profiles[selectedCar].id?t('selected'):['HOT HATCH','V8','BUGGY','SPORT','SUPERCAR · TEST','ENDURANCE · TEST','ROADSTER · TEST','ELETTRICA · TEST','HYPER EV · TEST','SUV · TEST','PICKUP · TEST','VAN · TEST','4X4 · TEST','HOT ROD · TEST','TAXI · TEST','POLIZIA · TEST','CLASSICA · TEST','MONOPOSTO · TEST','RALLY · TEST','MONSTER · TEST'][i]}</small></span></button>`).join('');
  document.querySelectorAll('.car-choice-preview').forEach(el=>{const car=el.dataset.image.replace('_showroom','');const pic=window.TTRAssets?.images[car+'_showroom']||window.TTRAssets?.images[car];const thumb=window.TTRVehicleThumbnail?.(car);if(thumb)el.src=thumb;else if(pic?.src)el.src=pic.src;});
- document.querySelectorAll('[data-car]').forEach(el=>el.onclick=()=>{garagePreview=+el.dataset.car;garageRotationOrigin=clock;ping(640,.08,.07);refreshGarage();});
+ list.querySelectorAll('[data-car]').forEach(el=>el.onclick=()=>{garagePreview=+el.dataset.car;garageRotationOrigin=clock;ping(640,.08,.07);refreshGarage();});
+ }
+ list.querySelectorAll('[data-car]').forEach(el=>el.classList.toggle('active',+el.dataset.car===garagePreview));
  const artCard=$('garageCanon');if(artCard){
    const pic=profiles[garagePreview].id+'_concept_views';
    const asset=window.TTRAssets?.images[pic];
@@ -1352,8 +1393,8 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
 function wireMenu(){
  // 14.15: tolerate a cached pre-14.14 HTML shell; manual acceleration is no longer supported.
  const obsoleteAuto=$('auto');if(obsoleteAuto){const label=obsoleteAuto.closest('label');if(label)label.remove();else obsoleteAuto.remove();}
- document.documentElement.dataset.ttrJsBuild='0.13.6.116';
- const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.116 · 14.20t';
+ document.documentElement.dataset.ttrJsBuild='0.13.6.120';
+ const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.120 · 14.20x';
  // A transformed menu creates a non-viewport containing block for fixed dialogs.
  // Move Options to document.body, so the overlay is genuinely viewport-sized on iPhone.
  const settingsDialog=$('retroSettings');if(settingsDialog&&settingsDialog.parentNode!==document.body)document.body.appendChild(settingsDialog);const configDialog=$('raceConfig');if(configDialog&&configDialog.parentNode!==document.body)document.body.appendChild(configDialog);const trackDialog=$('trackSelect');if(trackDialog&&trackDialog.parentNode!==document.body)document.body.appendChild(trackDialog);
