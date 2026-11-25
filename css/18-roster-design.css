@@ -7,3 +7,12 @@
 .ttr-roster-design-rail i.filled{background:#efb746;border-color:#efb746}
 .ttr-roster-design-row b{font-variant-numeric:tabular-nums;text-align:right}
 @media(max-width:650px){.ttr-roster-design-stats{grid-template-columns:1fr}.ttr-roster-design-row{grid-template-columns:90px minmax(70px,1fr) 32px}}
+
+/* 14.20u: only the vehicle list scrolls; actions stay below the six stats. */
+#garageScreen .garage-panel{overflow:hidden!important}
+#garageScreen .garage-layout{min-height:0!important;overflow:hidden!important}
+#garageScreen .garage-list{overflow:hidden!important;display:flex!important;flex-direction:column!important}
+#garageScreen #garageChoices{min-height:0!important;flex:1 1 auto!important;overflow-y:auto!important;overscroll-behavior:contain!important;align-content:start!important;touch-action:pan-y!important}
+#garageScreen .garage-actions{display:grid;grid-template-columns:1fr;gap:5px;flex:none;padding-top:4px}
+#garageScreen .garage-actions .btn{min-width:0!important;width:100%!important;margin:0!important;padding:5px 3px!important;min-height:31px!important;font-size:clamp(9px,1.3vw,13px)!important;white-space:nowrap!important}
+#garageScreen .garage-lock,#garageScreen .upcoming-preview{display:none!important}
