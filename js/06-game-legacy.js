@@ -33,7 +33,7 @@ function measurePerfInput(){if(!perfTouchAt)return;const delta=performance.now()
 function resetPerf(){perfCars={};perfStats=emptyPerf();perfTotal=emptyPerf();perfReport='';perfTouchAt=0;perfInputDelay=null;perfInputSamples=[];perfRecoveries=[];perfRecoveryDropped=0;}
 
 const perfPanel=document.createElement('div');perfPanel.className='ttr-perf';perfPanel.hidden=true;document.body.appendChild(perfPanel);
-function perfSnapshot(){const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.101 · 14.20e",quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(m=>({...m,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)})),trackId:race?.trackId??perfContext.trackId,raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
+function perfSnapshot(){const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.110 · 14.20n",quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(m=>({...m,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)})),trackId:race?.trackId??perfContext.trackId,raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
 window.TTRPerformance={snapshot:perfSnapshot};
 const points=breakfastPoints.slice();
 const controls={left:false,right:false,brake:false};
@@ -332,13 +332,13 @@ window.TTRKeyboard={down:keyDown};
 function openKeyboardPanel(){
  if(document.querySelector('.ttr-key-panel'))return;
  releaseAllControls();for(const k in keys)delete keys[k];
- const el=document.createElement('section');el.className='ttr-key-panel';el.innerHTML='<div class="panel"><h2>COMANDI TASTIERA</h2><p>Seleziona un tasto, poi premi il nuovo comando.</p><div data-rows></div><p data-msg aria-live="polite"></p><div class="menu-row"><button class="btn" data-reset>PREDEFINITI</button><button class="btn secondary" data-close>INDIETRO</button></div></div>';
+ const el=document.createElement('section');el.className='ttr-key-panel';el.setAttribute('role','dialog');el.setAttribute('aria-modal','true');el.setAttribute('aria-label','Comandi tastiera');el.innerHTML='<div class="panel"><h2>COMANDI TASTIERA</h2><p>Seleziona un tasto, poi premi il nuovo comando.</p><div data-rows></div><p data-msg aria-live="polite"></p><div class="menu-row"><button class="btn" data-reset>PREDEFINITI</button><button class="btn secondary" data-close>INDIETRO</button></div></div>';
  document.body.append(el);let pending=null;const msg=el.querySelector('[data-msg]');
  function save(){try{localStorage.setItem('ttr_keys_v1',JSON.stringify(keyMap));}catch(_){msg.textContent='Salvataggio non disponibile';}}
  function draw(){const rows=el.querySelector('[data-rows]');rows.replaceChildren();for(const k of Object.keys(keyDefaults)){const row=document.createElement('div');row.className='ttr-key-row';const label=document.createElement('span');label.textContent=keyLabels[k];row.append(label);keyMap[k].forEach((code,i)=>{const b=document.createElement('button');b.className='btn secondary';b.textContent=code.replace(/^Key/,'').replace(/^Digit/,'').replace(/^Arrow/,'');b.onclick=()=>{pending=[k,i];msg.textContent='Premi un tasto per '+keyLabels[k];};row.append(b);});rows.append(row);}}
- function close(){window.removeEventListener('keydown',capture,true);el.remove();for(const k in keys)delete keys[k];}
- function capture(e){e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;if(!pending){if(e.code==='Escape')close();return;}if(!allowedKey(e.code)){msg.textContent='Tasto non supportato';return;}const [k,i]=pending;if(Object.keys(keyMap).some(a=>keyMap[a].some((v,j)=>v===e.code&&(a!==k||j!==i)))){msg.textContent='Tasto già assegnato';return;}keyMap[k][i]=e.code;pending=null;msg.textContent='Comando aggiornato';save();draw();}
- window.addEventListener('keydown',capture,true);el.querySelector('[data-close]').onclick=close;el.querySelector('[data-reset]').onclick=()=>{keyMap=JSON.parse(JSON.stringify(keyDefaults));pending=null;msg.textContent='Predefiniti ripristinati';save();draw();};draw();
+ function close(){window.removeEventListener('keydown',capture,true);el.remove();for(const k in keys)delete keys[k];$('ttrKeyboardSettings')?.focus();}
+ function capture(e){if(!pending&&e.code==='Tab'){const items=[...el.querySelectorAll('button')];const i=items.indexOf(document.activeElement);if(items.length){e.preventDefault();e.stopImmediatePropagation();items[(i+(e.shiftKey?-1:1)+items.length)%items.length].focus();}return;}if(!pending&&(e.code==='Enter'||e.code==='Space')&&el.contains(document.activeElement)){e.stopImmediatePropagation();return;}e.preventDefault();e.stopImmediatePropagation();if(e.repeat)return;if(!pending){if(e.code==='Escape')close();return;}if(!allowedKey(e.code)){msg.textContent='Tasto non supportato';return;}const [k,i]=pending;if(Object.keys(keyMap).some(a=>keyMap[a].some((v,j)=>v===e.code&&(a!==k||j!==i)))){msg.textContent='Tasto già assegnato';return;}keyMap[k][i]=e.code;pending=null;msg.textContent='Comando aggiornato';save();draw();}
+ window.addEventListener('keydown',capture,true);el.querySelector('[data-close]').onclick=close;el.querySelector('[data-reset]').onclick=()=>{keyMap=JSON.parse(JSON.stringify(keyDefaults));pending=null;msg.textContent='Predefiniti ripristinati';save();draw();};draw();el.querySelector('[data-close]').focus();
 }
 
 const vehiclePalette=['#ef3d3d','#2987ee','#f4b942','#31ce98','#9447b4','#ef8f35','#f2f0e8','#2ca6bb'];
@@ -508,7 +508,7 @@ function contactWithProp(c,o,previous=null){
     }else return false;
   }
  // Both rinds are floor obstacles, not solid walls.
- if(o.type==='orange_bump'||o.type==='orange'){if(c.jump<=0&&K.segmentCircle(previous||c,c,o,(o.r||29)+(c.width||36)*.30)){c.speed*=.982;if(c===race?.player&&race.time-(c.lastRindSound??-10)>.7){c.lastRindSound=race.time;SND.sfx('slowSurface');}}return false;}
+ if(o.type==='orange_bump'||o.type==='orange'){if(c.jump<=0&&K.segmentCircle(previous||c,c,o,(o.r||29)+(c.width||36)*.30)){c.speed*=.982;if(c===race?.player&&race.time-(c.lastRindSound??-10)>.7){c.lastRindSound=race.time;SND.sfx('rindSurface');}}return false;}
  if(!o.solid||c.jump>0)return false;
  if(o.type!=='knife')return resolveCarObstacle(c,o.collisionR?{...o,r:o.collisionR}:o);
  if(o.interactive!==true)return false;
@@ -767,7 +767,10 @@ function eliminationProjectedAhead(challenger,incumbent){
 }
 function eliminationCameraLeader(){
  const active=eliminationActive();if(!active.length)return race.player;
- const leader=ttrEliminationMode.eliminationRanking()[0];
+ const ranked=ttrEliminationMode.eliminationRanking();
+ // A car in the pocket tunnel cannot anchor a visible race camera.
+ // On exit it becomes eligible again, with the normal credited race progress.
+ const leader=isBox()?(ranked.find(c=>!(c.boxTransit>0))||ranked[0]):ranked[0];
  if(elimCameraId!==leader.id){race.elim.lastLeaderSwitchTime=race.time;elimFocusWeight=0;}
  elimCameraId=leader.id;elimCameraProgress=leader.elimDistance||0;
  return leader;
@@ -777,9 +780,9 @@ function eliminationCameraLeader(){
 function eliminationCameraTarget(){
  const active=eliminationActive();if(!active.length)return {x:camX,y:camY};
  const leader=eliminationCameraLeader();
- const near=active.filter(c=>c!==leader&&Math.hypot(c.x-leader.x,c.y-leader.y)<165&&
+ const near=active.filter(c=>c!==leader&&!(c.boxTransit>0)&&Math.hypot(c.x-leader.x,c.y-leader.y)<165&&
    Math.abs((leader.elimDistance||0)-(c.elimDistance||0))<195);
- const closest=active.filter(c=>c!==leader).reduce((best,c)=>
+ const closest=active.filter(c=>c!==leader&&!(c.boxTransit>0)).reduce((best,c)=>
    Math.min(best,Math.max(0,(leader.elimDistance||0)-(c.elimDistance||0))),Infinity);
  const requested=clamp((closest-110)/135,0,1);
  const smoothing=1-Math.exp(-Math.min(.05,renderDelta)*6.5);
@@ -828,7 +831,7 @@ function openCircuitLoading(mode){
  $('loadingTrackIndex').textContent='· '+copy[0]+' '+String(chosen?.index||1).padStart(2,'0')+' / '+TTRCircuitCatalog.length;
  $('loadingTrackName').textContent=chosen?.name.toUpperCase()||t('trackName');
  $('loadingMapLabel').textContent=copy[1];
- $('loadingMapKey').textContent='▦ '+copy[2]+'   ◆ POWER-UP   '+(isBox()?'A → C ':'━ ')+copy[3];
+ $('loadingMapKey').textContent='▦ '+copy[2]+'   ◆ POWER-UP   '+(isBox()?'● → ● ':'━ ')+copy[3];
  $('loadingTipsTitle').textContent=copy[4];
  const guide=$('loadingTips');guide.replaceChildren();
  for(const n of (isBox()?[18,20]:[14,16])){const row=document.createElement('div'),title=document.createElement('b'),detail=document.createElement('span');title.textContent=copy[n];detail.textContent=copy[n+1];row.append(title,detail);guide.append(row);}
@@ -962,7 +965,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  if(race.countdown>0){ttrRaceTiming.advanceCountdown(dt);syncAudio();return;}
  ttrRaceTiming.advanceLiveFrame(dt);
  for(const c of race.cars){if(c.done)continue;
-  if(isBox()&&BR.transit(c,dt,race)){if(perfEnabled&&perfCars[c.id])perfCars[c.id].ramps=c.boxPasses||0;if(c===race.player&&c.boxTransit===0)showHint('USCITA C · RIPARTI!',1.1);continue;}
+  if(isBox()&&BR.transit(c,dt,race,SND)){if(perfEnabled&&perfCars[c.id])perfCars[c.id].ramps=c.boxPasses||0;continue;}
   if((c.tableFalling||0)>0){
     c.tableFalling=Math.max(0,c.tableFalling-dt);
     if(c.tableFalling>.56){c.a+=(c.tableSpin||8.2)*dt;c.speed=Math.max(0,c.speed*(1-dt*2.2));}
@@ -978,10 +981,10 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  // Sticky jam has a lasting, measurable slowdown and reduced acceleration.
  // It is not another oil patch: grip remains predictable, speed is limited.
  const inJam=!isBox()&&c.jump<=0&&jamHit(c,jamPatch);
- if(inJam&&!c.wasInJam&&c===race.player)SND.sfx('slowSurface');c.wasInJam=inJam;
+ if(inJam&&!c.wasInJam&&c===race.player)SND.sfx('jamSurface');c.wasInJam=inJam;
  c.jamTimer=inJam?.85:Math.max(0,(c.jamTimer||0)-dt);
  if(c.jamTimer>0){accelerate*=.40;}
- const boost=c.boost>0;c.reverseRecovery=Math.max(0,c.reverseRecovery-dt);c.boost=Math.max(0,c.boost-dt);c.slip=Math.max(0,c.slip-dt);const wasAirborne=c.jump>0;c.jump=Math.max(0,c.jump-dt);c.jumpCd=Math.max(0,c.jumpCd-dt);if(wasAirborne&&c.jump===0&&c===race.player&&!c.bridgeTakeoff)SND.sfx('impact');
+ const boost=c.boost>0;c.reverseRecovery=Math.max(0,c.reverseRecovery-dt);c.boost=Math.max(0,c.boost-dt);c.slip=Math.max(0,c.slip-dt);const wasAirborne=c.jump>0;c.jump=Math.max(0,c.jump-dt);c.jumpCd=Math.max(0,c.jumpCd-dt);if(wasAirborne&&c.jump===0&&c===race.player&&!c.bridgeTakeoff)SND.sfx('landing');
  // Brake takes absolute priority over automatic throttle, including after impacts.
  c.speed=stepDriveSpeed(c.speed,ctl,dt,{max:vmax,acc:accelerate},boost&&c.jamTimer<=0);
  if(c.jamTimer>0){const target=Math.max(54,vmax*.46);
@@ -1049,7 +1052,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  const beforeCPURecovery=c.shortcutRespawns||0;ttrRaceCPU.updateRecovery(c,dt);if(isBox()&&(c.shortcutRespawns||0)!==beforeCPURecovery)continue;
  // On-road snapshots are only written after complete frame of verified lane contact.
  // No penalty for a normal outside detour at the finish-line seam (p=1 -> p=0).
- if(isBox()){if(!BR.environment(c,{x:oldX,y:oldY},dt,race,recoverCar,SND)){if(c===race.player&&c.boxTransit>0)showHint('BUCA A → C',2);continue;}}else{
+ if(isBox()){if(!BR.environment(c,{x:oldX,y:oldY},dt,race,recoverCar,SND)){continue;}}else{
  let near=c.onBridge?{...shortcutNearest(c),shortcut:true}:nearestCourse(c,points);
  if(near.shortcut&&!c.onBridge&&!c.bridgeTakeoff&&!c.bridgeLandingActive&&!c.bridgeMissActive)near={...nearestTrack(c,points),shortcut:false};
  const routeCheck=junctionContinuity(c,near,oldX,oldY,dt);
@@ -1236,7 +1239,7 @@ const TTRTrackCopy=Object.freeze({
 function TTRTrackAvailable(c,mode){return !!(c?.ready||(c?.prototype&&window.TTRBoxTrack&&(mode==='race'||mode==='trial')));}
 function TTRDrawSelectedTrack(canvas,c,loading=false){
  const box=c?.id==='box-di-biliardo';
- const opts=box?{points:B.points,point:B.point,tangent:B.tangent,theme:loading?'plain':'billiard',pickups:loading?B.pickupPhases.map(B.point):[],pockets:loading?[B.entryPocket,B.exitPocket]:[]}:{points:breakfastPoints,point:Base.trackPoint,tangent:Base.tangent,theme:loading?'plain':'breakfast',pickups:loading?Base.pickupSegments.slice(0,2).map(Base.trackPoint):[],shortcuts:loading?[Base.shortcutSamples]:[]};
+ const opts=box?{points:B.points,point:B.point,tangent:B.tangent,theme:loading?'plain':'billiard',pickups:loading?B.pickupPhases.map(B.point):[],pockets:loading?[B.entryPocket,B.exitPocket]:B.pockets}:{points:breakfastPoints,point:Base.trackPoint,tangent:Base.tangent,theme:loading?'plain':'breakfast',pickups:loading?Base.pickupSegments.slice(0,2).map(Base.trackPoint):[],shortcuts:loading?[Base.shortcutSamples]:[]};
  window.TTRMinimapVisuals.drawTrackPreview(canvas,opts);
 }
 const TTRPrototypeCopy={it:['PROTOTIPO 0.2','Test separato · 4 auto o Prova a tempo · Nessun progresso Carriera','PROVA CIRCUITO'],en:['PROTOTYPE 0.2','Separate test · 4 cars or time trial · No career progress','TEST TRACK'],es:['PROTOTIPO 0.2','Prueba independiente · 4 coches o contrarreloj · Sin progreso de carrera','PROBAR CIRCUITO'],de:['PROTOTYP 0.2','Separater Test · 4 Autos oder Zeitfahren · Kein Karrierefortschritt','STRECKE TESTEN'],fr:['PROTOTYPE 0.2','Test séparé · 4 voitures ou contre-la-montre · Sans progression carrière','TESTER LE CIRCUIT'],pt:['PROTÓTIPO 0.2','Teste separado · 4 carros ou contrarrelógio · Sem progresso de carreira','TESTAR PISTA']};
@@ -1324,7 +1327,7 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
  const garageLabels=['Velocità','Accelerazione','Sterzo','Grip','Impatto','Stabilità'];
  const stats=garageLabels.map((label,i)=>[label,garageDesignStats[p.id]?.[i]??0]);
  $('garageBars').setAttribute('aria-label',garageDesignSource); $('garageBars').innerHTML=stats.map(([label,raw])=>{const value=Math.max(0,Math.min(10,Number(raw)||0));return `<div class="garage-stats"><span class="garage-stat-label">${label}</span><div class="rail" role="meter" aria-label="${label}" aria-valuemin="0" aria-valuemax="10" aria-valuenow="${value}">${Array.from({length:10},(_,i)=>`<i class="${i<value?'filled':''}"></i>`).join('')}</div><b class="garage-stat-value">${value}/10</b></div>`}).join('');
- $('garageChoices').innerHTML=profiles.map((q,i)=>`<button class="car-choice ${i===garagePreview?'active':''}" data-car="${i}"><img class="car-choice-preview" data-image="${q.id}" alt="" aria-hidden="true"><span class="car-choice-info"><b>${String(q.id==='neon'?19:i+1).padStart(2,'0')} · ${q.name}</b><small>${q.id===profiles[selectedCar].id?t('selected'):['HOT HATCH','V8','BUGGY','SPORT','SUPERCAR · TEST','ENDURANCE · TEST','ROADSTER · TEST','ELETTRICA · TEST','HYPER EV · TEST'][i]}</small></span></button>`).join('');
+ $('garageChoices').innerHTML=profiles.map((q,i)=>`<button class="car-choice ${i===garagePreview?'active':''}" data-car="${i}"><img class="car-choice-preview" data-image="${q.id}" alt="" aria-hidden="true"><span class="car-choice-info"><b>${String((window.TTRVehicleRoster||[]).find(v=>v.id===q.id)?.index??(i+1)).padStart(2,'0')} · ${q.name}</b><small>${q.id===profiles[selectedCar].id?t('selected'):['HOT HATCH','V8','BUGGY','SPORT','SUPERCAR · TEST','ENDURANCE · TEST','ROADSTER · TEST','ELETTRICA · TEST','HYPER EV · TEST','SUV · TEST','PICKUP · TEST','VAN · TEST','4X4 · TEST','HOT ROD · TEST','TAXI · TEST','POLIZIA · TEST','CLASSICA · TEST','MONOPOSTO · TEST','RALLY · TEST','MONSTER · TEST'][i]}</small></span></button>`).join('');
  document.querySelectorAll('.car-choice-preview').forEach(el=>{const car=el.dataset.image.replace('_showroom','');const pic=window.TTRAssets?.images[car+'_showroom']||window.TTRAssets?.images[car];const thumb=window.TTRVehicleThumbnail?.(car);if(thumb)el.src=thumb;else if(pic?.src)el.src=pic.src;});
  document.querySelectorAll('[data-car]').forEach(el=>el.onclick=()=>{garagePreview=+el.dataset.car;garageRotationOrigin=clock;ping(640,.08,.07);refreshGarage();});
  const artCard=$('garageCanon');if(artCard){
@@ -1340,8 +1343,8 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
 function wireMenu(){
  // 14.15: tolerate a cached pre-14.14 HTML shell; manual acceleration is no longer supported.
  const obsoleteAuto=$('auto');if(obsoleteAuto){const label=obsoleteAuto.closest('label');if(label)label.remove();else obsoleteAuto.remove();}
- document.documentElement.dataset.ttrJsBuild='0.13.6.101';
- const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.101 · 14.20e';
+ document.documentElement.dataset.ttrJsBuild='0.13.6.110';
+ const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.110 · 14.20n';
  // A transformed menu creates a non-viewport containing block for fixed dialogs.
  // Move Options to document.body, so the overlay is genuinely viewport-sized on iPhone.
  const settingsDialog=$('retroSettings');if(settingsDialog&&settingsDialog.parentNode!==document.body)document.body.appendChild(settingsDialog);const configDialog=$('raceConfig');if(configDialog&&configDialog.parentNode!==document.body)document.body.appendChild(configDialog);const trackDialog=$('trackSelect');if(trackDialog&&trackDialog.parentNode!==document.body)document.body.appendChild(trackDialog);
@@ -1355,7 +1358,7 @@ function wireMenu(){
   const settingsLanguage=$('settingsLanguage');if(settingsLanguage){settingsLanguage.value=I18N.getLang();settingsLanguage.onchange=()=>{I18N.setLang(settingsLanguage.value);refreshAudioUI();};}
   if(settingsDialog){settingsDialog.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();settingsDialog.open=false;setting?.focus();}});settingsDialog.addEventListener('click',event=>{if(event.target===settingsDialog){settingsDialog.open=false;setting?.focus();}});}
  if(settingsDialog&&!$('ttrQuality')){const row=document.createElement('div');row.className='ttr-quality-row';row.innerHTML='<label>GRAFICA <select id="ttrQuality"><option value="auto">Automatica</option><option value="high">Elevata</option><option value="balanced">Bilanciata</option><option value="low">Risparmio energetico</option></select></label><label><input id="ttrPerfToggle" type="checkbox"> Diagnostica</label><button type="button" class="mini-btn" id="ttrPerfCopy">Copia report</button>';settingsDialog.querySelector('.v11-settings-card').append(row);$('ttrQuality').value=qualityMode;$('ttrPerfToggle').checked=perfEnabled;$('ttrQuality').onchange=()=>{qualityMode=$('ttrQuality').value;try{localStorage.setItem('ttr_quality',qualityMode);}catch(_){}};$('ttrPerfToggle').onchange=()=>{perfEnabled=$('ttrPerfToggle').checked;try{localStorage.setItem('ttr_perf',perfEnabled?'1':'0');}catch(_){}};$('ttrPerfCopy').onclick=async()=>{const report=JSON.stringify(perfSnapshot(),null,2);try{await navigator.clipboard.writeText(report);$('ttrPerfCopy').textContent='Copiato';}catch(_){window.prompt('Copia diagnostica',report);}};}
- if(settingsDialog&&matchMedia('(any-pointer:fine)').matches&&!$('ttrKeyboardSettings')){const b=document.createElement('button');b.id='ttrKeyboardSettings';b.type='button';b.className='btn secondary';b.textContent='COMANDI';b.onclick=openKeyboardPanel;const close=$('closeSettings');if(close)close.before(b);}
+ if(settingsDialog&&matchMedia('(any-pointer:fine)').matches&&!$('ttrKeyboardSettings')){const row=document.createElement('div');row.className='ttr-keyboard-footer';const b=document.createElement('button');b.id='ttrKeyboardSettings';b.type='button';b.className='ttr-settings-text-action';b.textContent='COMANDI TASTIERA';b.setAttribute('aria-haspopup','dialog');b.onclick=openKeyboardPanel;row.append(b);settingsDialog.querySelector('.v11-settings-card').append(row);}
  if($('closeSettings'))$('closeSettings').onclick=()=>{$('retroSettings').open=false;setting?.focus();SND.sfx('select');};
  // Vehicle selection is exclusively handled by garageSelect (no global car selector).
  const nav=[...document.querySelectorAll('.retro-option')];nav.forEach((el,i)=>{

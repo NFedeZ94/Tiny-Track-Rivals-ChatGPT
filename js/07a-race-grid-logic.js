@@ -20,7 +20,9 @@ const duplicateColourSchemes={
  enduro:['#9951d6','#3cbdad','#e5a14e'],
  brezza:['#eb9254','#9d6be0','#70bf63'],
  volt:['#e8433e','#e5bb35','#4b6cd1'],
- neon:['#36b5ce','#ce9436','#36ce7d']
+ neon:['#36b5ce','#ce9436','#36ce7d'],
+ roccia:['#254770','#7b3c2a','#cdcfd1'],martello:['#264e87','#d38b1f','#3f4a43'],turbovan:['#2972b3','#c32e36','#dbddd5'],titan:['#775f37','#304d6f','#b7b9b3'],
+ hotflash:["#2b62c0", "#e7b11e", "#292d31"],metrocab:["#dead2c", "#e5e8ea", "#37679a"],interceptor:["#29427a", "#4a565c", "#1f5238"],retrosprint:["#c5272c", "#e0b93e", "#d2d7db"],apex:["#1e5bd6", "#f0b51f", "#2c2c33"],tempesta:["#c6242b", "#28965e", "#682aac"],behemoth:["#db3a23", "#247fd2", "#eca91f"]
 };
 
 const duplicateColourOffsets={scatto:0,tuono:1,polvere:1,lampo:2};

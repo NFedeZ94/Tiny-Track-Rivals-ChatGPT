@@ -93,6 +93,8 @@ if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInp
    const near=nearestTrack(c,points);
    if(c.aiRecoveryUntil>race.time&&!c.onBridge){const q=trackPoint(near.p+.012);target={x:q.x,y:q.y};plannedBranch=false;}
    if(near.distance>(s.curveSpeed>=.999?92:83)&&!plannedBranch&&!(c.aiRecoveryUntil>race.time)){target={x:near.x,y:near.y};}
+   const edgeRisk=!c.onBridge&&(c.x<120||c.x>K.WORLD_W-120||c.y<120||c.y>K.WORLD_H-120)&&near.distance>75;
+   if(edgeRisk){target=trackPoint(near.p+.006);plannedBranch=false;c.tryShortcut=false;}
    const d=angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a),v=Math.abs(d);
    const steer=clamp(d*s.steer,-1,1);
    if(c.reverseRecovery>0)return {steer:-steer||1,gas:false,brake:true};
@@ -104,6 +106,7 @@ if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInp
    const turnThreshold=.65+(s.curveSpeed-.77)*.9+(s.curveSpeed>=.999?.12:0);
    if(v>turnThreshold)desired=Math.min(desired,cap*(1-clamp((v-turnThreshold+.10)*.46,0,.55)));
    if(obstacle)desired=Math.min(desired,cap*(.78+(s.curveSpeed-.77)*.5));
+   if(edgeRisk)desired=Math.min(desired,105);
    if(blocked)desired=Math.min(desired,Math.max(75,frontSpeedFallback(c,race)));
    if(plannedBranch&&c.tryShortcut&&v<.45)desired=cap;
    const hard=s.curveSpeed>=.999;

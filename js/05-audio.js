@@ -27,6 +27,17 @@
     enduro:{type:'triangle',sub:'sine',harm:'triangle',base:124,range:171,filter:830,cut:550,mix:.155,submix:.042,harmmix:.031,detune:3,flutter:.009,flutterHz:10.6,ratio:2.27},
     volt:{type:'sine',sub:'sine',harm:'triangle',base:158,range:230,filter:1000,cut:630,mix:.105,submix:.032,harmmix:.013,detune:0,flutter:.002,flutterHz:12,ratio:2.6},
     neon:{type:'sine',sub:'triangle',harm:'sine',base:192,range:260,filter:1240,cut:760,mix:.100,submix:.040,harmmix:.023,detune:3,flutter:.007,flutterHz:17,ratio:3.2},
+    roccia:{type:'triangle',sub:'sine',harm:'sine',base:76,range:100,filter:530,cut:320,mix:.153,submix:.100,harmmix:.018,detune:-1,flutter:.012,flutterHz:6.2,ratio:1.72},
+    martello:{type:'triangle',sub:'sine',harm:'triangle',base:62,range:116,filter:660,cut:360,mix:.157,submix:.112,harmmix:.027,detune:-3,flutter:.032,flutterHz:5.6,ratio:1.85},
+    turbovan:{type:'triangle',sub:'sine',harm:'triangle',base:89,range:122,filter:670,cut:380,mix:.150,submix:.076,harmmix:.018,detune:1,flutter:.018,flutterHz:8.7,ratio:2.05},
+    titan:{type:'triangle',sub:'sine',harm:'sine',base:70,range:88,filter:500,cut:290,mix:.147,submix:.118,harmmix:.014,detune:-2,flutter:.026,flutterHz:4.7,ratio:1.45},
+    hotflash:{type:'triangle',sub:'sine',harm:'triangle',base:62,range:150,filter:740,cut:436,mix:.15,submix:0.11,harmmix:.024,detune:1,flutter:.012,flutterHz:5.5,ratio:2.1},
+    metrocab:{type:'triangle',sub:'sine',harm:'triangle',base:92,range:93,filter:550,cut:324,mix:.15,submix:0.07,harmmix:.024,detune:1,flutter:.012,flutterHz:7,ratio:2.1},
+    interceptor:{type:'triangle',sub:'sine',harm:'triangle',base:74,range:143,filter:760,cut:448,mix:.15,submix:0.09,harmmix:.024,detune:1,flutter:.012,flutterHz:6.4,ratio:2.1},
+    retrosprint:{type:'triangle',sub:'sine',harm:'triangle',base:104,range:120,filter:620,cut:365,mix:.15,submix:0.06,harmmix:.024,detune:1,flutter:.012,flutterHz:8,ratio:2.1},
+    apex:{type:'triangle',sub:'sine',harm:'triangle',base:155,range:220,filter:1160,cut:684,mix:.15,submix:0.025,harmmix:.024,detune:1,flutter:.012,flutterHz:14,ratio:2.1},
+    tempesta:{type:'triangle',sub:'sine',harm:'triangle',base:119,range:170,filter:910,cut:536,mix:.15,submix:0.06,harmmix:.024,detune:1,flutter:.012,flutterHz:10,ratio:2.1},
+    behemoth:{type:'triangle',sub:'sine',harm:'triangle',base:49,range:80,filter:450,cut:265,mix:.15,submix:0.13,harmmix:.024,detune:1,flutter:.012,flutterHz:4,ratio:2.1},
     brezza:{type:'sawtooth',sub:'sine',harm:'triangle',base:108,range:184,filter:690,cut:420,mix:.118,submix:.047,harmmix:.024,detune:1,flutter:.005,flutterHz:8.1,ratio:2.42}
   };
   function persist(){try{localStorage.setItem('ttr_audio_settings',JSON.stringify(settings));}catch(_){}}
@@ -96,6 +107,15 @@
       tone(110,.46,.28,'sawtooth',fxBus,at,38);tone(74,.51,.22,'triangle',fxBus,at+.04,32);
       tone(320,.17,.09,'triangle',fxBus,at+.03,82);
     }
+    // Original short material cues: no external samples and no persistent voices.
+    else if(kind==='boxPocket'){tone(580,.22,.18,'sine',fxBus,at,145);tone(185,.29,.16,'triangle',fxBus,at+.035,67);tone(415,.15,.07,'sine',fxBus,at+.09,230);}
+    else if(kind==='boxBall'){tone(1460,.045,.15,'sine',fxBus,at,920);tone(780,.08,.12,'triangle',fxBus,at,460);}
+    else if(kind==='boxWood'){tone(430,.09,.17,'triangle',fxBus,at,150);tone(245,.07,.10,'sine',fxBus,at+.012,115);}
+    else if(kind==='boxRack'){tone(285,.115,.16,'triangle',fxBus,at,92);tone(470,.065,.09,'triangle',fxBus,at+.02,170);}
+    else if(kind==='boxChalk'){tone(310,.065,.10,'sawtooth',fxBus,at,120);tone(180,.09,.09,'triangle',fxBus,at+.02,80);}
+    else if(kind==='landing'){tone(125,.11,.18,'triangle',fxBus,at,55);tone(220,.055,.07,'sine',fxBus,at,100);}
+    else if(kind==='jamSurface'){tone(210,.21,.12,'triangle',fxBus,at,85);tone(160,.14,.09,'sine',fxBus,at+.07,60);}
+    else if(kind==='rindSurface'){[0,.035,.075].forEach((t,i)=>tone(440-i*75,.035,.09,'triangle',fxBus,at+t,150));}
     else if(kind==='ramp'){tone(365,.19,.24,'triangle',fxBus,at,740);}
     else if(kind==='finish'){[523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,.30,.28,'triangle',fxBus,at+i*.14));}
     else if(kind==='count'){tone(550,.11,.22,'sine',fxBus,at,540);}
@@ -180,7 +200,7 @@
     engine.mainGain.gain.setTargetAtTime(profile.mix*pulse,at,.14);
     engine.subGain.gain.setTargetAtTime(profile.submix,at,.19);engine.harmGain.gain.setTargetAtTime(profile.harmmix,at,.18);
     // Audible but controlled engine bed: volume remains separate from music/effects.
-    engine.mix.gain.setTargetAtTime(playing&&!settings.muted?.26+rpm*.105+(boost?.018:0):0,at,.12);
+    const tunnel=car?.boxTransit>0?.22:1;engine.mix.gain.setTargetAtTime(playing&&!settings.muted?(.26+rpm*.105+(boost?.018:0))*tunnel:0,at,.12);
   }
   const tunes={
     menu:{bpm:126,lead:['E5','G5','A5','G5','E5','D5','C5','D5','E5','G5','B5','A5','G5','E5','D5','C5'],bass:['C3','C3','G3','G3','A3','A3','G3','G3','F3','F3','G3','G3','C3','C3','G3','G3']},
