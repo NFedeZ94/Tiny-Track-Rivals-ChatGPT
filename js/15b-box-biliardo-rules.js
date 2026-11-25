@@ -6,24 +6,78 @@
   for(const o of B.cues){const end=o.len/2-(o.jump?175:0);for(let x=-o.len/2;x<=end;x+=32)out.push({...B.propWorld(o,x,0),r:o.w/2,type:'box-proxy',solid:true});}
   for(let i=0;i<3;i++){const a=B.rack.vertices[i],b=B.rack.vertices[(i+1)%3],n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/24);for(let j=0;j<=n;j++){const t=j/n;out.push({...B.propWorld(B.rack,a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t),r:B.rack.w/2,type:'box-proxy',solid:true});}}return out;
  }
- function transit(c,dt,race){if(!(c.boxTransit>0))return false;c.boxTransit=Math.max(0,c.boxTransit-dt);c.speed=0;
-  if(c.boxTransit>0){if(c.boxTransit<.8){const u=1-c.boxTransit/.8;c.x=B.exitPocket.x+(B.outlet.x-B.exitPocket.x)*u;c.y=B.exitPocket.y+(B.outlet.y-B.exitPocket.y)*u;c.a=Math.atan2(B.outlet.y-B.exitPocket.y,B.outlet.x-B.exitPocket.x);}return true;}
-  const p=B.exit+.009,advance=K.forwardProgress(c.p,p);Object.assign(c,{x:B.outlet.x,y:B.outlet.y,p,lastP:p,a:B.tangent(p),routeStableP:p,auditP:p,auditTravel:0,auditCleanTime:0,auditOutsideTime:0,offtrack:false,offtrackSeconds:0,offtrackEntry:null,routePinch:null,routeResolvedNear:null,speed:155,respawnGrace:1.05,claw:0,clawTarget:null,hitVX:0,hitVY:0,skidVX:0,skidVY:0,boxOutside:0,boxTryPocket:false,boxPasses:(c.boxPasses||0)+1});
+ // Sequence the visible exit animation and outlet in entry order. Waiting cars
+ // remain hidden in the tunnel; no collision immunity is added on release.
+ const exitDuration=.8;
+ function exitPose(u){const v=1-u,a=B.tangent(B.exit+.009),handle=70;
+   const q={x:B.outlet.x-Math.cos(a)*handle,y:B.outlet.y-Math.sin(a)*handle},p=B.exitPocket,r=B.outlet;
+   return {x:v*v*p.x+2*v*u*q.x+u*u*r.x,y:v*v*p.y+2*v*u*q.y+u*u*r.y,
+     a:Math.atan2(v*(q.y-p.y)+u*(r.y-q.y),v*(q.x-p.x)+u*(r.x-q.x))};}
+ const active=(o,c)=>o!==c&&!o.done&&!o.eliminated;
+ // Use conservative bounding circles (including a small visual clearance).
+ const radius=c=>Math.hypot(c.length||69,c.width||41)*.5;
+ function clearOf(c,pose,race){return !race.cars.some(o=>active(o,c)&&!(o.boxTransit>=exitDuration)&&
+    Math.hypot(pose.x-o.x,pose.y-o.y)<radius(c)+radius(o)+12);}
+ function priorWaiting(c,next,race){return race.cars.some(o=>active(o,c)&&o.boxTransit>0&&
+   (o.boxEntryOrder??Infinity)<(c.boxEntryOrder??Infinity)&&o.boxTransit>=next);}
+ function transit(c,dt,race,SND){if(!(c.boxTransit>0))return false;c.speed=0;
+  const next=Math.max(0,c.boxTransit-dt);
+  if(next<exitDuration){const pose=exitPose(1-next/exitDuration);
+    // FIFO progress and physical clearance permit multiple visible cars, but
+    // a follower can never overtake or overlap its predecessor in the tunnel.
+    if(priorWaiting(c,next,race)||!clearOf(c,pose,race)){
+      if(c.boxTransit>=exitDuration)c.boxTransit=exitDuration;
+      return true;
+    }
+    Object.assign(c,pose);
+  }
+  c.boxTransit=next;if(next>0)return true;
+  const p=B.exit+.009,advance=K.forwardProgress(c.p,p);Object.assign(c,{x:B.outlet.x,y:B.outlet.y,p,lastP:p,a:B.tangent(p),routeStableP:p,auditP:p,auditTravel:0,auditCleanTime:0,auditOutsideTime:0,offtrack:false,offtrackSeconds:0,offtrackEntry:null,routePinch:null,routeResolvedNear:null,speed:155,respawnGrace:1.05,claw:0,clawTarget:null,hitVX:0,hitVY:0,hitYaw:0,skidVX:0,skidVY:0,slip:0,oilSpin:0,steer:0,boxOutside:0,boxRouteCredit:0,routeTrace:[],routeTraceAt:null,routeDecision:null,boxTryPocket:false,boxPasses:(c.boxPasses||0)+1});
   if(race.mode==='elimination'){c.elimDistance=(c.elimDistance||0)+advance*B.length;c.elimPrevP=p;c.elimPrevX=c.x;c.elimPrevY=c.y;c.elimTravelSinceCredit=0;c.elimProtection=1.2;}
-  c.lastCheckpoint=p;c.previousValidPosition=null;c.lastValidPosition={x:c.x,y:c.y,p,a:c.a,laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};return true;
+  c.lastCheckpoint=p;c.previousValidPosition=null;c.lastValidPosition={x:c.x,y:c.y,p,a:c.a,laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};if(c===race.player)SND?.sfx('boxPocket');return true;
  }
  function environment(c,old,dt,race,recover,SND){
-  for(const pocket of B.pockets){if(c.respawnGrace>0||c.jump>0||Math.hypot(c.x-pocket.x,c.y-pocket.y)>pocket.r-12)continue;
-   if(B.pocketEntry(c,pocket,old)){c.boxTransit=B.transit;c.claw=0;c.clawTarget=null;c.x=pocket.x;c.y=pocket.y;c.speed=0;c.boost=0;c.hitVX=c.hitVY=c.skidVX=c.skidVY=0;if(c===race.player)SND.sfx('ramp');}else recover(c,'box-pocket');return false;}
+  for(const pocket of B.pockets){if(c.respawnGrace>0||c.jump>0||Math.hypot(c.x-pocket.x,c.y-pocket.y)>pocket.triggerR)continue;
+   if(B.pocketEntry(c,pocket,old)){c.boxTransit=B.transit;c.boxEntryOrder=race.boxEntrySerial=(race.boxEntrySerial||0)+1;c.claw=0;c.clawTarget=null;c.x=pocket.x;c.y=pocket.y;c.speed=0;c.boost=0;c.hitVX=c.hitVY=c.skidVX=c.skidVY=0;if(c===race.player)SND.sfx('boxPocket');}else recover(c,'box-pocket');return false;}
   let hit=false;if(c.x<196||c.x>2404){c.x=K.clamp(c.x,196,2404);c.a=Math.PI-c.a;hit=true;}if(c.y<161||c.y>1439){c.y=K.clamp(c.y,161,1439);c.a=-c.a;hit=true;}if(hit)c.speed*=.55;
-  const prop=B.propContact(c,old);c.boxPropContact=!!(prop&&prop!=='jump'||hit);if(prop==='jump'){c.jumpTotal=.42;if(c===race.player)SND.sfx('ramp');}else if(prop||hit){if(c===race.player&&race.time-(c.lastPropHit??-10)>.35){c.lastPropHit=race.time;SND.sfx('impact');}}
-  // Use the previously accepted phase, not the globally nearest arm of a hairpin.
-  const prev=c.routeStableP??c.lastP??c.p,near=K.nearestTrackWindow(c,B.points,prev,.012),step=Math.hypot(c.x-old.x,c.y-old.y),delta=signed(prev,near.p);
-  const plausible=(step*2.3+.15)/B.length;
-  if(near.distance<=142&&step>.02)c.routeStableP=K.mod(prev+K.clamp(delta,-plausible,plausible),1);
-  const accepted=K.nearestTrackWindow(c,B.points,c.routeStableP,.004);
-  const d=accepted.distance;c.offtrack=d>142;c.boxOutside=c.offtrack?(c.boxOutside||0)+dt:Math.max(0,(c.boxOutside||0)-dt*2);
-  if(c.boxOutside>1.65&&d>205&&!(c.respawnGrace>0)){recover(c,'box-route-cut');return false;}
+  const prop=B.propContact(c,old);c.boxPropContact=!!(prop&&prop!=='jump'||hit);if(prop==='jump'){c.jumpTotal=.42;if(c===race.player)SND.sfx('ramp');}else if(prop||hit){if(c===race.player&&race.time-(c.lastPropHit??-10)>.35){c.lastPropHit=race.time;SND.sfx(({cue:'boxWood',rack:'boxRack',chalk:'boxChalk'})[prop]||'impact');}}
+  // Track the local arm even on wide bends. When it is lost, reacquire only
+  // a physically reachable phase, never the globally closest arm for free.
+  const prev=c.routeStableP??c.lastP??c.p,step=Math.hypot(c.x-old.x,c.y-old.y);
+  const near=K.nearestTrackWindow(c,B.points,prev,.012),delta=signed(prev,near.p);
+  // Credit is measured in world units, not elapsed time. Stationary cars and
+  // teleports cannot buy progress. A small reserve absorbs tight-corner geometry.
+  const physical=step<=40?step:0,localLimit=physical*2.3+.15;
+  let credit=Math.min(B.length*.14,(c.boxRouteCredit||0)+physical*1.35);
+  let advance=0,decision='box-local',global=null;
+  if(physical>.02&&near.distance<=142){
+    advance=K.clamp(delta*B.length,-Math.max(localLimit,credit),Math.max(localLimit,credit));
+    credit=Math.max(0,credit-Math.abs(advance));
+    if(Math.abs(delta*B.length-advance)<1)credit=Math.min(credit,24);
+  }else if(physical>.02){
+    global=K.nearestTrack(c,B.points);
+    const gain=signed(prev,global.p)*B.length;
+    if(global.distance<=142&&Math.abs(gain)<=credit+12&&Math.abs(gain)<=B.length*.14&&Math.abs(gain)>0.01){
+      advance=gain;credit=Math.min(24,Math.max(0,credit-Math.abs(gain)));decision='box-rejoin';
+    }else if(near.distance<=205){
+      // Maintain phase through a wide but continuous bend; no checkpoint is
+      // granted until the car actually returns to the usable lane.
+      advance=K.clamp(delta*B.length,-Math.min(localLimit,credit),Math.min(localLimit,credit));
+      credit=Math.max(0,credit-Math.abs(advance));decision='box-wide-continuous';
+    }else decision='box-rejoin-pending';
+  }
+  c.boxRouteCredit=credit;c.routeStableP=K.mod(prev+advance/B.length,1);
+  const accepted=K.nearestTrackWindow(c,B.points,c.routeStableP,.004),d=accepted.distance;
+  c.offtrack=d>142;c.boxOutside=c.offtrack?(c.boxOutside||0)+dt:Math.max(0,(c.boxOutside||0)-dt*2);
+  // Trace both projections so a later report can distinguish a real cut from
+  // a stale phase. A bounded ring covers the preceding four seconds.
+  const log=c.routeTrace??=[];
+  if(c.routeTraceAt==null||race.time-c.routeTraceAt>=.099){
+    log.push({t:+race.time.toFixed(3),x:+c.x.toFixed(2),y:+c.y.toFixed(2),p:c.p,stable:c.routeStableP,near:near.p,d:+d.toFixed(1),globalPhase:global?.p??null,globalDistance:global?+global.distance.toFixed(1):null,credit:+credit.toFixed(1),decision});
+    if(log.length>40)log.shift();c.routeTraceAt=race.time;
+  }
+  c.routeDecision={kind:decision,localDistance:+near.distance.toFixed(2),acceptedDistance:+d.toFixed(2),globalPhase:global?.p??null,globalDistance:global?.distance??null,credit,elapsed:c.boxOutside};
+  if(c.boxOutside>1.65&&d>205&&!(c.respawnGrace>0)){c.routeDecision.kind='box-route-penalty';recover(c,'box-route-cut');return false;}
   c.routeResolvedNear={...accepted,p:c.routeStableP,shortcut:false};
   if(!c.offtrack&&d<88&&!(c.respawnGrace>0)&&c.speed>=0&&Math.cos(K.angleDiff(c.a,B.tangent(c.routeStableP)))>.15){const p=c.routeStableP,q=B.point(p);c.lastCheckpoint=p;c.lastValidPosition={...q,p,a:B.tangent(p),laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};}
   return true;
@@ -48,15 +102,28 @@
    if(hard&&!c.aiPersonality)c.aiPersonality=['aggressive','technical','strategic'][((c.id-1)%3+3)%3];
    const speed=Math.abs(c.speed),look=(hard?62:52)+Math.min(40,speed*.14),lookP=look/B.length;
    const normal=guidance(p+lookP);let target=cpuTarget(c,race,s,normal),branch=target!==normal;
+   let leader=null,gap=Infinity;
+   if(!branch&&s.pass>0&&near.distance<85&&!(c.aiRecoveryUntil>race.time)){
+     const a=B.tangent(p),nx=-Math.sin(a),ny=Math.cos(a),fx=Math.cos(a),fy=Math.sin(a);
+     for(const o of race.cars){if(o===c||o.done||o.eliminated||o.boxTransit>0||o.jump>0)continue;const dx=o.x-c.x,dy=o.y-c.y,f=dx*fx+dy*fy,l=dx*nx+dy*ny;if(f>12&&f<135&&Math.abs(l)<49&&f<gap){leader=o;gap=f;}}
+     const laneSafe=side=>{const q={x:normal.x+nx*side*s.pass*.75,y:normal.y+ny*side*s.pass*.75};const n=K.nearestTrackWindow(q,B.points,p+lookP,.018);return n.distance<75&&q.x>220&&q.x<2380&&q.y>185&&q.y<1415&&!guides.some(o=>Math.hypot(q.x-o.x,q.y-o.y)<o.r+32)&&!B.pockets.some(o=>Math.hypot(q.x-o.x,q.y-o.y)<o.r+35);};
+     if(leader&&leader.speed<c.speed+12&&!(c.aiPassUntil>race.time)&&!(c.aiPassCooldown>race.time)){
+       const pref=((leader.x-normal.x)*nx+(leader.y-normal.y)*ny)>0?-1:1;
+       const side=laneSafe(pref)?pref:laneSafe(-pref)?-pref:0;
+       if(side){c.aiPassSide=side;c.aiPassUntil=race.time+1.0;c.aiPassCooldown=race.time+2.0;c.aiPassAttempts=(c.aiPassAttempts||0)+1;}
+     }
+     if(c.aiPassUntil>race.time&&laneSafe(c.aiPassSide)){target={x:normal.x+nx*c.aiPassSide*s.pass*.75,y:normal.y+ny*c.aiPassSide*s.pass*.75};}else if(c.aiPassUntil>race.time)c.aiPassUntil=0;
+   }else c.aiPassUntil=0;
    if(branch){const bearing=K.angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a);if(Math.abs(bearing)>1.12||p>B.entry+.006||c.aiRecoveryUntil>race.time){c.boxTryPocket=false;target=normal;branch=false;}}
    if(c.aiRecoveryUntil>race.time||near.distance>120){target=guidance(p+.007);branch=false;c.boxTryPocket=false;}
    let d=K.angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a);const steer=K.clamp(d*(hard?3.7:3.4),-1,1);
    if(c.reverseRecovery>0)return {steer:-steer||1,gas:false,brake:true};
    const bend=Math.max(Math.abs(K.angleDiff(B.tangent(p+.012),B.tangent(p))),Math.abs(K.angleDiff(B.tangent(p+.023),B.tangent(p+.008))));
-   const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);let desired=cap*(1-K.clamp((bend-.16)*.65,0,.60));
+   const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);let desired=cap*(1-K.clamp((bend-(hard?.25:.16))*(hard?.48:.65),0,hard?.48:.60));
    if(Math.abs(d)>.34)desired=Math.min(desired,cap*(1-K.clamp((Math.abs(d)-.28)*.68,0,.66)));
    if(branch)desired=Math.min(desired,cap*.83);
+   if(leader&&gap<60&&!(c.aiPassUntil>race.time))desired=Math.min(desired,Math.max(80,leader.speed));
    if(near.distance>95)desired=Math.min(desired,110);
-   const brake=c.speed>desired+12&&c.speed>75;return {steer,gas:!brake&&(desired>=cap*.96||c.speed<desired+3),brake};
+   const brake=c.speed>desired+(hard?16:12)&&c.speed>75;return {steer,gas:!brake&&(desired>=cap*.96||c.speed<desired+(hard?7:3)),brake};
  }
  window.TTRBoxRules=Object.freeze({obstacles,transit,environment,cpuTarget,drive});})();

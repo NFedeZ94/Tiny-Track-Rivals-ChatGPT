@@ -72,7 +72,11 @@ function eliminationEvaluate(dt){const race=getRace(),e=race.elim;
  const ranked=eliminationRanking();
  if(ranked.length===1){awardEliminationPoint(ranked[0]);return;}
  if(!ranked.length){eliminationNewRound();return;}
- const leader=eliminationCameraLeader(),last=ranked.at(-1),view=eliminationViewBounds(),margin=ELIM_RULES_TEST.edgeMargin;
+ const leader=eliminationCameraLeader();
+ // A pocket transit temporarily splits the field between distant track arms.
+ // Suspend only off-screen KO timers until all cars have emerged.
+ if(ranked.some(c=>c.boxTransit>0)){for(const c of ranked){c.elimLag=0;c.elimProtection=Math.max(0,(c.elimProtection||0)-dt);}return;}
+ const last=ranked.at(-1),view=eliminationViewBounds(),margin=ELIM_RULES_TEST.edgeMargin;
  for(const c of ranked){c.elimProtection=Math.max(0,(c.elimProtection||0)-dt);if(c!==last)c.elimLag=0;}
  // Use one ordering for camera and KO. Require sustained exit from BOTH the current
  // viewport and its leader-centred target; camera movement itself cannot knock out a racer.

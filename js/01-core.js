@@ -176,7 +176,18 @@
      {id:'enduro',name:'Enduro SP',color:'#e93a49',accent:'#f5f5f1',shape:'sport',max:267,acc:195,turn:2.75,mass:.88},
      {id:'brezza',name:'Brezza RS',color:'#42bddb',accent:'#182c39',shape:'sport',max:262,acc:203,turn:2.965,mass:.805},
      {id:'volt',name:'Volt GX',color:'#e1e8ef',accent:'#0cb7c3',shape:'sport',max:272,acc:219,turn:2.545,mass:.935},
-     {id:'neon',name:'Neon EV',color:'#8736ce',accent:'#f64cdd',shape:'sport',max:277,acc:219,turn:2.335,mass:.87}
+     {id:'neon',name:'Neon EV',color:'#8736ce',accent:'#f64cdd',shape:'sport',max:277,acc:219,turn:2.335,mass:.87},
+     {id:'roccia',name:'Roccia SUV',color:'#4d545f',accent:'#9aa4af',shape:'muscle',max:257,acc:187,turn:2.44,mass:1.26},
+     {id:'martello',name:'Martello PX',color:'#c62024',accent:'#252b30',shape:'muscle',max:257,acc:195,turn:2.44,mass:1.325},
+     {id:'turbovan',name:'Turbo Van',color:'#e8b218',accent:'#20262c',shape:'muscle',max:257,acc:195,turn:2.545,mass:1.195},
+     {id:'titan',name:'Titan 4X',color:'#526f30',accent:'#252b21',shape:'buggy',max:252,acc:187,turn:2.545,mass:1.26},
+     {id:'hotflash',name:'Hot Flash',color:'#c61a1f',accent:'#ffbd20',shape:'muscle',max:257,acc:195,turn:2.65,mass:1},
+     {id:'metrocab',name:'Metro Cab',color:'#e0d1a3',accent:'#23262a',shape:'hatch',max:257,acc:195,turn:2.65,mass:1},
+     {id:'interceptor',name:'Interceptor',color:'#1a1e25',accent:'#f1f1f1',shape:'muscle',max:257,acc:195,turn:2.65,mass:1},
+     {id:'retrosprint',name:'Retro Sprint',color:'#12a6b7',accent:'#c7e4e9',shape:'sport',max:257,acc:195,turn:2.65,mass:1},
+     {id:'apex',name:'Apex 1',color:'#d21d25',accent:'#ffffff',shape:'sport',max:257,acc:195,turn:2.65,mass:1},
+     {id:'tempesta',name:'Tempesta RX',color:'#2260e1',accent:'#eef2ff',shape:'sport',max:257,acc:195,turn:2.65,mass:1},
+     {id:'behemoth',name:'Mini Behemoth',color:'#69c518',accent:'#202020',shape:'buggy',max:257,acc:195,turn:2.65,mass:1}
   ];
 
    // v0.13.6.50: shared design-to-physics calibration for all 30 vehicle IDs.
@@ -205,9 +216,9 @@
        [id,Object.freeze(ttrCalibratedProfile({id,max:257,acc:195,turn:2.65,mass:1}))])));
    window.TTRBalanceAudit=Object.freeze({
      version:'0.13.6.84',scope:'all_modes_on_matching_builds',profileCount:30,
-     playableCount:9,hiddenExpansionCount:10,
+     playableCount:20,hiddenExpansionCount:10,
      status:'preliminary_tuning_requires_playtesting',onlinePhysics:'host_uses_six_stats_on_updated_builds',
-     notes:'Six design stats mapped to all race modes; 9 playable cars, others remain data only. Mixed client versions are not validated.'
+     notes:'Six design stats mapped to all race modes; 20 playable cars, expansion remains data only. Mixed client versions are not validated.'
    });
   // v0.13: original, arc-length-sampled tabletop course (not an oval).
   // Eight canon sections are represented in the course and identified in track-data.json.

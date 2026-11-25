@@ -12,7 +12,7 @@ function handleObstacles(c,oldX,oldY,dt) {
  if(c.onBridge){c.stuckAnchor=null;c.obstacleStuckSeconds=0;return;}
  for(const o of props){const reach=(o.type==='knife'?o.length||168:o.r||40)+(c.length||65)+18;if(Math.abs(o.x-c.x)>reach&&Math.abs(o.x-oldX)>reach||Math.abs(o.y-c.y)>reach&&Math.abs(o.y-oldY)>reach)continue;if(contactWithProp(c,o,{x:oldX,y:oldY})){
    touchedObstacle=true;
-   if(c===race.player&&c.jump<=0&&race.time-(c.lastPropHit||-10)>.35){c.lastPropHit=race.time;SND.sfx('impact');}
+   if(c===race.player&&c.jump<=0&&race.time-(c.lastPropHit||-10)>.35){c.lastPropHit=race.time;SND.sfx(o.type==='box-ball'?'boxBall':'impact');}
  }}
  if(stuckRecoveryStep(c,dt,race.time,touchedObstacle))recoverCar(c,'stuck');
 }

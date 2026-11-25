@@ -45,3 +45,18 @@ body #retroSettings .audio-settings{display:grid;grid-template-columns:repeat(4,
  body #retroSettings .audio-settings{grid-template-columns:repeat(2,minmax(0,1fr));}
 }
 @media (orientation:portrait){body #retroSettings .ttr-v66-settings-common{grid-template-columns:1fr 1fr;}body #retroSettings .ttr-v66-language{grid-column:1/-1;}body #retroSettings .audio-settings{grid-template-columns:1fr 1fr;}body #retroSettings .settings{grid-template-columns:1fr 1fr;}}
+
+/* 14.20k: desktop keyboard settings action uses the settings typography. */
+body #retroSettings .ttr-keyboard-footer{display:flex;justify-content:flex-end;align-items:center;border-top:1px solid #6574ad;margin-top:10px;padding-top:8px;}
+body #retroSettings .ttr-settings-text-action{appearance:none;border:0;background:transparent;color:#f9e9ae;font:800 12px system-ui,sans-serif;letter-spacing:.02em;text-align:right;cursor:pointer;min-height:30px;padding:4px 2px;}
+body #retroSettings .ttr-settings-text-action:hover{text-decoration:underline;color:#fff5c8;}
+body #retroSettings .ttr-settings-text-action:focus-visible{outline:2px solid #ffe5a6;outline-offset:3px;}
+body .ttr-key-panel{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(2,8,29,.93);padding:12px;box-sizing:border-box;}
+body .ttr-key-panel .panel{box-sizing:border-box;width:min(570px,96vw);max-height:calc(100dvh - 24px);overflow:auto;background:linear-gradient(#263b7c,#0b1e46);border:3px solid #ffdf77;border-radius:9px;padding:16px;color:#d8f2ff;font:750 12px system-ui,sans-serif;}
+body .ttr-key-panel h2{color:#ffe286;font:900 23px Impact,Arial,sans-serif;letter-spacing:.09em;margin:0 0 8px;}
+body .ttr-key-row{display:grid;grid-template-columns:minmax(90px,1fr) repeat(2,minmax(60px,100px));align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #6574ad;}
+body .ttr-key-panel button{cursor:pointer;min-height:31px;background:#293f7c;color:#ffe7a4;border:2px solid #a3caff;font:800 12px system-ui,sans-serif;padding:5px 8px;}
+body .ttr-key-panel button:focus-visible{outline:2px solid #ffe5a6;outline-offset:2px;}
+body .ttr-key-panel [data-msg]{min-height:16px;}
+body .ttr-key-panel .menu-row{display:flex;justify-content:flex-end;gap:8px;}
+@media(any-pointer:coarse) and (not (any-pointer:fine)){body #retroSettings .ttr-keyboard-footer{display:none;}}

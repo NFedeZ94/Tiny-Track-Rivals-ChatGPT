@@ -5,7 +5,8 @@
 function drawTrackPreview(canvas,{points,point,tangent,world,theme='plain',shortcuts=[],pickups=[],pockets=[]}){
  if(!canvas||!points?.length)return;
  const ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
- const x0=Math.min(...points.map(p=>p.x)),x1=Math.max(...points.map(p=>p.x)),y0=Math.min(...points.map(p=>p.y)),y1=Math.max(...points.map(p=>p.y));
+ const bounds=theme==='billiard'?[...points,...pockets.flatMap(p=>[{x:p.x-p.r-12,y:p.y-p.r-12},{x:p.x+p.r+12,y:p.y+p.r+12}])]:points;
+ const x0=Math.min(...bounds.map(p=>p.x)),x1=Math.max(...bounds.map(p=>p.x)),y0=Math.min(...bounds.map(p=>p.y)),y1=Math.max(...bounds.map(p=>p.y));
  const pad=theme==='plain'?24:16;
  const k=Math.min((W-pad*2)/(x1-x0),(H-pad*2)/(y1-y0));
  const cx=(x0+x1)/2,cy=(y0+y1)/2;
@@ -20,7 +21,11 @@ function drawTrackPreview(canvas,{points,point,tangent,world,theme='plain',short
  if(theme==='plain'){
   for(const line of shortcuts){path(line);ctx.strokeStyle='#073f61';ctx.lineWidth=6/k;ctx.stroke();ctx.strokeStyle='#46f5e2';ctx.lineWidth=3/k;ctx.stroke();}
   for(const q of pickups){const r=3.5/k;path([{x:q.x,y:q.y-r},{x:q.x+r,y:q.y},{x:q.x,y:q.y+r},{x:q.x-r,y:q.y}],true);ctx.fillStyle='#26d8f1';ctx.fill();}
-  for(const p of pockets){ctx.beginPath();ctx.arc(p.x,p.y,5/k,0,Math.PI*2);ctx.fillStyle=p.role==='entry'?'#ffd45b':'#46f5e2';ctx.fill();ctx.fillStyle='#111d40';ctx.font=`bold ${7/k}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(p.id,p.x,p.y);}
+  for(const p of pockets){ctx.beginPath();ctx.arc(p.x,p.y,5/k,0,Math.PI*2);ctx.fillStyle=p.role==='entry'?'#ffd45b':'#46f5e2';ctx.fill();}
+ }
+ if(theme==='billiard'){
+  // All six physical pockets; no labels or additional decorative objects.
+  for(const p of pockets){ctx.beginPath();ctx.arc(p.x,p.y,p.rimR,0,Math.PI*2);ctx.fillStyle='#091512';ctx.fill();ctx.strokeStyle=p.role==='entry'?'#e4b63c':p.role==='exit'?'#52cbdf':'#62462e';ctx.lineWidth=2/k;ctx.stroke();}
  }
  const f=point(0),a=tangent(0);ctx.save();ctx.translate(f.x,f.y);ctx.rotate(a);
  const cell=2.6/k;for(let row=0;row<2;row++)for(let col=0;col<6;col++){ctx.fillStyle=(row+col)%2?'#122239':'#fff';ctx.fillRect((row-1)*cell,(col-3)*cell,cell,cell);}
