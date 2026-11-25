@@ -13,12 +13,12 @@ function drawTrackPreview(canvas,{points,point,tangent,world,theme='plain',short
  ctx.clearRect(0,0,W,H);ctx.save();ctx.translate(W/2,H/2);ctx.scale(k,k);ctx.translate(-cx,-cy);
  const left=cx-W/(2*k),top=cy-H/(2*k),right=cx+W/(2*k),bottom=cy+H/(2*k);
  if(theme==='breakfast')window.TTRCircuitVisuals.paintClothPattern(ctx,left,top,right,bottom);
- else {let bg='#111d40';if(theme==='billiard'){bg=ctx.createLinearGradient(250,145,2300,1450);bg.addColorStop(0,'#226d50');bg.addColorStop(.5,'#175b45');bg.addColorStop(1,'#124839');}ctx.fillStyle=bg;ctx.fillRect(left,top,right-left,bottom-top);}
+ else {let bg=theme==='desk'?'#956749':'#111d40';if(theme==='billiard'){bg=ctx.createLinearGradient(250,145,2300,1450);bg.addColorStop(0,'#226d50');bg.addColorStop(.5,'#175b45');bg.addColorStop(1,'#124839');}ctx.fillStyle=bg;ctx.fillRect(left,top,right-left,bottom-top);}
  ctx.lineCap='round';ctx.lineJoin='round';
  function path(list,close=false){ctx.beginPath();list.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));if(close)ctx.closePath();}
  path(points,true);ctx.strokeStyle=theme==='breakfast'?'#50382f':theme==='billiard'?'#11382d':'#274f86';ctx.lineWidth=8/k;ctx.stroke();
  ctx.strokeStyle=theme==='breakfast'?'#fff5dd':theme==='billiard'?'#dcefc7':'#f2d78e';ctx.lineWidth=3/k;ctx.stroke();
- if(theme==='plain'){
+ if(theme==='plain'||theme==='desk'){
   for(const line of shortcuts){path(line);ctx.strokeStyle='#073f61';ctx.lineWidth=6/k;ctx.stroke();ctx.strokeStyle='#46f5e2';ctx.lineWidth=3/k;ctx.stroke();}
   for(const q of pickups){const r=3.5/k;path([{x:q.x,y:q.y-r},{x:q.x+r,y:q.y},{x:q.x,y:q.y+r},{x:q.x-r,y:q.y}],true);ctx.fillStyle='#26d8f1';ctx.fill();}
   for(const p of pockets){ctx.beginPath();ctx.arc(p.x,p.y,5/k,0,Math.PI*2);ctx.fillStyle=p.role==='entry'?'#ffd45b':'#46f5e2';ctx.fill();}
