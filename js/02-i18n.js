@@ -32,6 +32,12 @@ Object.assign(dict.es,{voltDesc:'Hiperdeportivo eléctrico de aceleración inmed
 Object.assign(dict.de,{voltDesc:'Elektrischer Supersportwagen mit sofortiger Beschleunigung.'});
 Object.assign(dict.fr,{voltDesc:'Hypercar électrique à accélération immédiate.'});
 Object.assign(dict.pt,{voltDesc:'Hipercarro elétrico de aceleração imediata.'});
+Object.assign(dict.it, {neonDesc:"Hypercar elettrica estrema: accelerazione esplosiva, guida impegnativa."});
+Object.assign(dict.en, {neonDesc:"Extreme electric hypercar: explosive acceleration, demanding handling."});
+Object.assign(dict.es, {neonDesc:"Hiperdeportivo eléctrico extremo: aceleración explosiva, conducción exigente."});
+Object.assign(dict.de, {neonDesc:"Extremer Elektro-Supersportwagen: explosive Beschleunigung, anspruchsvolle Lenkung."});
+Object.assign(dict.fr, {neonDesc:"Hypercar électrique extrême : accélération explosive, conduite exigeante."});
+Object.assign(dict.pt, {neonDesc:"Hipercarro elétrico extremo: aceleração explosiva e condução exigente."});
 function t(k){return dict[lang]?.[k]||dict.it[k]||k;}
 function apply(){if(typeof document==='undefined')return;document.documentElement.lang=lang;document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n)});}
 function setLang(value){if(!dict[value])return;lang=value;try{localStorage.setItem('ttr_lang',value)}catch(e){}apply();}

@@ -24,7 +24,7 @@
    const select=$('careerVehicle'),old=select.value;
    select.replaceChildren();available().forEach(v=>{const op=document.createElement('option');op.value=v.id;op.textContent=v.name;select.appendChild(op);});
    if([...select.options].some(o=>o.value===old))select.value=old;
-   else {let selectedIndex=0;try{selectedIndex=Number(localStorage.getItem('ttr_selected_car'))||0}catch(e){}const saved=roster[selectedIndex]?.id;select.value=[...select.options].some(o=>o.value===saved)?saved:'scatto';}
+   else {let selectedIndex=0;try{selectedIndex=Number(localStorage.getItem('ttr_selected_car'))||0}catch(e){}const saved=window.TTRCore?.profiles[selectedIndex]?.id;select.value=[...select.options].some(o=>o.value===saved)?saved:'scatto';}
    const items=C.quests(state),byProgress=(x,y)=>((y.progress/y.target)-(x.progress/x.target));
    const grid=$('careerMissionList'),upcoming=$('careerNextList');grid.replaceChildren();upcoming.replaceChildren();
    function makeCard(q){const done=q.progress>=q.target,v=q.car?byId[q.car]:null,article=document.createElement('article');article.className='career-mission'+(done?' is-done':'');const icon=document.createElement('div');icon.className='career-mission-icon';if(done){icon.textContent='🏅';}else{icon.classList.add('ttr-v69-upcoming');icon.setAttribute('aria-hidden','true');}article.appendChild(icon);const body=document.createElement('div');body.className='career-mission-body';const top=document.createElement('div');top.className='career-mission-top';const title=document.createElement('b');title.textContent=q.title;const progress=document.createElement('strong');progress.textContent=q.progress+'/'+q.target;top.append(title,progress);const desc=document.createElement('div');desc.className='career-mission-desc';desc.textContent=q.desc+(v?' · Premio: '+v.name:'');const meter=document.createElement('div');meter.className='career-meter';meter.setAttribute('role','progressbar');meter.setAttribute('aria-valuenow',q.progress);meter.setAttribute('aria-valuemax',q.target);const fill=document.createElement('span');fill.style.width=(100*q.progress/q.target)+'%';meter.append(fill);const status=document.createElement('div');status.className='career-state';status.textContent=done?'✓ COMPLETATA':q.available?'IN CORSO':'IN ATTESA DEL CIRCUITO';body.append(top,desc,meter,status);article.append(body);return article;}
@@ -42,7 +42,7 @@
  function start(){
    const v=byId[$('careerVehicle').value];if(!v||v.status!=='playable')return;
    if(v.availability!=='initial'&&!C.earned(state).includes(v.id))return;
-   window.dispatchEvent(new CustomEvent('ttr:career-start',{detail:{carId:v.id,vehicleIndex:v.index-1}}));
+   window.dispatchEvent(new CustomEvent('ttr:career-start',{detail:{carId:v.id,vehicleIndex:window.TTRCore.profiles.findIndex(p=>p.id===v.id)}}));
  }
  function recordResult(rec){
    const out=C.applyResult(state,rec);if(!out.accepted)return {accepted:false,newUnlocks:[]};

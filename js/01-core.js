@@ -175,7 +175,8 @@
     {id:'aero',name:'Aero R',color:'#f57927',accent:'#202b33',shape:'sport',max:273,acc:183,turn:2.32,mass:1.09},
      {id:'enduro',name:'Enduro SP',color:'#e93a49',accent:'#f5f5f1',shape:'sport',max:267,acc:195,turn:2.75,mass:.88},
      {id:'brezza',name:'Brezza RS',color:'#42bddb',accent:'#182c39',shape:'sport',max:262,acc:203,turn:2.965,mass:.805},
-     {id:'volt',name:'Volt GX',color:'#e1e8ef',accent:'#0cb7c3',shape:'sport',max:272,acc:219,turn:2.545,mass:.935}
+     {id:'volt',name:'Volt GX',color:'#e1e8ef',accent:'#0cb7c3',shape:'sport',max:272,acc:219,turn:2.545,mass:.935},
+     {id:'neon',name:'Neon EV',color:'#8736ce',accent:'#f64cdd',shape:'sport',max:277,acc:219,turn:2.335,mass:.87}
   ];
 
    // v0.13.6.50: shared design-to-physics calibration for all 30 vehicle IDs.
@@ -204,9 +205,9 @@
        [id,Object.freeze(ttrCalibratedProfile({id,max:257,acc:195,turn:2.65,mass:1}))])));
    window.TTRBalanceAudit=Object.freeze({
      version:'0.13.6.84',scope:'all_modes_on_matching_builds',profileCount:30,
-     playableCount:8,hiddenExpansionCount:10,
+     playableCount:9,hiddenExpansionCount:10,
      status:'preliminary_tuning_requires_playtesting',onlinePhysics:'host_uses_six_stats_on_updated_builds',
-     notes:'Six design stats mapped to all race modes; 7 playable cars, others remain data only. Mixed client versions are not validated.'
+     notes:'Six design stats mapped to all race modes; 9 playable cars, others remain data only. Mixed client versions are not validated.'
    });
   // v0.13: original, arc-length-sampled tabletop course (not an oval).
   // Eight canon sections are represented in the course and identified in track-data.json.

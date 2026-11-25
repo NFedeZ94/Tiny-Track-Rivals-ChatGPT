@@ -1,7 +1,28 @@
-
-.ttr-circuit-tip{display:flex;align-items:center;justify-content:center;gap:10px;text-align:left;border:1px solid #ffc768;background:#0d234b;border-radius:8px;padding:9px 13px;margin-top:8px;color:#f8f1d6;font:600 clamp(11px,1.5vw,14px)/1.3 system-ui,sans-serif}
-.ttr-circuit-tip b{white-space:nowrap;color:#ffe27a;font-weight:900;font-size:clamp(10px,1.4vw,12px)}
-.circuit-load-bottom .ttr-launch-race{grid-column:1 / -1!important;justify-self:center;width:min(360px,90%);min-height:40px;display:block;font-weight:900;font-size:15px;color:#192642;background:linear-gradient(#ffe79d,#f6af4f);border:2px solid #fff5c2;border-radius:9px;box-shadow:0 3px 0 #87582c;cursor:pointer}
+/* 14.20e — adaptive, shared pre-race guide. The race HUD is not affected. */
+#loadingTrack .circuit-load-card{width:min(880px,95vw);max-width:95vw!important;max-height:96vh;overflow:auto;padding:clamp(8px,1.8vw,18px)}
+#loadingTrack .circuit-load-content{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1.18fr);align-items:stretch!important;gap:10px!important;max-height:none}
+#loadingTrack .circuit-load-side{width:100%!important;max-width:none!important;box-sizing:border-box;justify-content:center;min-width:0;padding:6px}
+#loadingTrack .circuit-load-side canvas{max-height:32vh!important;min-height:0!important;width:100%!important;height:auto!important;object-fit:contain}
+#loadingTrack .circuit-load-key{font-size:clamp(8px,1.2vw,11px);color:#dce9ff;display:block;text-align:center}
+.ttr-loading-guide{min-width:0;display:grid;gap:6px;align-content:start}
+.ttr-loading-guide section{padding:6px 8px;border:1px solid #5b8acc;border-radius:5px;background:#081534}
+.ttr-loading-guide h3{font:900 clamp(10px,1.6vw,15px)/1.15 system-ui,sans-serif;color:#ffdb6c;margin:0 0 4px;letter-spacing:.05em}
+#loadingTrack .load-powerups{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;margin:0;align-items:stretch}
+#loadingTrack .power-chip{display:flex;flex-direction:column;align-items:center;gap:2px;padding:3px;min-width:0;text-align:center;line-height:1.12}
+#loadingTrack .power-chip .up-icon svg{display:block;width:clamp(20px,4vw,35px);height:clamp(20px,4vw,35px)}
+#loadingTrack .power-chip strong{display:block;color:#fff;font-size:clamp(9px,1.4vw,12px)}
+#loadingTrack .power-chip small{display:block;font-weight:600;font-size:clamp(8px,1.15vw,11px);color:#cbdcf3;overflow-wrap:anywhere}
+#loadingTrack .power-chip.unavailable{opacity:.55;filter:grayscale(1)}
+.ttr-loading-tips{display:grid;gap:4px;color:#eaf4ff;font:600 clamp(10px,1.35vw,13px)/1.2 system-ui,sans-serif}
+.ttr-loading-tips>div{display:grid;gap:1px;padding-left:7px;border-left:2px solid #68c7de}
+.ttr-loading-tips b{color:#ffe498;font-weight:850}
+.circuit-load-bottom .ttr-launch-race{grid-column:1 / -1!important;justify-self:center;width:min(360px,90%);min-height:38px;display:block;font-weight:900;font-size:15px;color:#192642;background:linear-gradient(#ffe79d,#f6af4f);border:2px solid #fff5c2;border-radius:9px;box-shadow:0 3px 0 #87582c;cursor:pointer}
 .circuit-load-bottom .ttr-launch-race[hidden]{display:none!important}
-@media(max-height:470px) and (orientation:landscape){.ttr-circuit-tip{gap:6px;padding:5px 7px;margin-top:3px;font-size:10px;line-height:1.18}.ttr-circuit-tip b{font-size:10px}.circuit-load-side canvas{max-height:22vh!important}.circuit-load-bottom .ttr-launch-race{min-height:30px;font-size:12px}.circuit-load-bottom{margin-top:3px}}
-@media(max-width:560px){.ttr-circuit-tip{flex-direction:column;gap:3px;text-align:center}}
+#loadingRaceFill.ttr-loading-pending{width:32%!important;animation:ttr-load-pulse 1s ease-in-out infinite alternate}
+@keyframes ttr-load-pulse{from{transform:translateX(0)}to{transform:translateX(210%)}}
+.circuit-load-bar{overflow:hidden}
+@media(prefers-reduced-motion:reduce){#loadingRaceFill.ttr-loading-pending{animation:none}}
+@media(max-height:470px) and (orientation:landscape){#loadingTrack .circuit-load-head h2{font-size:clamp(22px,4.2vw,31px)}#loadingTrack .circuit-load-side canvas{max-height:29vh!important}#loadingTrack .circuit-load-bottom{margin-top:4px;gap:3px 10px}#loadingTrack .ttr-launch-race{min-height:30px;font-size:12px}.ttr-loading-guide section{padding:4px 6px}.ttr-loading-guide h3{font-size:11px}.ttr-loading-tips{font-size:10px}#loadingTrack .power-chip .up-icon svg{width:22px;height:22px}}
+@media(orientation:portrait){#loadingTrack .circuit-load-content{grid-template-columns:1fr}#loadingTrack .circuit-load-side canvas{max-height:20vh!important}.ttr-loading-guide section{padding:5px}.ttr-loading-tips{font-size:11px}}
+
+#loadingRaceFill{transition:none!important}

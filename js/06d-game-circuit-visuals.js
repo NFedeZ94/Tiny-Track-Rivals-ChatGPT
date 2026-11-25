@@ -14,6 +14,15 @@ function paintBridgeDeck(deps){const {bridgeCtx,WORLD_W,WORLD_H,shortcutSamples}
   }
  // A slight dark underside along the edges helps distinguish the underpass.
 }
+function paintClothPattern(ctx,left,top,right,bottom){
+  // Original 74-unit tiles, anchored to the real tablecloth coordinates.
+  const x0=70+Math.floor((left-70)/74)*74,y0=65+Math.floor((top-65)/74)*74;
+  for(let y=y0;y<bottom;y+=74)for(let x=x0;x<right;x+=74){
+    const xx=Math.floor((x-70)/74),yy=Math.floor((y-65)/74);
+    ctx.fillStyle=(xx+yy)%2?'#f0c8bc':'#fbf0e5';ctx.fillRect(x,y,74,74);
+    ctx.fillStyle='#a8554a1b';ctx.fillRect(x,y,74,2);ctx.fillRect(x,y,2,74);
+  }
+}
 function paintWorld(deps){const {trackCtx,WORLD_W,WORLD_H,K,points,drawCrumb,jamPatch,jamSpillPath,trackPoint,tangent,drawPoly}=deps;const ctx=trackCtx,W=WORLD_W,H=WORLD_H;
   // Original cartoon breakfast-table world; no external sprites or copyrighted materials.
   const wood=ctx.createLinearGradient(0,0,W,H);wood.addColorStop(0,'#a86a48');wood.addColorStop(.47,'#d19a65');wood.addColorStop(1,'#875638');
@@ -22,11 +31,7 @@ function paintWorld(deps){const {trackCtx,WORLD_W,WORLD_H,K,points,drawCrumb,jam
   // A vast red gingham tablecloth and stitched hem, with warm, soft colours.
   ctx.save();ctx.shadowColor='#412f30a1';ctx.shadowBlur=22;ctx.shadowOffsetY=18;
   ctx.fillStyle='#f7e6d7';ctx.fillRect(70,65,W-140,H-120);ctx.restore();
-  for(let y=65;y<H-55;y+=74)for(let x=70;x<W-70;x+=74){
-    const xx=Math.floor((x-70)/74),yy=Math.floor((y-65)/74);
-    ctx.fillStyle=(xx+yy)%2?'#f0c8bc':'#fbf0e5';ctx.fillRect(x,y,74,74);
-    ctx.fillStyle='#a8554a1b';ctx.fillRect(x,y,74,2);ctx.fillRect(x,y,2,74);
-  }
+  paintClothPattern(ctx,70,65,W-70,H-55);
   ctx.strokeStyle='#e9dad0';ctx.lineWidth=8;ctx.setLineDash([7,9]);ctx.strokeRect(89,82,W-178,H-154);ctx.setLineDash([]);
   // The course IS the uninterrupted gingham cloth. No tinted pavement or translucent curbs.
   // The crumb edges alone define the winding route and reveal its driving direction.
@@ -74,5 +79,5 @@ function paintWorld(deps){const {trackCtx,WORLD_W,WORLD_H,K,points,drawCrumb,jam
     drawPoly(ctx,[[cx-nx*5-fx*5,cy-ny*5-fy*5],[cx+nx*5-fx*5,cy+ny*5-fy*5],[cx+nx*5+fx*5,cy+ny*5+fy*5],[cx-nx*5+fx*5,cy-ny*5+fy*5]],(row+col)%2?'#f9f5e9':'#292d3b');
   }
 }
-window.TTRCircuitVisuals=Object.freeze({paintBridgeDeck,paintWorld});
+window.TTRCircuitVisuals=Object.freeze({paintBridgeDeck,paintWorld,paintClothPattern});
 })();
