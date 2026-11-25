@@ -6,7 +6,7 @@ window.TTRRaceSafety=Object.freeze({create(deps){
 
 function recoverCar(c,reason='edge'){
  const race=getRace();
- if(race){const log=race.recoveryHistory??=[];if(log.length<512)log.push({car:c.id,reason,time:+race.time.toFixed(3),lap:c.lapsCompleted+1,x:+c.x.toFixed(2),y:+c.y.toFixed(2),phase:c.p,stablePhase:c.routeStableP,pendingPhase:c.routePinch?.phase??null,orangeState:c.orangeLine?{active:c.orangeLine.active,entryPhase:c.orangeLine.entryPhase,travel:c.orangeLine.travel,u:c.orangeLine.u}:null,trajectory:(c.routeTrace||[]).slice(),decision:c.routeDecision??null});else race.recoveryHistoryDropped=(race.recoveryHistoryDropped||0)+1;}
+ if(race){const log=race.recoveryHistory??=[];if(log.length<512)log.push({car:c.id,reason,time:+race.time.toFixed(3),lap:c.lapsCompleted+1,round:race.mode==='elimination'?race.elim?.round??null:null,x:+c.x.toFixed(2),y:+c.y.toFixed(2),phase:c.p,stablePhase:c.routeStableP,pendingPhase:c.routePinch?.phase??null,orangeState:c.orangeLine?{active:c.orangeLine.active,entryPhase:c.orangeLine.entryPhase,travel:c.orangeLine.travel,u:c.orangeLine.u}:null,trajectory:(c.routeTrace||[]).slice(),decision:c.routeDecision??null});else race.recoveryHistoryDropped=(race.recoveryHistoryDropped||0)+1;}
 
  const anchor=c.routePinch?.phase??c.lastCheckpoint??c.lastP??0;
  let safe=c.routePinch?.safe||c.offtrackEntry||c.lastValidPosition||{...trackPoint(anchor),p:anchor,a:tangent(anchor),speed:42,laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};
@@ -30,7 +30,7 @@ function recoverCar(c,reason='edge'){
    c.elimLag=0;c.elimProtection=ELIM_RULES_TEST.respawnProtectionSeconds;
    c.elimPrevP=p;c.elimPrevX=c.x;c.elimPrevY=c.y;c.elimTravelSinceCredit=0;
  }
- c.shortcutRespawns=(c.shortcutRespawns||0)+1;c.lastPenaltyReason=reason;c.routeStableP=p;c.boxTransit=0;c.boxOutside=0;c.boxRouteCredit=0;c.boxTryPocket=false;c.routePinch=null;c.orangeLine=null;c.routeTrace=[];c.routeTraceAt=null;c.routeDecision=null;c.routeResolvedNear=null;c.tableFalling=0;c.tableSpin=0;c.tableFallDir=0;c.auditP=p;c.auditTravel=0;c.auditCleanTime=0;c.auditBridge=false;c.auditOutsideTime=0;c.oilSpin=0;c.bridgeLandingActive=false;c.mugApexPassed=safe.mugApexPassed===true||(safe.mugApexPassed===undefined&&p>.32&&p<.93);
+ c.shortcutRespawns=(c.shortcutRespawns||0)+1;c.lastPenaltyReason=reason;c.routeStableP=p;c.boxTransit=0;c.boxExitAssist=0;c.boxOutside=0;c.boxRouteCredit=0;c.boxTryPocket=false;c.routePinch=null;c.orangeLine=null;c.routeTrace=[];c.routeTraceAt=null;c.routeDecision=null;c.routeResolvedNear=null;c.tableFalling=0;c.tableSpin=0;c.tableFallDir=0;c.auditP=p;c.auditTravel=0;c.auditCleanTime=0;c.auditBridge=false;c.auditOutsideTime=0;c.oilSpin=0;c.bridgeLandingActive=false;c.mugApexPassed=safe.mugApexPassed===true||(safe.mugApexPassed===undefined&&p>.32&&p<.93);
  
  if(c===race.player){SND.sfx('respawn');setLastHint(0);const h=$('hint');if(h){h.textContent='';h.classList.remove('show');}/* Recovery stays silent: no PENALITÀ banner in any mode. */}
 }

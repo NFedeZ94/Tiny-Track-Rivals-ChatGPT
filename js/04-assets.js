@@ -10,35 +10,28 @@ inlineAssets['enduro_showroom']='assets/images/enduro_showroom.png';
 inlineAssets['enduro_turntable']='assets/images/enduro_turntable.webp';
 for(const suffix of ['', '_color1','_color2','_color3','_showroom','_turntable']){for(const model of ['brezza','volt','neon','roccia','martello','turbovan','titan','hotflash','metrocab','interceptor','retrosprint','apex','tempesta','behemoth']){const key=model+suffix;names.push(key);inlineAssets[key]='assets/images/'+key+(suffix==='_turntable'?'.webp':'.png');}}
 const images={}; const status={};
-const heavyTurntables=new Set(['roccia_turntable','martello_turntable','turbovan_turntable','titan_turntable','hotflash_turntable','metrocab_turntable','interceptor_turntable','retrosprint_turntable','apex_turntable','tempesta_turntable','behemoth_turntable']);
-const previewNames=[...heavyTurntables].map(key=>key+'_preview');
-for(const key of previewNames)inlineAssets[key]='assets/images/'+key+'.webp';
-const promises=[...previewNames,...names.filter(name=>!heavyTurntables.has(name))].map(name=>new Promise(resolve=>{
-  const img=new Image();images[name]=img;
-  img.onload=()=>{if(previewNames.includes(name)&&typeof img.decode==='function'){img.decode().catch(()=>{}).then(()=>{status[name]='ready';resolve(true);});}else{status[name]='ready';resolve(true);}};
-  img.onerror=()=>{status[name]='failed';console.warn('Asset unavailable:',name);resolve(false);};
-  img.src=(inlineAssets[name]||'assets/'+name+((name.includes('_concept_')||name.includes('_menu_clean'))?'.jpg':'.png'))+ (/^(brezza|tuono|volt|neon|aero|roccia|martello|turbovan|titan|hotflash|metrocab|interceptor|retrosprint|apex|tempesta|behemoth)/.test(name)?'?v=0.13.6.116':'');
-}));
-const ready=Promise.all(promises);
-// Keep one full-size lazy atlas. All heavy models have a predecoded 96px/cell
-// full-orbit preview with identical frame indices, camera and pivot.
-let activeHeavyAtlas=null;
-function ensureTurntable(id){
- const key=id+'_turntable';if(!heavyTurntables.has(key))return images[key];
- const preview=images[key+'_preview'];
- if(activeHeavyAtlas!==key){
-  if(activeHeavyAtlas){const old=images[activeHeavyAtlas];if(old){old.onload=old.onerror=null;old.removeAttribute('src');delete images[activeHeavyAtlas];delete status[activeHeavyAtlas];}}
-  activeHeavyAtlas=key;const img=new Image();images[key]=img;status[key]='loading';
-  img.onload=()=>{const done=()=>{if(images[key]===img)status[key]='ready';};if(typeof img.decode==='function')img.decode().then(done,done);else done();};
-  img.onerror=()=>{if(images[key]===img)status[key]='failed';};
-  img.src=inlineAssets[key]+'?v=0.13.6.116';
- }
- return status[key]==='ready'?images[key]:preview;
-}
+// One lossless atlas per model. Only transparent margins are removed.
+const atlasLayouts=Object.freeze({"aero":[24,54,144,87,192,192],"apex":[34,73,188,124,256,256],"behemoth":[15,48,226,153,256,256],"brezza":[19,78,218,119,256,256],"enduro":[17,7,158,108,192,128],"hotflash":[52,88,152,99,256,256],"interceptor":[43,92,170,99,256,256],"lampo":[15,26,162,92,192,144],"martello":[16,60,224,142,256,256],"metrocab":[43,80,170,109,256,256],"neon":[6,27,244,179,256,256],"polvere":[20,27,152,98,192,144],"retrosprint":[46,95,164,92,256,256],"roccia":[21,55,214,145,256,256],"tempesta":[41,61,174,132,256,256],"titan":[48,60,160,128,256,256],"tuono":[23,45,210,103,256,192],"turbovan":[29,44,198,152,256,256],"volt":[4,35,248,172,256,256]});
+const atlasNames=names.filter(name=>name.endsWith('_turntable'));
+for(const id of Object.keys(atlasLayouts))inlineAssets[id+'_turntable']='assets/images/'+id+'_turntable_compact.webp';
+function loadAsset(name,decode=false){return new Promise(resolve=>{
+ const img=new Image();images[name]=img;status[name]='loading';
+ const done=ok=>{status[name]=ok?'ready':'failed';resolve(ok);};
+ img.onload=()=>{if(decode&&typeof img.decode==='function')img.decode().then(()=>done(true),()=>done(false));else done(true);};
+ img.onerror=()=>{console.warn('Asset unavailable:',name);done(false);};
+ img.src=(inlineAssets[name]||'assets/'+name+((name.includes('_concept_')||name.includes('_menu_clean'))?'.jpg':'.png'))+'?v=0.13.6.120';
+});}
+const ready=Promise.all(names.filter(name=>!atlasNames.includes(name)).map(name=>loadAsset(name)));
+// Decode sequentially before enabling the showroom, avoiding selection-time upgrades.
+let garageLoaded=false;
+const garageReady=(async()=>{await ready;const outcomes=[];for(const name of atlasNames)outcomes.push(await loadAsset(name,true));garageLoaded=outcomes.every(Boolean);return garageLoaded;})();
+function ensureTurntable(id){const key=id+'_turntable';return status[key]==='ready'?images[key]:null;}
+function isGarageReady(){return garageLoaded;}
 // v0.13.6.34: visual-only race scale, measured from the opaque footprint of each top-down sprite.
 // No modifications to physics widths/lengths, track, or GLB meshes.
 window.TTRArtRevision='TTRToyScaleV1-Scatto92-Tuono125-Brezza93-Volt-Neon-v100';
 const spriteVisualScale=Object.freeze({"scatto":0.6443128,"polvere":0.85129411,"enduro":0.86291893,"brezza":0.80727716,"lampo":0.83974417,"aero":0.79993688,"tuono":0.90990739,"volt":0.7892473051224944,"neon":0.7874934222222222,"roccia":0.8884409112709831,"martello":0.9270687769784174,"turbovan":0.89057659,"titan":0.78215857,"hotflash":0.71246127,"metrocab":0.84411172,"interceptor":0.85185587,"retrosprint":0.82862343,"apex":0.88283244,"tempesta":0.85185587,"behemoth":1.00673875});
+const raceAspect=Object.freeze({"tuono":[1.0518499073663916,1],"titan":[1.1310891050175118,0.9564356402721607]});
 const vehicleLengthRatios=Object.freeze({"scatto":0.92,"polvere":1.02,"enduro":1.05,"brezza":1.07,"lampo":1.1,"aero":1.1,"tuono":1.11,"volt":1.1,"neon":1.1,"roccia":1.15,"martello":1.2,"turbovan":1.15,"titan":1.01,"hotflash":0.92,"metrocab":1.09,"interceptor":1.1,"retrosprint":1.07,"apex":1.14,"tempesta":1.1,"behemoth":1.3});
 const has=name=>status[name]==='ready';
 const draw=(ctx,name,x,y,w,h)=>{if(!has(name))return false;ctx.drawImage(images[name],x,y,w,h);return true;};
@@ -48,6 +41,7 @@ function drawVehicle(ctx,car,clock){
   ctx.save();ctx.translate(car.x,car.y);
   const mini=car.mini;
   const size=(mini?77:70)*(spriteVisualScale[car.profile.id]??1);
+  const [aspectW,aspectL]=raceAspect[car.profile.id]??[1,1];
   const total=car.jumpTotal||.72;
   const t=car.jump>0?Math.max(0,Math.min(1,1-car.jump/total)):0;
   const lift=car.jump>0?Math.sin(Math.PI*t):0;
@@ -58,7 +52,7 @@ function drawVehicle(ctx,car,clock){
   const rolling=!mini&&!(car.tableFalling>0)&&car.jump<=0;
   const rollSpeed=Math.min(1,Math.abs(car.speed||0)/190);
   const wheelPhase=car.wheelPhase||0;
-  ctx.save();ctx.rotate(car.a+Math.PI/2);
+  ctx.save();ctx.rotate(car.a+Math.PI/2);ctx.scale(aspectW,aspectL);
   // Two faint, moving tyre traces stay below the body; no fake circle under the car.
   if(rolling&&rollSpeed>.18){
     const trail=9+16*rollSpeed;
@@ -78,6 +72,7 @@ function drawVehicle(ctx,car,clock){
   ctx.restore();
   ctx.translate(0,-jump);ctx.rotate(car.a+Math.PI/2+wobble);
   if(car.elimCelebration>0&&!mini)ctx.rotate(flip*2*Math.PI);if(car.tableFalling>0){ctx.scale(car.tableFallImpact?.89:1,car.tableFallImpact?.89:1);}
+  ctx.scale(aspectW,aspectL);
   if(lift>0.1)ctx.scale(1+lift*.13,1+lift*.13);
   if(rolling&&rollSpeed>.3){
     const bob=Math.sin(wheelPhase*2)*.32*rollSpeed;
@@ -101,6 +96,6 @@ function drawVehicle(ctx,car,clock){
   if(car.boost>0&&!mini){ctx.fillStyle='#72e7ffce';for(const k of [-8,8]){ctx.beginPath();ctx.moveTo(k,28);ctx.lineTo(k-4,39+Math.sin(clock*27)*4);ctx.lineTo(k+4,38);ctx.fill();}}
   ctx.restore();return true;
 }
-root.TTRAssets={images,status,ready,ensureTurntable,has,draw,drawVehicle,raceVisualScale:spriteVisualScale,vehicleLengthRatios};
+root.TTRAssets={images,status,ready,garageReady,isGarageReady,atlasLayouts,ensureTurntable,has,draw,drawVehicle,raceVisualScale:spriteVisualScale,raceAspect,vehicleLengthRatios};
 })(typeof window==='undefined'?globalThis:window);
 

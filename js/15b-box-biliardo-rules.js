@@ -8,7 +8,7 @@
  }
  // Sequence the visible exit animation and outlet in entry order. Waiting cars
  // remain hidden in the tunnel; no collision immunity is added on release.
- const exitDuration=.8;
+ const exitDuration=.8,exitAssistDuration=1.05;
  function exitPose(u){const v=1-u,a=B.tangent(B.exit+.009),handle=70;
    const q={x:B.outlet.x-Math.cos(a)*handle,y:B.outlet.y-Math.sin(a)*handle},p=B.exitPocket,r=B.outlet;
    return {x:v*v*p.x+2*v*u*q.x+u*u*r.x,y:v*v*p.y+2*v*u*q.y+u*u*r.y,
@@ -32,7 +32,7 @@
     Object.assign(c,pose);
   }
   c.boxTransit=next;if(next>0)return true;
-  const p=B.exit+.009,advance=K.forwardProgress(c.p,p);Object.assign(c,{x:B.outlet.x,y:B.outlet.y,p,lastP:p,a:B.tangent(p),routeStableP:p,auditP:p,auditTravel:0,auditCleanTime:0,auditOutsideTime:0,offtrack:false,offtrackSeconds:0,offtrackEntry:null,routePinch:null,routeResolvedNear:null,speed:Math.min(140,(c.profile?.max||250)*.55),boxExitAssist:.42,respawnGrace:1.05,claw:0,clawTarget:null,hitVX:0,hitVY:0,hitYaw:0,skidVX:0,skidVY:0,slip:0,oilSpin:0,steer:0,boxOutside:0,boxRouteCredit:0,routeTrace:[],routeTraceAt:null,routeDecision:null,boxTryPocket:false,boxPasses:(c.boxPasses||0)+1});
+  const p=B.exit+.009,advance=K.forwardProgress(c.p,p);Object.assign(c,{x:B.outlet.x,y:B.outlet.y,p,lastP:p,a:B.tangent(p),routeStableP:p,auditP:p,auditTravel:0,auditCleanTime:0,auditOutsideTime:0,offtrack:false,offtrackSeconds:0,offtrackEntry:null,routePinch:null,routeResolvedNear:null,speed:Math.min(112,(c.profile?.max||250)*.40),boxExitAssist:exitAssistDuration,respawnGrace:1.05,claw:0,clawTarget:null,hitVX:0,hitVY:0,hitYaw:0,skidVX:0,skidVY:0,slip:0,oilSpin:0,steer:0,boxOutside:0,boxRouteCredit:0,routeTrace:[],routeTraceAt:null,routeDecision:null,boxTryPocket:false,boxPasses:(c.boxPasses||0)+1});
   if(race.mode==='elimination'){c.elimDistance=(c.elimDistance||0)+advance*B.length;c.elimPrevP=p;c.elimPrevX=c.x;c.elimPrevY=c.y;c.elimTravelSinceCredit=0;c.elimProtection=1.2;}
   c.lastCheckpoint=p;c.previousValidPosition=null;c.lastValidPosition={x:c.x,y:c.y,p,a:c.a,laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};if(c===race.player)SND?.sfx('boxPocket');return true;
  }
@@ -61,6 +61,17 @@
     if(global.p>=.435&&global.p<=.47&&gain>=.018&&gain<=.045&&global.distance<=B.laneHalf-10&&near.distance>global.distance+18&&alignment>.5){
       const before=K.nearestTrack(old,B.points);
       if(before.distance<=B.laneHalf){advance=gain*B.length;credit=24;decision='box-junction-handoff';seam=true;}
+    }
+  }
+  // Bottom-left hairpin: the inner racing line joins the outgoing arm before
+  // the centreline apex. Only permit a local, forward handoff inside this
+  // specific junction, never a free phase jump from the rest of the table.
+  if(!seam&&physical>.02&&prev>=.825&&prev<=.865&&c.x>=490&&c.x<=755&&c.y>=885&&c.y<=1085&&near.distance<=190){
+    global=K.nearestTrack(c,B.points);const gain=signed(prev,global.p);
+    const a=B.tangent(global.p),alignment=((c.x-old.x)*Math.cos(a)+(c.y-old.y)*Math.sin(a))/physical;
+    if(global.p>=.875&&global.p<=.915&&gain>=.018&&gain<=.075&&global.distance<=132&&near.distance>global.distance+18&&alignment>.45){
+      const before=K.nearestTrack(old,B.points);
+      if(before.distance<=142&&c.boxOutside<.15){advance=gain*B.length;credit=24;decision='box-final-junction-handoff';seam=true;}
     }
   }
   if(!seam&&physical>.02&&near.distance<=142){
@@ -129,6 +140,8 @@
    }else c.aiPassUntil=0;
    if(branch){const bearing=K.angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a);if(Math.abs(bearing)>1.12||p>B.entry+.006||c.aiRecoveryUntil>race.time){c.boxTryPocket=false;target=normal;branch=false;}}
    if(c.aiRecoveryUntil>race.time||near.distance>120){target=guidance(p+.007);branch=false;c.boxTryPocket=false;}
+   const oil=(!branch&&near.distance<85&&!(c.aiRecoveryUntil>race.time))?window.TTRRaceDrivers.avoidOil(c,race,s,target,B.tangent(p+lookP),q=>q.x>220&&q.x<2380&&q.y>185&&q.y<1415&&K.nearestTrackWindow(q,B.points,p+lookP,.033).distance<B.laneHalf-(c.width||36)*.5-5&&!B.pockets.some(o=>Math.hypot(q.x-o.x,q.y-o.y)<o.r+35),guides):{target,slow:false};
+   target=oil.target;
    let d=K.angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a);const steer=K.clamp(d*(hard?3.7:3.4),-1,1);
    if(c.reverseRecovery>0)return {steer:-steer||1,gas:false,brake:true};
    const bend=Math.max(Math.abs(K.angleDiff(B.tangent(p+.012),B.tangent(p))),Math.abs(K.angleDiff(B.tangent(p+.023),B.tangent(p+.008))));
@@ -137,6 +150,8 @@
    if(branch)desired=Math.min(desired,cap*.83);
    if(leader&&gap<60&&!(c.aiPassUntil>race.time))desired=Math.min(desired,Math.max(80,leader.speed));
    if(near.distance>95)desired=Math.min(desired,110);
+   if(oil.slow)desired=Math.min(desired,cap*.68);
+   else if(c.aiOilSeen?.side)desired=Math.min(desired,cap*.86);
    const brake=c.speed>desired+(hard?16:12)&&c.speed>75;return {steer,gas:!brake&&(desired>=cap*.96||c.speed<desired+(hard?7:3)),brake};
  }
  function cameraPose(c){
@@ -145,4 +160,4 @@
    const t=K.clamp((B.transit-c.boxTransit)/(B.transit-exitDuration),0,1),u=t*t*(3-2*t);
    return {x:B.entryPocket.x+(B.exitPocket.x-B.entryPocket.x)*u,y:B.entryPocket.y+(B.exitPocket.y-B.entryPocket.y)*u};
  }
- window.TTRBoxRules=Object.freeze({obstacles,transit,environment,cpuTarget,drive,cameraPose});})();
+ window.TTRBoxRules=Object.freeze({obstacles,transit,environment,cpuTarget,drive,cameraPose,exitAssistDuration});})();
