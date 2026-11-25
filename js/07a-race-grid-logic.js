@@ -1,7 +1,14 @@
 /* Tiny Track Rivals — Fase 7: logica di gara estratta senza alterare gli algoritmi.
  * Script classico: dipendenze iniettate dalla closure del legacy, nessuno stato globale di gara duplicato. */
 (()=>{'use strict';
-window.TTRRaceGrid=Object.freeze({create(deps){
+// Full-roster rotation for offline grids; online indices remain unchanged.
+function offlineOpponents(count,player,slots,cursor=0){
+ if(count<1||slots<=0)return [];
+ const pool=Array.from({length:count},(_,i)=>(count-1+cursor+i)%count).filter(i=>i!==player);
+ if(!pool.length)return Array(slots).fill(player);
+ return Array.from({length:slots},(_,i)=>pool[i%pool.length]);
+}
+window.TTRRaceGrid=Object.freeze({offlineOpponents,create(deps){
   const {profiles,ttrCalibratedProfile,trackPoint,tangent,mod,getRace}=deps;
 
 const duplicateColourSchemes={
@@ -12,7 +19,8 @@ const duplicateColourSchemes={
  aero:['#33a7ce','#f5d760','#bd7adb'],
  enduro:['#9951d6','#3cbdad','#e5a14e'],
  brezza:['#eb9254','#9d6be0','#70bf63'],
- volt:['#e8433e','#e5bb35','#4b6cd1']
+ volt:['#e8433e','#e5bb35','#4b6cd1'],
+ neon:['#36b5ce','#ce9436','#36ce7d']
 };
 
 const duplicateColourOffsets={scatto:0,tuono:1,polvere:1,lampo:2};

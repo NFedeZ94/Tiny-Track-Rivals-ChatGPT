@@ -62,6 +62,24 @@ function orangeContinuity(c,near,anchor,step,dt){
   }
   const forward=q.u-state.u;state.elapsed+=dt;
   if(q.distance>orangeWidth||step>40||Math.abs(forward)>step*2+22||state.elapsed>12){
+    // 14.20c: a verified orange traversal can leave its inner corridor a few
+    // frames before the main-road projection switches to the upper arm.
+    // Hold earned progress only in this bounded handoff, never for a fresh cut.
+    const exitCandidate=state.active&&q.distance>orangeWidth&&q.distance<=155&&step<=40&&Math.abs(forward)<=step*2+22&&state.elapsed<=12&&state.travel>=180&&state.u-state.entryU>=140&&anchor>=.525&&anchor<=.56&&near.p>=.49&&near.p<=.61&&near.distance<=138&&c.x>=1460&&c.x<=1570&&c.y>=290&&c.y<=425;
+    if(exitCandidate){
+      state.handoffTravel=(state.handoffTravel||0)+step;state.handoffElapsed=(state.handoffElapsed||0)+dt;
+      if(state.handoffTravel<=90&&state.handoffElapsed<=.45){
+        const road=nearestTrackWindow(c,points,anchor,.05);
+        if(near.p>=.55&&near.p<=.61&&near.p>=anchor-.005&&near.p<=anchor+.05&&road.distance<=138&&Math.abs(road.p-near.p)<.005){
+          const phase=Math.max(anchor,road.p);
+          c.orangeLine=null;c.routePinch=null;c.routeStableP=phase;c.routeDecision='orange-main-merge';
+          c.auditP=phase;c.auditTravel=0;c.auditCleanTime=0;c.auditOutsideTime=0;
+          return {near:{...road,p:phase,shortcut:false},penalty:false};
+        }
+        c.routePinch=null;c.routeDecision='orange-exit-handoff';
+        return {near:{...q,p:anchor,distance:Math.min(q.distance,near.distance),shortcut:false,orangeLine:true},penalty:false};
+      }
+    }
     c.orangeLine=null;
     if(!state.active)return null;
     // A verified inside line can merge onto the adjacent ordinary road toward
