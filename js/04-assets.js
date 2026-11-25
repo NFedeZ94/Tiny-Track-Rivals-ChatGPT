@@ -11,29 +11,35 @@ inlineAssets['enduro_turntable']='assets/images/enduro_turntable.webp';
 for(const suffix of ['', '_color1','_color2','_color3','_showroom','_turntable']){for(const model of ['brezza','volt','neon','roccia','martello','turbovan','titan','hotflash','metrocab','interceptor','retrosprint','apex','tempesta','behemoth']){const key=model+suffix;names.push(key);inlineAssets[key]='assets/images/'+key+(suffix==='_turntable'?'.webp':'.png');}}
 const images={}; const status={};
 const heavyTurntables=new Set(['roccia_turntable','martello_turntable','turbovan_turntable','titan_turntable','hotflash_turntable','metrocab_turntable','interceptor_turntable','retrosprint_turntable','apex_turntable','tempesta_turntable','behemoth_turntable']);
-const promises=names.filter(name=>!heavyTurntables.has(name)).map(name=>new Promise(resolve=>{
+const previewNames=[...heavyTurntables].map(key=>key+'_preview');
+for(const key of previewNames)inlineAssets[key]='assets/images/'+key+'.webp';
+const promises=[...previewNames,...names.filter(name=>!heavyTurntables.has(name))].map(name=>new Promise(resolve=>{
   const img=new Image();images[name]=img;
-  img.onload=()=>{status[name]='ready';resolve(true);};
+  img.onload=()=>{if(previewNames.includes(name)&&typeof img.decode==='function'){img.decode().catch(()=>{}).then(()=>{status[name]='ready';resolve(true);});}else{status[name]='ready';resolve(true);}};
   img.onerror=()=>{status[name]='failed';console.warn('Asset unavailable:',name);resolve(false);};
-  img.src=(inlineAssets[name]||'assets/'+name+((name.includes('_concept_')||name.includes('_menu_clean'))?'.jpg':'.png'))+ (/^(brezza|tuono|volt|neon|aero|roccia|martello|turbovan|titan|hotflash|metrocab|interceptor|retrosprint|apex|tempesta|behemoth)/.test(name)?'?v=0.13.6.111':'');
+  img.src=(inlineAssets[name]||'assets/'+name+((name.includes('_concept_')||name.includes('_menu_clean'))?'.jpg':'.png'))+ (/^(brezza|tuono|volt|neon|aero|roccia|martello|turbovan|titan|hotflash|metrocab|interceptor|retrosprint|apex|tempesta|behemoth)/.test(name)?'?v=0.13.6.116':'');
 }));
 const ready=Promise.all(promises);
-// Only keep the currently requested heavy atlas decoded. Gameplay sprites are preloaded.
+// Keep one full-size lazy atlas. All heavy models have a predecoded 96px/cell
+// full-orbit preview with identical frame indices, camera and pivot.
 let activeHeavyAtlas=null;
 function ensureTurntable(id){
  const key=id+'_turntable';if(!heavyTurntables.has(key))return images[key];
- if(images[key])return images[key];
- if(activeHeavyAtlas&&activeHeavyAtlas!==key){const old=images[activeHeavyAtlas];if(old){old.onload=old.onerror=null;old.removeAttribute('src');delete images[activeHeavyAtlas];delete status[activeHeavyAtlas];}}
- activeHeavyAtlas=key;const img=new Image();images[key]=img;status[key]='loading';
- img.onload=()=>{if(images[key]===img)status[key]='ready';};
- img.onerror=()=>{if(images[key]===img)status[key]='failed';};
- img.src=inlineAssets[key]+'?v=0.13.6.111';return img;
+ const preview=images[key+'_preview'];
+ if(activeHeavyAtlas!==key){
+  if(activeHeavyAtlas){const old=images[activeHeavyAtlas];if(old){old.onload=old.onerror=null;old.removeAttribute('src');delete images[activeHeavyAtlas];delete status[activeHeavyAtlas];}}
+  activeHeavyAtlas=key;const img=new Image();images[key]=img;status[key]='loading';
+  img.onload=()=>{const done=()=>{if(images[key]===img)status[key]='ready';};if(typeof img.decode==='function')img.decode().then(done,done);else done();};
+  img.onerror=()=>{if(images[key]===img)status[key]='failed';};
+  img.src=inlineAssets[key]+'?v=0.13.6.116';
+ }
+ return status[key]==='ready'?images[key]:preview;
 }
 // v0.13.6.34: visual-only race scale, measured from the opaque footprint of each top-down sprite.
 // No modifications to physics widths/lengths, track, or GLB meshes.
 window.TTRArtRevision='TTRToyScaleV1-Scatto92-Tuono125-Brezza93-Volt-Neon-v100';
-const spriteVisualScale=Object.freeze({"scatto":0.6443128,"polvere":0.85129411,"enduro":0.86291893,"brezza":0.8072771599999999,"lampo":0.83974417,"aero":0.79993688,"tuono":0.90990739,"volt":0.7892473051224944,"neon":0.7874934222222222,"roccia":0.8884409112709831,"martello":0.9270687769784174,"turbovan":0.8905765865384615,"titan":0.85185587,"hotflash":0.71246127,"metrocab":0.84411172,"interceptor":0.85185587,"retrosprint":0.82862343,"apex":0.88283244,"tempesta":0.85185587,"behemoth":1.00673875});
-const vehicleLengthRatios=Object.freeze({"scatto":0.92,"polvere":1.02,"enduro":1.05,"brezza":1.07,"lampo":1.1,"aero":1.1,"tuono":1.11,"volt":1.1,"neon":1.1,"roccia":1.15,"martello":1.2,"turbovan":1.15,"titan":1.1,"hotflash":0.92,"metrocab":1.09,"interceptor":1.1,"retrosprint":1.07,"apex":1.14,"tempesta":1.1,"behemoth":1.3});
+const spriteVisualScale=Object.freeze({"scatto":0.6443128,"polvere":0.85129411,"enduro":0.86291893,"brezza":0.80727716,"lampo":0.83974417,"aero":0.79993688,"tuono":0.90990739,"volt":0.7892473051224944,"neon":0.7874934222222222,"roccia":0.8884409112709831,"martello":0.9270687769784174,"turbovan":0.89057659,"titan":0.78215857,"hotflash":0.71246127,"metrocab":0.84411172,"interceptor":0.85185587,"retrosprint":0.82862343,"apex":0.88283244,"tempesta":0.85185587,"behemoth":1.00673875});
+const vehicleLengthRatios=Object.freeze({"scatto":0.92,"polvere":1.02,"enduro":1.05,"brezza":1.07,"lampo":1.1,"aero":1.1,"tuono":1.11,"volt":1.1,"neon":1.1,"roccia":1.15,"martello":1.2,"turbovan":1.15,"titan":1.01,"hotflash":0.92,"metrocab":1.09,"interceptor":1.1,"retrosprint":1.07,"apex":1.14,"tempesta":1.1,"behemoth":1.3});
 const has=name=>status[name]==='ready';
 const draw=(ctx,name,x,y,w,h)=>{if(!has(name))return false;ctx.drawImage(images[name],x,y,w,h);return true;};
 function drawVehicle(ctx,car,clock){
