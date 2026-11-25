@@ -32,13 +32,13 @@
     Object.assign(c,pose);
   }
   c.boxTransit=next;if(next>0)return true;
-  const p=B.exit+.009,advance=K.forwardProgress(c.p,p);Object.assign(c,{x:B.outlet.x,y:B.outlet.y,p,lastP:p,a:B.tangent(p),routeStableP:p,auditP:p,auditTravel:0,auditCleanTime:0,auditOutsideTime:0,offtrack:false,offtrackSeconds:0,offtrackEntry:null,routePinch:null,routeResolvedNear:null,speed:155,respawnGrace:1.05,claw:0,clawTarget:null,hitVX:0,hitVY:0,hitYaw:0,skidVX:0,skidVY:0,slip:0,oilSpin:0,steer:0,boxOutside:0,boxRouteCredit:0,routeTrace:[],routeTraceAt:null,routeDecision:null,boxTryPocket:false,boxPasses:(c.boxPasses||0)+1});
+  const p=B.exit+.009,advance=K.forwardProgress(c.p,p);Object.assign(c,{x:B.outlet.x,y:B.outlet.y,p,lastP:p,a:B.tangent(p),routeStableP:p,auditP:p,auditTravel:0,auditCleanTime:0,auditOutsideTime:0,offtrack:false,offtrackSeconds:0,offtrackEntry:null,routePinch:null,routeResolvedNear:null,speed:Math.min(140,(c.profile?.max||250)*.55),boxExitAssist:.42,respawnGrace:1.05,claw:0,clawTarget:null,hitVX:0,hitVY:0,hitYaw:0,skidVX:0,skidVY:0,slip:0,oilSpin:0,steer:0,boxOutside:0,boxRouteCredit:0,routeTrace:[],routeTraceAt:null,routeDecision:null,boxTryPocket:false,boxPasses:(c.boxPasses||0)+1});
   if(race.mode==='elimination'){c.elimDistance=(c.elimDistance||0)+advance*B.length;c.elimPrevP=p;c.elimPrevX=c.x;c.elimPrevY=c.y;c.elimTravelSinceCredit=0;c.elimProtection=1.2;}
   c.lastCheckpoint=p;c.previousValidPosition=null;c.lastValidPosition={x:c.x,y:c.y,p,a:c.a,laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};if(c===race.player)SND?.sfx('boxPocket');return true;
  }
  function environment(c,old,dt,race,recover,SND){
   for(const pocket of B.pockets){if(c.respawnGrace>0||c.jump>0||Math.hypot(c.x-pocket.x,c.y-pocket.y)>pocket.triggerR)continue;
-   if(B.pocketEntry(c,pocket,old)){c.boxTransit=B.transit;c.boxEntryOrder=race.boxEntrySerial=(race.boxEntrySerial||0)+1;c.claw=0;c.clawTarget=null;c.x=pocket.x;c.y=pocket.y;c.speed=0;c.boost=0;c.hitVX=c.hitVY=c.skidVX=c.skidVY=0;if(c===race.player)SND.sfx('boxPocket');}else recover(c,'box-pocket');return false;}
+   if(B.pocketEntry(c,pocket,old)){c.boxTransit=B.transit;c.boxEntryTime=race.time;c.boxEntryOrder=race.boxEntrySerial=(race.boxEntrySerial||0)+1;c.claw=0;c.clawTarget=null;c.x=pocket.x;c.y=pocket.y;c.speed=0;c.boost=0;c.hitVX=c.hitVY=c.skidVX=c.skidVY=0;if(c===race.player)SND.sfx('boxPocket');}else recover(c,'box-pocket');return false;}
   let hit=false;if(c.x<196||c.x>2404){c.x=K.clamp(c.x,196,2404);c.a=Math.PI-c.a;hit=true;}if(c.y<161||c.y>1439){c.y=K.clamp(c.y,161,1439);c.a=-c.a;hit=true;}if(hit)c.speed*=.55;
   const prop=B.propContact(c,old);c.boxPropContact=!!(prop&&prop!=='jump'||hit);if(prop==='jump'){c.jumpTotal=.42;if(c===race.player)SND.sfx('ramp');}else if(prop||hit){if(c===race.player&&race.time-(c.lastPropHit??-10)>.35){c.lastPropHit=race.time;SND.sfx(({cue:'boxWood',rack:'boxRack',chalk:'boxChalk'})[prop]||'impact');}}
   // Track the local arm even on wide bends. When it is lost, reacquire only
@@ -50,11 +50,24 @@
   const physical=step<=40?step:0,localLimit=physical*2.3+.15;
   let credit=Math.min(B.length*.14,(c.boxRouteCredit||0)+physical*1.35);
   let advance=0,decision='box-local',global=null;
-  if(physical>.02&&near.distance<=142){
+  // At the top-right hairpin the visible lane overlaps its outgoing arm.
+  // A local handoff is allowed only within that junction, with both projections
+  // on the lane and real forward motion along the outgoing arm. Never grant
+  // credit for crossing unrelated parts of the table.
+  let seam=false;
+  if(physical>.02&&prev>=.39&&prev<=.43&&near.distance<=B.laneHalf+3){
+    global=K.nearestTrack(c,B.points);const gain=signed(prev,global.p);
+    const a=B.tangent(global.p),alignment=((c.x-old.x)*Math.cos(a)+(c.y-old.y)*Math.sin(a))/physical;
+    if(global.p>=.435&&global.p<=.47&&gain>=.018&&gain<=.045&&global.distance<=B.laneHalf-10&&near.distance>global.distance+18&&alignment>.5){
+      const before=K.nearestTrack(old,B.points);
+      if(before.distance<=B.laneHalf){advance=gain*B.length;credit=24;decision='box-junction-handoff';seam=true;}
+    }
+  }
+  if(!seam&&physical>.02&&near.distance<=142){
     advance=K.clamp(delta*B.length,-Math.max(localLimit,credit),Math.max(localLimit,credit));
     credit=Math.max(0,credit-Math.abs(advance));
     if(Math.abs(delta*B.length-advance)<1)credit=Math.min(credit,24);
-  }else if(physical>.02){
+  }else if(!seam&&physical>.02){
     global=K.nearestTrack(c,B.points);
     const gain=signed(prev,global.p)*B.length;
     if(global.distance<=142&&Math.abs(gain)<=credit+12&&Math.abs(gain)<=B.length*.14&&Math.abs(gain)>0.01){
@@ -126,4 +139,10 @@
    if(near.distance>95)desired=Math.min(desired,110);
    const brake=c.speed>desired+(hard?16:12)&&c.speed>75;return {steer,gas:!brake&&(desired>=cap*.96||c.speed<desired+(hard?7:3)),brake};
  }
- window.TTRBoxRules=Object.freeze({obstacles,transit,environment,cpuTarget,drive});})();
+ function cameraPose(c){
+   if(!(c?.boxTransit>0))return null;
+   if(c.boxTransit<exitDuration)return {x:c.x,y:c.y};
+   const t=K.clamp((B.transit-c.boxTransit)/(B.transit-exitDuration),0,1),u=t*t*(3-2*t);
+   return {x:B.entryPocket.x+(B.exitPocket.x-B.entryPocket.x)*u,y:B.entryPocket.y+(B.exitPocket.y-B.entryPocket.y)*u};
+ }
+ window.TTRBoxRules=Object.freeze({obstacles,transit,environment,cpuTarget,drive,cameraPose});})();

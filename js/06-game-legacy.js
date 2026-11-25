@@ -33,7 +33,7 @@ function measurePerfInput(){if(!perfTouchAt)return;const delta=performance.now()
 function resetPerf(){perfCars={};perfStats=emptyPerf();perfTotal=emptyPerf();perfReport='';perfTouchAt=0;perfInputDelay=null;perfInputSamples=[];perfRecoveries=[];perfRecoveryDropped=0;}
 
 const perfPanel=document.createElement('div');perfPanel.className='ttr-perf';perfPanel.hidden=true;document.body.appendChild(perfPanel);
-function perfSnapshot(){const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.110 · 14.20n",quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(m=>({...m,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)})),trackId:race?.trackId??perfContext.trackId,raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
+function perfSnapshot(){const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.111 · 14.20o",quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(m=>({...m,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)})),trackId:race?.trackId??perfContext.trackId,raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
 window.TTRPerformance={snapshot:perfSnapshot};
 const points=breakfastPoints.slice();
 const controls={left:false,right:false,brake:false};
@@ -965,7 +965,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  if(race.countdown>0){ttrRaceTiming.advanceCountdown(dt);syncAudio();return;}
  ttrRaceTiming.advanceLiveFrame(dt);
  for(const c of race.cars){if(c.done)continue;
-  if(isBox()&&BR.transit(c,dt,race,SND)){if(perfEnabled&&perfCars[c.id])perfCars[c.id].ramps=c.boxPasses||0;continue;}
+  if(isBox()&&BR.transit(c,dt,race,SND)){if(perfEnabled&&perfCars[c.id]){const m=perfCars[c.id];m.ramps=c.boxPasses||0;if(!c.boxTransit&&Number.isFinite(c.boxEntryTime)){(m.boxTunnelTimes??=[]).push(+(race.time-c.boxEntryTime).toFixed(3));if(m.boxTunnelTimes.length>30)m.boxTunnelTimes.shift();}}continue;}
   if((c.tableFalling||0)>0){
     c.tableFalling=Math.max(0,c.tableFalling-dt);
     if(c.tableFalling>.56){c.a+=(c.tableSpin||8.2)*dt;c.speed=Math.max(0,c.speed*(1-dt*2.2));}
@@ -1009,7 +1009,16 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
 
  let turn=c.profile.turn*(.24+clamp(Math.abs(c.speed)/160,0,1)*.76)*(c.slip>0?.38:1)*preSurface.grip*(c.profile.gripFactor||1);
  if((c.oilSpin||0)>0){const step=Math.min(dt,c.oilSpin);c.a+=c.oilSpinDir*2*Math.PI*(step/1.16);c.oilSpin-=step;c.speed=Math.sign(c.speed)*Math.min(Math.abs(c.speed),145);}
- else c.a+=ctl.steer*turn*(c.speed>=0?1:-.7)*dt;
+ else {
+   const assist=isBox()?Math.max(0,c.boxExitAssist||0):0;
+   if(assist>0){
+     // Blend steering authority back in; the player can brake throughout.
+     const blend=clamp(1-assist/.42,0,1),target=B.tangent(c.routeStableP??c.p);
+     c.a+=angleDiff(target,c.a)*Math.min(1,dt*5*(1-blend));
+     c.a+=ctl.steer*turn*(.35+.65*blend)*(c.speed>=0?1:-.7)*dt;
+     c.boxExitAssist=Math.max(0,assist-dt);
+   }else c.a+=ctl.steer*turn*(c.speed>=0?1:-.7)*dt;
+ }
  c.a+=(c.hitYaw||0)*dt;c.hitYaw=(c.hitYaw||0)*Math.exp(-4.0*dt);
  if(c.claw>0){
    c.claw-=dt;const t=c.clawTarget,d=t?distance(c,t):0;
@@ -1343,8 +1352,8 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
 function wireMenu(){
  // 14.15: tolerate a cached pre-14.14 HTML shell; manual acceleration is no longer supported.
  const obsoleteAuto=$('auto');if(obsoleteAuto){const label=obsoleteAuto.closest('label');if(label)label.remove();else obsoleteAuto.remove();}
- document.documentElement.dataset.ttrJsBuild='0.13.6.110';
- const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.110 · 14.20n';
+ document.documentElement.dataset.ttrJsBuild='0.13.6.111';
+ const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.111 · 14.20o';
  // A transformed menu creates a non-viewport containing block for fixed dialogs.
  // Move Options to document.body, so the overlay is genuinely viewport-sized on iPhone.
  const settingsDialog=$('retroSettings');if(settingsDialog&&settingsDialog.parentNode!==document.body)document.body.appendChild(settingsDialog);const configDialog=$('raceConfig');if(configDialog&&configDialog.parentNode!==document.body)document.body.appendChild(configDialog);const trackDialog=$('trackSelect');if(trackDialog&&trackDialog.parentNode!==document.body)document.body.appendChild(trackDialog);
@@ -1488,8 +1497,9 @@ function render(){const qualityCap=qualityMode==='low'?1.25:qualityMode==='balan
  const physicalPlayer=race?.mode==='elimination'?(gridLocked?race.player:race.elim.state==='celebration'?race.cars[race.elim.winner]:eliminationCameraLeader()):race?.player,player=physicalPlayer?visualCar(physicalPlayer):null,playerFalling=!!(player&&player.tableFalling>0);
  const look=player&&race.countdown<=0&&!playerFalling?(race?.mode==='elimination'?0:85):0;
  const groupTarget=race?.mode==='elimination'&&race.elim.state==='race'&&!gridLocked?{x:player.x,y:player.y}:null;
- const targetX=isBox()&&player?.boxTransit>0?B.exitPocket.x:gridLocked?elimGridCamera.x:groupTarget?groupTarget.x:player?player.x+Math.cos(player.a)*look:WORLD_W/2;
- const targetY=isBox()&&player?.boxTransit>0?B.exitPocket.y:gridLocked?elimGridCamera.y:groupTarget?groupTarget.y:player?player.y+Math.sin(player.a)*look:WORLD_H/2;
+ const pocketCamera=isBox()&&player?.boxTransit>0?BR.cameraPose(player):null;
+ const targetX=pocketCamera?pocketCamera.x:gridLocked?elimGridCamera.x:groupTarget?groupTarget.x:player?player.x+Math.cos(player.a)*look:WORLD_W/2;
+ const targetY=pocketCamera?pocketCamera.y:gridLocked?elimGridCamera.y:groupTarget?groupTarget.y:player?player.y+Math.sin(player.a)*look:WORLD_H/2;
  scale=sw<sh?Math.min(.85,Math.max(.60,sh/620)):
    Math.min(.86,Math.max(.59,Math.min(sw/1140,sh/540)));
  const halfW=sw/(2*scale),halfH=sh/(2*scale);

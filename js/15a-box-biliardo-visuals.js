@@ -26,7 +26,7 @@ function render(b){
   // Start line and painted grid.
   let s=T.point(0),a=T.tangent(0);b.save();b.translate(s.x,s.y);b.rotate(a);for(let row=0;row<2;row++)for(let col=0;col<10;col++){b.fillStyle=(row+col)%2?'#172c26':'#f7f2d5';b.fillRect(-18+row*18,-100+col*20,18,20);}for(let i=0;i<4;i++){let x=-65-Math.floor(i/2)*78,y=i%2===0?-42:42;b.strokeStyle='#f1edce80';b.lineWidth=3;b.strokeRect(x-26,y-21,52,42);}b.restore();
   // Decorative chalk logo / score typography in the unoccupied felt.
-  b.save();b.translate(1130,510);b.rotate(-.12);b.fillStyle='#d9efcf2c';b.textAlign='center';b.font='900 84px system-ui';b.fillText('8  BALL',0,0);b.font='800 34px system-ui';b.fillText('BOX DI BILIARDO',0,47);b.restore();
+
   // Large wooden cues, their geometry matches physical collision shapes.
   for(const o of T.cues){const {x,y,a,len,w}=o;b.save();b.translate(x,y);b.rotate(a);b.shadowColor='#071b14bb';b.shadowBlur=10;b.shadowOffsetY=8;let c=b.createLinearGradient(0,-w/2,0,w/2);c.addColorStop(0,'#f8dfb3');c.addColorStop(.35,'#c99b61');c.addColorStop(1,'#64412a');b.fillStyle=c;b.beginPath();b.moveTo(-len/2,-w/2);b.lineTo(len/2,-w*.21);b.lineTo(len/2,w*.21);b.lineTo(-len/2,w/2);b.closePath();b.fill();b.shadowBlur=0;b.shadowOffsetY=0;b.fillStyle='#42282a';b.fillRect(-len/2,-w/2,len*.24,w);b.fillStyle='#e2d7b3';b.fillRect(-len/2+len*.24,-w*.44,8,w*.88);b.fillStyle='#cfddd1';b.fillRect(len/2-17,-w*.22,12,w*.44);b.fillStyle='#6cb2c4';b.fillRect(len/2-5,-w*.22,5,w*.44);b.restore();}
   // Hollow rack: three wooden rails, no invisible filled triangle.

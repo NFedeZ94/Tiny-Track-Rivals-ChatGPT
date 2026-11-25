@@ -13,7 +13,7 @@
  function nearest(pos,anchor=null,window=.042){let best={distance:Infinity};for(let i=0;i<points.length;i++){if(anchor!==null&&gap((i+.5)/points.length,anchor)>window)continue;const a=points[i],b=points[(i+1)%points.length],dx=b.x-a.x,dy=b.y-a.y,den=dx*dx+dy*dy,t=clamp(((pos.x-a.x)*dx+(pos.y-a.y)*dy)/den,0,1),x=a.x+dx*t,y=a.y+dy*t,d=Math.hypot(pos.x-x,pos.y-y);if(d<best.distance)best={distance:d,x,y,p:mod((i+t)/points.length,1)};}return best;}
  const pocketRadius=40;
  const pockets=[{id:'A',x:2410,y:145,role:'entry'},{id:'B',x:1300,y:145,role:'hazard'},{id:'C',x:190,y:145,role:'exit'},{id:'D',x:190,y:1455,role:'hazard'},{id:'E',x:1300,y:1455,role:'hazard'},{id:'F',x:2410,y:1455,role:'hazard'}].map(p=>({...p,r:pocketRadius,triggerR:pocketRadius-8,rimR:pocketRadius+5}));
- const entryPocket=pockets[0],exitPocket=pockets[2],entry=nearest(entryPocket).p,exit=nearest(exitPocket).p, outlet=point(exit+.009), transit=6.8;
+ const entryPocket=pockets[0],exitPocket=pockets[2],entry=nearest(entryPocket).p,exit=nearest(exitPocket).p, outlet=point(exit+.009), transit=3.9;
  // Place checkpoint phases outside the pocket branch; all remain mandatory.
  const checkpoints=[.17,.34,.78,.88];
  const pickupPhases=[.10,.39,.76,.92];
