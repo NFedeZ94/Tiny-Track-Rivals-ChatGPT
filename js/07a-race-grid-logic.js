@@ -10,7 +10,9 @@ const duplicateColourSchemes={
  polvere:['#b759d9','#3bbba9','#de597f'],
  lampo:['#e29a46','#9068df','#e65b88'],
  aero:['#33a7ce','#f5d760','#bd7adb'],
- enduro:['#9951d6','#3cbdad','#e5a14e']
+ enduro:['#9951d6','#3cbdad','#e5a14e'],
+ brezza:['#eb9254','#9d6be0','#70bf63'],
+ volt:['#e8433e','#e5bb35','#4b6cd1']
 };
 
 const duplicateColourOffsets={scatto:0,tuono:1,polvere:1,lampo:2};

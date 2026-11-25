@@ -17,7 +17,7 @@
   if(race.mode!=='career'||!c.done||race.careerRecorded)return null;
   race.careerRecorded=true;
   return window.TTRCareer?.recordResult({mode:'career',finished:true,laps:c.lapsCompleted,place,racerCount,
-   carId:c.profile.id,respawns:c.shortcutRespawns||0,pickups:race.careerStats?.pickups||0,
+   trackIndex:race.trackIndex??0,carId:c.profile.id,respawns:c.shortcutRespawns||0,pickups:race.careerStats?.pickups||0,
    turbos:race.careerStats?.turbos||0,oils:race.careerStats?.oils||0,claws:race.careerStats?.claws||0});
  }
  function resultActions(mode,nav){

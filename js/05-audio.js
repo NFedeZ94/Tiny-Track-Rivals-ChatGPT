@@ -24,7 +24,9 @@
     // European naturally-aspirated GT: smooth airy crescendo, mid-high register
     aero:{type:'triangle',sub:'sine',harm:'sine',base:101,range:157,filter:720,cut:470,mix:.159,submix:.058,harmmix:.019,detune:0,flutter:.004,flutterHz:6.7,ratio:2.1},
     // Endurance prototype: high-rev, clean metallic racing motor, distinct from Aero R.
-    enduro:{type:'triangle',sub:'sine',harm:'triangle',base:124,range:171,filter:830,cut:550,mix:.155,submix:.042,harmmix:.031,detune:3,flutter:.009,flutterHz:10.6,ratio:2.27}
+    enduro:{type:'triangle',sub:'sine',harm:'triangle',base:124,range:171,filter:830,cut:550,mix:.155,submix:.042,harmmix:.031,detune:3,flutter:.009,flutterHz:10.6,ratio:2.27},
+    volt:{type:'sine',sub:'sine',harm:'triangle',base:158,range:230,filter:1000,cut:630,mix:.105,submix:.032,harmmix:.013,detune:0,flutter:.002,flutterHz:12,ratio:2.6},
+    brezza:{type:'sawtooth',sub:'sine',harm:'triangle',base:108,range:184,filter:690,cut:420,mix:.118,submix:.047,harmmix:.024,detune:1,flutter:.005,flutterHz:8.1,ratio:2.42}
   };
   function persist(){try{localStorage.setItem('ttr_audio_settings',JSON.stringify(settings));}catch(_){}}
   function gainNode(value,destination){const g=ctx.createGain();g.gain.value=value;g.connect(destination);return g;}

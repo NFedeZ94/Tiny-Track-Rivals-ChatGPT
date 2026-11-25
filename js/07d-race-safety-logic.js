@@ -30,7 +30,7 @@ function recoverCar(c,reason='edge'){
    c.elimLag=0;c.elimProtection=ELIM_RULES_TEST.respawnProtectionSeconds;
    c.elimPrevP=p;c.elimPrevX=c.x;c.elimPrevY=c.y;c.elimTravelSinceCredit=0;
  }
- c.shortcutRespawns=(c.shortcutRespawns||0)+1;c.lastPenaltyReason=reason;c.routeStableP=p;c.routePinch=null;c.orangeLine=null;c.routeTrace=[];c.routeTraceAt=null;c.routeDecision=null;c.routeResolvedNear=null;c.tableFalling=0;c.tableSpin=0;c.tableFallDir=0;c.auditP=p;c.auditTravel=0;c.auditCleanTime=0;c.auditBridge=false;c.auditOutsideTime=0;c.oilSpin=0;c.bridgeLandingActive=false;c.mugApexPassed=safe.mugApexPassed===true||(safe.mugApexPassed===undefined&&p>.32&&p<.93);
+ c.shortcutRespawns=(c.shortcutRespawns||0)+1;c.lastPenaltyReason=reason;c.routeStableP=p;c.boxTransit=0;c.boxOutside=0;c.boxTryPocket=false;c.routePinch=null;c.orangeLine=null;c.routeTrace=[];c.routeTraceAt=null;c.routeDecision=null;c.routeResolvedNear=null;c.tableFalling=0;c.tableSpin=0;c.tableFallDir=0;c.auditP=p;c.auditTravel=0;c.auditCleanTime=0;c.auditBridge=false;c.auditOutsideTime=0;c.oilSpin=0;c.bridgeLandingActive=false;c.mugApexPassed=safe.mugApexPassed===true||(safe.mugApexPassed===undefined&&p>.32&&p<.93);
  
  if(c===race.player){SND.sfx('respawn');setLastHint(0);const h=$('hint');if(h){h.textContent='';h.classList.remove('show');}/* Recovery stays silent: no PENALITÀ banner in any mode. */}
 }
@@ -64,6 +64,16 @@ function orangeContinuity(c,near,anchor,step,dt){
   if(q.distance>orangeWidth||step>40||Math.abs(forward)>step*2+22||state.elapsed>12){
     c.orangeLine=null;
     if(!state.active)return null;
+    // A verified inside line can merge onto the adjacent ordinary road toward
+    // the ramp. Never reset its earned progress when that road is reached.
+    // Use a local projection as a second witness; no bridge credit is granted.
+    const merge=nearestTrackWindow(c,points,anchor,.038);
+    const validMerge=step<=40&&state.travel>=80&&state.u-state.entryU>=45&&anchor>=.50&&anchor<=.65&&near.p>=.48&&near.p<=.665&&near.distance<=138&&merge.distance<=138&&merge.p>=anchor-.018;
+    if(validMerge){
+      const phase=Math.max(anchor,Math.min(merge.p,anchor+step*.00072));
+      c.routePinch=null;c.routeStableP=phase;c.routeDecision='orange-main-merge';
+      return {near:{...merge,p:phase,shortcut:false},penalty:false};
+    }
     if(near.distance<=138&&phaseGap(near.p,anchor)<.025){c.routePinch=null;c.routeStableP=near.p;return {near,penalty:false};}
     c.routeStableP=state.entryPhase;c.routePinch={phase:state.entryPhase,elapsed:0,travel:0,safe:state.safe};return null;
   }

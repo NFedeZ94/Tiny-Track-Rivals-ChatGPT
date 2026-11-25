@@ -34,7 +34,7 @@ if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInp
  const skillProfiles=Object.freeze([
    Object.freeze({pace:.80,look:105,line:0,steer:2.1,curveSpeed:.77,pass:0,shortcut:.10,aim:49}),
    Object.freeze({pace:.95,look:125,line:.45,steer:2.55,curveSpeed:.89,pass:34,shortcut:.45,aim:27}),
-   Object.freeze({pace:1,look:175,line:1,steer:3.1,curveSpeed:1,pass:52,shortcut:.85,aim:8})
+   Object.freeze({pace:1,look:185,line:1,steer:3.2,curveSpeed:1,pass:52,shortcut:.60,aim:8})
  ]);
  function skillFor(race){
    const f=race.aiFactor||1;
@@ -46,17 +46,24 @@ if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInp
  const length=K.TRACK_LENGTH;
  const ramp=()=>props.find(o=>o.type==='ramp');
  function linePoint(p,strength){
-   const chord=strength>=.999?.019:.014;const q=trackPoint(p),a=trackPoint(p-chord),b=trackPoint(p+chord),heading=K.tangent(p);
+   const chord=strength>=.999?.021:.014;const q=trackPoint(p),a=trackPoint(p-chord),b=trackPoint(p+chord),heading=K.tangent(p);
    // A bounded chord through the bend, still well inside the drivable lane.
    const n={x:-Math.sin(heading),y:Math.cos(heading)};
-   const off=clamp(((a.x+b.x)/2-q.x)*n.x+((a.y+b.y)/2-q.y)*n.y,-42,42)*strength;
+   const off=clamp(((a.x+b.x)/2-q.x)*n.x+((a.y+b.y)/2-q.y)*n.y,-(strength>=.999?48:42),strength>=.999?48:42)*strength;
    return {x:q.x+n.x*off,y:q.y+n.y*off};
  }
  function inputFor(c){
    const race=getRace();if(c===race.player||race.mode==='online')return legacyInputFor(c);
-   const s=skillFor(race),r=ramp(),inZone=c.p>.515&&c.p<.63,visit=(race.elim?.round||0)+':'+c.lapsCompleted;
+   const s=skillFor(race),hardLevel=s.curveSpeed>=.999;
+   if(race.trackId==='box-di-biliardo')return window.TTRBoxRules.drive(c,race,s);
+   if(hardLevel&&!c.aiPersonality)c.aiPersonality=['aggressive','technical','strategic'][((c.id-1)%3+3)%3];
+   const r=ramp(),inZone=c.p>.515&&c.p<.63,visit=(race.elim?.round||0)+':'+c.lapsCompleted;
    if(r&&inZone&&c.shortcutDecisionLap!==visit&&!c.bridgeMissActive){
-     c.shortcutDecisionLap=visit;c.tryShortcut=Math.random()<s.shortcut;c.shortcutDecisionCount=(c.shortcutDecisionCount||0)+1;
+     c.shortcutDecisionLap=visit;
+     const chance=hardLevel?({aggressive:.76,technical:.38,strategic:.66}[c.aiPersonality]??.60):s.shortcut;
+     const clear=!hardLevel||!race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&o.tryShortcut&&Math.hypot(o.x-c.x,o.y-c.y)<95);
+     c.tryShortcut=Math.random()<chance&&clear&&(!hardLevel||c.aiRampStreak!==2);
+     if(hardLevel)c.aiRampStreak=c.tryShortcut?(c.aiRampStreak||0)+1:0;c.shortcutDecisionCount=(c.shortcutDecisionCount||0)+1;
      if(c.tryShortcut)c.shortcutAttemptCount=(c.shortcutAttemptCount||0)+1;
      c.rampAimOffset=(Math.random()*2-1)*s.aim;
    }

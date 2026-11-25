@@ -173,7 +173,9 @@
     {id:'polvere',name:'Polvere X',color:'#e5ae3b',accent:'#3e2d19',shape:'buggy',max:249,acc:194,turn:2.82,mass:0.87},
     {id:'lampo',name:'Lampo ZX',color:'#69e337',accent:'#e5ffd0',shape:'sport',max:266,acc:201,turn:2.52,mass:0.94},
     {id:'aero',name:'Aero R',color:'#f57927',accent:'#202b33',shape:'sport',max:273,acc:183,turn:2.32,mass:1.09},
-     {id:'enduro',name:'Enduro SP',color:'#e93a49',accent:'#f5f5f1',shape:'sport',max:267,acc:195,turn:2.75,mass:.88}
+     {id:'enduro',name:'Enduro SP',color:'#e93a49',accent:'#f5f5f1',shape:'sport',max:267,acc:195,turn:2.75,mass:.88},
+     {id:'brezza',name:'Brezza RS',color:'#42bddb',accent:'#182c39',shape:'sport',max:262,acc:203,turn:2.965,mass:.805},
+     {id:'volt',name:'Volt GX',color:'#e1e8ef',accent:'#0cb7c3',shape:'sport',max:272,acc:219,turn:2.545,mass:.935}
   ];
 
    // v0.13.6.50: shared design-to-physics calibration for all 30 vehicle IDs.
@@ -202,9 +204,9 @@
        [id,Object.freeze(ttrCalibratedProfile({id,max:257,acc:195,turn:2.65,mass:1}))])));
    window.TTRBalanceAudit=Object.freeze({
      version:'0.13.6.84',scope:'all_modes_on_matching_builds',profileCount:30,
-     playableCount:6,hiddenExpansionCount:10,
+     playableCount:8,hiddenExpansionCount:10,
      status:'preliminary_tuning_requires_playtesting',onlinePhysics:'host_uses_six_stats_on_updated_builds',
-     notes:'Six design stats mapped to all race modes; 6 playable cars, others remain data only. Mixed client versions are not validated.'
+     notes:'Six design stats mapped to all race modes; 7 playable cars, others remain data only. Mixed client versions are not validated.'
    });
   // v0.13: original, arc-length-sampled tabletop course (not an oval).
   // Eight canon sections are represented in the course and identified in track-data.json.
@@ -333,7 +335,7 @@
     return (forward-closestF)**2+(across-closestA)**2<=r*r;
   }
   function segmentCircle(a,b,c,r){const dx=b.x-a.x,dy=b.y-a.y,d=dx*dx+dy*dy||1,t=clamp(((c.x-a.x)*dx+(c.y-a.y)*dy)/d,0,1);return Math.hypot(a.x+t*dx-c.x,a.y+t*dy-c.y)<r;}
-  function clawTarget(user,cars,obstacles,range=158,cone=0.30){let result=null,best=Infinity;for(const c of cars){if(c===user||c.done)continue;const d=distance(user,c);if(d>range||d<10||d>=best)continue;const a=Math.atan2(c.y-user.y,c.x-user.x);if(Math.abs(angleDiff(a,user.a))>cone)continue;if(obstacles.some(o=>o.solid&&segmentCircle(user,c,o,(o.r||20)+2)))continue;best=d;result=c;}return result;}
+  function clawTarget(user,cars,obstacles,range=158,cone=0.30){let result=null,best=Infinity;for(const c of cars){if(c===user||c.done||c.boxTransit>0)continue;const d=distance(user,c);if(d>range||d<10||d>=best)continue;const a=Math.atan2(c.y-user.y,c.x-user.x);if(Math.abs(angleDiff(a,user.a))>cone)continue;if(obstacles.some(o=>o.solid&&segmentCircle(user,c,o,(o.r||20)+2)))continue;best=d;result=c;}return result;}
   function segmentPointDistance(ax,ay,bx,by,px,py){
     const dx=bx-ax,dy=by-ay,den=dx*dx+dy*dy;
     const t=den>1e-6?clamp(((px-ax)*dx+(py-ay)*dy)/den,0,1):0;
@@ -422,7 +424,7 @@
   // and short-lived lateral impulse. This avoids the overlap/sticky-pair artefact.
   function resolveCarContacts(cars){let impacts=0,maxOverlap=0,maxImpulse=0;const hits=[],deckContacts=new Map();
     for(let iteration=0;iteration<3;iteration++)for(let i=0;i<cars.length;i++)for(let j=i+1;j<cars.length;j++){
-      const a=cars[i],b=cars[j];if(a.done||b.done||a.tableFalling>0||b.tableFalling>0)continue;
+      const a=cars[i],b=cars[j];if(a.done||b.done||a.tableFalling>0||b.tableFalling>0||a.boxTransit>0||b.boxTransit>0)continue;
       const aDeck=!!a.onBridge,bDeck=!!b.onBridge;
       if(aDeck!==bDeck&&!(a.bridgeExitVisual>0||b.bridgeExitVisual>0))continue;
       if((a.jump>0||b.jump>0)&&!(aDeck&&bDeck))continue;

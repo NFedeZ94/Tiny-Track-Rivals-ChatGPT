@@ -8,7 +8,7 @@ function handleObstacles(c,oldX,oldY,dt) {
  const race=getRace();
  // Orange rind in v62 is a solid obstacle: no auto-launch and no jump award.
  // Static object collisions; jump avoids low obstacles.
- let touchedObstacle=false;
+ let touchedObstacle=race.trackId==='box-di-biliardo'&&!!c.boxPropContact;c.boxPropContact=false;
  if(c.onBridge){c.stuckAnchor=null;c.obstacleStuckSeconds=0;return;}
  for(const o of props){const reach=(o.type==='knife'?o.length||168:o.r||40)+(c.length||65)+18;if(Math.abs(o.x-c.x)>reach&&Math.abs(o.x-oldX)>reach||Math.abs(o.y-c.y)>reach&&Math.abs(o.y-oldY)>reach)continue;if(contactWithProp(c,o,{x:oldX,y:oldY})){
    touchedObstacle=true;

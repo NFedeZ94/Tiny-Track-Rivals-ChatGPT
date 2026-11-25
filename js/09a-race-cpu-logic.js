@@ -35,7 +35,7 @@ function useTacticalPowerup(c) {
  if((c.aiItemCheckAt||0)>race.time)return;
  c.aiItemCheckAt=race.time+[.95,.48,.20][level]+Math.random()*.12;
  if(c.item==='turbo'){
-   const aligned=Math.abs(c.steer||0)<[.35,.48,.56][level];
+   const aligned=Math.abs(c.steer||0)<[.35,.48,.67][level];
    if(c.speed>95&&aligned&&!c.onBridge&&Math.random()<[.25,.65,.95][level])useItem(c);
  }else if(c.item==='oil'){
    const behind=race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&!o.onBridge&&Math.hypot(o.x-c.x,o.y-c.y)<175&&(o.x-c.x)*Math.cos(c.a)+(o.y-c.y)*Math.sin(c.a)<-20);
