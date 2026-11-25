@@ -87,7 +87,7 @@ function eliminationEvaluate(dt){const race=getRace(),e=race.elim;
  if(onNormal){if(last.elimBranchStart==null)last.elimBranchStart=race.time;}else if(!inBranch)last.elimBranchStart=null;
  const branchProtected=onNormal&&race.time-last.elimBranchStart<8.5;
  const safe=!branchProtected&&e.roundTime>=ELIM_RULES_TEST.minimumRoundSeconds&&last!==leader&&settled&&
-   !last.tableFalling&&!last.routePinch&&outside(view.x,view.y)&&outside(leader.x,leader.y)&&
+   !last.tableFalling&&!(last.boxTransit>0)&&!(leader.boxTransit>0)&&!last.routePinch&&outside(view.x,view.y)&&outside(leader.x,leader.y)&&
    gap>80&&Math.hypot(last.x-leader.x,last.y-leader.y)>ELIM_RULES_TEST.physicalSeparation;
  last.elimLag=safe?(last.elimLag||0)+dt:0;
  if(safe&&last.elimLag>=ELIM_RULES_TEST.sustainedTrailSeconds&&!(last.respawnGrace>0)&&!(last.elimProtection>0))knockOutElimination(last,'fuori schermo');

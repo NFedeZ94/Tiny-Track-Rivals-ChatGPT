@@ -2,7 +2,18 @@
 
 /* Tiny Track Rivals — indipendent playable 2.5D HTML Canvas vertical slice. MIT-like original project code. */
 (()=>{'use strict';
-const K=window.TTRCore,{clamp,mod,angleDiff,distance,trackPoint,tangent,nearestTrack,nearestTrackWindow,junctionPhaseHop,phaseGap,circleRotatedRect,clawTarget,jamHit,profiles,pickupCount,rampEntryVisual,rampLaunch,resolveCarContacts,resolveCarObstacle,resolveBorderContact,stepDriveSpeed,pickupSegments,pickupType,offTrackDynamics,wideCornerRecovery,spoonContactZone,insideTrackLoop,shortcutViolation,illegalRouteGain,mugBendGate,finishGateCrossing,finishLinePlane,edgeOfTable,stuckRecoveryStep,oilHit,clawPullStep,bridgeLaneViolation,WORLD_W,WORLD_H,TRACK_LENGTH,LANE_HALF,shortcutFrom,shortcutTo,shortcutPoint,shortcutSamples,shortcutNearest,nearestCourse,sectionNames,sectionRanges,ttrCalibratedProfile}=K;
+const Base=window.TTRCore,B=window.TTRBoxTrack,BR=window.TTRBoxRules;
+let circuitId='colazione-turbo';const isBox=()=>circuitId==='box-di-biliardo';
+let WORLD_W=Base.WORLD_W,WORLD_H=Base.WORLD_H,TRACK_LENGTH=Base.TRACK_LENGTH,LANE_HALF=Base.LANE_HALF,shortcutFrom=Base.shortcutFrom,shortcutTo=Base.shortcutTo,pickupSegments=Base.pickupSegments,shortcutSamples=Base.shortcutSamples,sectionNames=Base.sectionNames,sectionRanges=Base.sectionRanges;
+const breakfastPoints=Array.from({length:520},(_,i)=>Base.trackPoint(i/520));
+const trackPoint=p=>isBox()?B.point(p):Base.trackPoint(p),tangent=p=>isBox()?B.tangent(p):Base.tangent(p);
+const nearestTrack=(p,unused)=>Base.nearestTrack(p,isBox()?B.points:breakfastPoints),nearestTrackWindow=(p,unused,a,w)=>Base.nearestTrackWindow(p,isBox()?B.points:breakfastPoints,a,w);
+const nearestCourse=(p,unused)=>isBox()?{...nearestTrack(p),shortcut:false}:Base.nearestCourse(p,breakfastPoints);
+const shortcutPoint=t=>isBox()?B.point(B.entry+(B.exit-B.entry)*t):Base.shortcutPoint(t),shortcutNearest=p=>isBox()?{...nearestTrack(p),distance:Infinity,t:0}:Base.shortcutNearest(p);
+const edgeOfTable=c=>Base.edgeOfTable(c,WORLD_W,WORLD_H),bridgeLaneViolation=(...a)=>!isBox()&&Base.bridgeLaneViolation(...a);
+const K={...Base,trackPoint,tangent,nearestTrack,nearestTrackWindow,nearestCourse,shortcutPoint,shortcutNearest,edgeOfTable,bridgeLaneViolation};
+for(const k of ['WORLD_W','WORLD_H','TRACK_LENGTH','LANE_HALF','shortcutFrom','shortcutTo'])Object.defineProperty(K,k,{get:()=>({WORLD_W,WORLD_H,TRACK_LENGTH,LANE_HALF,shortcutFrom,shortcutTo})[k]});
+const {clamp,mod,angleDiff,distance,junctionPhaseHop,phaseGap,circleRotatedRect,clawTarget,jamHit,profiles,pickupCount,rampEntryVisual,rampLaunch,resolveCarContacts,resolveCarObstacle,resolveBorderContact,stepDriveSpeed,pickupType,offTrackDynamics,wideCornerRecovery,spoonContactZone,insideTrackLoop,shortcutViolation,illegalRouteGain,mugBendGate,finishGateCrossing,finishLinePlane,stuckRecoveryStep,oilHit,clawPullStep,ttrCalibratedProfile}=K;
 const {drawKnife,drawRamp}=window.TTRGameParts;
 const {drawClawCable,renderOil,renderEffect}=window.TTRGameEffectsVisuals;
 const $=id=>document.getElementById(id);
@@ -22,9 +33,9 @@ function measurePerfInput(){if(!perfTouchAt)return;const delta=performance.now()
 function resetPerf(){perfCars={};perfStats=emptyPerf();perfTotal=emptyPerf();perfReport='';perfTouchAt=0;perfInputDelay=null;perfInputSamples=[];perfRecoveries=[];perfRecoveryDropped=0;}
 
 const perfPanel=document.createElement('div');perfPanel.className='ttr-perf';perfPanel.hidden=true;document.body.appendChild(perfPanel);
-function perfSnapshot(){const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.90 · 14.16",quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(m=>({...m,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)})),raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
+function perfSnapshot(){const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.97 · 14.20a",quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(m=>({...m,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)})),trackId:race?.trackId??perfContext.trackId,raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
 window.TTRPerformance={snapshot:perfSnapshot};
-const points=Array.from({length:520},(_,i)=>trackPoint(i/520));
+const points=breakfastPoints.slice();
 const controls={left:false,right:false,brake:false};
 
 // TTR Online Phase 1: real WebSocket lobby + relay, simulation on the host device.
@@ -64,7 +75,7 @@ function onlineOpenPanel(){
  $('onlineModal').hidden=false;
  $('onlineServer').value=localStorage.getItem('ttr_online_server')||'';
  $('onlineName').value=localStorage.getItem('ttr_online_name')||'';
- $('onlineCar').value=String(selectedCar);
+ $('onlineCar').value=String(selectedCar<onlineCarNames.length?selectedCar:0);
  onlineRefreshRoom();
 }
 function onlineRefreshRoom(){
@@ -350,6 +361,7 @@ function addProp(p,t,side,r,solid=true){const at=trackPoint(p),a=tangent(p),nx=-
 function drawCrumb(ctx,x,y,r,seed){ctx.save();ctx.translate(x,y);ctx.rotate((seed*1.731)%Math.PI);ctx.fillStyle='#472816bd';ctx.beginPath();ctx.ellipse(2,4,r*1.12,r*.69,0,0,Math.PI*2);ctx.fill();drawPoly(ctx,[[-r*.97,-r*.3],[-r*.43,-r*.92],[r*.55,-r*.70],[r,.08],[r*.32,r*.78],[-r*.82,r*.66]],seed%3===0?'#d49448':seed%3===1?'#f2c276':'#b66d2c','#784321',1.15);ctx.strokeStyle='#fff3b8ba';ctx.lineWidth=1.05;ctx.beginPath();ctx.moveTo(-r*.5,-r*.28);ctx.lineTo(r*.28,-r*.54);ctx.stroke();ctx.restore();}
 function worldInit(){
   props.length=0;milkCerealSpills.length=0;
+  if(isBox()){props.push(...BR.obstacles());window.TTRBoxVisuals.render(trackCtx);bridgeCtx.clearRect(0,0,WORLD_W,WORLD_H);return;}
   // Interactive props are deliberately few: props not marked solid never obstruct racing.
   addProp(.231,'mug',-188,58,true);props.at(-1).tall=true;        // Mug Bend
   // Removed confusing spiral/cereal decoration at the end of the second bend.
@@ -484,9 +496,11 @@ function prepareRaceProp(o){
  if(!o.staticSprite){const pad=Math.ceil(Math.max(96,o.r*2.25,(o.length||0)+22)),density=1.5;const cv=document.createElement('canvas');cv.width=cv.height=Math.ceil(pad*2*density);const cx=cv.getContext('2d');cx.scale(density,density);cx.translate(pad-o.x,pad-o.y);drawObstacle(cx,o);o.staticSprite={cv,pad};}
 }
 function drawRaceProp(ctx,o){
+ if(isBox())return;
  if(!o.staticSprite){drawObstacle(ctx,o);return;}const {cv,pad}=o.staticSprite;ctx.drawImage(cv,o.x-pad,o.y-pad,pad*2,pad*2);
 }
 function contactWithProp(c,o,previous=null){
+ if(isBox()&&o.type==='box-proxy')return false;
   // Both the high bowl and the tipped glass jar must be solid, even to a jumping car.
   if(o.tall&&o.solid&&c.jump>0){
     if(K.segmentCircle(previous||c,c,o,(o.r||70)+(c.width||36)*.42)){
@@ -549,6 +563,7 @@ function contactWithProp(c,o,previous=null){
 }
 
 function gameObstacles(ctx){
+ if(isBox())return;
  props.filter(o=>o.type==='milk_cereal_cup').forEach(o=>drawMilkOverflow(ctx,o));
   props.filter(o=>o.type==='milk_cereal_spill').forEach(o=>drawObstacle(ctx,o));
   drawJamPour(ctx);
@@ -597,6 +612,7 @@ const ELIM_ROW_SPACING=84,ELIM_START_OFFSET=65;
 const ELIM_JUMP_RUNUP=360,ELIM_JUMP_EXIT=190;
 function eliminationSignedArc(from,to){return (((mod(from-to,1)+.5)%1)-.5)*TRACK_LENGTH;}
 function eliminationJumpHazards(){
+ if(isBox())return [{name:"box-pocket",phase:B.entry},{name:"box-cue",phase:nearestTrack(B.propWorld(B.cues[1],B.cues[1].len/2,0)).p}];
  return [{name:'toast-ramp',phase:shortcutFrom},{name:'jam-knife',phase:knifePhase}];
 }
 function eliminationJumpSafeGrid(grid){
@@ -795,6 +811,8 @@ function createCar(index,p,t=0){return ttrRaceGrid.createCar(index,p,t);}
 function assignDuplicateAccents(){return ttrRaceGrid.assignDuplicateAccents();}
 let loadingToken=0;
 function openCircuitLoading(mode){
+ if(mode==='online')selectedTrackId='colazione-turbo';
+ selectCircuit(selectedTrackId);
  ttrRaceResults.cancelMusicTimer();
   const token=++loadingToken,wrap=$('loadingTrack');
   if(!wrap){initRace(mode);return;}
@@ -806,15 +824,15 @@ function openCircuitLoading(mode){
    en:'The toast ramp is a shortcut: line it up carefully to save time. A bad landing will cost you speed!',
    es:'La rampa de la tostada es un atajo: alinéate bien para ahorrar segundos. ¡Un mal aterrizaje te hará perder velocidad!'
   };
-  $('ttrRampTip').textContent=tipByLanguage[I18N.getLang()]||tipByLanguage.it;
+  $('ttrRampTip').textContent=isBox()?'Buca A → C: entra nel verso corretto. Le altre buche sono ostacoli.':tipByLanguage[I18N.getLang()]||tipByLanguage.it;
   const startLabel=I18N.getLang()==='en'?'START RACE':I18N.getLang()==='es'?'INICIAR CARRERA':'AVVIA GARA';
   startButton.textContent=startLabel;
   startButton.onclick=()=>{if(token!==loadingToken||startButton.disabled)return;startButton.disabled=true;wrap.hidden=true;initRace(mode);};
  race=null;syncAudio();wrap.hidden=false;$('screen').hidden=true;$('screen').style.display='none';$('garageScreen').hidden=true;if($('careerScreen'))$('careerScreen').hidden=true;if($('careerMissionsScreen'))$('careerMissionsScreen').hidden=true;
- $('loadingMode').textContent=mode==='online'?'GARA ONLINE · ALPHA':t(mode==='trial'?'timeTrial':mode==='elimination'?'elimination':'quickRace');
+ $('loadingMode').textContent=mode==='online'?'GARA ONLINE · ALPHA':mode==='career'?'CARRIERA':t(mode==='trial'?'timeTrial':mode==='elimination'?'elimination':'quickRace');
  const roster=[['turbo','TURBO'],['oil','OLIO'],['claw','PINZA']].map(([k,name])=>[window.TTRHudVisuals.icon(k),name]);
  $('loadingPowerups').innerHTML=roster.map(([icon,name],i)=>'<span class="power-chip'+(mode==='trial'&&i>0?' unavailable':'')+'"><span class="up-icon">'+icon+'</span><span>'+name+'</span></span>').join('');
- $('loadingTrackName').textContent=t('trackName');
+ $('loadingTrackName').textContent=isBox()?B.name:t('trackName');
  const c=$('loadingCircuitMap'),m=c.getContext('2d');m.clearRect(0,0,c.width,c.height);
  m.fillStyle='#111d40';m.fillRect(0,0,c.width,c.height);
  m.save();
@@ -825,12 +843,12 @@ function openCircuitLoading(mode){
  m.beginPath();points.forEach((p,i)=>i?m.lineTo(p.x,p.y):m.moveTo(p.x,p.y));m.closePath();m.strokeStyle='#122344';m.lineWidth=72;m.stroke();m.strokeStyle='#ffe498';m.lineWidth=21;m.stroke();
  for(const q of pickupSegments.slice(0,2)){const pos=trackPoint(q);const r=29;m.fillStyle='#26d8f1';m.strokeStyle='#073f61';m.lineWidth=6;m.beginPath();m.moveTo(pos.x,pos.y-r);m.lineTo(pos.x+r,pos.y);m.lineTo(pos.x,pos.y+r);m.lineTo(pos.x-r,pos.y);m.closePath();m.fill();m.stroke();}
  // Full elevated shortcut, with a contrasting line from take-off to landing.
-  m.save();m.beginPath();shortcutSamples.forEach((q,i)=>i?m.lineTo(q.x,q.y):m.moveTo(q.x,q.y));
+  if(!isBox()){m.save();m.beginPath();shortcutSamples.forEach((q,i)=>i?m.lineTo(q.x,q.y):m.moveTo(q.x,q.y));
   m.lineCap='round';m.lineJoin='round';m.strokeStyle='#073f61';m.lineWidth=36;m.stroke();
   m.strokeStyle='#46f5e2';m.lineWidth=20;m.stroke();
   m.restore();
   for(const t of [.085,.965]){const q=shortcutPoint(t);m.fillStyle='#fff5c3';m.beginPath();m.arc(q.x,q.y,21,0,Math.PI*2);m.fill();}
-  const ramp=shortcutPoint(.135);m.fillStyle='#f6bd62';m.beginPath();m.arc(ramp.x,ramp.y,17,0,Math.PI*2);m.fill();
+  const ramp=shortcutPoint(.135);m.fillStyle='#f6bd62';m.beginPath();m.arc(ramp.x,ramp.y,17,0,Math.PI*2);m.fill();}else{for(const p of [B.entryPocket,B.exitPocket]){m.fillStyle=p.role==='entry'?'#ffd45b':'#46f5e2';m.beginPath();m.arc(p.x,p.y,28,0,Math.PI*2);m.fill();}}
  const start=trackPoint(0);m.fillStyle='#fff';m.beginPath();m.arc(start.x,start.y,33,0,Math.PI*2);m.fill();m.restore();
  const bar=$('loadingRaceFill');bar.style.width='12%';
  SND.music('garage');requestAnimationFrame(()=>{if(token===loadingToken)bar.style.width='84%';});
@@ -842,17 +860,18 @@ function openCircuitLoading(mode){
   });
 }
 function initRace(mode){
+ if(mode==='online')selectedTrackId='colazione-turbo';selectCircuit(selectedTrackId);
  releaseAllControls();
  const cfg=TTRModeConfigs[mode]||null;
  const modeSettings=window.TTRRaceFlow.modeSettings(mode,cfg,selectedCar,onlineSession,mode==='career'?TTRCareerDifficulty():1);
  const {num,pr,aiFactor,auto}=modeSettings;
  lastRaceSettings={num,pr,aiFactor,auto};
- onlineFinishDeadline=0;race={mode,cars:[],player:null,pickups:[],oils:[],effects:[],time:0,countdown:3.2,paused:false,auto,aiFactor,finished:false,pauseOverlay:false,collisionCount:0,lastImpactSound:-10,careerStats:{pickups:0,turbos:0,oils:0,claws:0},careerRecorded:false};
+ onlineFinishDeadline=0;race={mode,trackId:circuitId,trackIndex:isBox()?1:0,cars:[],player:null,pickups:[],oils:[],effects:[],time:0,countdown:3.2,paused:false,auto,aiFactor,finished:false,pauseOverlay:false,collisionCount:0,lastImpactSound:-10,careerStats:{pickups:0,turbos:0,oils:0,claws:0},careerRecorded:false};
  if(mode==='elimination')race.elim=window.TTRModeElimination.initialState(num,TTRModeConfigs.elimination.elimGoal,ELIM_RULES_TEST.defaultGoal);
- for(let i=0;i<num;i++){const own=mode==='online'&&onlineSession?.members[i];race.cars.push(createCar(i,own?own.car:i===0?pr:i%profiles.length,mod(-(ELIM_START_OFFSET+Math.floor(i/2)*ELIM_ROW_SPACING)/TRACK_LENGTH,1)));}
+ for(let i=0;i<num;i++){const own=mode==='online'&&onlineSession?.members[i];race.cars.push(createCar(i,own?own.car:i===0?pr:i%(mode==='online'?7:profiles.length),mod(-(ELIM_START_OFFSET+Math.floor(i/2)*ELIM_ROW_SPACING)/TRACK_LENGTH,1)));}
  assignDuplicateAccents();
  race.player=race.cars[mode==='online'&&onlineSession?onlineSession.slot:0];
- if(mode==='trial'){const p=race.player.profile;race.trialSession=window.TTRTrialSession.create({trackId:window.TTRModeTrial.track,carId:p.id,carName:p.name});race.trialRecovery=race.player.shortcutRespawns||0;race.trialSession.sample(0,race.player,{force:true});race.trialGhost=window.TTRModeTrial.ghost(p.id,race.trialSession);}
+ if(mode==='trial'){const p=race.player.profile;race.trialSession=window.TTRTrialSession.create({trackId:circuitId,carId:p.id,carName:p.name});race.trialRecovery=race.player.shortcutRespawns||0;race.trialSession.sample(0,race.player,{force:true});race.trialGhost=window.TTRModeTrial.ghost(p.id,race.trialSession);}
  if(mode==='elimination'){
    const placement=eliminationChooseGrid(0,num,true);
    race.cars.forEach((c,i)=>{eliminationApplyGrid(c,placement.grid[i],i);c.eliminated=false;c.elimCelebration=0;});
@@ -905,7 +924,7 @@ const ttrRaceGrid=window.TTRRaceGrid.create({
 const ttrRacePowerups=window.TTRRacePowerups.create({
  getRace:()=>race,getOnlineSession:()=>onlineSession,onlineSend,SND,clawTarget,props,distance,showHint,t:(...args)=>t(...args)
 });
-const ttrRaceDrivers=window.TTRRaceDrivers.create({
+let ttrRaceDrivers=window.TTRRaceDrivers.create({
  getRace:()=>race,getOnlineSession:()=>onlineSession,onlineHostInput,controls,keys,trackPoint,mod,angleDiff,clamp,nearestTrack,points,K,props
 });
 const ttrRaceSafety=window.TTRRaceSafety.create({
@@ -938,19 +957,21 @@ const ttrRaceCollisions=window.TTRRaceCollisions.create({
 
 
 // Fase 10 — adapter Eliminazione: stato gara condiviso, nessuna copia di race.
-const ttrEliminationMode=window.TTRModeElimination.create({
+let ttrEliminationMode=makeEliminationMode();
+function makeEliminationMode(){return window.TTRModeElimination.create({
  getRace:()=>race,getI18N:()=>I18N,K,SND,$,LANE_HALF,TRACK_LENGTH,
  nearestTrack,nearestTrackWindow,nearestCourse,tangent,points,
  elimBanner,elimDisplayName,refreshEliminationBoard,eliminationNewRound,
  eliminationCameraLeader,eliminationViewBounds,eliminationPhysicalOvertake,
  eliminationProjectedAhead,ELIM_RULES_TEST,hideEliminationUI,showResults
-});
+});}
 
 function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='online'&&onlineSession&&!onlineSession.host)return;if(race.paused||race.finished||innerHeight>innerWidth){syncAudio();return;}
  if(race.mode==='elimination'&&eliminationEndPoint(dt)){syncAudio();return;}
  if(race.countdown>0){ttrRaceTiming.advanceCountdown(dt);syncAudio();return;}
  ttrRaceTiming.advanceLiveFrame(dt);
  for(const c of race.cars){if(c.done)continue;
+  if(isBox()&&BR.transit(c,dt,race)){if(perfEnabled&&perfCars[c.id])perfCars[c.id].ramps=c.boxPasses||0;if(c===race.player&&c.boxTransit===0)showHint('USCITA C · RIPARTI!',1.1);continue;}
   if((c.tableFalling||0)>0){
     c.tableFalling=Math.max(0,c.tableFalling-dt);
     if(c.tableFalling>.56){c.a+=(c.tableSpin||8.2)*dt;c.speed=Math.max(0,c.speed*(1-dt*2.2));}
@@ -962,10 +983,10 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
     }
     if(c.tableFalling<=0){recoverCar(c,'table-fall');}
     continue;
-  }const ctl=inputFor(c),mul=race.mode==='online'&&onlineSession?.members[c.id]?1:(c===race.player?1:(race.mode==='online'?Math.min(1,race.aiFactor):ttrRaceDrivers.skillFor(race).pace));let vmax=c.profile.max*mul,accelerate=c.profile.acc*mul;if(perfEnabled){const m=perfCars[c.id]??=( {id:c.id,model:c.profile.name,seconds:0,sum:0,max:0,gas:0,brake:0,mul,cap:vmax,acc:accelerate,ramps:0} );m.lapTimes??=[];m.lapStart??=0;m.passAttempts=c.aiPassAttempts||0;m.decisions=c.shortcutDecisionCount||0;m.attempts=c.shortcutAttemptCount||0;m.respawns=c.shortcutRespawns||0;m.lastPenalty=c.lastPenaltyReason||'';m.seconds+=dt;m.sum+=Math.abs(c.speed)*dt;m.max=Math.max(m.max,Math.abs(c.speed));m.gas+=ctl.gas?dt:0;m.brake+=ctl.brake?dt:0;m.respawns=c.shortcutRespawns||0;m.reason=c.lastPenaltyReason||'';}
+  }const ctl=inputFor(c),mul=race.mode==='online'&&onlineSession?.members[c.id]?1:(c===race.player?1:(race.mode==='online'?Math.min(1,race.aiFactor):ttrRaceDrivers.skillFor(race).pace));let vmax=c.profile.max*mul,accelerate=c.profile.acc*mul;if(perfEnabled){const m=perfCars[c.id]??=( {id:c.id,model:c.profile.name,seconds:0,sum:0,max:0,gas:0,brake:0,mul,cap:vmax,acc:accelerate,ramps:0} );m.lapTimes??=[];m.lapStart??=0;m.passAttempts=c.aiPassAttempts||0;m.personality=c.aiPersonality??null;m.decisions=c.shortcutDecisionCount||0;m.attempts=c.shortcutAttemptCount||0;m.respawns=c.shortcutRespawns||0;m.lastPenalty=c.lastPenaltyReason||'';m.seconds+=dt;m.sum+=Math.abs(c.speed)*dt;m.max=Math.max(m.max,Math.abs(c.speed));m.gas+=ctl.gas?dt:0;m.brake+=ctl.brake?dt:0;m.respawns=c.shortcutRespawns||0;m.reason=c.lastPenaltyReason||'';}
  // Sticky jam has a lasting, measurable slowdown and reduced acceleration.
  // It is not another oil patch: grip remains predictable, speed is limited.
- const inJam=c.jump<=0&&jamHit(c,jamPatch);
+ const inJam=!isBox()&&c.jump<=0&&jamHit(c,jamPatch);
  if(inJam&&!c.wasInJam&&c===race.player)SND.sfx('slowSurface');c.wasInJam=inJam;
  c.jamTimer=inJam?.85:Math.max(0,(c.jamTimer||0)-dt);
  if(c.jamTimer>0){accelerate*=.40;}
@@ -987,7 +1008,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  c.oilCooldown=Math.max(0,(c.oilCooldown||0)-dt);
  c.respawnGrace=Math.max(0,(c.respawnGrace||0)-dt);
  c.impactGrace=Math.max(0,(c.impactGrace||0)-dt);
- const preSurface=offTrackDynamics(nearestCourse(c,points).distance);
+ const preSurface=offTrackDynamics(isBox()?nearestTrackWindow(c,points,c.routeStableP??c.p,.047).distance:nearestCourse(c,points).distance);
  // Jam slowing is handled before acceleration; no fake tiny per-frame drag.
 
  if(preSurface.outside)c.speed*=Math.max(.93,1-(1-preSurface.speedFactor)*dt*1.9);
@@ -1000,7 +1021,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
    c.claw-=dt;const t=c.clawTarget,d=t?distance(c,t):0;
    const front=t?Math.abs(angleDiff(Math.atan2(t.y-c.y,t.x-c.x),c.a)):99;
    const obstructed=t?props.some(o=>o.solid&&K.segmentCircle(c,t,o,(o.r||18)+2)):true;
-   if(!t||t.done||d>164||front>.65||obstructed||c.jump>0||t.jump>0){c.claw=0;c.clawTarget=null;}
+   if(!t||t.done||t.boxTransit>0||d>164||front>.65||obstructed||c.jump>0||t.jump>0){c.claw=0;c.clawTarget=null;}
    else{
      const result=clawPullStep(c,t,dt);
      if(!result.connected){c.claw=0;c.clawTarget=null;}
@@ -1034,9 +1055,10 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
      }
    }
  }
- ttrRaceCPU.updateRecovery(c,dt);
+ const beforeCPURecovery=c.shortcutRespawns||0;ttrRaceCPU.updateRecovery(c,dt);if(isBox()&&(c.shortcutRespawns||0)!==beforeCPURecovery)continue;
  // On-road snapshots are only written after complete frame of verified lane contact.
  // No penalty for a normal outside detour at the finish-line seam (p=1 -> p=0).
+ if(isBox()){if(!BR.environment(c,{x:oldX,y:oldY},dt,race,recoverCar,SND)){if(c===race.player&&c.boxTransit>0)showHint('BUCA A → C',2);continue;}}else{
  let near=c.onBridge?{...shortcutNearest(c),shortcut:true}:nearestCourse(c,points);
  if(near.shortcut&&!c.onBridge&&!c.bridgeTakeoff&&!c.bridgeLandingActive&&!c.bridgeMissActive)near={...nearestTrack(c,points),shortcut:false};
  const routeCheck=junctionContinuity(c,near,oldX,oldY,dt);
@@ -1160,6 +1182,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
       c.onBridge=true;c.bridgeOffSeconds=0;
     }
   }
+ }
  const recoveryBefore=c.shortcutRespawns||0;
  ttrRaceCollisions.handleObstacles(c,oldX,oldY,dt);
  if((c.shortcutRespawns||0)!==recoveryBefore)continue;
@@ -1167,7 +1190,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  ttrRacePickups.collect(c);
  const lapBefore=c.lapsCompleted;
  ttrRaceProgress.updateCarProgress(c,dt,oldX,oldY);
- if(perfEnabled&&perfCars[c.id]&&c.lapsCompleted===lapBefore+1){const m=perfCars[c.id];m.lapTimes.push(+(race.time-m.lapStart).toFixed(3));m.lapStart=race.time;}
+ if(perfEnabled&&perfCars[c.id]&&c.lapsCompleted===lapBefore+1){const m=perfCars[c.id];const lapTime=+(race.time-m.lapStart).toFixed(3);m.lapTimes.push(lapTime);(m.lapDetails??=[]).push({time:lapTime,ramps:m.ramps-(m.lapRampStart||0),respawns:m.respawns-(m.lapRecoveryStart||0)});m.lapRampStart=m.ramps;m.lapRecoveryStart=m.respawns;m.lapStart=race.time;}
  if(race.mode==='elimination'&&c.lastValidPosition&&K.phaseGap(c.lastValidPosition.p,c.elimPrevP)<.008){const d=((K.forwardProgress(c.elimPrevP,c.lastValidPosition.p)+.5)%1-.5)*TRACK_LENGTH;c.lastValidPosition.elimDistance=c.elimDistance+d;}
  ttrRaceCPU.useTacticalPowerup(c);
  }
@@ -1197,8 +1220,8 @@ let selectedCar=0,garagePreview=0,menuTimer=null,menuStep=0,lastShowroomDraw=0,g
 // so they may be previewed in text but are NEVER passed into initRace or misrepresented as playable.
 const TTRCircuitCatalog=Object.freeze([
  {id:'colazione-turbo',name:'Colazione Turbo',scene:'colazione',ready:true},
+ {id:'box-di-biliardo',name:'Box di Biliardo',scene:'box',ready:true},
  {id:'desk-drift',name:'Desk Drift',scene:null,ready:false},
- {id:'box-di-biliardo',name:'Box di Biliardo',scene:null,ready:false},
  {id:'bagno-sprint',name:'Bagno Sprint',scene:null,ready:false},
  {id:'garage-grid',name:'Garage Grid',scene:null,ready:false},
  {id:'giardino-mini-gp',name:'Giardino Mini GP',scene:null,ready:false},
@@ -1219,36 +1242,57 @@ const TTRTrackCopy=Object.freeze({
  fr:{title:'CHOISIR UN CIRCUIT',ready:'JOUABLE',locked:'EN DÉVELOPPEMENT',info:'Vraie carte · Bonus sur tout le parcours',back:'← RETOUR',continue:'CONTINUER',launch:'LANCER LA COURSE',lockedInfo:'Circuit en développement · carte non disponible'},
  pt:{title:'ESCOLHER PISTA',ready:'JOGÁVEL',locked:'EM DESENVOLVIMENTO',info:'Minimapa real · Itens em toda a pista',back:'← VOLTAR',continue:'CONTINUAR',launch:'INICIAR CORRIDA',lockedInfo:'Pista em desenvolvimento · minimapa indisponível'}
 });
-const TTRDrawActualMinimap=canvas=>window.TTRMinimapVisuals.drawActualMinimap(canvas,points,trackPoint);
+const TTRDrawActualMinimap=canvas=>window.TTRMinimapVisuals.drawActualMinimap(canvas,breakfastPoints,Base.trackPoint);
+// 14.18: isolated playable prototype, never routed to the Colazione race engine.
+function TTRTrackAvailable(c,mode){return !!(c?.ready||(c?.prototype&&window.TTRBoxTrack&&(mode==='race'||mode==='trial')));}
+function TTRDrawBoxMinimap(canvas){
+ const B=window.TTRBoxTrack;if(!canvas||!B)return;
+ const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height,k=Math.min((w-10)/B.world.w,(h-10)/B.world.h);
+ ctx.clearRect(0,0,w,h);ctx.save();ctx.translate((w-B.world.w*k)/2,(h-B.world.h*k)/2);ctx.scale(k,k);
+ ctx.fillStyle='#204f40';ctx.fillRect(0,0,B.world.w,B.world.h);
+ ctx.strokeStyle='#b8d5b3';ctx.lineWidth=36;ctx.setLineDash([]);ctx.lineJoin='round';ctx.beginPath();B.points.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.closePath();ctx.stroke();
+ for(const p of B.pockets){ctx.beginPath();ctx.arc(p.x,p.y,58,0,Math.PI*2);ctx.fillStyle=p.role==='entry'?'#f6d34c':p.role==='exit'?'#58ddec':'#132821';ctx.fill();}
+ const f=B.point(0),a=B.tangent(0);ctx.strokeStyle='#fff';ctx.lineWidth=20;ctx.beginPath();ctx.moveTo(f.x-Math.sin(a)*90,f.y+Math.cos(a)*90);ctx.lineTo(f.x+Math.sin(a)*90,f.y-Math.cos(a)*90);ctx.stroke();ctx.restore();
+}
+const TTRDrawSelectedTrack=(canvas,c)=>c.id==='box-di-biliardo'?TTRDrawBoxMinimap(canvas):TTRDrawActualMinimap(canvas);
+const TTRPrototypeCopy={it:['PROTOTIPO 0.2','Test separato · 4 auto o Prova a tempo · Nessun progresso Carriera','PROVA CIRCUITO'],en:['PROTOTYPE 0.2','Separate test · 4 cars or time trial · No career progress','TEST TRACK'],es:['PROTOTIPO 0.2','Prueba independiente · 4 coches o contrarreloj · Sin progreso de carrera','PROBAR CIRCUITO'],de:['PROTOTYP 0.2','Separater Test · 4 Autos oder Zeitfahren · Kein Karrierefortschritt','STRECKE TESTEN'],fr:['PROTOTYPE 0.2','Test séparé · 4 voitures ou contre-la-montre · Sans progression carrière','TESTER LE CIRCUIT'],pt:['PROTÓTIPO 0.2','Teste separado · 4 carros ou contrarrelógio · Sem progresso de carreira','TESTAR PISTA']};
+const TTRProtoCopy=()=>TTRPrototypeCopy[I18N.getLang()]||TTRPrototypeCopy.it;
 function TTRPaintCareerTracks(){const root=$('careerCircuitCatalog');if(!root)return;root.replaceChildren();TTRCircuitCatalog.forEach(c=>{const label=document.createElement('span');label.className='ttr-career-circuit'+(c.ready?' ready':'');label.textContent=String(c.index).padStart(2,'0')+' · '+c.name+(c.ready?' ✓':'');root.append(label);});}
 TTRPaintCareerTracks();
 function TTROpenTrackSelect(mode){
- if(!TTRModeConfigs[mode])return;TTRCloseRaceConfig(false);activeTrackMode=mode;
+ if(mode!=='trial'&&mode!=='career'&&!TTRModeConfigs[mode])return;TTRCloseRaceConfig(false);activeTrackMode=mode;
  selectedTrackId='colazione-turbo';const copy=TTRTrackCopy[I18N.getLang()]||TTRTrackCopy.it;
  const panel=$('trackSelect'),grid=$('trackSelectGrid');if(!panel||!grid)return;
  $('trackSelectTitle').textContent=copy.title;
- $('trackSelectSubtitle').textContent=t(mode==='race'?'quickRace':'elimination')+' · 1 / '+TTRCircuitCatalog.length+' '+copy.ready;
+ $('trackSelectSubtitle').textContent=(mode==='trial'?($('trialBtn')?.textContent?.trim()||'TIME TRIAL'):t(mode==='career'?'career':mode==='race'?'quickRace':'elimination'))+' · '+TTRCircuitCatalog.filter(c=>TTRTrackAvailable(c,mode)).length+' / '+TTRCircuitCatalog.length+' '+copy.ready;
  $('trackSelectBack').textContent=copy.back;$('trackSelectNext').textContent=copy.continue;
  grid.replaceChildren();
  TTRCircuitCatalog.forEach((c)=>{
   const btn=document.createElement('button');btn.type='button';btn.className='ttr-track-card'+(c.id===selectedTrackId?' is-selected':'');btn.dataset.track=c.id;
-  btn.disabled=!c.ready;btn.setAttribute('aria-label',String(c.index).padStart(2,'0')+' · '+c.name+' · '+(c.ready?copy.ready:copy.locked));
-  if(c.ready){const map=document.createElement('canvas');map.width=180;map.height=94;map.setAttribute('aria-hidden','true');btn.append(map);TTRDrawActualMinimap(map);}
+  const available=TTRTrackAvailable(c,mode),statusText=c.ready?copy.ready:(available&&c.prototype?TTRProtoCopy()[0]:copy.locked);
+  btn.disabled=!available;btn.setAttribute('aria-label',String(c.index).padStart(2,'0')+' · '+c.name+' · '+statusText);
+  if(available){const map=document.createElement('canvas');map.width=180;map.height=94;map.setAttribute('aria-hidden','true');btn.append(map);TTRDrawSelectedTrack(map,c);}
   else{const blank=document.createElement('span');blank.className='ttr-track-empty';blank.classList.add('ttr-v69-upcoming');blank.setAttribute('aria-hidden','true');btn.append(blank);}
   const labels=document.createElement('span');labels.className='ttr-track-info';const title=document.createElement('b');title.textContent=String(c.index).padStart(2,'0')+' · '+c.name;
-  const status=document.createElement('small');status.textContent=c.ready?copy.ready:copy.locked;labels.append(title,status);btn.append(labels);
-  if(c.ready)btn.addEventListener('click',()=>{selectedTrackId=c.id;grid.querySelectorAll('button').forEach(e=>e.classList.toggle('is-selected',e.dataset.track===c.id));TTRUpdateTrackPreview();SND.sfx('select');});grid.append(btn);
+  const status=document.createElement('small');status.textContent=statusText;labels.append(title,status);btn.append(labels);
+  if(available)btn.addEventListener('click',()=>{selectedTrackId=c.id;grid.querySelectorAll('button').forEach(e=>e.classList.toggle('is-selected',e.dataset.track===c.id));TTRUpdateTrackPreview();SND.sfx('select');});grid.append(btn);
  });
  TTRUpdateTrackPreview();panel.hidden=false;grid.querySelector('.is-selected')?.focus();SND.sfx('select');
 }
 function TTRUpdateTrackPreview(){const c=TTRCircuitCatalog.find(t=>t.id===selectedTrackId);const copy=TTRTrackCopy[I18N.getLang()]||TTRTrackCopy.it;if(!c)return;
- $('trackSelectSelected').textContent=String(c.index).padStart(2,'0')+' · '+c.name.toUpperCase();$('trackSelectInfo').textContent=c.ready?copy.info:copy.lockedInfo;
- if(c.ready)TTRDrawActualMinimap($('trackSelectMap'));
- $('trackSelectNext').disabled=!c.ready;
+ const available=TTRTrackAvailable(c,activeTrackMode);
+ $('trackSelectSelected').textContent=String(c.index).padStart(2,'0')+' · '+c.name.toUpperCase();$('trackSelectInfo').textContent=c.prototype&&available?TTRProtoCopy()[1]:c.ready?copy.info:copy.lockedInfo;
+ if(available)TTRDrawSelectedTrack($('trackSelectMap'),c);
+ $('trackSelectNext').textContent=c.prototype&&available?TTRProtoCopy()[2]:copy.continue;
+ $('trackSelectNext').disabled=!available;
 }
 function TTRCloseTrackSelect(){const panel=$('trackSelect');if(panel)panel.hidden=true;activeTrackMode=null;}
-function TTRAdvanceTrackSelect(){const c=TTRCircuitCatalog.find(t=>t.id===selectedTrackId);if(!activeTrackMode||!c?.ready||!c.scene)return;
- const mode=activeTrackMode;TTRCloseTrackSelect();TTROpenRaceConfig(mode);
+function TTRAdvanceTrackSelect(){const c=TTRCircuitCatalog.find(t=>t.id===selectedTrackId);if(!activeTrackMode||!TTRTrackAvailable(c,activeTrackMode))return;
+ const mode=activeTrackMode;TTRCloseTrackSelect();
+ if(!c.ready||!c.scene)return;
+ if(mode==='career'){SND.unlock();stopMenuMusic();openCircuitLoading('career');return;}
+ if(mode==='trial'){window.TTRModeTrial.setTrack(c.id);window.TTRModeTrial.menu(profiles,profiles[selectedCar],()=>{stopMenuMusic();openCircuitLoading('trial');});return;}
+ TTROpenRaceConfig(mode);
 }
 // v67: separate persistent race configurations; never mix with global language/audio settings.
 const TTRModeDefaults=Object.freeze({race:Object.freeze({racers:'4',difficulty:'1',elimGoal:'5'}),elimination:Object.freeze({racers:'4',difficulty:'1',elimGoal:'5'})});
@@ -1271,6 +1315,7 @@ function TTRStartConfiguredRace(){const mode=activeConfigMode;const track=TTRCir
 try{selectedCar=+localStorage.getItem('ttr_selected_car')||0;}catch(e){}selectedCar=clamp(selectedCar,0,profiles.length-1);
 const initialMenu=$('screen').innerHTML;
 function mainMenu(){
+ selectedTrackId='colazione-turbo';selectCircuit(selectedTrackId);
  if(onlineSession)onlineQuit();
  ttrRaceResults.cancelMusicTimer();
  loadingToken++;$('loadingTrack').hidden=true;if(race){perfRecoveries=race.recoveryHistory||[];perfRecoveryDropped=race.recoveryHistoryDropped||0;}race=null;releaseAllControls();hideEliminationUI();$('pauseOverlay').hidden=true;syncAudio();$('garageScreen').hidden=true;$('languageScreen').hidden=true;if($('careerScreen'))$('careerScreen').hidden=true;if($('careerMissionsScreen'))$('careerMissionsScreen').hidden=true;
@@ -1295,8 +1340,8 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
  const garageLabels=['Velocità','Accelerazione','Sterzo','Grip','Impatto','Stabilità'];
  const stats=garageLabels.map((label,i)=>[label,garageDesignStats[p.id]?.[i]??0]);
  $('garageBars').setAttribute('aria-label',garageDesignSource); $('garageBars').innerHTML=stats.map(([label,raw])=>{const value=Math.max(0,Math.min(10,Number(raw)||0));return `<div class="garage-stats"><span class="garage-stat-label">${label}</span><div class="rail" role="meter" aria-label="${label}" aria-valuemin="0" aria-valuemax="10" aria-valuenow="${value}">${Array.from({length:10},(_,i)=>`<i class="${i<value?'filled':''}"></i>`).join('')}</div><b class="garage-stat-value">${value}/10</b></div>`}).join('');
- $('garageChoices').innerHTML=profiles.map((q,i)=>`<button class="car-choice ${i===garagePreview?'active':''}" data-car="${i}"><img class="car-choice-preview" data-image="${q.id}" alt="" aria-hidden="true"><span class="car-choice-info"><b>${String(i+1).padStart(2,'0')} · ${q.name}</b><small>${q.id===profiles[selectedCar].id?t('selected'):['HOT HATCH','V8','BUGGY','SPORT','SUPERCAR · TEST','ENDURANCE · TEST'][i]}</small></span></button>`).join('');
- document.querySelectorAll('.car-choice-preview').forEach(el=>{const car=el.dataset.image.replace('_showroom','');const pic=window.TTRAssets?.images[car+'_showroom']||window.TTRAssets?.images[car];if(pic?.src)el.src=pic.src;});
+ $('garageChoices').innerHTML=profiles.map((q,i)=>`<button class="car-choice ${i===garagePreview?'active':''}" data-car="${i}"><img class="car-choice-preview" data-image="${q.id}" alt="" aria-hidden="true"><span class="car-choice-info"><b>${String(i+1).padStart(2,'0')} · ${q.name}</b><small>${q.id===profiles[selectedCar].id?t('selected'):['HOT HATCH','V8','BUGGY','SPORT','SUPERCAR · TEST','ENDURANCE · TEST','ROADSTER · TEST','ELETTRICA · TEST'][i]}</small></span></button>`).join('');
+ document.querySelectorAll('.car-choice-preview').forEach(el=>{const car=el.dataset.image.replace('_showroom','');const pic=window.TTRAssets?.images[car+'_showroom']||window.TTRAssets?.images[car];const thumb=window.TTRVehicleThumbnail?.(car);if(thumb)el.src=thumb;else if(pic?.src)el.src=pic.src;});
  document.querySelectorAll('[data-car]').forEach(el=>el.onclick=()=>{garagePreview=+el.dataset.car;garageRotationOrigin=clock;ping(640,.08,.07);refreshGarage();});
  const artCard=$('garageCanon');if(artCard){
    const pic=profiles[garagePreview].id+'_concept_views';
@@ -1311,17 +1356,17 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
 function wireMenu(){
  // 14.15: tolerate a cached pre-14.14 HTML shell; manual acceleration is no longer supported.
  const obsoleteAuto=$('auto');if(obsoleteAuto){const label=obsoleteAuto.closest('label');if(label)label.remove();else obsoleteAuto.remove();}
- document.documentElement.dataset.ttrJsBuild='0.13.6.90';
- const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.90 · 14.16';
+ document.documentElement.dataset.ttrJsBuild='0.13.6.97';
+ const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.97 · 14.20a';
  // A transformed menu creates a non-viewport containing block for fixed dialogs.
  // Move Options to document.body, so the overlay is genuinely viewport-sized on iPhone.
  const settingsDialog=$('retroSettings');if(settingsDialog&&settingsDialog.parentNode!==document.body)document.body.appendChild(settingsDialog);const configDialog=$('raceConfig');if(configDialog&&configDialog.parentNode!==document.body)document.body.appendChild(configDialog);const trackDialog=$('trackSelect');if(trackDialog&&trackDialog.parentNode!==document.body)document.body.appendChild(trackDialog);
  const r=$('raceBtn'),trial=$('trialBtn'),garage=$('garageBtn'),mute=$('menuMute');
  const careerBtn=$('careerBtn');if(careerBtn)careerBtn.onclick=()=>{SND.unlock();window.TTRCareer?.open();};
-  if(r)r.onclick=()=>{SND.unlock();TTROpenTrackSelect('race')};if(trial)trial.onclick=()=>{SND.unlock();window.TTRModeTrial.menu(profiles,profiles[selectedCar],()=>{stopMenuMusic();openCircuitLoading('trial');});};const onlineBtn=$('onlineBtn');if(onlineBtn)onlineBtn.onclick=()=>{SND.unlock();onlineOpenPanel();};const eliminationBtn=$('eliminationBtn');if(eliminationBtn)eliminationBtn.onclick=()=>{SND.unlock();TTROpenTrackSelect('elimination')};
+  if(r)r.onclick=()=>{SND.unlock();TTROpenTrackSelect('race')};if(trial)trial.onclick=()=>{SND.unlock();TTROpenTrackSelect('trial');};const onlineBtn=$('onlineBtn');if(onlineBtn)onlineBtn.onclick=()=>{SND.unlock();onlineOpenPanel();};const eliminationBtn=$('eliminationBtn');if(eliminationBtn)eliminationBtn.onclick=()=>{SND.unlock();TTROpenTrackSelect('elimination')};
  if(garage)garage.onclick=()=>{SND.unlock().then(ok=>{if(ok)SND.music('garage')});showGarage();};
  if($('raceConfigStart'))$('raceConfigStart').onclick=TTRStartConfiguredRace;for(const id of ['raceConfigCancel','raceConfigClose'])if($(id))$(id).onclick=()=>TTRCloseRaceConfig(true);if(configDialog){configDialog.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();TTRCloseRaceConfig(true);}});configDialog.addEventListener('click',e=>{if(e.target===configDialog)TTRCloseRaceConfig(true);});}
-  if($('trackSelectNext'))$('trackSelectNext').onclick=TTRAdvanceTrackSelect;for(const id of ['trackSelectClose','trackSelectBack'])if($(id))$(id).onclick=()=>{const mode=activeTrackMode;TTRCloseTrackSelect();$('screen').querySelector(mode==='elimination'?'#eliminationBtn':'#raceBtn')?.focus();};if(trackDialog){trackDialog.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();TTRCloseTrackSelect();}});trackDialog.addEventListener('click',e=>{if(e.target===trackDialog)TTRCloseTrackSelect();});}
+  if($('trackSelectNext'))$('trackSelectNext').onclick=TTRAdvanceTrackSelect;for(const id of ['trackSelectClose','trackSelectBack'])if($(id))$(id).onclick=()=>{const mode=activeTrackMode;TTRCloseTrackSelect();if(mode==='career')$('careerPlay')?.focus();else $('screen').querySelector(mode==='elimination'?'#eliminationBtn':mode==='trial'?'#trialBtn':'#raceBtn')?.focus();};if(trackDialog){trackDialog.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();TTRCloseTrackSelect();}});trackDialog.addEventListener('click',e=>{if(e.target===trackDialog)TTRCloseTrackSelect();});}
   const setting=$('settingsBtn');if(setting)setting.onclick=()=>{const panel=$('retroSettings');panel.open=true;const selector=$('settingsLanguage');if(selector)selector.value=I18N.getLang();SND.sfx('select');};
   const settingsLanguage=$('settingsLanguage');if(settingsLanguage){settingsLanguage.value=I18N.getLang();settingsLanguage.onchange=()=>{I18N.setLang(settingsLanguage.value);refreshAudioUI();};}
   if(settingsDialog){settingsDialog.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();settingsDialog.open=false;setting?.focus();}});settingsDialog.addEventListener('click',event=>{if(event.target===settingsDialog){settingsDialog.open=false;setting?.focus();}});}
@@ -1433,7 +1478,17 @@ function syncPauseAudioControls(){const st=SND.getSettings();
 function togglePause(){if(!race||race.finished)return;race.paused=!race.paused;releaseAllControls();$('pauseOverlay').hidden=!race.paused;$('hint').classList.remove('show');lastHint=0;
  if(race.paused){$('pauseAudio').open=false;document.querySelector('.pause-card').classList.remove('audio-open');syncPauseAudioControls();SND.stopMusic();SND.sfx('select');}
  else SND.music('race');syncAudio();}
-const miniBase=window.TTRMinimapVisuals.createRaceMiniBase(points,shortcutSamples,WORLD_W,WORLD_H);
+let miniBase=window.TTRMinimapVisuals.createRaceMiniBase(points,shortcutSamples,WORLD_W,WORLD_H);
+function selectCircuit(id){
+ const next=id==='box-di-biliardo'&&B?'box-di-biliardo':'colazione-turbo';window.TTRModeTrial.setTrack(next);if(next===circuitId)return;
+ circuitId=next;WORLD_W=isBox()?B.world.w:Base.WORLD_W;WORLD_H=isBox()?B.world.h:Base.WORLD_H;TRACK_LENGTH=isBox()?B.length:Base.TRACK_LENGTH;LANE_HALF=isBox()?B.laneHalf:Base.LANE_HALF;
+ shortcutFrom=isBox()?B.entry:Base.shortcutFrom;shortcutTo=isBox()?B.exit:Base.shortcutTo;shortcutSamples=isBox()?[]:Base.shortcutSamples;pickupSegments=isBox()?B.pickupPhases:Base.pickupSegments;
+ points.splice(0,points.length,...(isBox()?B.points:breakfastPoints));
+ track.width=bridgeLayer.width=WORLD_W;track.height=bridgeLayer.height=WORLD_H;worldInit();
+ miniBase=window.TTRMinimapVisuals.createRaceMiniBase(points,shortcutSamples,WORLD_W,WORLD_H);
+ ttrRaceDrivers=window.TTRRaceDrivers.create({getRace:()=>race,getOnlineSession:()=>onlineSession,onlineHostInput,controls,keys,trackPoint,mod,angleDiff,clamp,nearestTrack,points,K,props});ttrEliminationMode=makeEliminationMode();
+ camX=WORLD_W/2;camY=WORLD_H/2;
+}
 let ttrFrameMean=1/60,ttrLowGraphics=false,ttrQualityTimer=0;let perfQuality=1.65;
  const SIM_STEP=1/60;let simDebt=0,simRace=null,simPrevious=new Map(),renderFraction=1,lastHudAt=-Infinity;
  function visualCar(c){const p=simPrevious.get(c.id);if(!p||p.round!==race.elim?.round||p.recovery!==(c.shortcutRespawns||0)||Math.hypot(c.x-p.x,c.y-p.y)>100)return c;const u=renderFraction;const pose={...c,x:p.x+(c.x-p.x)*u,y:p.y+(c.y-p.y)*u,a:p.a+angleDiff(c.a,p.a)*u};if(race.mode!=='elimination'&&p.onBridge===!!c.onBridge&&p.rampEntryVisual===!!c.rampEntryVisual&&p.elevated===!!(c.jump>0||c.bridgeExitVisual>0||c.onBridge||c.rampEntryVisual)&&p.falling===!!(c.tableFalling>0)){pose.jump=p.jump+(c.jump-p.jump)*u;pose.wheelPhase=p.wheelPhase+angleDiff(c.wheelPhase||0,p.wheelPhase)*u;}return pose;}
@@ -1446,8 +1501,8 @@ function render(){const qualityCap=qualityMode==='low'?1.25:qualityMode==='balan
  const physicalPlayer=race?.mode==='elimination'?(gridLocked?race.player:race.elim.state==='celebration'?race.cars[race.elim.winner]:eliminationCameraLeader()):race?.player,player=physicalPlayer?visualCar(physicalPlayer):null,playerFalling=!!(player&&player.tableFalling>0);
  const look=player&&race.countdown<=0&&!playerFalling?(race?.mode==='elimination'?0:85):0;
  const groupTarget=race?.mode==='elimination'&&race.elim.state==='race'&&!gridLocked?{x:player.x,y:player.y}:null;
- const targetX=gridLocked?elimGridCamera.x:groupTarget?groupTarget.x:player?player.x+Math.cos(player.a)*look:WORLD_W/2;
- const targetY=gridLocked?elimGridCamera.y:groupTarget?groupTarget.y:player?player.y+Math.sin(player.a)*look:WORLD_H/2;
+ const targetX=isBox()&&player?.boxTransit>0?B.exitPocket.x:gridLocked?elimGridCamera.x:groupTarget?groupTarget.x:player?player.x+Math.cos(player.a)*look:WORLD_W/2;
+ const targetY=isBox()&&player?.boxTransit>0?B.exitPocket.y:gridLocked?elimGridCamera.y:groupTarget?groupTarget.y:player?player.y+Math.sin(player.a)*look:WORLD_H/2;
  scale=sw<sh?Math.min(.85,Math.max(.60,sh/620)):
    Math.min(.86,Math.max(.59,Math.min(sw/1140,sh/540)));
  const halfW=sw/(2*scale),halfH=sh/(2*scale);
@@ -1471,9 +1526,9 @@ function render(){const qualityCap=qualityMode==='low'?1.25:qualityMode==='balan
    props.filter(o=>o.type==='milk_cereal_cup'&&visibleProp(o)).forEach(o=>drawMilkOverflow(g,o));
     props.filter(o=>o.type==='milk_cereal_spill'&&visibleProp(o)).forEach(o=>drawObstacle(g,o));
     // The spreading jam is a low ground decal, always BEHIND car wheels.
-    if(Math.abs(jamPatch.x-camX)<halfW+240&&Math.abs(jamPatch.y-camY)<halfH+280)drawJamPour(g);
+    if(!isBox()&&Math.abs(jamPatch.x-camX)<halfW+240&&Math.abs(jamPatch.y-camY)<halfH+280)drawJamPour(g);
  const ghostPose=race.trialGhost&&race.countdown<=0?race.trialGhost(race.time):null;
- const ghostCar=ghostPose?{profile:race.player.profile,id:-1,...ghostPose,jumpTotal:ghostPose.jumpTotal||.96,onBridge:!!ghostPose.onBridge,rampEntryVisual:!!ghostPose.rampEntryVisual,bridgeExitVisual:ghostPose.bridgeExitVisual||0,speed:0,slip:0,boost:0,claw:0,tableFalling:ghostPose.tableFalling||0}:null;
+ const ghostCar=ghostPose&&!(ghostPose.boxTransit>=.8)?{profile:race.player.profile,id:-1,...ghostPose,jumpTotal:ghostPose.jumpTotal||.96,onBridge:!!ghostPose.onBridge,rampEntryVisual:!!ghostPose.rampEntryVisual,bridgeExitVisual:ghostPose.bridgeExitVisual||0,speed:0,slip:0,boost:0,claw:0,tableFalling:ghostPose.tableFalling||0}:null;
  const elevated=c=>c.onBridge||c.jump>0||c.rampEntryVisual||c.bridgeExitVisual>0;
  const drawGhost=()=>{if(!ghostCar||!visibleProp(ghostCar))return;g.save();g.globalAlpha=.35;carSprite(g,ghostCar);g.restore();};
  props.filter(o=>(o.type==='orange_bump'||o.type==='orange')&&visibleProp(o)).forEach(o=>drawRaceProp(g,o));
@@ -1481,21 +1536,21 @@ function render(){const qualityCap=qualityMode==='low'?1.25:qualityMode==='balan
    // Road cars are drawn first. The opaque raised bread deck then occludes them
    // at crossings, while vehicles actually ON the bridge stay visible on top.
    [...props.filter(o=>o.type!=='ramp'&&o.type!=='milk_cereal_spill'&&o.type!=='orange_bump'&&o.type!=='orange'&&visibleProp(o)).map(o=>({y:o.y,prop:o})),
-    ...race.cars.filter(c=>!c.eliminated&&visibleProp(c)&&c.jump<=0&&!c.onBridge&&!c.rampEntryVisual&&!(c.bridgeExitVisual>0)).map(c=>({y:c.y,car:visualCar(c)}))]
+    ...race.cars.filter(c=>!c.eliminated&&!(c.boxTransit>=.8)&&visibleProp(c)&&c.jump<=0&&!c.onBridge&&!c.rampEntryVisual&&!(c.bridgeExitVisual>0)).map(c=>({y:c.y,car:visualCar(c)}))]
      .sort((a,b)=>a.y-b.y).forEach(e=>e.prop?drawRaceProp(g,e.prop):carSprite(g,e.car));
    if(viewRight>viewLeft&&viewBottom>viewTop)g.drawImage(bridgeLayer,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop);
    props.filter(o=>o.type==='ramp'&&visibleProp(o)).forEach(o=>drawRaceProp(g,o));
    if(ghostCar&&elevated(ghostCar))drawGhost();
-   race.cars.filter(c=>!c.eliminated&&visibleProp(c)&&elevated(c)).map(visualCar).sort((a,b)=>a.y-b.y).forEach(c=>carSprite(g,c));
+   race.cars.filter(c=>!c.eliminated&&!(c.boxTransit>=.8)&&visibleProp(c)&&elevated(c)).map(visualCar).sort((a,b)=>a.y-b.y).forEach(c=>carSprite(g,c));
 
- for(const c of race.cars){if(!c.eliminated&&c.claw>0&&c.clawTarget)drawClawCable(g,visualCar(c),visualCar(c.clawTarget),clock);}
+ for(const c of race.cars){if(!c.eliminated&&!(c.boxTransit>0)&&c.claw>0&&c.clawTarget)drawClawCable(g,visualCar(c),visualCar(c.clawTarget),clock);}
  let impactBudget=(ttrLowGraphics||qualityMode==='low')?5:12;race.effects.forEach(e=>{if(e.kind==='impactBurst'&&impactBudget--<=0)return;if(Math.abs(e.x-camX)<halfW+160&&Math.abs(e.y-camY)<halfH+160)renderEffect(g,e,clamp);});if(race.countdown>0){g.save();g.setTransform(dpr,0,0,dpr,0,0);g.textAlign='center';g.textBaseline='middle';g.lineWidth=7;g.strokeStyle='#142438';g.font=`950 ${Math.min(90,sw/5)}px system-ui`;const v=Math.ceil(race.countdown);g.strokeText(String(v),sw/2,sh/2);g.fillStyle='#ffe67f';g.fillText(String(v),sw/2,sh/2);g.restore();}}else gameObstacles(g);
  if(clock>lastHint&&lastHint!==0){$('hint').classList.remove('show');lastHint=0;}
 }
 function frame(t){
   const raw=Math.max(0,(t-frameTime)/1000);frameTime=t;
   const dt=document.hidden?0:Math.min(.5,raw);renderDelta=dt||1/60;
-  if(simRace!==race){if(simRace){perfRecoveries=simRace.recoveryHistory||[];perfRecoveryDropped=simRace.recoveryHistoryDropped||0;}simRace=race;resetSim();if(race){resetPerf();perfContext={mode:race.mode,difficulty:race.aiFactor,quality:qualityMode};perfLast=t;ttrFrameMean=1/60;ttrQualityTimer=0;ttrLowGraphics=false;perfQuality=1.65;}}
+  if(simRace!==race){if(simRace){perfRecoveries=simRace.recoveryHistory||[];perfRecoveryDropped=simRace.recoveryHistoryDropped||0;}simRace=race;resetSim();if(race){resetPerf();perfContext={trackId:race.trackId,mode:race.mode,difficulty:race.aiFactor,quality:qualityMode};perfLast=t;ttrFrameMean=1/60;ttrQualityTimer=0;ttrLowGraphics=false;perfQuality=1.65;}}
   if(race&&raw>0&&raw<.5){ttrFrameMean+=.10*(raw-ttrFrameMean);ttrQualityTimer+=raw;if(ttrQualityTimer>(ttrLowGraphics?2:.6)){if(ttrFrameMean>.026){ttrLowGraphics=true;perfQuality=ttrFrameMean>.041?1.25:1.45;}else if(ttrFrameMean<.019){ttrLowGraphics=false;perfQuality=1.65;}ttrQualityTimer=0;}}
   onlinePingTick(t);
   if(race){
@@ -1529,10 +1584,12 @@ function frame(t){
  }
  requestAnimationFrame(frame);
 }
-window.addEventListener('ttr:career-start',e=>{const v=(window.TTRVehicleRoster||[]).find(x=>x.id===e.detail?.carId);if(!v||v.status!=='playable'||v.index-1!==e.detail.vehicleIndex)return;if(v.availability!=='initial'&&!window.TTRCareer?.isUnlocked(v.id))return;selectedCar=v.index-1;try{localStorage.setItem('ttr_selected_car',String(selectedCar))}catch(_){}SND.unlock();stopMenuMusic();openCircuitLoading('career');});
+window.addEventListener('ttr:career-start',e=>{const v=(window.TTRVehicleRoster||[]).find(x=>x.id===e.detail?.carId);if(!v||v.status!=='playable'||v.index-1!==e.detail.vehicleIndex)return;if(v.availability!=='initial'&&!window.TTRCareer?.isUnlocked(v.id))return;selectedCar=v.index-1;try{localStorage.setItem('ttr_selected_car',String(selectedCar))}catch(_){}SND.unlock();stopMenuMusic();TTROpenTrackSelect('career');});
 window.addEventListener('ttr:career-close',()=>mainMenu());
 onlineWire();worldInit();window.TTRAssets?.ready.then(()=>{worldInit();if(!$('screen').hidden)drawShowroom($('menuCar'),selectedCar,'menu');if(!$('garageScreen').hidden)drawShowroom($('garageCanvas'),garagePreview,'garage');});wireMenu();boot();requestAnimationFrame(frame);
 window.TTROnlineDebug={state:()=>onlineSession?{...onlineSession,connected:onlineSocket?.readyState===1,raceMode:race?.mode,rttMs:onlineRttMs,latencySupported:onlinePingSupported,net:{...onlineNetStats},prediction:!!race?.player?.netPrediction,local:race?.player?{x:race.player.x,y:race.player.y,a:race.player.a,netX:race.player.netX,netY:race.player.netY,netA:race.player.netA}:null,controls:race?.mode==='online'&&!onlineSession.host?onlineLocalInput():null,remoteSteer:onlineSession.host?onlineRemoteInputs[1]?.steer??null:null}:null};
+window.TTRTrackDebug=Object.freeze({current:()=>circuitId,info:()=>({trackId:circuitId,length:TRACK_LENGTH,cars:race?.cars.length,mode:race?.mode}),
+});
 window.TTREliminationDebug={startTestRace:()=>initRace('elimination'),
  // Verify no front/rear starting slot lies near a jump takeoff or landing.
  testJumpRestartGrid:()=>[shortcutFrom-.006,shortcutFrom+.01,knifePhase-.008,knifePhase+.008].flatMap(p=>[4,8].map(count=>{

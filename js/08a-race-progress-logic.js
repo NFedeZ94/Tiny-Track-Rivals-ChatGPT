@@ -15,10 +15,16 @@ window.TTRRaceProgress=Object.freeze({create(deps){
  // the full usable width so an imperfect racing line does not forfeit the lap.
  const clearLane=!c.offtrack&&!c.bridgeMissActive&&!(c.respawnGrace>0)&&!(c.tableFalling>0);
  if(clearLane&&closest.distance<=150){
+   if(race.trackId==='box-di-biliardo'){
+    if(pr>.88)c.lapGateBlocked=false;
+    if(pr>.15&&pr<.23)c.flags[0]=true;
+    if(c.flags[0]&&pr>.30&&pr<.38)c.flags[1]=true;
+    if(c.flags[1]&&pr>.78&&pr<.88)c.flags[2]=true;
+   }else{
    if(pr>.81)c.lapGateBlocked=false;
    if(pr>.17&&pr<.36)c.flags[0]=true;
    if(c.flags[0]&&pr>.43&&pr<.62)c.flags[1]=true;
-   if(c.flags[1]&&pr>.68&&pr<.86)c.flags[2]=true;
+   if(c.flags[1]&&pr>.68&&pr<.86)c.flags[2]=true;}
  }
  // True finish-line intersection from position, also if the inner racing line
  // makes nearest-track phase fail to wrap at this particular curve.

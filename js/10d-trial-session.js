@@ -9,7 +9,7 @@
  const validTime=n=>finite(n)&&n>0;
  function pose(t,car){
   if(!car||![t,car.x,car.y,car.a].every(finite)||t<0)return null;
-  return {t,x:car.x,y:car.y,a:car.a,jump:finite(car.jump)?Math.max(0,car.jump):0,jumpTotal:finite(car.jumpTotal)?Math.max(0,car.jumpTotal):.72,onBridge:!!car.onBridge,rampEntryVisual:!!car.rampEntryVisual,bridgeExitVisual:Math.max(0,car.bridgeExitVisual||0),tableFalling:Math.max(0,car.tableFalling||0)};
+  return {t,x:car.x,y:car.y,a:car.a,jump:finite(car.jump)?Math.max(0,car.jump):0,jumpTotal:finite(car.jumpTotal)?Math.max(0,car.jumpTotal):.72,onBridge:!!car.onBridge,rampEntryVisual:!!car.rampEntryVisual,bridgeExitVisual:Math.max(0,car.bridgeExitVisual||0),tableFalling:Math.max(0,car.tableFalling||0),boxTransit:Math.max(0,car.boxTransit||0)};
  }
  function formatTime(seconds){
   if(!finite(seconds)||seconds<0)return '—';

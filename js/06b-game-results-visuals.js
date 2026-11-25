@@ -16,7 +16,7 @@ function ttrResultHslRgb(h,s,l){
  const a=h<60?[c,x,0]:h<120?[x,c,0]:h<180?[0,c,x]:h<240?[0,x,c]:h<300?[x,0,c]:[c,0,x];
  return [a[0]+m,a[1]+m,a[2]+m];
 }
-function ttrTintResultBody(source,baseHex,targetHex){
+function ttrTintResultBody(source,baseHex,targetHex,model){
  if(!targetHex||targetHex.toLowerCase()===baseHex?.toLowerCase())return;
  const base=ttrResultPaintColor(baseHex),target=ttrResultPaintColor(targetHex);
  if(!base||!target)return;
@@ -31,10 +31,11 @@ function ttrTintResultBody(source,baseHex,targetHex){
   const hueWeight=Math.min(1,Math.max(0,(98-angle)/62));
   const satWeight=Math.min(1,Math.max(0,(s-.18)/.30));
   const lightWeight=Math.min(1,Math.max(0,(l-.10)/.13));
-  const weight=hueWeight*satWeight*lightWeight;
+  const whiteMask=Math.min(1,Math.max(0,(l-.48)/.26))*Math.min(1,Math.max(0,(.27-s)/.16));
+  const weight=model==='volt'?whiteMask:hueWeight*satWeight*lightWeight;
   if(weight<.035)continue;
   const delta=((target[0]-h+540)%360)-180;
-  const newH=(h+delta*weight+360)%360;
+  const newH=model==='volt'?target[0]:(h+delta*weight+360)%360;
   const newS=Math.max(0,Math.min(1,s+(target[1]-base[1])*.68*weight));
   const newL=Math.max(0,Math.min(1,l+(target[2]-base[2])*.78*weight));
   const rgb=ttrResultHslRgb(newH,newS,newL);
@@ -66,7 +67,7 @@ function ttrDrawResultThumbnail(canvas,car,TTRShowroomStarts){
  }
  if(!source)return;
  try{
-  ttrTintResultBody(source,car.profile.color,car.variantAccent);
+  ttrTintResultBody(source,car.profile.color,car.variantAccent,id);
   const pixels=source.getContext('2d',{willReadFrequently:true}).getImageData(0,0,source.width,source.height).data;
   let minX=source.width,minY=source.height,maxX=-1,maxY=-1;
   for(let y=0;y<source.height;y++)for(let x=0;x<source.width;x++){
@@ -78,7 +79,7 @@ function ttrDrawResultThumbnail(canvas,car,TTRShowroomStarts){
   minX=Math.max(0,minX-pad);minY=Math.max(0,minY-pad);
   maxX=Math.min(source.width-1,maxX+pad);maxY=Math.min(source.height-1,maxY+pad);
   const bw=maxX-minX+1,bh=maxY-minY+1;
-  const size=Math.min(w*.86/bw,h*.89/bh);
+  const size=(atlas?.complete&&atlas.naturalWidth?window.TTRVehiclePreviewScale?.(id,w,h,'result'):null)??Math.min(w*.86/bw,h*.89/bh);
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
   ctx.drawImage(source,minX,minY,bw,bh,(w-bw*size)/2,(h-bh*size)/2,bw*size,bh*size);
  }catch(err){
