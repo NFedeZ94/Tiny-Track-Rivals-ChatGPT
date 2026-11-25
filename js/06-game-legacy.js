@@ -2,15 +2,16 @@
 
 /* Tiny Track Rivals — indipendent playable 2.5D HTML Canvas vertical slice. MIT-like original project code. */
 (()=>{'use strict';
-const Base=window.TTRCore,B=window.TTRBoxTrack,BR=window.TTRBoxRules;
-let circuitId='colazione-turbo';const isBox=()=>circuitId==='box-di-biliardo';
+const Base=window.TTRCore,B=window.TTRBoxTrack,BR=window.TTRBoxRules,Desk=window.TTRDeskTrack,Bath=window.TTRBathTrack;
+let D=Desk,DR=window.TTRDeskRules;
+let circuitId='colazione-turbo';const isBox=()=>circuitId==='box-di-biliardo',isBath=()=>circuitId==='bagno-sprint',isDesk=()=>circuitId==='desk-drift'||isBath(),isBreakfast=()=>!isBox()&&!isDesk();
 let WORLD_W=Base.WORLD_W,WORLD_H=Base.WORLD_H,TRACK_LENGTH=Base.TRACK_LENGTH,LANE_HALF=Base.LANE_HALF,shortcutFrom=Base.shortcutFrom,shortcutTo=Base.shortcutTo,pickupSegments=Base.pickupSegments,shortcutSamples=Base.shortcutSamples,sectionNames=Base.sectionNames,sectionRanges=Base.sectionRanges;
 const breakfastPoints=Array.from({length:520},(_,i)=>Base.trackPoint(i/520));
-const trackPoint=p=>isBox()?B.point(p):Base.trackPoint(p),tangent=p=>isBox()?B.tangent(p):Base.tangent(p);
-const nearestTrack=(p,unused)=>Base.nearestTrack(p,isBox()?B.points:breakfastPoints),nearestTrackWindow=(p,unused,a,w)=>Base.nearestTrackWindow(p,isBox()?B.points:breakfastPoints,a,w);
-const nearestCourse=(p,unused)=>isBox()?{...nearestTrack(p),shortcut:false}:Base.nearestCourse(p,breakfastPoints);
-const shortcutPoint=t=>isBox()?B.point(B.entry+(B.exit-B.entry)*t):Base.shortcutPoint(t),shortcutNearest=p=>isBox()?{...nearestTrack(p),distance:Infinity,t:0}:Base.shortcutNearest(p);
-const edgeOfTable=c=>Base.edgeOfTable(c,WORLD_W,WORLD_H),bridgeLaneViolation=(...a)=>!isBox()&&Base.bridgeLaneViolation(...a);
+const trackPoint=p=>isDesk()?D.point(p):isBox()?B.point(p):Base.trackPoint(p),tangent=p=>isDesk()?D.tangent(p):isBox()?B.tangent(p):Base.tangent(p);
+const nearestTrack=(p,unused)=>Base.nearestTrack(p,isDesk()?D.points:isBox()?B.points:breakfastPoints),nearestTrackWindow=(p,unused,a,w)=>Base.nearestTrackWindow(p,isDesk()?D.points:isBox()?B.points:breakfastPoints,a,w);
+const nearestCourse=(p,unused)=>!isBreakfast()?{...nearestTrack(p),shortcut:false}:Base.nearestCourse(p,breakfastPoints);
+const shortcutPoint=t=>isDesk()?D.shortcutPoint(t):isBox()?B.point(B.entry+(B.exit-B.entry)*t):Base.shortcutPoint(t),shortcutNearest=p=>isDesk()?D.shortcutNearest(p):isBox()?{...nearestTrack(p),distance:Infinity,t:0}:Base.shortcutNearest(p);
+const edgeOfTable=c=>Base.edgeOfTable(c,WORLD_W,WORLD_H),bridgeLaneViolation=(...a)=>isBreakfast()&&Base.bridgeLaneViolation(...a);
 const K={...Base,trackPoint,tangent,nearestTrack,nearestTrackWindow,nearestCourse,shortcutPoint,shortcutNearest,edgeOfTable,bridgeLaneViolation};
 for(const k of ['WORLD_W','WORLD_H','TRACK_LENGTH','LANE_HALF','shortcutFrom','shortcutTo'])Object.defineProperty(K,k,{get:()=>({WORLD_W,WORLD_H,TRACK_LENGTH,LANE_HALF,shortcutFrom,shortcutTo})[k]});
 const {clamp,mod,angleDiff,distance,junctionPhaseHop,phaseGap,circleRotatedRect,clawTarget,jamHit,profiles,pickupCount,rampEntryVisual,rampLaunch,resolveCarContacts,resolveCarObstacle,resolveBorderContact,stepDriveSpeed,pickupType,offTrackDynamics,wideCornerRecovery,spoonContactZone,insideTrackLoop,shortcutViolation,illegalRouteGain,mugBendGate,finishGateCrossing,finishLinePlane,stuckRecoveryStep,oilHit,clawPullStep,ttrCalibratedProfile}=K;
@@ -52,7 +53,7 @@ function perfRecordLap(m){
  const lapTime=+(race.time-m.lapStart).toFixed(3);m.lapTimes.push(lapTime);(m.lapDetails??=[]).push({time:lapTime,ramps:m.ramps-(m.lapRampStart||0),respawns:m.respawns-(m.lapRecoveryStart||0)});m.lapRampStart=m.ramps;m.lapRecoveryStart=m.respawns;m.lapStart=race.time;
 }
 function perfPublicCar(m){const out=Object.fromEntries(Object.entries(m).filter(([k])=>!k.startsWith('_')));return {...out,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)};}
-function perfSnapshot(){if(race&&perfEnabled)for(const c of race.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m);}const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.120 · 14.20x",quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(perfPublicCar),trackId:race?.trackId??perfContext.trackId,raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
+function perfSnapshot(){if(race&&perfEnabled)for(const c of race.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m);}const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.126 · 14.22d",quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(perfPublicCar),trackId:race?.trackId??perfContext.trackId,raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
 window.TTRPerformance={snapshot:perfSnapshot};
 const points=breakfastPoints.slice();
 const controls={left:false,right:false,brake:false};
@@ -380,7 +381,8 @@ function addProp(p,t,side,r,solid=true){const at=trackPoint(p),a=tangent(p),nx=-
 function drawCrumb(ctx,x,y,r,seed){ctx.save();ctx.translate(x,y);ctx.rotate((seed*1.731)%Math.PI);ctx.fillStyle='#472816bd';ctx.beginPath();ctx.ellipse(2,4,r*1.12,r*.69,0,0,Math.PI*2);ctx.fill();drawPoly(ctx,[[-r*.97,-r*.3],[-r*.43,-r*.92],[r*.55,-r*.70],[r,.08],[r*.32,r*.78],[-r*.82,r*.66]],seed%3===0?'#d49448':seed%3===1?'#f2c276':'#b66d2c','#784321',1.15);ctx.strokeStyle='#fff3b8ba';ctx.lineWidth=1.05;ctx.beginPath();ctx.moveTo(-r*.5,-r*.28);ctx.lineTo(r*.28,-r*.54);ctx.stroke();ctx.restore();}
 function worldInit(){
   props.length=0;milkCerealSpills.length=0;
-  if(isBox()){props.push(...BR.obstacles());window.TTRBoxVisuals.render(trackCtx);bridgeCtx.clearRect(0,0,WORLD_W,WORLD_H);return;}
+  if(isDesk()){props.push(...D.props.map(o=>({...o})));(isBath()?window.TTRBathVisuals:window.TTRDeskVisuals).render(trackCtx,bridgeCtx);return;}
+  if(isBox()){props.push(...BR.obstacles());const original=B.balls.slice();try{B.balls.splice(0,B.balls.length,...original.filter(o=>!BR.movableBall(o)));window.TTRBoxVisuals.render(trackCtx);}finally{B.balls.splice(0,B.balls.length,...original);}bridgeCtx.clearRect(0,0,WORLD_W,WORLD_H);return;}
   // Interactive props are deliberately few: props not marked solid never obstruct racing.
   addProp(.231,'mug',-188,58,true);props.at(-1).tall=true;        // Mug Bend
   // Removed confusing spiral/cereal decoration at the end of the second bend.
@@ -406,7 +408,7 @@ function worldInit(){
   // A low breakfast knife lies transversally across the lane just before the jam.
   const sp=knifePhase,at=trackPoint(sp),a=tangent(sp),nx=-Math.sin(a),ny=Math.cos(a);
   const knifeLength=168,knifeBladeInLane=102.4; // 2/5 of 256-unit lane; stainless handle outside
-  props.push({type:'knife',x:at.x+nx*126,y:at.y+ny*126,r:11,angle:Math.atan2(-ny,-nx),solid:true,interactive:true,segment:sp,length:knifeLength,bladeInLane:knifeBladeInLane,jumpBladeStart:0,jumpBladeEnd:102.4,jumpTriggerHalfAcross:18});
+  props.push({type:'knife',x:at.x+nx*126,y:at.y+ny*126,r:11,angle:Math.atan2(-ny,-nx),solid:true,interactive:true,segment:sp,length:knifeLength,bladeInLane:knifeBladeInLane,jumpBladeStart:0,jumpBladeEnd:102.4,jumpTriggerHalfAcross:10});
   // v80: locate the entrance ramp at the BEGINNING of the optional shortcut,
   // not eight percent down the toast where a car has already entered it.
   const launch=shortcutPoint(.018),next=shortcutPoint(.055),ang=Math.atan2(next.y-launch.y,next.x-launch.x);
@@ -515,7 +517,8 @@ function prepareRaceProp(o){
  if(!o.staticSprite){const pad=Math.ceil(Math.max(96,o.r*2.25,(o.length||0)+22)),density=1.5;const cv=document.createElement('canvas');cv.width=cv.height=Math.ceil(pad*2*density);const cx=cv.getContext('2d');cx.scale(density,density);cx.translate(pad-o.x,pad-o.y);drawObstacle(cx,o);o.staticSprite={cv,pad};}
 }
 function drawRaceProp(ctx,o){
- if(isBox())return;
+ if(isBox()&&o.movable){BR.drawBall(ctx,o);return;}
+ if(!isBreakfast())return;
  if(!o.staticSprite){drawObstacle(ctx,o);return;}const {cv,pad}=o.staticSprite;ctx.drawImage(cv,o.x-pad,o.y-pad,pad*2,pad*2);
 }
 function contactWithProp(c,o,previous=null){
@@ -529,6 +532,7 @@ function contactWithProp(c,o,previous=null){
  // Both rinds are floor obstacles, not solid walls.
  if(o.type==='orange_bump'||o.type==='orange'){if(c.jump<=0&&K.segmentCircle(previous||c,c,o,(o.r||29)+(c.width||36)*.30)){c.speed*=.982;if(c===race?.player&&race.time-(c.lastRindSound??-10)>.7){c.lastRindSound=race.time;SND.sfx('rindSurface');}}return false;}
  if(!o.solid||c.jump>0)return false;
+ if(isBox()&&o.movable)return BR.hitBall(c,o,previous);
  if(o.type!=='knife')return resolveCarObstacle(c,o.collisionR?{...o,r:o.collisionR}:o);
  if(o.interactive!==true)return false;
  const ca=Math.cos(o.angle),sa=Math.sin(o.angle),dx=c.x-o.x,dy=c.y-o.y;
@@ -561,28 +565,29 @@ function contactWithProp(c,o,previous=null){
    }
    return resolveCarObstacle(c,handle);
  }
- const bladeTouched=along>=jumpBladeStart-halfWidth&&along<=jumpBladeEnd+halfWidth&&Math.abs(across)<=triggerHalf+halfLength;
- const sweptBlade=K.segmentPointDistance(oldX,oldY,c.x,c.y,o.x+ca*((jumpBladeStart+jumpBladeEnd)*.5),o.y+sa*((jumpBladeStart+jumpBladeEnd)*.5))<Math.max(16,(jumpBladeEnd-jumpBladeStart)*.58)+halfWidth;
- if(!bladeTouched&&!sweptBlade)return false;
- // The short hop is earned by hitting the blade from the correct direction.
+ // Match the visible blade: use the actual front bumper crossing, not a wide circular trigger.
  const knifeForward={x:-sa,y:ca};
  const heading=Math.cos(c.a)*knifeForward.x+Math.sin(c.a)*knifeForward.y;
- const impactLine=-(halfLength+triggerHalf);
- const crossed=beforeAcross<impactLine+18&&across>=impactLine-18&&across>beforeAcross-2;
- const bladeRange=along>=jumpBladeStart&&along<=jumpBladeEnd;
+ const impactLine=-(halfLength+triggerHalf),deltaAcross=across-beforeAcross;
+ const crossed=deltaAcross>0&&beforeAcross<=impactLine&&across>=impactLine;
+ const alpha=crossed?(impactLine-beforeAcross)/deltaAcross:0;
+ const hitAlong=beforeAlong+(along-beforeAlong)*alpha;
+ const bladeRange=hitAlong>=jumpBladeStart&&hitAlong<=jumpBladeEnd;
+ const bladeTouched=along>=jumpBladeStart-halfWidth&&along<=jumpBladeEnd+halfWidth&&Math.abs(across)<=triggerHalf+halfLength;
  if(c.speed>72&&heading>.24&&crossed&&bladeRange&&c.jumpCd<=0&&(c.knifeCd||0)<=0){
    c.jump=1.13;c.jumpTotal=1.13;c.jumpCd=1.54;c.knifeCd=1.2;
    c.speed=Math.max(c.speed,113);
    if(race&&c===race.player)SND.sfx('spoon');
    return true;
  }
+ if(!bladeTouched&&!(crossed&&bladeRange))return false;
  // Non-qualifying contacts slow/deflect rather than awarding a free jump.
  const bladeCollider={x:o.x+ca*Math.max(8,Math.min(bladeEnd-8,along)),y:o.y+sa*Math.max(8,Math.min(bladeEnd-8,along)),r:13,solid:true};
  return resolveCarObstacle(c,bladeCollider);
 }
 
 function gameObstacles(ctx){
- if(isBox())return;
+ if(!isBreakfast())return;
  props.filter(o=>o.type==='milk_cereal_cup').forEach(o=>drawMilkOverflow(ctx,o));
   props.filter(o=>o.type==='milk_cereal_spill').forEach(o=>drawObstacle(ctx,o));
   drawJamPour(ctx);
@@ -606,7 +611,11 @@ function drawBox(ctx,p){if(p.cool>0)return;
 }
 // Four genuinely independent silhouettes; Canvas 2D paints light and side depth consistently.
 function glass(ctx,shape){drawPoly(ctx,shape,'#15314a','#a1d6e055',1);}
-function carSprite(ctx,car){return window.TTRVehicleVisuals.carSprite(ctx,car,clock);}
+function carSprite(ctx,car){
+ const pose=isBath()&&car.onBridge?{...car,onBridge:false}:car;
+ if(isBox()&&car.boxTransit>0){const scale=BR.visualScale(car);if(scale<=0)return;ctx.save();ctx.translate(car.x,car.y);ctx.scale(scale,scale);ctx.translate(-car.x,-car.y);ctx.globalAlpha*=Math.min(1,scale*1.4);window.TTRVehicleVisuals.carSprite(ctx,pose,clock);ctx.restore();return;}
+ return window.TTRVehicleVisuals.carSprite(ctx,pose,clock);
+}
 
 // ELIMINAZIONE PROTOTIPO v0.1 — not canonical rules.
 // The master design bible (2026-11-17) confirms points, jingle, side flip and a longer final victory,
@@ -631,6 +640,8 @@ const ELIM_ROW_SPACING=84,ELIM_START_OFFSET=65;
 const ELIM_JUMP_RUNUP=360,ELIM_JUMP_EXIT=190;
 function eliminationSignedArc(from,to){return (((mod(from-to,1)+.5)%1)-.5)*TRACK_LENGTH;}
 function eliminationJumpHazards(){
+ if(isBath())return [{name:'bath-deck',phase:Bath.entry},{name:'bath-exit',phase:Bath.exit}];
+ if(isDesk())return [];
  if(isBox())return [{name:"box-pocket",phase:B.entry},{name:"box-cue",phase:nearestTrack(B.propWorld(B.cues[1],B.cues[1].len/2,0)).p}];
  return [{name:'toast-ramp',phase:shortcutFrom},{name:'jam-knife',phase:knifePhase}];
 }
@@ -850,10 +861,11 @@ function openCircuitLoading(mode){
  $('loadingTrackIndex').textContent='· '+copy[0]+' '+String(chosen?.index||1).padStart(2,'0')+' / '+TTRCircuitCatalog.length;
  $('loadingTrackName').textContent=chosen?.name.toUpperCase()||t('trackName');
  $('loadingMapLabel').textContent=copy[1];
- $('loadingMapKey').textContent='▦ '+copy[2]+'   ◆ POWER-UP   '+(isBox()?'● → ● ':'━ ')+copy[3];
+ $('loadingMapKey').textContent='▦ '+copy[2]+'   ◆ POWER-UP   '+((isBox()?'● → ● ':'━ ')+copy[3]);
  $('loadingTipsTitle').textContent=copy[4];
  const guide=$('loadingTips');guide.replaceChildren();
- for(const n of (isBox()?[18,20]:[14,16])){const row=document.createElement('div'),title=document.createElement('b'),detail=document.createElement('span');title.textContent=copy[n];detail.textContent=copy[n+1];row.append(title,detail);guide.append(row);}
+ if(isDesk()){const row=document.createElement('div'),title=document.createElement('b');title.textContent=isBath()?'LAVABO · SCORCIATOIA':'RIGHELLO · SCORCIATOIA';const detail=document.createElement('span');detail.textContent=isBath()?'Nel lavabo imbocca la traccia bagnata a destra: passa sotto lo spazzolino. Evita le saponette e risali dalla rampa di asciugamano.':'Prendi la corsia sinistra con le frecce gialle; il ponte evita il tornante destro.';row.append(title,detail);guide.append(row);}
+ for(const n of (isDesk()?[]:isBox()?[18,20]:[14,16])){const row=document.createElement('div'),title=document.createElement('b'),detail=document.createElement('span');title.textContent=copy[n];detail.textContent=copy[n+1];row.append(title,detail);guide.append(row);}
  const power=$('loadingPowerups');power.replaceChildren();
  for(const [i,k] of ['turbo','oil','claw'].entries()){
   const off=mode==='trial'&&i>0,chip=document.createElement('div');chip.className='power-chip'+(off?' unavailable':'');
@@ -863,8 +875,9 @@ function openCircuitLoading(mode){
  TTRDrawSelectedTrack($('loadingCircuitMap'),chosen,true);
  const bar=$('loadingRaceFill');bar.style.width='100%';bar.classList.add('ttr-loading-pending');
  SND.music('garage');
- Promise.resolve(window.TTRAssets?.ready).then(()=>{
+ Promise.all([window.TTRAssets?.ready,isDesk()&&!isBath()?window.TTRDeskVisuals.ready:true]).then(([,deskReady])=>{
   if(token!==loadingToken)return;
+  if(isDesk()&&!isBath()){worldInit();if(!deskReady){$('loadingStateLabel').textContent='Asset Desk Drift non disponibile';return;}}
   bar.classList.remove('ttr-loading-pending');bar.style.width='100%';
   $('loadingStateLabel').textContent=copy[5];startButton.hidden=false;startButton.disabled=false;
  });
@@ -877,7 +890,8 @@ function initRace(mode){
  const modeSettings=window.TTRRaceFlow.modeSettings(mode,cfg,selectedCar,onlineSession,mode==='career'?TTRCareerDifficulty():1);
  const {num,pr,aiFactor,auto}=modeSettings;
  lastRaceSettings={num,pr,aiFactor,auto};
- onlineFinishDeadline=0;race={mode,trackId:circuitId,trackIndex:isBox()?1:0,cars:[],player:null,pickups:[],oils:[],effects:[],time:0,countdown:3.2,paused:false,auto,aiFactor,finished:false,pauseOverlay:false,collisionCount:0,lastImpactSound:-10,careerStats:{pickups:0,turbos:0,oils:0,claws:0},careerRecorded:false};
+ onlineFinishDeadline=0;race={mode,trackId:circuitId,trackIndex:isBath()?3:isDesk()?2:isBox()?1:0,cars:[],player:null,pickups:[],oils:[],effects:[],time:0,countdown:3.2,paused:false,auto,aiFactor,finished:false,pauseOverlay:false,collisionCount:0,lastImpactSound:-10,careerStats:{pickups:0,turbos:0,oils:0,claws:0},careerRecorded:false};
+ if(isBox()){BR.resetBalls(props);race.boxBalls=props.filter(o=>o.movable);}
  if(mode==='elimination')race.elim=window.TTRModeElimination.initialState(num,TTRModeConfigs.elimination.elimGoal,ELIM_RULES_TEST.defaultGoal);
  const opponents=mode==='online'?null:window.TTRRaceGrid.offlineOpponents(profiles.length,pr,num-1,mode==='trial'?0:offlineGridCursor);
  if(mode!=='online'&&mode!=='trial')offlineGridCursor=(offlineGridCursor+Math.max(1,num-1))%profiles.length;
@@ -889,7 +903,7 @@ function initRace(mode){
    const placement=eliminationChooseGrid(0,num,true);
    race.cars.forEach((c,i)=>{eliminationApplyGrid(c,placement.grid[i],i);c.eliminated=false;c.elimCelebration=0;});
  }
- const refLap=TRACK_LENGTH/155;const count=pickupCount(refLap);for(let i=0;i<count;i++){const p=pickupSegments[i],pt=trackPoint(p);race.pickups.push({x:pt.x,y:pt.y,size:22,r:16.5,cool:0,phase:i*1.7,segment:p});}
+ const refLap=TRACK_LENGTH/155;const count=isBath()?Math.min(D.pickupPhases.length,Math.max(3,pickupCount(refLap))):isDesk()?3:pickupCount(refLap);for(let i=0;i<count;i++){const p=pickupSegments[i],pt=trackPoint(p);race.pickups.push({x:pt.x,y:pt.y,size:22,r:16.5,cool:0,phase:i*1.7,segment:p});}
  for(const k of Object.keys(controls))controls[k]=false;
  $('loadingTrack').hidden=true;$('pauseOverlay').hidden=true;$('screen').hidden=true;$('screen').style.display='none';$('hud').style.display='block';$('controls').style.display='flex';$('hint').classList.remove('show');
  if(mode==='elimination'){elimBanner.style.display='none';refreshEliminationBoard();}else hideEliminationUI();
@@ -983,7 +997,9 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  if(race.mode==='elimination'&&eliminationEndPoint(dt)){syncAudio();return;}
  if(race.countdown>0){ttrRaceTiming.advanceCountdown(dt);syncAudio();return;}
  ttrRaceTiming.advanceLiveFrame(dt);
+ if(isBox())BR.stepBalls(props,dt);
  for(const c of race.cars){if(c.done)continue;
+  if(isDesk()&&c.deskBridge){const old={x:c.x,y:c.y};DR.transit(c,dt,race,SND,c===race.player&&inputFor(c).brake);ttrRaceProgress.updateCarProgress(c,dt,old.x,old.y);if(!c.deskBridge){c.lastCheckpoint=c.p;c.lastValidPosition={x:c.x,y:c.y,p:c.p,a:c.a,laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};if(perfEnabled&&perfCars[c.id])perfCars[c.id].ramps++;}continue;}
   if(isBox()&&BR.transit(c,dt,race,SND)){if(perfEnabled&&perfCars[c.id]){const m=perfCars[c.id];if(!c.boxTransit&&Number.isFinite(c.boxEntryTime)){m.ramps++;(m.boxTunnelTimes??=[]).push(+(race.time-c.boxEntryTime).toFixed(3));if(m.boxTunnelTimes.length>30)m.boxTunnelTimes.shift();}}continue;}
   if((c.tableFalling||0)>0){
     c.tableFalling=Math.max(0,c.tableFalling-dt);
@@ -999,7 +1015,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
   }const ctl=inputFor(c),mul=race.mode==='online'&&onlineSession?.members[c.id]?1:(c===race.player?1:(race.mode==='online'?Math.min(1,race.aiFactor):ttrRaceDrivers.skillFor(race).pace));let vmax=c.profile.max*mul,accelerate=c.profile.acc*mul;if(perfEnabled){const m=perfCars[c.id]??=( {id:c.id,model:c.profile.name,seconds:0,sum:0,max:0,gas:0,brake:0,mul,cap:vmax,acc:accelerate,ramps:0} );m.lapTimes??=[];m.lapStart??=0;perfSyncCounters(c,m);m.personality=c.aiPersonality??null;m.lastPenalty??='';m.reason??='';m.seconds+=dt;m.sum+=Math.abs(c.speed)*dt;m.max=Math.max(m.max,Math.abs(c.speed));m.gas+=ctl.gas?dt:0;m.brake+=ctl.brake?dt:0;}
  // Sticky jam has a lasting, measurable slowdown and reduced acceleration.
  // It is not another oil patch: grip remains predictable, speed is limited.
- const inJam=!isBox()&&c.jump<=0&&jamHit(c,jamPatch);
+ const inJam=isBreakfast()&&c.jump<=0&&jamHit(c,jamPatch);
  if(inJam&&!c.wasInJam&&c===race.player)SND.sfx('jamSurface');c.wasInJam=inJam;
  c.jamTimer=inJam?.85:Math.max(0,(c.jamTimer||0)-dt);
  if(c.jamTimer>0){accelerate*=.40;}
@@ -1012,9 +1028,10 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  // A fall from the toast bridge costs time; it is neither a free shortcut nor a respawn.
  if(c.bridgeMissActive){const cap=c.bridgeFalling>0?32:100;c.speed=Math.sign(c.speed)*Math.min(Math.abs(c.speed),cap);}
  // The pocket exit is a short, controllable merge, not a launch.
- const boxExitAssist=isBox()?Math.max(0,c.boxExitAssist||0):0;
+ const boxExitAssist=isBox()?Math.max(0,c.boxExitAssist||0):isDesk()?Math.max(0,c.deskExitAssist||0):0;
+ const exitAssistDuration=isDesk()?DR.exitAssistDuration:BR.exitAssistDuration;
  if(boxExitAssist>0&&c.speed>0){
-   const u=clamp(1-boxExitAssist/BR.exitAssistDuration,0,1);
+   const u=clamp(1-boxExitAssist/exitAssistDuration,0,1);
    const cap=vmax*(.40+.60*u*u*(3-2*u));
    c.speed=Math.min(c.speed,cap);
  }
@@ -1028,7 +1045,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  c.oilCooldown=Math.max(0,(c.oilCooldown||0)-dt);
  c.respawnGrace=Math.max(0,(c.respawnGrace||0)-dt);
  c.impactGrace=Math.max(0,(c.impactGrace||0)-dt);
- const preSurface=offTrackDynamics(isBox()?nearestTrackWindow(c,points,c.routeStableP??c.p,.047).distance:nearestCourse(c,points).distance);
+ const preSurface=offTrackDynamics(!isBreakfast()?nearestTrackWindow(c,points,c.routeStableP??c.p,.047).distance:nearestCourse(c,points).distance);
  // Jam slowing is handled before acceleration; no fake tiny per-frame drag.
 
  if(preSurface.outside)c.speed*=Math.max(.93,1-(1-preSurface.speedFactor)*dt*1.9);
@@ -1039,13 +1056,13 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
    const assist=boxExitAssist;
    if(assist>0&&c.speed>0&&!ctl.brake){
      // Follow the immediate road curvature, without fighting deliberate input.
-     const blend=clamp(1-assist/BR.exitAssistDuration,0,1);
-     const target=B.tangent((c.routeStableP??c.p)+.005);
+     const blend=clamp(1-assist/exitAssistDuration,0,1);
+     const target=(isDesk()?D:B).tangent((c.routeStableP??c.p)+.005);
      const correction=clamp(angleDiff(target,c.a),-.55,.55);
      c.a+=correction*Math.min(1,dt*4*(1-blend)*(1-.65*Math.min(1,Math.abs(ctl.steer))));
      c.a+=ctl.steer*turn*(.65+.35*blend)*dt;
    }else c.a+=ctl.steer*turn*(c.speed>=0?1:-.7)*dt;
-   if(assist>0)c.boxExitAssist=Math.max(0,assist-dt);
+   if(assist>0){if(isDesk())c.deskExitAssist=Math.max(0,assist-dt);else c.boxExitAssist=Math.max(0,assist-dt);}
  }
  c.a+=(c.hitYaw||0)*dt;c.hitYaw=(c.hitYaw||0)*Math.exp(-4.0*dt);
  if(c.claw>0){
@@ -1086,10 +1103,10 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
      }
    }
  }
- const beforeCPURecovery=c.shortcutRespawns||0;ttrRaceCPU.updateRecovery(c,dt);if(isBox()&&(c.shortcutRespawns||0)!==beforeCPURecovery)continue;
+ const beforeCPURecovery=c.shortcutRespawns||0;ttrRaceCPU.updateRecovery(c,dt);if(!isBreakfast()&&(c.shortcutRespawns||0)!==beforeCPURecovery)continue;
  // On-road snapshots are only written after complete frame of verified lane contact.
  // No penalty for a normal outside detour at the finish-line seam (p=1 -> p=0).
- if(isBox()){if(!BR.environment(c,{x:oldX,y:oldY},dt,race,recoverCar,SND)){continue;}}else{
+ if(isDesk()){if(DR.enter(c,{x:oldX,y:oldY},race,SND)){ttrRaceProgress.updateCarProgress(c,dt,oldX,oldY);continue;}if(!DR.environment(c,{x:oldX,y:oldY},dt,race,recoverCar,SND)){continue;}if(edgeOfTable(c)){startTableFall(c);continue;}}else if(isBox()){if(!BR.environment(c,{x:oldX,y:oldY},dt,race,recoverCar,SND)){continue;}}else{
  let near=c.onBridge?{...shortcutNearest(c),shortcut:true}:nearestCourse(c,points);
  if(near.shortcut&&!c.onBridge&&!c.bridgeTakeoff&&!c.bridgeLandingActive&&!c.bridgeMissActive)near={...nearestTrack(c,points),shortcut:false};
  const routeCheck=junctionContinuity(c,near,oldX,oldY,dt);
@@ -1169,7 +1186,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
     const recoverWide=!(c.offtrackReturnGrace>0)&&wideCornerRecovery(near.distance,c.offtrackSeconds,near.shortcut);
    // Early breakfast bend: keep legal tight lines safe, but do NOT allow a cloth-cut before the mug.
    const earlyBendAdvance=!near.shortcut&&c.offtrackEntry?K.forwardProgress(c.offtrackEntry.p,near.p):0;
-   const lenientEarlyBend=!near.shortcut&&near.p>.095&&near.p<.335&&near.distance<166&&c.offtrackSeconds<.90&&earlyBendAdvance<.088;
+   const lenientEarlyBend=!near.shortcut&&near.p>.095&&near.p<.335&&near.distance<166&&c.offtrackSeconds<.90&&earlyBendAdvance<.065&&(c.maxInteriorCut||0)<155;
    if(!c.onBridge&&!c.bridgeLandingActive&&!c.bridgeMissActive&&!(c.bridgeMissGrace>0)&&!(c.respawnGrace>0)&&!(c.impactGrace>0)&&!(lenientEarlyBend||lenientJamCurve||lenientFinish)&&(penalty||recoverWide)){
      recoverCar(c,penalty?'shortcut':'wide-corner');continue;
    }else if(!surface.outside){
@@ -1253,8 +1270,8 @@ let selectedCar=0,garagePreview=0,menuTimer=null,menuStep=0,lastShowroomDraw=0,g
 const TTRCircuitCatalog=Object.freeze([
  {id:'colazione-turbo',name:'Colazione Turbo',scene:'colazione',ready:true},
  {id:'box-di-biliardo',name:'Box di Biliardo',scene:'box',ready:true},
- {id:'desk-drift',name:'Desk Drift',scene:null,ready:false},
- {id:'bagno-sprint',name:'Bagno Sprint',scene:null,ready:false},
+ {id:'desk-drift',name:'Desk Drift',scene:'desk',ready:false,prototype:true},
+ {id:'bagno-sprint',name:'Bagno Sprint',scene:'bath',ready:false,prototype:true},
  {id:'garage-grid',name:'Garage Grid',scene:null,ready:false},
  {id:'giardino-mini-gp',name:'Giardino Mini GP',scene:null,ready:false},
  {id:'market-rush',name:'Market Rush',scene:null,ready:false},
@@ -1274,15 +1291,17 @@ const TTRTrackCopy=Object.freeze({
  fr:{title:'CHOISIR UN CIRCUIT',ready:'JOUABLE',locked:'EN DÉVELOPPEMENT',info:'Vraie carte · Bonus sur tout le parcours',back:'← RETOUR',continue:'CONTINUER',launch:'LANCER LA COURSE',lockedInfo:'Circuit en développement · carte non disponible'},
  pt:{title:'ESCOLHER PISTA',ready:'JOGÁVEL',locked:'EM DESENVOLVIMENTO',info:'Minimapa real · Itens em toda a pista',back:'← VOLTAR',continue:'CONTINUAR',launch:'INICIAR CORRIDA',lockedInfo:'Pista em desenvolvimento · minimapa indisponível'}
 });
-function TTRTrackAvailable(c,mode){return !!(c?.ready||(c?.prototype&&window.TTRBoxTrack&&(mode==='race'||mode==='trial')));}
+function TTRTrackAvailable(c,mode){return !!(c?.ready||(c?.prototype&&(c.id==='bagno-sprint'?Bath:Desk)&&['race','trial','career','elimination'].includes(mode)));}
 function TTRDrawSelectedTrack(canvas,c,loading=false){
  const box=c?.id==='box-di-biliardo';
- const opts=box?{points:B.points,point:B.point,tangent:B.tangent,theme:loading?'plain':'billiard',pickups:loading?B.pickupPhases.map(B.point):[],pockets:loading?[B.entryPocket,B.exitPocket]:B.pockets}:{points:breakfastPoints,point:Base.trackPoint,tangent:Base.tangent,theme:loading?'plain':'breakfast',pickups:loading?Base.pickupSegments.slice(0,2).map(Base.trackPoint):[],shortcuts:loading?[Base.shortcutSamples]:[]};
+ const bath=c?.id==='bagno-sprint',desk=c?.id==='desk-drift';
+ const T=bath?Bath:Desk;
+ const opts=(desk||bath)?{points:T.points,point:T.point,tangent:T.tangent,theme:loading||bath?'plain':'desk',shortcuts:[T.shortcutSamples],pickups:loading||bath?T.pickupPhases.slice(0,bath?Math.min(T.pickupPhases.length,Math.max(3,pickupCount(T.length/155))):3).map(T.point):[]}:box?{points:B.points,point:B.point,tangent:B.tangent,theme:loading?'plain':'billiard',pickups:loading?B.pickupPhases.map(B.point):[],pockets:loading?[B.entryPocket,B.exitPocket]:B.pockets}:{points:breakfastPoints,point:Base.trackPoint,tangent:Base.tangent,theme:loading?'plain':'breakfast',pickups:loading?Base.pickupSegments.slice(0,2).map(Base.trackPoint):[],shortcuts:loading?[Base.shortcutSamples]:[]};
  window.TTRMinimapVisuals.drawTrackPreview(canvas,opts);
 }
-const TTRPrototypeCopy={it:['PROTOTIPO 0.2','Test separato · 4 auto o Prova a tempo · Nessun progresso Carriera','PROVA CIRCUITO'],en:['PROTOTYPE 0.2','Separate test · 4 cars or time trial · No career progress','TEST TRACK'],es:['PROTOTIPO 0.2','Prueba independiente · 4 coches o contrarreloj · Sin progreso de carrera','PROBAR CIRCUITO'],de:['PROTOTYP 0.2','Separater Test · 4 Autos oder Zeitfahren · Kein Karrierefortschritt','STRECKE TESTEN'],fr:['PROTOTYPE 0.2','Test séparé · 4 voitures ou contre-la-montre · Sans progression carrière','TESTER LE CIRCUIT'],pt:['PROTÓTIPO 0.2','Teste separado · 4 carros ou contrarrelógio · Sem progresso de carreira','TESTAR PISTA']};
+const TTRPrototypeCopy={it:['PROTOTIPO 0.2','Tracciato preliminare · Tutte le modalità offline','PROVA CIRCUITO'],en:['PROTOTYPE 0.2','Early track · All offline modes','TEST TRACK'],es:['PROTOTIPO 0.2','Circuito preliminar · Todos los modos offline','PROBAR CIRCUITO'],de:['PROTOTYP 0.1','Frühe Strecke · Alle Offline-Modi','STRECKE TESTEN'],fr:['PROTOTYPE 0.2','Circuit préliminaire · Tous les modes hors ligne','TESTER LE CIRCUIT'],pt:['PROTÓTIPO 0.1','Pista preliminar · Todos os modos offline','TESTAR PISTA']};
 const TTRProtoCopy=()=>TTRPrototypeCopy[I18N.getLang()]||TTRPrototypeCopy.it;
-function TTRPaintCareerTracks(){const root=$('careerCircuitCatalog');if(!root)return;root.replaceChildren();TTRCircuitCatalog.forEach(c=>{const label=document.createElement('span');label.className='ttr-career-circuit'+(c.ready?' ready':'');label.textContent=String(c.index).padStart(2,'0')+' · '+c.name+(c.ready?' ✓':'');root.append(label);});}
+function TTRPaintCareerTracks(){const root=$('careerCircuitCatalog');if(!root)return;root.replaceChildren();TTRCircuitCatalog.forEach(c=>{const label=document.createElement('span');label.className='ttr-career-circuit'+(TTRTrackAvailable(c,'career')?' ready':'');label.textContent=String(c.index).padStart(2,'0')+' · '+c.name+(c.prototype?' · 0.2':c.ready?' ✓':'');root.append(label);});}
 TTRPaintCareerTracks();
 function TTROpenTrackSelect(mode){
  if(mode!=='trial'&&mode!=='career'&&!TTRModeConfigs[mode])return;TTRCloseRaceConfig(false);activeTrackMode=mode;
@@ -1314,7 +1333,7 @@ function TTRUpdateTrackPreview(){const c=TTRCircuitCatalog.find(t=>t.id===select
 function TTRCloseTrackSelect(){const panel=$('trackSelect');if(panel)panel.hidden=true;activeTrackMode=null;}
 function TTRAdvanceTrackSelect(){const c=TTRCircuitCatalog.find(t=>t.id===selectedTrackId);if(!activeTrackMode||!TTRTrackAvailable(c,activeTrackMode))return;
  const mode=activeTrackMode;TTRCloseTrackSelect();
- if(!c.ready||!c.scene)return;
+ if(!TTRTrackAvailable(c,mode)||!c.scene)return;
  if(mode==='career'){SND.unlock();stopMenuMusic();openCircuitLoading('career');return;}
  if(mode==='trial'){window.TTRModeTrial.setTrack(c.id);window.TTRModeTrial.menu(profiles,profiles[selectedCar],()=>{stopMenuMusic();openCircuitLoading('trial');});return;}
  TTROpenRaceConfig(mode);
@@ -1325,14 +1344,14 @@ let TTRModeConfigs={race:{...TTRModeDefaults.race},elimination:{...TTRModeDefaul
 try{const saved=JSON.parse(localStorage.getItem('ttr_mode_config_v67')||'null');if(saved&&typeof saved==='object')for(const m of ['race','elimination'])if(saved[m])for(const k of Object.keys(TTRModeDefaults[m])){const val=String(saved[m][k]);if(({racers:['4','6','8'],difficulty:['0.8','1','1.13'],elimGoal:['3','5','7']})[k].includes(val))TTRModeConfigs[m][k]=val;}}catch(_){}
 function TTRCareerDifficulty(){const state=window.TTRCareer?.getState?.()||{};return window.TTRRaceFlow.careerDifficulty(state,window.TTRCareerCore?.medalCount);}
 function TTRCloseRaceConfig(returnToTracks=false){const mode=activeConfigMode;const panel=$('raceConfig');if(panel)panel.hidden=true;activeConfigMode=null;if(returnToTracks&&mode)TTROpenTrackSelect(mode);}
-function TTROpenRaceConfig(mode){if(!TTRModeConfigs[mode])return;const chosen=TTRCircuitCatalog.find(c=>c.id===selectedTrackId);if(!chosen?.ready||!chosen.scene)return;
+function TTROpenRaceConfig(mode){if(!TTRModeConfigs[mode])return;const chosen=TTRCircuitCatalog.find(c=>c.id===selectedTrackId);if(!TTRTrackAvailable(chosen,mode)||!chosen.scene)return;
  activeConfigMode=mode;const panel=$('raceConfig'),cfg=TTRModeConfigs[mode];if(!panel)return;
  for(const name of ['racers','difficulty','elimGoal'])$(name).value=cfg[name];$('eliminationGoalField').hidden=mode!=='elimination';
  const title=$('raceConfigTitle');title.dataset.i18n=mode==='race'?'quickRace':'elimination';I18N.apply();
  $('raceSelectedTrack').textContent=String(chosen.index).padStart(2,'0')+' · '+chosen.name.toUpperCase();
  const copy=TTRTrackCopy[I18N.getLang()]||TTRTrackCopy.it;const start=$('raceConfigStart');start.removeAttribute('data-i18n');start.textContent=copy.launch;
  panel.hidden=false;start.focus();SND.sfx('select');}
-function TTRStartConfiguredRace(){const mode=activeConfigMode;const track=TTRCircuitCatalog.find(c=>c.id===selectedTrackId);if(!TTRModeConfigs[mode]||!track?.ready||!track.scene)return;
+function TTRStartConfiguredRace(){const mode=activeConfigMode;const track=TTRCircuitCatalog.find(c=>c.id===selectedTrackId);if(!TTRModeConfigs[mode]||!TTRTrackAvailable(track,mode)||!track.scene)return;
  const cfg={};for(const name of ['racers','difficulty','elimGoal'])cfg[name]=$(name).value;TTRModeConfigs[mode]=cfg;
  try{localStorage.setItem('ttr_mode_config_v67',JSON.stringify(TTRModeConfigs));}catch(_){}
  TTRCloseRaceConfig(false);SND.unlock();stopMenuMusic();openCircuitLoading(mode);}
@@ -1393,8 +1412,8 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
 function wireMenu(){
  // 14.15: tolerate a cached pre-14.14 HTML shell; manual acceleration is no longer supported.
  const obsoleteAuto=$('auto');if(obsoleteAuto){const label=obsoleteAuto.closest('label');if(label)label.remove();else obsoleteAuto.remove();}
- document.documentElement.dataset.ttrJsBuild='0.13.6.120';
- const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.120 · 14.20x';
+ document.documentElement.dataset.ttrJsBuild='0.13.6.122';
+ const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.126 · 14.22d';
  // A transformed menu creates a non-viewport containing block for fixed dialogs.
  // Move Options to document.body, so the overlay is genuinely viewport-sized on iPhone.
  const settingsDialog=$('retroSettings');if(settingsDialog&&settingsDialog.parentNode!==document.body)document.body.appendChild(settingsDialog);const configDialog=$('raceConfig');if(configDialog&&configDialog.parentNode!==document.body)document.body.appendChild(configDialog);const trackDialog=$('trackSelect');if(trackDialog&&trackDialog.parentNode!==document.body)document.body.appendChild(trackDialog);
@@ -1517,10 +1536,10 @@ function togglePause(){if(!race||race.finished)return;race.paused=!race.paused;r
  else SND.music('race');syncAudio();}
 let miniBase=window.TTRMinimapVisuals.createRaceMiniBase(points,shortcutSamples,WORLD_W,WORLD_H);
 function selectCircuit(id){
- const next=id==='box-di-biliardo'&&B?'box-di-biliardo':'colazione-turbo';window.TTRModeTrial.setTrack(next);if(next===circuitId)return;
- circuitId=next;WORLD_W=isBox()?B.world.w:Base.WORLD_W;WORLD_H=isBox()?B.world.h:Base.WORLD_H;TRACK_LENGTH=isBox()?B.length:Base.TRACK_LENGTH;LANE_HALF=isBox()?B.laneHalf:Base.LANE_HALF;
- shortcutFrom=isBox()?B.entry:Base.shortcutFrom;shortcutTo=isBox()?B.exit:Base.shortcutTo;shortcutSamples=isBox()?[]:Base.shortcutSamples;pickupSegments=isBox()?B.pickupPhases:Base.pickupSegments;
- points.splice(0,points.length,...(isBox()?B.points:breakfastPoints));
+ const next=id==='bagno-sprint'&&Bath?'bagno-sprint':id==='desk-drift'&&Desk?'desk-drift':id==='box-di-biliardo'&&B?'box-di-biliardo':'colazione-turbo';window.TTRModeTrial.setTrack(next);if(next===circuitId)return;
+ circuitId=next;D=isBath()?Bath:Desk;DR=isBath()?window.TTRBathRules:window.TTRDeskRules;WORLD_W=isDesk()?D.world.w:isBox()?B.world.w:Base.WORLD_W;WORLD_H=isDesk()?D.world.h:isBox()?B.world.h:Base.WORLD_H;TRACK_LENGTH=isDesk()?D.length:isBox()?B.length:Base.TRACK_LENGTH;LANE_HALF=isDesk()?D.laneHalf:isBox()?B.laneHalf:Base.LANE_HALF;
+ shortcutFrom=isDesk()?D.entry:isBox()?B.entry:Base.shortcutFrom;shortcutTo=isDesk()?D.exit:isBox()?B.exit:Base.shortcutTo;shortcutSamples=isDesk()?D.shortcutSamples:isBox()?[]:Base.shortcutSamples;pickupSegments=isDesk()?D.pickupPhases:isBox()?B.pickupPhases:Base.pickupSegments;
+ points.splice(0,points.length,...(isDesk()?D.points:isBox()?B.points:breakfastPoints));
  track.width=bridgeLayer.width=WORLD_W;track.height=bridgeLayer.height=WORLD_H;worldInit();
  miniBase=window.TTRMinimapVisuals.createRaceMiniBase(points,shortcutSamples,WORLD_W,WORLD_H);
  ttrRaceDrivers=window.TTRRaceDrivers.create({getRace:()=>race,getOnlineSession:()=>onlineSession,onlineHostInput,controls,keys,trackPoint,mod,angleDiff,clamp,nearestTrack,points,K,props});ttrEliminationMode=makeEliminationMode();
@@ -1564,22 +1583,22 @@ function render(){const qualityCap=qualityMode==='low'?1.25:qualityMode==='balan
    props.filter(o=>o.type==='milk_cereal_cup'&&visibleProp(o)).forEach(o=>drawMilkOverflow(g,o));
     props.filter(o=>o.type==='milk_cereal_spill'&&visibleProp(o)).forEach(o=>drawObstacle(g,o));
     // The spreading jam is a low ground decal, always BEHIND car wheels.
-    if(!isBox()&&Math.abs(jamPatch.x-camX)<halfW+240&&Math.abs(jamPatch.y-camY)<halfH+280)drawJamPour(g);
+    if(isBreakfast()&&Math.abs(jamPatch.x-camX)<halfW+240&&Math.abs(jamPatch.y-camY)<halfH+280)drawJamPour(g);
  const ghostPose=race.trialGhost&&race.countdown<=0?race.trialGhost(race.time):null;
  const ghostCar=ghostPose&&!(ghostPose.boxTransit>=.8)?{profile:race.player.profile,id:-1,...ghostPose,jumpTotal:ghostPose.jumpTotal||.96,onBridge:!!ghostPose.onBridge,rampEntryVisual:!!ghostPose.rampEntryVisual,bridgeExitVisual:ghostPose.bridgeExitVisual||0,speed:0,slip:0,boost:0,claw:0,tableFalling:ghostPose.tableFalling||0}:null;
- const elevated=c=>c.onBridge||c.jump>0||c.rampEntryVisual||c.bridgeExitVisual>0;
+ const elevated=c=>isBath()?(!c.onBridge&&(Bath.upperDeck(c)||c.jump>0||c.rampEntryVisual||c.bridgeExitVisual>0)):(c.onBridge||c.jump>0||c.rampEntryVisual||c.bridgeExitVisual>0);
  const drawGhost=()=>{if(!ghostCar||!visibleProp(ghostCar))return;g.save();g.globalAlpha=.35;carSprite(g,ghostCar);g.restore();};
  props.filter(o=>(o.type==='orange_bump'||o.type==='orange')&&visibleProp(o)).forEach(o=>drawRaceProp(g,o));
  if(ghostCar&&!elevated(ghostCar))drawGhost();
    // Road cars are drawn first. The opaque raised bread deck then occludes them
    // at crossings, while vehicles actually ON the bridge stay visible on top.
    [...props.filter(o=>o.type!=='ramp'&&o.type!=='milk_cereal_spill'&&o.type!=='orange_bump'&&o.type!=='orange'&&visibleProp(o)).map(o=>({y:o.y,prop:o})),
-    ...race.cars.filter(c=>!c.eliminated&&!(c.boxTransit>=.8)&&visibleProp(c)&&c.jump<=0&&!c.onBridge&&!c.rampEntryVisual&&!(c.bridgeExitVisual>0)).map(c=>({y:c.y,car:visualCar(c)}))]
+    ...race.cars.filter(c=>!c.eliminated&&(!isBox()||BR.visualScale(c)>0)&&visibleProp(c)&&!elevated(c)).map(c=>({y:c.y,car:visualCar(c)}))]
      .sort((a,b)=>a.y-b.y).forEach(e=>e.prop?drawRaceProp(g,e.prop):carSprite(g,e.car));
    if(viewRight>viewLeft&&viewBottom>viewTop)g.drawImage(bridgeLayer,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop,viewLeft,viewTop,viewRight-viewLeft,viewBottom-viewTop);
    props.filter(o=>o.type==='ramp'&&visibleProp(o)).forEach(o=>drawRaceProp(g,o));
    if(ghostCar&&elevated(ghostCar))drawGhost();
-   race.cars.filter(c=>!c.eliminated&&!(c.boxTransit>=.8)&&visibleProp(c)&&elevated(c)).map(visualCar).sort((a,b)=>a.y-b.y).forEach(c=>carSprite(g,c));
+   race.cars.filter(c=>!c.eliminated&&(!isBox()||BR.visualScale(c)>0)&&visibleProp(c)&&elevated(c)).map(visualCar).sort((a,b)=>a.y-b.y).forEach(c=>carSprite(g,c));
 
  for(const c of race.cars){if(!c.eliminated&&!(c.boxTransit>0)&&c.claw>0&&c.clawTarget)drawClawCable(g,visualCar(c),visualCar(c.clawTarget),clock);}
  let impactBudget=(ttrLowGraphics||qualityMode==='low')?5:12;race.effects.forEach(e=>{if(e.kind==='impactBurst'&&impactBudget--<=0)return;if(Math.abs(e.x-camX)<halfW+160&&Math.abs(e.y-camY)<halfH+160)renderEffect(g,e,clamp);});if(race.countdown>0){g.save();g.setTransform(dpr,0,0,dpr,0,0);g.textAlign='center';g.textBaseline='middle';g.lineWidth=7;g.strokeStyle='#142438';g.font=`950 ${Math.min(90,sw/5)}px system-ui`;const v=Math.ceil(race.countdown);g.strokeText(String(v),sw/2,sh/2);g.fillStyle='#ffe67f';g.fillText(String(v),sw/2,sh/2);g.restore();}}else gameObstacles(g);

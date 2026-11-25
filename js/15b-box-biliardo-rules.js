@@ -1,14 +1,23 @@
 /* Box 02: environment-specific rules, invoked by the common fixed-step race loop. */
 (()=>{'use strict';const B=window.TTRBoxTrack,K=window.TTRCore;
  const signed=(a,b)=>K.mod(b-a+.5,1)-.5;
- function obstacles(){const out=B.balls.map(o=>({...o,type:'box-ball',solid:true}));
+ const movableBall=o=>[9,10,11].includes(o.n);
+ function obstacles(){const out=B.balls.map(o=>({...o,type:'box-ball',solid:true,movable:movableBall(o),homeX:o.x,homeY:o.y,vx:0,vy:0}));
   for(const o of B.chalks)out.push({...o,r:Math.hypot(o.w,o.h)/2,type:'box-proxy',solid:true});
   for(const o of B.cues){const end=o.len/2-(o.jump?175:0);for(let x=-o.len/2;x<=end;x+=32)out.push({...B.propWorld(o,x,0),r:o.w/2,type:'box-proxy',solid:true});}
   for(let i=0;i<3;i++){const a=B.rack.vertices[i],b=B.rack.vertices[(i+1)%3],n=Math.ceil(Math.hypot(b[0]-a[0],b[1]-a[1])/24);for(let j=0;j<=n;j++){const t=j/n;out.push({...B.propWorld(B.rack,a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t),r:B.rack.w/2,type:'box-proxy',solid:true});}}return out;
  }
+ function resetBalls(props){for(const o of props)if(o.movable){o.x=o.homeX;o.y=o.homeY;o.vx=o.vy=0;}}
+ function hitBall(c,o,previous){if(c.jump>0)return false;const dx=o.x-c.x,dy=o.y-c.y,d=Math.hypot(dx,dy),r=o.r+Math.min(24,(c.width||36)*.5);if(d>=r)return false;const nx=d>.001?dx/d:Math.cos(c.a),ny=d>.001?dy/d:Math.sin(c.a);const approach=Math.max(0,(Math.cos(c.a)*c.speed+(c.hitVX||0)-o.vx)*nx+(Math.sin(c.a)*c.speed+(c.hitVY||0)-o.vy)*ny);const overlap=r-d+.4;c.x-=nx*overlap*.75;c.y-=ny*overlap*.75;o.x+=nx*overlap*.25;o.y+=ny*overlap*.25;const push=Math.min(170,approach*.62);o.vx+=nx*push;o.vy+=ny*push;const speed=Math.hypot(o.vx,o.vy);if(speed>190){o.vx*=190/speed;o.vy*=190/speed;}c.speed*=1-Math.min(.36,approach/500);return true;}
+ function stepBalls(props,dt){const moving=props.filter(o=>o.movable);for(const o of moving){o.x+=o.vx*dt;o.y+=o.vy*dt;const drag=Math.exp(-dt*2.45);o.vx*=drag;o.vy*=drag;if(Math.hypot(o.vx,o.vy)<1)o.vx=o.vy=0;const l=196+o.r,r=2404-o.r,t=161+o.r,b=1439-o.r;if(o.x<l||o.x>r){o.x=K.clamp(o.x,l,r);o.vx*=-.62;}if(o.y<t||o.y>b){o.y=K.clamp(o.y,t,b);o.vy*=-.62;}}
+  // Reflect against static props and pocket rims instead of permitting a ball to block a hole.
+  for(const o of moving){for(const q of [...props.filter(q=>q!==o&&!q.movable),...B.pockets]){const dx=o.x-q.x,dy=o.y-q.y,d=Math.hypot(dx,dy),lim=o.r+(q.rimR||q.r||0);if(d>=lim||d<.001)continue;const nx=dx/d,ny=dy/d;o.x=q.x+nx*(lim+.3);o.y=q.y+ny*(lim+.3);const v=o.vx*nx+o.vy*ny;if(v<0){o.vx-=1.55*v*nx;o.vy-=1.55*v*ny;}}}
+  for(let i=0;i<moving.length;i++)for(let j=i+1;j<moving.length;j++){const a=moving[i],b=moving[j],dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy),lim=a.r+b.r;if(d>=lim||d<.001)continue;const nx=dx/d,ny=dy/d,over=(lim-d+.4)*.5;a.x-=nx*over;a.y-=ny*over;b.x+=nx*over;b.y+=ny*over;const v=(a.vx-b.vx)*nx+(a.vy-b.vy)*ny;if(v>0){const imp=v*.8;a.vx-=imp*nx;a.vy-=imp*ny;b.vx+=imp*nx;b.vy+=imp*ny;}}}
+ function drawBall(c,o){c.save();c.shadowColor='#07180d99';c.shadowBlur=9;c.shadowOffsetY=6;const g=c.createRadialGradient(o.x-o.r*.35,o.y-o.r*.4,2,o.x,o.y,o.r);g.addColorStop(0,'#fff');g.addColorStop(.25,o.color);g.addColorStop(1,'#10191d');c.fillStyle=g;c.beginPath();c.arc(o.x,o.y,o.r,0,Math.PI*2);c.fill();c.shadowBlur=0;c.shadowOffsetY=0;c.fillStyle='#f3eee1';c.beginPath();c.arc(o.x,o.y,o.r*.42,0,Math.PI*2);c.fill();c.font=`900 ${Math.round(o.r*.5)}px system-ui`;c.fillStyle='#171c24';c.textAlign='center';c.textBaseline='middle';c.fillText(o.n,o.x,o.y);c.restore();}
  // Sequence the visible exit animation and outlet in entry order. Waiting cars
  // remain hidden in the tunnel; no collision immunity is added on release.
- const exitDuration=.8,exitAssistDuration=1.05;
+ const exitDuration=.8,entryDuration=.38,exitAssistDuration=1.05;
+ function visualScale(c){if(!(c.boxTransit>0))return 1;if(c.boxEntryPose&&c.boxTransit>B.transit-entryDuration){const u=K.clamp((B.transit-c.boxTransit)/entryDuration,0,1);return Math.max(0,1-u*u);}if(c.boxTransit>=exitDuration)return 0;const u=K.clamp(1-c.boxTransit/exitDuration,0,1);return .28+.72*u;}
  function exitPose(u){const v=1-u,a=B.tangent(B.exit+.009),handle=70;
    const q={x:B.outlet.x-Math.cos(a)*handle,y:B.outlet.y-Math.sin(a)*handle},p=B.exitPocket,r=B.outlet;
    return {x:v*v*p.x+2*v*u*q.x+u*u*r.x,y:v*v*p.y+2*v*u*q.y+u*u*r.y,
@@ -22,6 +31,10 @@
    (o.boxEntryOrder??Infinity)<(c.boxEntryOrder??Infinity)&&o.boxTransit>=next);}
  function transit(c,dt,race,SND){if(!(c.boxTransit>0))return false;c.speed=0;
   const next=Math.max(0,c.boxTransit-dt);
+  if(c.boxEntryPose){const u=K.clamp((B.transit-next)/entryDuration,0,1),v=u*u*(3-2*u),q=c.boxEntryPose;
+    c.x=q.x+(B.entryPocket.x-q.x)*v;c.y=q.y+(B.entryPocket.y-q.y)*v;c.a=q.a;c.boxTransit=next;
+    if(u>=1)c.boxEntryPose=null;return true;
+  }
   if(next<exitDuration){const pose=exitPose(1-next/exitDuration);
     // FIFO progress and physical clearance permit multiple visible cars, but
     // a follower can never overtake or overlap its predecessor in the tunnel.
@@ -38,7 +51,7 @@
  }
  function environment(c,old,dt,race,recover,SND){
   for(const pocket of B.pockets){if(c.respawnGrace>0||c.jump>0||Math.hypot(c.x-pocket.x,c.y-pocket.y)>pocket.triggerR)continue;
-   if(B.pocketEntry(c,pocket,old)){c.boxTransit=B.transit;c.boxEntryTime=race.time;c.boxEntryOrder=race.boxEntrySerial=(race.boxEntrySerial||0)+1;c.claw=0;c.clawTarget=null;c.x=pocket.x;c.y=pocket.y;c.speed=0;c.boost=0;c.hitVX=c.hitVY=c.skidVX=c.skidVY=0;if(c===race.player)SND.sfx('boxPocket');}else recover(c,'box-pocket');return false;}
+   if(B.pocketEntry(c,pocket,old)){c.boxTransit=B.transit;c.boxEntryTime=race.time;c.boxEntryPose={x:c.x,y:c.y,a:c.a};c.boxEntryOrder=race.boxEntrySerial=(race.boxEntrySerial||0)+1;c.claw=0;c.clawTarget=null;c.speed=0;c.boost=0;c.hitVX=c.hitVY=c.skidVX=c.skidVY=0;if(c===race.player)SND.sfx('boxPocket');}else recover(c,'box-pocket');return false;}
   let hit=false;if(c.x<196||c.x>2404){c.x=K.clamp(c.x,196,2404);c.a=Math.PI-c.a;hit=true;}if(c.y<161||c.y>1439){c.y=K.clamp(c.y,161,1439);c.a=-c.a;hit=true;}if(hit)c.speed*=.55;
   const prop=B.propContact(c,old);c.boxPropContact=!!(prop&&prop!=='jump'||hit);if(prop==='jump'){c.jumpTotal=.42;if(c===race.player)SND.sfx('ramp');}else if(prop||hit){if(c===race.player&&race.time-(c.lastPropHit??-10)>.35){c.lastPropHit=race.time;SND.sfx(({cue:'boxWood',rack:'boxRack',chalk:'boxChalk'})[prop]||'impact');}}
   // Track the local arm even on wide bends. When it is lost, reacquire only
@@ -106,8 +119,8 @@
   if(!c.offtrack&&d<88&&!(c.respawnGrace>0)&&c.speed>=0&&Math.cos(K.angleDiff(c.a,B.tangent(c.routeStableP)))>.15){const p=c.routeStableP,q=B.point(p);c.lastCheckpoint=p;c.lastValidPosition={...q,p,a:B.tangent(p),laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};}
   return true;
  }
- function cpuTarget(c,race,s,normal){const p=c.p,visit=(race.elim?.round||0)+':'+c.lapsCompleted;
-  if(p>B.entry-.065&&p<B.entry-.012&&c.boxDecision!==visit){c.boxDecision=visit;const chance=s.pace>=.999?({aggressive:.68,technical:.30,strategic:.55}[c.aiPersonality]??.50):s.shortcut;const clear=!race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&o.boxTryPocket&&Math.hypot(o.x-c.x,o.y-c.y)<100);c.boxTryPocket=Math.random()<chance&&clear&&(c.boxStreak||0)<2;c.boxStreak=c.boxTryPocket?(c.boxStreak||0)+1:0;c.shortcutDecisionCount=(c.shortcutDecisionCount||0)+1;if(c.boxTryPocket)c.shortcutAttemptCount=(c.shortcutAttemptCount||0)+1;}
+ function cpuTarget(c,race,s,normal){const p=c.routeStableP??c.p,visit=(race.elim?.round||0)+':'+c.lapsCompleted;
+  if(p>B.entry-.065&&p<B.entry-.012&&c.boxDecision!==visit){c.boxDecision=visit;const chance=s.pace>=.999?({aggressive:.76,technical:.55,strategic:.65}[c.aiPersonality]??.65):s.shortcut;const clear=!race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&o.boxTryPocket&&Math.hypot(o.x-c.x,o.y-c.y)<100);c.boxTryPocket=Math.random()<chance&&clear&&(c.boxStreak||0)<2;c.boxStreak=c.boxTryPocket?(c.boxStreak||0)+1:0;c.shortcutDecisionCount=(c.shortcutDecisionCount||0)+1;if(c.boxTryPocket)c.shortcutAttemptCount=(c.shortcutAttemptCount||0)+1;}
   if(p<B.entry-.07||p>B.entry+.025||c.respawnGrace>0)c.boxTryPocket=false;
   return c.boxTryPocket&&p>B.entry-.045&&p<B.entry+.018?B.entryPocket:normal;
  }
@@ -126,6 +139,7 @@
    if(hard&&!c.aiPersonality)c.aiPersonality=['aggressive','technical','strategic'][((c.id-1)%3+3)%3];
    const speed=Math.abs(c.speed),look=(hard?62:52)+Math.min(40,speed*.14),lookP=look/B.length;
    const normal=guidance(p+lookP);let target=cpuTarget(c,race,s,normal),branch=target!==normal;
+   if(!branch){const a=B.tangent(p+lookP),nx=-Math.sin(a),ny=Math.cos(a);for(const o of race.boxBalls||[]){if(K.distance(c,o)>150||K.distance(target,o)>o.r+30)continue;const side=(o.x-target.x)*nx+(o.y-target.y)*ny>0?-1:1;const q={x:target.x+nx*side*46,y:target.y+ny*side*46};if(K.nearestTrackWindow(q,B.points,p+lookP,.02).distance<B.laneHalf-28)target=q;break;}}
    let leader=null,gap=Infinity;
    if(!branch&&s.pass>0&&near.distance<85&&!(c.aiRecoveryUntil>race.time)){
      const a=B.tangent(p),nx=-Math.sin(a),ny=Math.cos(a),fx=Math.cos(a),fy=Math.sin(a);
@@ -147,7 +161,7 @@
    const bend=Math.max(Math.abs(K.angleDiff(B.tangent(p+.012),B.tangent(p))),Math.abs(K.angleDiff(B.tangent(p+.023),B.tangent(p+.008))));
    const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);let desired=cap*(1-K.clamp((bend-(hard?.25:.16))*(hard?.48:.65),0,hard?.48:.60));
    if(Math.abs(d)>.34)desired=Math.min(desired,cap*(1-K.clamp((Math.abs(d)-.28)*.68,0,.66)));
-   if(branch)desired=Math.min(desired,cap*.83);
+   if(branch)desired=Math.min(desired,Math.max(105,cap*.74));
    if(leader&&gap<60&&!(c.aiPassUntil>race.time))desired=Math.min(desired,Math.max(80,leader.speed));
    if(near.distance>95)desired=Math.min(desired,110);
    if(oil.slow)desired=Math.min(desired,cap*.68);
@@ -156,8 +170,8 @@
  }
  function cameraPose(c){
    if(!(c?.boxTransit>0))return null;
-   if(c.boxTransit<exitDuration)return {x:c.x,y:c.y};
-   const t=K.clamp((B.transit-c.boxTransit)/(B.transit-exitDuration),0,1),u=t*t*(3-2*t);
+   if(c.boxEntryPose||c.boxTransit<exitDuration)return {x:c.x,y:c.y};
+   const t=K.clamp((B.transit-entryDuration-c.boxTransit)/(B.transit-entryDuration-exitDuration),0,1),u=t*t*(3-2*t);
    return {x:B.entryPocket.x+(B.exitPocket.x-B.entryPocket.x)*u,y:B.entryPocket.y+(B.exitPocket.y-B.entryPocket.y)*u};
  }
- window.TTRBoxRules=Object.freeze({obstacles,transit,environment,cpuTarget,drive,cameraPose,exitAssistDuration});})();
+ window.TTRBoxRules=Object.freeze({obstacles,transit,environment,cpuTarget,drive,cameraPose,visualScale,exitAssistDuration,movableBall,resetBalls,hitBall,stepBalls,drawBall});})();

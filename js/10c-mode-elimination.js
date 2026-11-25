@@ -50,8 +50,8 @@ function eliminationProgressUpdate(c,pr,dt){
  // The safety module owns legal route validation; a provisional pinch must never score.
  if(c.routePinch||c.bridgeMissActive)return;
  let near=c.routeResolvedNear||nearestCourse(c,points);
- if(c.onBridge){const bridge=K.shortcutNearest(c);if(bridge.distance<75)near=bridge;}
- else if(near.shortcut){near=nearestTrackWindow(c,points,prev,.055);}
+ if(c.onBridge&&!['desk-drift','bagno-sprint'].includes(getRace().trackId)){const bridge=K.shortcutNearest(c);if(bridge.distance<75)near=bridge;}
+ else if(near.shortcut&&!['desk-drift','bagno-sprint'].includes(getRace().trackId)){near=nearestTrackWindow(c,points,prev,.055);}
  const signed=(K.forwardProgress(prev,near.p)+.5)%1-.5;
  const distance=signed*TRACK_LENGTH;
  const budget=Math.max(28,c.elimTravelSinceCredit*3+20);

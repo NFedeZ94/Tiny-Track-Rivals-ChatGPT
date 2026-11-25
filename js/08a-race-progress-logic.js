@@ -31,11 +31,12 @@ window.TTRRaceProgress=Object.freeze({create(deps){
  // Outside the crumbs (road-edge distance 138), allow up to 48 additional
  // world units only at the finish and only before the respawn/cut threshold.
  // Checkpoints are still earned on road. This never grants a shortcut lap.
- const legalOuterFinish=c.offtrack&&finishEdgeTolerance(c,closest);
+ const desk=['desk-drift','bagno-sprint'].includes(race.trackId);
+ const legalOuterFinish=!desk&&c.offtrack&&finishEdgeTolerance(c,closest);
  const finishSurfaceOk=clearLane||legalOuterFinish;
  const blockedGate=c.lapGateBlocked||!finishSurfaceOk;
  const gateReady=c.flags.every(Boolean);
- const planeCrossed=finishLinePlane({x:oldX,y:oldY},c,trackPoint(0),tangent(0),186,blockedGate,gateReady,c.speed);
+ const planeCrossed=finishLinePlane({x:oldX,y:oldY},c,trackPoint(0),tangent(0),desk?140:186,blockedGate,gateReady,c.speed);
  // Legacy phase-based seam is retained for comparison in tests, NOT used for laps:
  // finishGateCrossing(oldP,pr,closest.distance,blockedGate,gateReady,c.speed)
  const crossed=planeCrossed;
