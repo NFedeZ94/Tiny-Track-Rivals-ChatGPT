@@ -192,15 +192,16 @@
       engine.osc.detune.setTargetAtTime(profile.detune,at,.22);
     }
     const boost=car?.boost>0;
-    const freq=profile.base+profile.range*Math.pow(rpm,.92)+(boost?22:0);
+    const inTunnel=car?.boxTransit>0;
+    const freq=inTunnel?88+18*Math.sin(at*2.1):profile.base+profile.range*Math.pow(rpm,.92)+(boost?22:0);
     engine.osc.frequency.setTargetAtTime(freq,at,.24);
     engine.sub.frequency.setTargetAtTime(freq*.5,at,.23);engine.harm.frequency.setTargetAtTime(freq*(profile.ratio||2),at,.24);
-    engine.filter.frequency.setTargetAtTime(profile.filter+profile.cut*rpm,at,.17);
+    engine.filter.frequency.setTargetAtTime(inTunnel?260:profile.filter+profile.cut*rpm,at,.17);
     const pulse=1+(profile.flutter||0)*Math.sin(at*Math.PI*2*(profile.flutterHz||7))*(.4+.6*rpm);
     engine.mainGain.gain.setTargetAtTime(profile.mix*pulse,at,.14);
     engine.subGain.gain.setTargetAtTime(profile.submix,at,.19);engine.harmGain.gain.setTargetAtTime(profile.harmmix,at,.18);
     // Audible but controlled engine bed: volume remains separate from music/effects.
-    const tunnel=car?.boxTransit>0?.22:1;engine.mix.gain.setTargetAtTime(playing&&!settings.muted?(.26+rpm*.105+(boost?.018:0))*tunnel:0,at,.12);
+    const tunnel=inTunnel?.32:1;engine.mix.gain.setTargetAtTime(playing&&!settings.muted?(.26+rpm*.105+(boost?.018:0))*tunnel:0,at,.12);
   }
   const tunes={
     menu:{bpm:126,lead:['E5','G5','A5','G5','E5','D5','C5','D5','E5','G5','B5','A5','G5','E5','D5','C5'],bass:['C3','C3','G3','G3','A3','A3','G3','G3','F3','F3','G3','G3','C3','C3','G3','G3']},

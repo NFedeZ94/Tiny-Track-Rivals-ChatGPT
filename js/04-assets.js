@@ -15,7 +15,7 @@ const promises=names.filter(name=>!heavyTurntables.has(name)).map(name=>new Prom
   const img=new Image();images[name]=img;
   img.onload=()=>{status[name]='ready';resolve(true);};
   img.onerror=()=>{status[name]='failed';console.warn('Asset unavailable:',name);resolve(false);};
-  img.src=(inlineAssets[name]||'assets/'+name+((name.includes('_concept_')||name.includes('_menu_clean'))?'.jpg':'.png'))+ (/^(brezza|tuono|volt|neon|aero|roccia|martello|turbovan|titan|hotflash|metrocab|interceptor|retrosprint|apex|tempesta|behemoth)/.test(name)?'?v=0.13.6.110':'');
+  img.src=(inlineAssets[name]||'assets/'+name+((name.includes('_concept_')||name.includes('_menu_clean'))?'.jpg':'.png'))+ (/^(brezza|tuono|volt|neon|aero|roccia|martello|turbovan|titan|hotflash|metrocab|interceptor|retrosprint|apex|tempesta|behemoth)/.test(name)?'?v=0.13.6.111':'');
 }));
 const ready=Promise.all(promises);
 // Only keep the currently requested heavy atlas decoded. Gameplay sprites are preloaded.
@@ -27,13 +27,13 @@ function ensureTurntable(id){
  activeHeavyAtlas=key;const img=new Image();images[key]=img;status[key]='loading';
  img.onload=()=>{if(images[key]===img)status[key]='ready';};
  img.onerror=()=>{if(images[key]===img)status[key]='failed';};
- img.src=inlineAssets[key]+'?v=0.13.6.110';return img;
+ img.src=inlineAssets[key]+'?v=0.13.6.111';return img;
 }
 // v0.13.6.34: visual-only race scale, measured from the opaque footprint of each top-down sprite.
 // No modifications to physics widths/lengths, track, or GLB meshes.
 window.TTRArtRevision='TTRToyScaleV1-Scatto92-Tuono125-Brezza93-Volt-Neon-v100';
-const spriteVisualScale=Object.freeze({"scatto":0.6443128,"polvere":0.85129411,"enduro":0.86291893,"brezza":0.8072771599999999,"lampo":0.83974417,"aero":0.79993688,"tuono":0.90990739,"volt":0.7892473051224944,"neon":0.7874934222222222,"roccia":0.8884409112709831,"martello":0.9270687769784174,"turbovan":0.8905765865384615,"titan":0.8208792884615386,"hotflash":0.71246127,"metrocab":0.84411172,"interceptor":0.85185587,"retrosprint":0.82862343,"apex":0.88283244,"tempesta":0.85185587,"behemoth":1.00673875});
-const vehicleLengthRatios=Object.freeze({"scatto":0.92,"polvere":1.02,"enduro":1.05,"brezza":1.07,"lampo":1.1,"aero":1.1,"tuono":1.11,"volt":1.1,"neon":1.1,"roccia":1.15,"martello":1.2,"turbovan":1.15,"titan":1.06,"hotflash":0.92,"metrocab":1.09,"interceptor":1.1,"retrosprint":1.07,"apex":1.14,"tempesta":1.1,"behemoth":1.3});
+const spriteVisualScale=Object.freeze({"scatto":0.6443128,"polvere":0.85129411,"enduro":0.86291893,"brezza":0.8072771599999999,"lampo":0.83974417,"aero":0.79993688,"tuono":0.90990739,"volt":0.7892473051224944,"neon":0.7874934222222222,"roccia":0.8884409112709831,"martello":0.9270687769784174,"turbovan":0.8905765865384615,"titan":0.85185587,"hotflash":0.71246127,"metrocab":0.84411172,"interceptor":0.85185587,"retrosprint":0.82862343,"apex":0.88283244,"tempesta":0.85185587,"behemoth":1.00673875});
+const vehicleLengthRatios=Object.freeze({"scatto":0.92,"polvere":1.02,"enduro":1.05,"brezza":1.07,"lampo":1.1,"aero":1.1,"tuono":1.11,"volt":1.1,"neon":1.1,"roccia":1.15,"martello":1.2,"turbovan":1.15,"titan":1.1,"hotflash":0.92,"metrocab":1.09,"interceptor":1.1,"retrosprint":1.07,"apex":1.14,"tempesta":1.1,"behemoth":1.3});
 const has=name=>status[name]==='ready';
 const draw=(ctx,name,x,y,w,h)=>{if(!has(name))return false;ctx.drawImage(images[name],x,y,w,h);return true;};
 function drawVehicle(ctx,car,clock){
