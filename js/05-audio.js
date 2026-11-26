@@ -77,6 +77,10 @@
     else if(kind==='boxRack'){tone(285,.115,.16,'triangle',fxBus,at,92);tone(470,.065,.09,'triangle',fxBus,at+.02,170);}
     else if(kind==='boxChalk'){tone(310,.065,.10,'sawtooth',fxBus,at,120);tone(180,.09,.09,'triangle',fxBus,at+.02,80);}
     else if(kind==='landing'){tone(125,.11,.18,'triangle',fxBus,at,55);tone(220,.055,.07,'sine',fxBus,at,100);}
+    else if(kind==='environmentWarning'){tone(450,.13,.12,'triangle',fxBus,at,610);tone(610,.15,.10,'sine',fxBus,at+.18,700);}
+    else if(kind==='waterFlow'||kind==='milkFlow'){tone(kind==='waterFlow'?950:310,.29,.09,'sine',fxBus,at,180);tone(520,.19,.075,'triangle',fxBus,at+.13,160);}
+    else if(kind==='inkFlow'){tone(220,.22,.13,'triangle',fxBus,at,83);}
+    else if(kind==='rolling'){tone(140,.25,.15,'triangle',fxBus,at,84);tone(360,.12,.07,'sine',fxBus,at+.12,180);}
     else if(kind==='rampDown'){tone(280,.15,.12,'triangle',fxBus,at,115);tone(185,.08,.08,'sine',fxBus,at+.10,84);}
     else if(kind==='jamSurface'){tone(210,.21,.12,'triangle',fxBus,at,85);tone(160,.14,.09,'sine',fxBus,at+.07,60);}
     else if(kind==='rindSurface'){[0,.035,.075].forEach((t,i)=>tone(440-i*75,.035,.09,'triangle',fxBus,at+t,150));}
@@ -137,13 +141,14 @@
     billiards:{bpm:122,style:'jazz',roots:[50,55,48,57,50,55,52,57],chords:[[0,3,7,10],[0,4,7,10],[0,4,7,11],[0,3,7,10],[0,3,7,10],[0,4,7,10],[0,3,6,10],[0,4,7,10]],lead:['69 - 72 77 - 76 - 72','71 74 - 77 76 - 74 -','67 - 72 76 - 79 - 76','69 72 - 76 79 - 76 72','65 - 69 72 - 76 74 -','71 - 77 74 - 71 69 -','67 70 - 74 76 - 74 -','73 - 76 79 - 76 73 -']},
     desk:{bpm:142,style:'break',roots:[45,48,53,55,45,48,50,52],chords:[[0,3,7,10],[0,4,7,11],[0,4,7,9],[0,4,7,10],[0,3,7,10],[0,4,7,11],[0,3,7,10],[0,4,7,10]],lead:['69 72 - 76 79 - 76 72','67 - 72 76 - 79 84 -','77 81 - 84 81 - 79 77','74 - 79 83 - 81 79 -','81 - 79 76 72 - 76 79','84 79 - 76 72 - 74 -','77 - 81 84 - 81 77 76','76 80 83 - 86 - 83 80']},
     bath:{bpm:128,style:'tropical',roots:[48,55,57,53,48,55,50,55],chords:[[0,4,7,9],[0,4,7,10],[0,3,7,10],[0,4,7,9],[0,4,7,9],[0,4,7,10],[0,3,7,10],[0,4,7,10]],lead:['84 - 79 - 76 79 - 81','83 - 79 74 - 76 79 -','81 84 - 88 - 84 81 -','77 - 81 84 81 - 79 -','76 79 - 84 - 81 79 -','74 79 - 83 81 - 79 -','77 - 81 84 - 81 76 -','79 - 83 86 84 - 79 -']},
+    workshop:{bpm:144,style:'rock',roots:[40,43,45,43,40,48,45,47],chords:[[0,3,7],[0,4,7],[0,3,7],[0,4,7],[0,3,7],[0,4,7],[0,3,7],[0,4,7]],lead:['64 - 67 71 - 69 67 -','67 71 - 74 71 - 69 -','69 - 72 76 74 - 72 -','67 - 71 74 - 71 69 -','76 71 67 - 69 - 71 -','72 - 76 79 - 76 74 -','69 72 - 76 79 - 76 -','75 - 78 83 - 78 75 -']},
     career:{bpm:138,style:'rock',roots:[45,41,48,43,45,41,50,52],chords:[[0,3,7],[0,4,7],[0,4,7],[0,4,7],[0,3,7],[0,4,7],[0,3,7],[0,4,7]],lead:['69 - 76 81 - 79 76 -','77 - 81 84 - 81 77 -','79 84 - 88 84 - 79 -','74 - 79 83 86 - 83 -','81 - 84 88 - 91 88 -','84 - 81 77 81 - 84 -','77 81 - 86 84 - 81 -','80 83 88 - 86 - 83 80']},
     trial:{bpm:150,style:'pulse',roots:[45,45,53,55,45,48,50,52],chords:[[0,3,7],[0,3,7],[0,4,7],[0,4,7],[0,3,7],[0,4,7],[0,3,7],[0,4,7]],lead:['69 - 76 - 72 - 76 -','81 - 76 - 79 - 76 -','77 - 84 - 81 - 84 -','79 - 86 - 83 - 86 -','81 - 88 - 84 - 88 -','84 - 79 - 76 - 79 -','74 - 81 - 77 - 81 -','76 - 83 - 80 - 83 -']},
     elimination:{bpm:160,style:'urgent',roots:[40,43,45,47,40,43,45,47],chords:[[0,3,7],[0,4,7],[0,3,7],[0,3,6],[0,3,7],[0,4,7],[0,3,7],[0,4,7]],lead:['76 79 83 - 81 79 76 -','79 83 - 86 83 - 79 74','81 84 88 - 84 81 79 -','83 - 86 89 - 86 83 -','88 83 79 - 76 79 83 -','86 83 79 - 83 86 91 -','88 84 81 - 84 88 93 -','83 87 90 - 87 83 80 -']}
   };
   for(const tune of Object.values(raceTunes))tune.notes=tune.lead.map(bar=>bar.split(' ').map(n=>n==='-'?null:Number(n)));
   let raceTheme='breakfast';
-  function setRaceContext(track,kind){raceTheme=['career','trial','elimination'].includes(kind)?kind:({'colazione-turbo':'breakfast','box-di-biliardo':'billiards','desk-drift':'desk','bagno-sprint':'bath'}[track]||'breakfast');return raceTheme;}
+  function setRaceContext(track,kind){raceTheme=['career','trial','elimination'].includes(kind)?kind:({'colazione-turbo':'breakfast','box-di-biliardo':'billiards','desk-drift':'desk','bagno-sprint':'bath','garage-grid':'workshop'}[track]||'breakfast');return raceTheme;}
   const midi=n=>440*Math.pow(2,(n-69)/12);
   function raceStep(tune,i,at,interval){
     const bar=Math.floor(i/8)%16,k=bar%8,step=i%8,second=bar>=8,style=tune.style,root=tune.roots[k],chord=tune.chords[k],note=tune.notes[k][step];

@@ -86,8 +86,9 @@
   const visit=(race.elim?.round||0)+':'+c.lapsCompleted;
   const decisionZone=p>D.entry-(hard?.045:.027)&&p<D.entry-.005;
   if(decisionZone&&c.deskChoiceVisit!==visit){c.deskChoiceVisit=visit;c.deskTry=false;c.bathChoicePending=Math.random()<(s.pace<.9?.12:s.pace<.99?.30:.88);c.shortcutDecisionCount=(c.shortcutDecisionCount||0)+1;}
-  if(decisionZone&&c.bathChoicePending&&!c.deskTry){const clear=!race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&K.distance(o,P)<(hard?100:125));if(clear&&near.distance<65&&Math.abs(K.angleDiff(c.a,D.tangent(p)))<.55&&speed>80&&(hard||speed<290)&&!(c.respawnGrace>0)&&!(c.aiRecoveryUntil>race.time)){c.deskTry=true;c.bathChoicePending=false;c.shortcutAttemptCount=(c.shortcutAttemptCount||0)+1;}}
+  if(decisionZone&&c.bathChoicePending&&!c.deskTry){const waterRisk=window.TTREnvironmentEvents.branchHazard(race.environmentEvents,D,speed);const clear=!waterRisk&&!race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&K.distance(o,P)<(hard?100:125));if(clear&&near.distance<65&&Math.abs(K.angleDiff(c.a,D.tangent(p)))<.55&&speed>80&&(hard||speed<290)&&!(c.respawnGrace>0)&&!(c.aiRecoveryUntil>race.time)){c.deskTry=true;c.bathChoicePending=false;c.shortcutAttemptCount=(c.shortcutAttemptCount||0)+1;}}
   if(!decisionZone)c.bathChoicePending=false;
+  if(!c.onBridge&&p<D.entry-.01&&c.deskTry&&window.TTREnvironmentEvents.branchHazard(race.environmentEvents,D,speed)){c.deskTry=false;c.environmentShortcutAvoids=(c.environmentShortcutAvoids||0)+1;}
   if(c.onBridge||c.deskTry&&p>D.entry-(hard?.045:.023)&&p<D.entry+.043){const b=D.shortcutNearest(c);target=D.shortcutPoint(Math.min(1,b.t+Math.min(.09,95/D.shortcutLength)));if(c.onBridge&&b.t>.91)target=D.point(D.exit+.006);}
   if(!c.onBridge&&(p>D.entry+.043||c.aiRecoveryUntil>race.time||c.respawnGrace>0))c.deskTry=false;
   // On the narrow mandatory toothbrush, aim at the actual support axis.

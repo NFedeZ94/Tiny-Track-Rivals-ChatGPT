@@ -23,7 +23,7 @@ function updateRecovery(c,dt) {
  }
 }
 function tacticalTurboSafe(c,race){
- const K=window.TTRCore,T=race.trackId==='desk-drift'?window.TTRDeskTrack:race.trackId==='bagno-sprint'?window.TTRBathTrack:race.trackId==='box-di-biliardo'?window.TTRBoxTrack:null;
+ const K=window.TTRCore,T=race.trackId==='garage-grid'?window.TTRGarageTrack:race.trackId==='desk-drift'?window.TTRDeskTrack:race.trackId==='bagno-sprint'?window.TTRBathTrack:race.trackId==='box-di-biliardo'?window.TTRBoxTrack:null;
  if(c.onBridge||c.jump>0||c.slip>.1||c.oilSpin>0||c.boost>0||c.respawnGrace>0||c.reverseRecovery>0||c.aiRecoveryUntil>race.time||c.aiOilSeen||c.deskTry||c.tryShortcut||c.boxTryPocket||c.boxTransit>0||c.bridgeExitVisual>0||c.deskExitRamp||c.jamTimer>0)return false;
  const p=c.routeStableP??c.p,point=T?T.point:K.trackPoint,tangent=T?T.tangent:K.tangent,length=T?T.length:K.TRACK_LENGTH;
  if(T?.brush&&p>T.brush.start-.045&&p<T.brush.end+.007)return false;
