@@ -17,7 +17,7 @@ function handleObstacles(c,oldX,oldY,dt) {
 function handleCars() {
  const race=getRace();
  const active=race.mode==='elimination'?eliminationActive():race.cars;
- const narrow=race.trackId==='bagno-sprint'?window.TTRBathRules:race.trackId==='desk-drift'?window.TTRDeskRules:null;
+ const narrow=race.trackId==='bagno-sprint'?window.TTRBathRules:race.trackId==='desk-drift'?window.TTRDeskRules:race.trackId==='garage-grid'?window.TTRGarageRules:null;
  const before=narrow?active.map(c=>[c,narrow.contactSnapshot(c)]):[];
  const contacts=resolveCarContacts(active);
  if(narrow)for(const [c,old] of before)narrow.softenContact(c,old);

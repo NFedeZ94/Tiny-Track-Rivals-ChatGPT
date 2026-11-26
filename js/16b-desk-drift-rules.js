@@ -1,5 +1,5 @@
 /* Desk Drift R3. Manual ruler bridge, independent of Bagno Sprint transit. */
-(()=>{'use strict';const D=window.TTRDeskTrack,K=window.TTRCore;
+(()=>{'use strict';const K=window.TTRCore;function create(D){
  const signed=(a,b)=>K.mod(b-a+.5,1)-.5,exitAssistDuration=.75;
  const axis=D.shortcutTangent(),fx=Math.cos(axis),fy=Math.sin(axis),P=D.shortcutPoint(0);
  const gate=D.gate,merge=D.merge,gatePhase=K.nearestTrackWindow(D.shortcutPoint(gate),D.points,D.entry,.025).p;
@@ -104,4 +104,4 @@
  function softenContact(c,old){if(!old)return;const nx=-fy,ny=fx,v=((c.hitVX||0)-old.vx)*nx+((c.hitVY||0)-old.vy)*ny,side=(c.x-old.x)*nx+(c.y-old.y)*ny;if(Math.abs(v)<1e-6&&Math.abs(side)<1e-6)return;
   c.hitVX=(c.hitVX||0)-nx*v*.72;c.hitVY=(c.hitVY||0)-ny*v*.72;c.hitYaw=old.yaw+((c.hitYaw||0)-old.yaw)*.4;
   const u=along(c),z=(c.x-P.x)*nx+(c.y-P.y)*ny,excess=Math.max(0,Math.abs(z)-D.bridgeHalf);if(u>=gate&&u<=merge&&excess>0){c.x-=nx*Math.sign(z)*excess;c.y-=ny*Math.sign(z)*excess;}}
- window.TTRDeskRules=Object.freeze({contactSnapshot,softenContact,environment,drive,enter,transit,exitAssistDuration,rampPose,markOil,sameOilSurface,drawDeckOil,resetObjects,hitObject,stepObjects});})();
+ return Object.freeze({contactSnapshot,softenContact,environment,drive,enter,transit,exitAssistDuration,rampPose,markOil,sameOilSurface,drawDeckOil,resetObjects,hitObject,stepObjects});}window.TTRDeskRules=create(window.TTRDeskTrack);if(window.TTRGarageTrack)window.TTRGarageRules=create(window.TTRGarageTrack);})();

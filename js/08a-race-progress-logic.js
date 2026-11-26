@@ -31,7 +31,7 @@ window.TTRRaceProgress=Object.freeze({create(deps){
  // Outside the crumbs (road-edge distance 138), allow up to 48 additional
  // world units only at the finish and only before the respawn/cut threshold.
  // Checkpoints are still earned on road. This never grants a shortcut lap.
- const desk=['desk-drift','bagno-sprint'].includes(race.trackId);
+ const desk=['desk-drift','bagno-sprint','garage-grid'].includes(race.trackId);
  const legalOuterFinish=!desk&&c.offtrack&&finishEdgeTolerance(c,closest);
  const finishSurfaceOk=clearLane||legalOuterFinish;
  const blockedGate=c.lapGateBlocked||!finishSurfaceOk;

@@ -101,11 +101,12 @@ if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInp
    return {x:q.x+n.x*off,y:q.y+n.y*off};
  }
  function inputFor(c){
-   const race=getRace();if(c===race.player||race.mode==='online')return legacyInputFor(c);
+   const race=getRace();if(c===race.player||race.mode==='online'&&getOnlineSession()?.members[c.id])return legacyInputFor(c);
    const s=skillFor(race),hardLevel=s.curveSpeed>=.999;
    if(race.trackId==='box-di-biliardo')return window.TTRBoxRules.drive(c,race,s);
    if(race.trackId==='bagno-sprint')return window.TTRBathRules.drive(c,race,s);
    if(race.trackId==='desk-drift')return window.TTRDeskRules.drive(c,race,s);
+   if(race.trackId==='garage-grid')return window.TTRGarageRules.drive(c,race,s);
    if(hardLevel&&!c.aiPersonality)c.aiPersonality=['aggressive','technical','strategic'][((c.id-1)%3+3)%3];
    const r=ramp(),inZone=c.p>.515&&c.p<.63,visit=(race.elim?.round||0)+':'+c.lapsCompleted;
    if(r&&inZone&&c.shortcutDecisionLap!==visit&&!c.bridgeMissActive){
