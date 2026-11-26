@@ -10,7 +10,7 @@
   const p=K.mod(c.routeStableP??c.p,1),step=K.distance(c,old),physical=step<=40?step:0;
   const b=D.shortcutNearest(c),before=D.shortcutNearest(old),n=K.nearestTrackWindow(c,D.points,p,.032),advance=signed(p,n.p)*D.length;
   const trace=(decision,distance)=>{if(race.time-(c.routeTraceAt??-Infinity)<.099)return;const log=c.routeTrace??=[];log.push({t:+race.time.toFixed(3),x:+c.x.toFixed(2),y:+c.y.toFixed(2),p:c.p,stable:c.routeStableP??p,near:b.p,d:+distance.toFixed(1),branchT:b.t,decision});if(log.length>40)log.shift();c.routeTraceAt=race.time;};
-  const fail=reason=>{if(c.onBridge)c.shortcutFailed=(c.shortcutFailed||0)+1;trace(reason,b.distance);c.routeDecision={kind:reason,branch:!!c.onBridge,phase:p,t:b.t,branchDistance:b.distance,normalDistance:K.nearestTrackWindow(c,D.points,D.exit,.025).distance,water:D.wet(c)};if(c===race.player&&reason==='bath-water')SND?.sfx('boxPocket');recover(c,reason);return false;};
+  const fail=reason=>{if(c.onBridge)c.shortcutFailed=(c.shortcutFailed||0)+1;trace(reason,b.distance);c.routeDecision={kind:reason,branch:!!c.onBridge,phase:p,t:b.t,branchDistance:b.distance,normalDistance:n.distance,exitDistance:K.nearestTrackWindow(c,D.points,D.exit,.025).distance,brushU:D.brushContact(c).u,brushSide:D.brushContact(c).side,brushHalf:D.brushDeckHalf(D.brushContact(c).u),brushLimit:D.brushLimit(c,D.brushContact(c).u),brushOffSeconds:c.bathBrushOff||0,water:D.wet(c)};if(c===race.player&&reason==='bath-water')SND?.sfx('boxPocket');recover(c,reason);return false;};
   // The branch is acquired only at the real entrance plane, with forward movement.
   if(!c.onBridge&&!(c.respawnGrace>0)&&physical>.02&&plane(old,P,axis)<0&&plane(c,P,axis)>=0&&b.t<gate+.03&&b.distance<D.bridgeHalf-15&&Math.abs(signed(D.entry,p))<.043&&Math.cos(K.angleDiff(c.a,axis))>.58&&c.speed>0){c.onBridge=true;c.bridgeOffSeconds=0;c.routePinch=null;c.deskTry=false;c.shortcutEntered=(c.shortcutEntered||0)+1;if(c===race.player)SND?.sfx('oilSkid');}
   if(D.wet(c)&&!(c.jump>0))return fail('bath-water');
@@ -21,9 +21,11 @@
    const exitGap=signed(D.exit,rejoin.p);
    const forward=physical>.02&&c.speed>0&&((c.x-old.x)*Math.cos(D.tangent(rejoin.p))+(c.y-old.y)*Math.sin(D.tangent(rejoin.p)))>=-physical*.2;
    if(oldBranch>=.88&&b.t>=.90&&Math.abs(exitGap)<=.022&&rejoin.distance<=D.laneHalf-12&&forward&&Math.abs(b.t-oldBranch)*D.shortcutLength<=physical*2.4+5&&(b.distance>D.bridgeHalf-8||b.t>=.97)){
-    c.onBridge=false;c.offtrack=false;c.offtrackSeconds=0;c.routePinch=null;c.routeStableP=rejoin.p;c.routeResolvedNear={...rejoin,shortcut:false};c.routeDecision='bath-legal-rejoin';c.deskTry=false;c.shortcutCompleted=(c.shortcutCompleted||0)+1;trace(c.routeDecision,rejoin.distance);if(c===race.player)SND?.sfx('landing');return true;
+    c.onBridge=false;c.bridgeOffSeconds=0;c.offtrack=false;c.offtrackSeconds=0;c.routePinch=null;c.routeStableP=rejoin.p;c.routeResolvedNear={...rejoin,shortcut:false};c.routeDecision='bath-legal-rejoin';c.deskTry=false;c.shortcutCompleted=(c.shortcutCompleted||0)+1;trace(c.routeDecision,rejoin.distance);if(c===race.player)SND?.sfx('landing');return true;
    }
-   if(b.distance>D.bridgeHalf||b.t<gate-.045)return fail('bath-shortcut-fall');
+   // A dry edge may be grazed briefly; no progress credit while outside.
+   if(b.t<gate-.045)return fail('bath-shortcut-fall');
+   if(b.distance>D.bridgeHalf){c.bridgeOffSeconds=(c.bridgeOffSeconds||0)+dt;if(b.distance>D.bridgeHalf+10||c.bridgeOffSeconds>.12)return fail('bath-shortcut-fall');c.routeResolvedNear={...b,p,shortcut:true};trace('bath-edge-grace',b.distance);return true;}c.bridgeOffSeconds=0;
    if(Math.abs(b.t-before.t)*D.shortcutLength>physical*2.4+5)return fail('bath-shortcut-cut');
    c.offtrack=false;c.offtrackSeconds=0;c.routePinch=null;
    const phase=D.entry+(D.exit-D.entry)*b.t;c.routeStableP=phase;c.routeResolvedNear={...b,p:phase};c.routeDecision='bath-manual-cut';trace(c.routeDecision,b.distance);
@@ -70,14 +72,16 @@
   if(near.distance>100||c.aiRecoveryUntil>race.time)target=D.point(p+.008);
   const visit=(race.elim?.round||0)+':'+c.lapsCompleted;
   if(p>D.entry-.027&&p<D.entry-.005&&c.deskChoiceVisit!==visit){c.deskChoiceVisit=visit;const clear=!race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&K.distance(o,P)<125);c.deskTry=clear&&near.distance<65&&Math.abs(K.angleDiff(c.a,D.tangent(p)))<.55&&speed>80&&speed<290&&Math.random()<(s.pace<.9?.12:s.pace<.99?.30:.50);c.shortcutDecisionCount=(c.shortcutDecisionCount||0)+1;if(c.deskTry)c.shortcutAttemptCount=(c.shortcutAttemptCount||0)+1;}
-  if(c.onBridge||c.deskTry&&p>D.entry-.023&&p<D.entry+.043){const b=D.shortcutNearest(c);target=D.shortcutPoint(Math.min(1,b.t+Math.min(.09,95/D.shortcutLength)));if(c.onBridge&&b.t>.93)target=D.point(D.exit+.009);}
+  if(c.onBridge||c.deskTry&&p>D.entry-.023&&p<D.entry+.043){const b=D.shortcutNearest(c);target=D.shortcutPoint(Math.min(1,b.t+Math.min(.09,95/D.shortcutLength)));if(c.onBridge&&b.t>.94)target=D.point(D.exit+.006);}
   if(!c.onBridge&&(p>D.entry+.043||c.aiRecoveryUntil>race.time||c.respawnGrace>0))c.deskTry=false;
   // On the narrow mandatory toothbrush, aim at the actual support axis.
   // No overtaking or oil-avoidance detour may send CPU wheels over its edge.
-  const brushApproach=!c.onBridge&&p>D.brush.start-.020&&p<D.brush.end+.004;
-  if(brushApproach){const q=D.brushContact(c),u=q.u+look/D.brush.length;if(u<=1){const t=K.clamp(u,0,1);target={x:D.brush.P.x+(D.brush.Q.x-D.brush.P.x)*t,y:D.brush.P.y+(D.brush.Q.y-D.brush.P.y)*t};}else target=D.point(D.brush.end+(u-1)*D.brush.length/D.length);
+  const brushApproach=!c.onBridge&&p>D.brush.start-.035&&p<D.brush.end+.004;
+  if(brushApproach){const q=D.brushContact(c),u=q.u+Math.max(55,look-Math.abs(q.side)*.6)/D.brush.length;if(u<=1){const t=K.clamp(u,0,1);target={x:D.brush.P.x+(D.brush.Q.x-D.brush.P.x)*t,y:D.brush.P.y+(D.brush.Q.y-D.brush.P.y)*t};}else target=D.point(D.brush.end+(u-1)*D.brush.length/D.length);
    // Queue behind nearby cars on the narrow crossing. No side passing here.
    c.aiPassUntil=0;
+   // Queue on the actual bridge axis, including cars returning to the centre.
+   lead=null;gap=Infinity;for(const o of race.cars){if(o===c||o.done||o.eliminated||o.onBridge||o.jump>0)continue;const z=D.brushContact(o),f=(z.u-q.u)*D.brush.length;if(f>0&&f<155&&Math.abs(z.side)<D.brush.half+25&&f<gap){gap=f;lead=o;}}
   }
   const oil=(c.onBridge||c.deskTry||brushApproach)?{target,slow:false}:window.TTRRaceDrivers.avoidOil(c,race,s,target,a,valid,D.props);target=oil.target;
   const d=K.angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a),steer=K.clamp(d*(hard?3.7:3.3),-1,1);
@@ -85,7 +89,17 @@
   const bend=Math.max(Math.abs(K.angleDiff(D.tangent(p+.017),D.tangent(p))),Math.abs(K.angleDiff(D.tangent(p+.029),D.tangent(p+.012))));
   const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);let desired=cap*(1-K.clamp((bend-.20)*(hard?.48:.63),0,.6));
   if(Math.abs(d)>.30)desired=Math.min(desired,cap*(1-K.clamp((Math.abs(d)-.25)*.68,0,.65)));
-  if(lead&&gap<60&&!(c.aiPassUntil>race.time))desired=Math.min(desired,Math.max(70,lead.speed));if(c.onBridge||c.deskTry)desired=Math.min(cap*.94,235);else if(brushApproach){desired=Math.min(desired,Math.abs(D.brushContact(c).side)>32?135:195);if(lead&&gap<105)desired=Math.min(desired,Math.max(0,lead.speed-(105-gap)*1.8));}else if(near.distance>95)desired=Math.min(desired,110);if(oil.slow)desired=Math.min(desired,cap*.68);
-  const brake=c.speed>desired+12&&c.speed>70;return {steer,gas:!brake&&(desired>=cap*.96||c.speed<desired+5),brake};
+  if(lead&&gap<60&&!(c.aiPassUntil>race.time))desired=Math.min(desired,Math.max(70,lead.speed));if(c.onBridge||c.deskTry){const b=D.shortcutNearest(c);desired=Math.min(desired,cap*.94,b.t>.74&&(b.distance>30||Math.abs(d)>.25)?205:235);}else if(brushApproach){const q=D.brushContact(c),returning=Math.abs(q.side)>24||Math.abs(d)>.22;desired=Math.min(desired,returning?105:195,c.bathRejoinUntil>race.time?125:Infinity);if(lead&&gap<135)desired=Math.min(desired,Math.max(0,lead.speed-(135-gap)*2.5));}else if(near.distance>95)desired=Math.min(desired,110);if(oil.slow)desired=Math.min(desired,cap*.68);
+  const brake=c.speed>desired+(brushApproach?5:12)&&c.speed>(brushApproach?8:70);return {steer,gas:!brake&&(desired>=cap*.96||c.speed<desired+5),brake};
  }
- window.TTRBathRules=Object.freeze({environment,drive,enter,transit,exitAssistDuration});})();
+ // Preserve legitimate falls, but limit the lateral displacement and impulse
+ // introduced by car-to-car contacts on the narrow mandatory bridge only.
+ function contactSnapshot(c){const q=D.brushContact(c);return !c.onBridge&&!c.done&&!c.eliminated&&!(c.jump>0)&&D.onBrushPhase(c.routeStableP??c.p)&&q.u>.10&&q.u<.965&&D.brushSupported(c)?{x:c.x,y:c.y,vx:c.hitVX||0,vy:c.hitVY||0,yaw:c.hitYaw||0}:null;}
+ function softenContact(c,old){if(!old)return;const dx=(D.brush.Q.x-D.brush.P.x)/D.brush.length,dy=(D.brush.Q.y-D.brush.P.y)/D.brush.length,nx=-dy,ny=dx;
+  const side=(c.x-old.x)*nx+(c.y-old.y)*ny,v=((c.hitVX||0)-old.vx)*nx+((c.hitVY||0)-old.vy)*ny;
+  if(Math.abs(side)<1e-6&&Math.abs(v)<1e-6)return;
+  // Keep the normal positional separation, correcting only an unsupported overhang.
+  c.hitVX=(c.hitVX||0)-nx*v*.78;c.hitVY=(c.hitVY||0)-ny*v*.78;c.hitYaw=old.yaw+((c.hitYaw||0)-old.yaw)*.35;
+  const q=D.brushContact(c),limit=D.brushLimit(c,q.u),excess=Math.max(0,Math.abs(q.side)-limit);if(excess>0){c.x-=nx*Math.sign(q.side)*excess;c.y-=ny*Math.sign(q.side)*excess;}
+ }
+ window.TTRBathRules=Object.freeze({environment,drive,enter,transit,exitAssistDuration,contactSnapshot,softenContact});})();

@@ -16,7 +16,11 @@ function handleObstacles(c,oldX,oldY,dt) {
 }
 function handleCars() {
  const race=getRace();
- const contacts=resolveCarContacts(race.mode==='elimination'?eliminationActive():race.cars);
+ const active=race.mode==='elimination'?eliminationActive():race.cars;
+ const bath=race.trackId==='bagno-sprint'?window.TTRBathRules:null;
+ const before=bath?active.map(c=>[c,bath.contactSnapshot(c)]):[];
+ const contacts=resolveCarContacts(active);
+ if(bath)for(const [c,old] of before)bath.softenContact(c,old);
  for(const c of race.cars)if(!c.done&&!(c.tableFalling>0)&&edgeOfTable(c))startTableFall(c);
  for(const hit of contacts.hits){race.effects.push({kind:'impactBurst',x:hit.x,y:hit.y,t:.32,ttl:.32,nx:hit.nx,ny:hit.ny,intensity:hit.intensity});}
  if(contacts.impacts>0&&contacts.maxImpulse>24&&race.time-race.lastImpactSound>.24){SND.sfx('impact');race.lastImpactSound=race.time;}

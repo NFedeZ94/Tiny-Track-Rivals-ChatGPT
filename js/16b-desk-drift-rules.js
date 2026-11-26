@@ -15,6 +15,12 @@
   const hop=c.onBridge&&u>.10&&u<.29?Math.sin(Math.PI*((u-.10)/.19))*8:0;
   return {above,hop,stage:approach?'approach':leaving?'exit':!c.onBridge?'ground':u<.17?'ascent':u>.82?'descent':'deck'};
  }
+ // Oil belongs to the surface where it was deposited, not merely to its XY.
+ function rulerFootprint(q){const u=along(q);return u>=0&&u<=1&&Math.abs((q.x-P.x)*(-fy)+(q.y-P.y)*fx)<=D.bridgeHalf;}
+ function oilOnDeck(c,o=c){return (c.onBridge||rampPose(c).above)&&rulerFootprint(o);}
+ function markOil(c,o){o.deskDeck=!!oilOnDeck(c,o);return o;}
+ function sameOilSurface(c,o){return !!o.deskDeck===!!(c.onBridge||oilOnDeck(c));}
+ function drawDeckOil(g,o,clock,draw){g.save();g.translate(P.x,P.y);g.rotate(axis);g.beginPath();g.rect(0,-D.bridgeHalf,D.shortcutLength,D.bridgeHalf*2);g.clip();g.rotate(-axis);g.translate(-P.x,-P.y);draw(g,o,clock);g.restore();}
  function resetObjects(props){for(const o of props)if(o.movable){Object.assign(o,{x:o.homeX,y:o.homeY,a:o.homeA,vx:0,vy:0,spin:0});}}
  function hitObject(c,o,resolve){const before=c.speed,dx=o.x-c.x,dy=o.y-c.y;if(!resolve(c,o))return false;const d=Math.hypot(dx,dy)||1,force=Math.min(125,Math.abs(before)*.44);o.vx=(o.vx||0)+dx/d*force;o.vy=(o.vy||0)+dy/d*force;o.spin=K.clamp((o.spin||0)+((dx*Math.sin(c.a)-dy*Math.cos(c.a))/d)*2.1,-3,3);return true;}
  function stepObjects(props,dt){const mobiles=props.filter(o=>o.movable);for(const o of mobiles){const old={x:o.x,y:o.y};o.x+=o.vx*dt;o.y+=o.vy*dt;o.a+=o.spin*dt;const drag=Math.exp(-dt*3.8);o.vx*=drag;o.vy*=drag;o.spin*=drag;
@@ -43,7 +49,11 @@
   if(physical>.02&&n.distance<=D.laneHalf+24&&from.distance<=D.laneHalf+30){const a=D.tangent(n.p),align=((c.x-old.x)*Math.cos(a)+(c.y-old.y)*Math.sin(a))/physical;if(Math.abs(advance)<=allowed||align*Math.sign(advance)>.12)stable=K.mod(p+K.clamp(advance,-allowed,allowed)/D.length,1);}
   const near=K.nearestTrackWindow(c,D.points,stable,.009);c.routeStableP=stable;c.offtrack=near.distance>D.laneHalf+16;c.offtrackSeconds=c.offtrack?(c.offtrackSeconds||0)+dt:0;c.routeResolvedNear={...near,p:stable,shortcut:false};c.routeDecision=c.offtrack?'desk-outside':'desk-local';c.routePinch=c.offtrack?{phase:stable}:null;
   if(race.time-(c.routeTraceAt??-Infinity)>=.099){const log=c.routeTrace??=[];log.push({t:+race.time.toFixed(3),x:+c.x.toFixed(2),y:+c.y.toFixed(2),p:c.p,stable,near:n.p,d:+near.distance.toFixed(1),decision:c.routeDecision});if(log.length>40)log.shift();c.routeTraceAt=race.time;}
-  if(c.offtrackSeconds>.8&&near.distance>D.laneHalf+38&&!(c.respawnGrace>0)){recover(c,'desk-route-cut');return false;}
+  // An outward excursion can be returning on the same local arm. Give it a short
+  // bounded opportunity to rejoin; do not snap progress to a distant arm.
+  const priorLocal=K.nearestTrackWindow(old,D.points,p,.032),returning=physical>.02&&n.distance+0.08<priorLocal.distance&&n.distance<=D.laneHalf+82&&Math.abs(signed(p,n.p))<=.022;
+  const returnGrace=returning&&c.offtrackSeconds<1.40;
+  if(c.offtrackSeconds>.8&&near.distance>D.laneHalf+38&&!returnGrace&&!(c.respawnGrace>0)){recover(c,'desk-route-cut');return false;}
   if(!c.offtrack&&near.distance<80&&!(c.respawnGrace>0)&&c.speed>=0&&Math.cos(K.angleDiff(c.a,D.tangent(stable)))>.2){c.lastCheckpoint=stable;c.lastValidPosition={...D.point(stable),p:stable,a:D.tangent(stable),laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};}
   return true;
  }
@@ -63,13 +73,15 @@
   if(p>D.entry-.045&&p<D.entry+.008&&c.deskChoiceVisit!==visit){c.deskChoiceVisit=visit;c.deskTry=Math.random()<(s.pace<.9?.12:s.pace<.99?.40:.58);c.shortcutDecisionCount=(c.shortcutDecisionCount||0)+1;if(c.deskTry)c.shortcutAttemptCount=(c.shortcutAttemptCount||0)+1;}
   if(c.onBridge||c.deskTry&&p>D.entry-.035&&p<D.entry+.035){const b=D.shortcutNearest(c);target=D.shortcutPoint(Math.min(1,b.t+.12));if(c.onBridge&&b.t>.85)target=D.point(D.exit+.009);}
   if(!c.onBridge&&(p>D.entry+.035||c.aiRecoveryUntil>race.time))c.deskTry=false;
-  const oil=(c.onBridge||c.deskTry)?{target,slow:false}:window.TTRRaceDrivers.avoidOil(c,race,s,target,a,valid,obstacles);target=oil.target;
+  const oil=(c.onBridge||c.deskTry)?{target,slow:false}:window.TTRRaceDrivers.avoidOil(c,race.oils?.length?{...race,oils:race.oils.filter(o=>sameOilSurface(c,o))}:race,s,target,a,valid,obstacles);target=oil.target;
   const d=K.angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a),steer=K.clamp(d*(hard?3.7:3.3),-1,1);
   if(c.reverseRecovery>0)return {steer:-steer||1,gas:false,brake:true};
   const bend=c.onBridge?0:Math.max(Math.abs(K.angleDiff(D.tangent(p+.017),D.tangent(p))),Math.abs(K.angleDiff(D.tangent(p+.029),D.tangent(p+.012))));
   const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);let desired=cap*(1-K.clamp((bend-(hard?.30:.20))*(hard?.26:.63),0,hard?.45:.6));
   if(Math.abs(d)>.30)desired=Math.min(desired,cap*(1-K.clamp((Math.abs(d)-.25)*(hard?.38:.68),0,hard?.48:.65)));
+  if(!c.onBridge&&Math.abs(d)>.90)desired=Math.min(desired,Math.abs(d)>1.55?78:118);
+  if(!c.onBridge&&near.distance>65&&Math.abs(d)>.60)desired=Math.min(desired,125);
   if(lead&&gap<60&&!(c.aiPassUntil>race.time))desired=Math.min(desired,Math.max(70,lead.speed));if(c.onBridge)desired=Math.min(desired,cap,hard?260:225);else if(c.deskTry&&p>D.entry-.018)desired=Math.min(desired,cap,hard?245:210);else if(near.distance>95)desired=Math.min(desired,110);if(oil.slow)desired=Math.min(desired,cap*.68);
   const brake=c.speed>desired+(hard?17:12)&&c.speed>70;return {steer,gas:!brake&&(desired>=cap*(hard?.94:.96)||c.speed<desired+(hard?12:5)),brake};
  }
- window.TTRDeskRules=Object.freeze({environment,drive,enter,transit,exitAssistDuration,rampPose,resetObjects,hitObject,stepObjects});})();
+ window.TTRDeskRules=Object.freeze({environment,drive,enter,transit,exitAssistDuration,rampPose,markOil,sameOilSurface,drawDeckOil,resetObjects,hitObject,stepObjects});})();
