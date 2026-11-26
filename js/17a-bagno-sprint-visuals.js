@@ -30,16 +30,19 @@
   // Tap closed; standing water stays in the actual low basin.
 
  }
+ function bubble(c,x,y,r){ell(c,x+2,y+3,r,r*.91,'#557d8430');ell(c,x,y,r,r*.94,rad(c,x,y,r,[[0,'#ffffffb8'],[.55,'#daeeefb0'],[.8,'#8ac2c9c0'],[1,'#eaffffdf']]),'#e7faf5',1.5);ell(c,x-r*.27,y-r*.34,r*.30,r*.17,'#ffffffd0');}
+ function waterMotion(c,time){const {x,y,rx,ry}=T.pool;c.save();c.beginPath();c.ellipse(x,y,rx-6,ry-6,0,0,tau);c.clip();for(let i=0;i<12;i++){const t=time*.65+i*1.17,xx=x+Math.sin(i*2.42)*rx*.81,yy=y+Math.cos(i*2.07)*ry*.83;if(Math.hypot(xx-x,yy-y)<100)continue;const r=22+((t%2+2)%2)*19;c.beginPath();c.ellipse(xx,yy,r,r*.19,0,0,tau);c.strokeStyle=`rgba(235,255,255,${.10+.12*(1+Math.sin(t*3))/2})`;c.lineWidth=2.8;c.stroke();}c.restore();}
  function road(c){const pts=T.points,br=T.brush;
   // Draw only the supported ceramic lanes. The toothbrush replaces, rather than covers, the missing road.
   const n=pts.length,i0=Math.ceil(br.start*n),i1=Math.floor(br.end*n),base=pts.slice(i1).concat(pts.slice(0,i0+1));
   line(c,base,2*T.laneHalf+18,'#4a6c7040');line(c,base,2*T.laneHalf+7,'#6b8185');line(c,base,2*T.laneHalf-3,'#f9f9f1');line(c,base,2*T.laneHalf-22,'#d5d4c7');line(c,base,2*T.laneHalf-36,'#e7e2d5');c.setLineDash([20,30]);line(c,base,3,'#fffaf1ac');c.setLineDash([]);
   // The descent and ascent are integrated ceramic ramps, shaded with the same width as the road.
-  for(const [p0,p1,reverse] of [[T.entry-.028,T.entry+.012,false],[T.exit+.01,T.exit+.049,true]]){const a=T.point(p0),b=T.point(p1),seg=Array.from({length:36},(_,i)=>T.point(p0+(p1-p0)*i/35));const g=grad(c,a.x,a.y,b.x,b.y,reverse?[[0,'#aabbbf'],[1,'#eee8dc']]:[[0,'#eee8dc'],[1,'#aabbbf']]);line(c,seg,2*T.laneHalf-38,g);for(let i=5;i<34;i+=6){const p=p0+(p1-p0)*i/35,q=T.point(p),a=T.tangent(p);at(c,{...q,a},()=>{rr(c,-3,-T.laneHalf+24,6,2*T.laneHalf-48,3,'#617f8730');});}}
-  // The optional route has a narrower, glossier ceramic surface. No painted arrows.
-  line(c,T.shortcutSamples,2*T.bridgeHalf+10,'#dce7e49c');line(c,T.shortcutSamples,2*T.bridgeHalf,'#c7d9d9');line(c,T.shortcutSamples,2*T.bridgeHalf-26,'#d5e3e0');
-  c.save();c.globalAlpha=.42;for(let i=1;i<12;i++){let q=T.shortcutPoint(i/12),a=T.shortcutTangent(i/12);at(c,{...q,a},()=>{ell(c,0,-24,22,7,'#f3ffff');ell(c,14,24,13,4,'#f3ffff');});}c.restore();
-  for(let i=0,n=Math.round(T.length/45);i<n;i++){const p=i/n;if(T.onBrushPhase(p))continue;const q=T.point(p),a=T.tangent(p);for(const side of [-1,1]){const o={x:q.x-Math.sin(a)*side*(T.laneHalf-8),y:q.y+Math.cos(a)*side*(T.laneHalf-8),a};if(T.shortcutNearest(o).distance<T.bridgeHalf+24&&(Math.abs(p-T.entry)<.05||Math.abs(p-T.exit)<.05))continue;at(c,o,()=>rr(c,-21,-7,42,14,3,i%2?'#f9faf4':'#358aa9'));}}
+  for(const [p0,p1,reverse] of [[T.entry-.028,T.entry+.012,false],[T.towel.p-T.towel.rx/T.length,T.towel.p+T.towel.rx/T.length,true]]){const a=T.point(p0),b=T.point(p1),seg=Array.from({length:36},(_,i)=>T.point(p0+(p1-p0)*i/35));const g=grad(c,a.x,a.y,b.x,b.y,reverse?[[0,'#aabbbf'],[1,'#eee8dc']]:[[0,'#eee8dc'],[1,'#aabbbf']]);line(c,seg,2*T.laneHalf-38,g);for(let i=5;i<34;i+=6){const p=p0+(p1-p0)*i/35,q=T.point(p),a=T.tangent(p);at(c,{...q,a},()=>{rr(c,-3,-T.laneHalf+24,6,2*T.laneHalf-48,3,'#617f8730');});}}
+  // Foam covers the existing dry ceramic, not an artificial second road.
+  line(c,T.shortcutSamples,2*T.bridgeHalf-8,'#d9ebe5a0');seed=182;
+  for(let i=0;i<=64;i++){const t=i/64,q=T.shortcutPoint(t),a=T.shortcutTangent(t);for(let k=0;k<5;k++){const r=9+rnd()*10,y=(k-2)*24+(rnd()-.5)*7,x=(rnd()-.5)*16;at(c,{...q,a},()=>bubble(c,x,y,r));}}
+  // Small groups of bubbles define the edge without making a solid wall.
+  const edges=[];for(let i=0,n=Math.round(T.length/62);i<n;i++){const p=i/n;if(T.onBrushPhase(p)||Math.abs(p-T.towel.p)<.028)continue;const q=T.point(p),a=T.tangent(p);for(const side of [-1,1]){const o={x:q.x-Math.sin(a)*side*(T.laneHalf-5),y:q.y+Math.cos(a)*side*(T.laneHalf-5),a};if(T.shortcutNearest(o).distance<T.bridgeHalf+25||edges.some(e=>Math.hypot(e.x-o.x,e.y-o.y)<40))continue;edges.push(o);at(c,o,()=>{bubble(c,-11,0,13);bubble(c,8,3,10);bubble(c,21,-3,6);});}}
   at(c,{...T.point(0),a:T.tangent(0)},()=>{for(let i=0;i<12;i++)for(let j=0;j<2;j++){c.fillStyle=(i+j)%2?'#20313c':'#fff';c.fillRect(-20+j*20,-120+i*20,20,20);}});
  }
  function puddle(c,z){at(c,z,()=>{ell(c,0,0,z.rx,z.ry,'#69c4e5bb','#bff1fa',4);ell(c,-10,-8,z.rx*.72,z.ry*.6,'#d8f6fa70');});}
@@ -54,25 +57,28 @@
  function cotton(c,o){at(c,o,()=>{ell(c,5,12,o.rx,o.ry,'#6c70735c');seed=724;for(let i=0;i<30;i++){let a=rnd()*tau,r=Math.sqrt(rnd()),x=Math.cos(a)*r*(o.rx-13),y=Math.sin(a)*r*(o.ry-13),v=12+rnd()*14;ell(c,x,y,v,v*.89,rad(c,x,y,v,[[0,'#fffef8'],[.68,'#f6f2e8'],[1,'#c8ccca']]));}});}
  function bridge(c){const {P,Q,length:L}=T.brush,a=Math.atan2(Q.y-P.y,Q.x-P.x);
   at(c,{...P,a},()=>{
-   // Only the two ends are solid ceramic; the dark recessed slot separates them.
-   rr(c,L*.06,-T.laneHalf+5,L*.88,2*T.laneHalf-10,24,grad(c,0,-T.laneHalf,0,T.laneHalf,[[0,'#667b81'],[.5,'#344d56'],[1,'#8ba1a8']]),'#9aadb0',3);
-   for(const x of [-36,L*.94])rr(c,x,-T.laneHalf, L*.06+36,2*T.laneHalf,19,grad(c,0,-T.laneHalf,0,T.laneHalf,[[0,'#fcfcf5'],[.5,'#dadcd3'],[1,'#9dafb2']]),'#b1c1c2',3);
-   // Use the physical width profile for the actual visible contour. Smoothly rounded tail and shoulders.
-   function silhouette(){const p=[];for(let i=0;i<=84;i++){const u=.075+.905*i/84;p.push({x:u*L,y:-Math.min(85,T.brushHalfAt(u))});}for(let i=84;i>=0;i--){const u=.075+.905*i/84;p.push({x:u*L,y:Math.min(85,T.brushHalfAt(u))});}path(c,p,true);}
-   c.save();c.translate(9,17);silhouette();c.fillStyle='#1a334a91';c.fill();c.restore();
-   c.save();c.translate(0,8);silhouette();c.fillStyle='#155273';c.fill();c.restore();
-   silhouette();c.fillStyle=grad(c,0,-85,0,85,[[0,'#d9f7f8'],[.2,'#66c6d9'],[.55,'#239ac2'],[.86,'#166e9b'],[1,'#0f5078']]);c.fill();c.strokeStyle='#bcf0f3';c.lineWidth=3;c.stroke();
-   // Grip follows the widening handle, then tapers naturally into a white neck.
+   // Two ceramic supports and a visible recessed gap, not a second road.
+   rr(c,L*.045,-94,L*.94,188,25,grad(c,0,-94,0,94,[[0,'#677e84'],[.46,'#354c54'],[1,'#90a5a9']]),'#b0c0c1',3);
+   for(const [x,w] of [[-35,L*.10+35],[L*.965,L*.035+35]])rr(c,x,-T.laneHalf,w,2*T.laneHalf,20,grad(c,0,-T.laneHalf,0,T.laneHalf,[[0,'#fffef5'],[.5,'#d8dcd4'],[1,'#9aadb2']]),'#bbc9c9',3);
+   // A continuous ergonomic silhouette. The top contour is shared with the collision profile.
+   function silhouette(){const p=[],edge=u=>{const round=u<.10?Math.sqrt(Math.max(0,1-((.10-u)/.045)**2)):u>.965?Math.sqrt(Math.max(0,1-((u-.965)/.03)**2)):1;return T.brushDeckHalf(u)*round;};for(let i=0;i<=180;i++){const u=.055+.94*i/180;p.push({x:u*L,y:-edge(u)});}for(let i=180;i>=0;i--){const u=.055+.94*i/180;p.push({x:u*L,y:edge(u)});}path(c,p,true);}
+   c.save();c.translate(12,36);silhouette();c.fillStyle='#142d3c80';c.fill();c.restore();
+   // Side wall extruded downward: rounded molded plastic with a dark lower seam.
+   for(let y=27;y>=1;y--){c.save();c.translate(0,y);silhouette();c.fillStyle=y>22?'#123e59':y>11?'#176a8b':'#3194af';c.fill();c.restore();}
+   silhouette();c.fillStyle=grad(c,0,-52,0,52,[[0,'#bff5f7'],[.15,'#70d6e5'],[.46,'#26a6c8'],[.8,'#1076a1'],[1,'#155373']]);c.fill();c.strokeStyle='#a9e9ef';c.lineWidth=2;c.stroke();
    c.save();silhouette();c.clip();
-   ell(c,L*.17,0,L*.082,57,grad(c,0,-57,0,57,[[0,'#f6ffff'],[1,'#b5e2e8']]),'#d7fbff',3);
-   rr(c,L*.23,-54,L*.28,108,36,grad(c,0,-54,0,54,[[0,'#277f9d'],[.5,'#1f678b'],[1,'#164d70']]),'#80cbd6',3);
-   for(let i=0;i<7;i++){const u=.25+i*.035;rr(c,L*u,-37,9,74,4,'#b7e6ed86');}
-   const neck=[{x:L*.49,y:-56},{x:L*.61,y:-40},{x:L*.68,y:-34},{x:L*.74,y:-34},{x:L*.80,y:-60},{x:L*.80,y:60},{x:L*.74,y:34},{x:L*.68,y:34},{x:L*.61,y:40},{x:L*.49,y:56}];path(c,neck,true);c.fillStyle=grad(c,0,-56,0,56,[[0,'#fff'],[.5,'#ecf6f4'],[1,'#b1ced2']]);c.fill();
-   rr(c,L*.775,-65,L*.176,130,32,grad(c,0,-65,0,65,[[0,'#fffef9'],[1,'#cbe2e0']]),'#a5c6cc',3);
-   for(let row=0;row<5;row++)for(let col=0;col<5;col++){const x=L*(.79+col*.031),y=-49+row*24+(col%2?2:0);ell(c,x+2,y+5,8.8,10.3,'#799ba5');ell(c,x,y,8.8,10.3,row===0||row===4?'#7bd0d9':'#f7fffa','#b8d8db',1);for(let k=0;k<3;k++)line(c,[{x:x-4+k*4,y:y-6},{x:x-3+k*4,y:y+5}],1,'#eaffff');}
+   // Long molded grip with rounded ends and soft rubber ribs.
+   ell(c,L*.15,0,L*.085,38,grad(c,0,-38,0,38,[[0,'#eaffff'],[.5,'#bfe4e7'],[1,'#7bbfc9']]),'#e1fcff',2);
+   rr(c,L*.205,-36,L*.32,72,35,grad(c,0,-36,0,36,[[0,'#397f9a'],[.35,'#246783'],[1,'#163e5a']]),'#6bc4d5',2);
+   for(let i=0;i<10;i++){const u=.23+i*.028;rr(c,L*u,-26,10,52,5,'#b0dce17c');}
+   // Long ivory neck; recessed color boundary, a distinct oval bristle head.
+   const neck=[{x:L*.50,y:-40},{x:L*.61,y:-33},{x:L*.76,y:-31},{x:L*.81,y:-44},{x:L*.81,y:44},{x:L*.76,y:31},{x:L*.61,y:33},{x:L*.50,y:40}];path(c,neck,true);c.fillStyle=grad(c,0,-42,0,42,[[0,'#fff'],[.5,'#e9f4f1'],[1,'#a3c4cc']]);c.fill();
+   rr(c,L*.80,-46,L*.17,92,42,grad(c,0,-46,0,46,[[0,'#fffef9'],[.6,'#e2eeeb'],[1,'#b3cfd2']]),'#9dbbc0',2);
+   // Separate raised tufts with visible sides, light tips and fine filaments.
+   for(let row=0;row<4;row++)for(let col=0;col<7;col++){const x=L*(.825+col*.019),y=-29+row*19+(col%2?1:0);ell(c,x+1,y+7,8,8,'#779da6');ell(c,x,y+4,8,8,'#9dc4ca');ell(c,x,y,8,8,row===0||row===3?'#71cadb':'#fbfff7','#c1e1e1',1);for(let k=0;k<3;k++)line(c,[{x:x-4+k*4,y:y-5},{x:x-3+k*4,y:y+4}],1,'#efffff');}
    c.restore();
   });
  }
  function render(c,b){const {w,h}=T.world;c.clearRect(0,0,w,h);b.clearRect(0,0,w,h);counter(c);basin(c);road(c);faucet(c);T.puddles.forEach(o=>puddle(c,o));T.soaps.forEach(o=>soap(c,o));T.bottles.forEach(o=>bottle(c,o));T.cotton.forEach(o=>cotton(c,o));sponge(c,T.sponge);towel(c,T.towel);bridge(c);}
- window.TTRBathVisuals=Object.freeze({render,ready:Promise.resolve(true)});
+ window.TTRBathVisuals=Object.freeze({render,waterMotion,ready:Promise.resolve(true)});
 })();

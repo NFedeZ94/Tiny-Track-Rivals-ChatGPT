@@ -7,7 +7,7 @@
  function tangent(p){const a=point(p-.0006),b=point(p+.0006);return Math.atan2(b.y-a.y,b.x-a.x);}
  const points=Array.from({length:640},(_,i)=>point(i/640));
  const phaseAt=(x,y)=>K.nearestTrack({x,y},points).p;
- const entry=phaseAt(2180,700),exit=phaseAt(3300,700),P=point(entry),Q=point(exit);
+ const entry=phaseAt(2350,700),exit=phaseAt(3140,700),P=point(entry),Q=point(exit);
  const shortcutPoint=t=>({x:P.x+(Q.x-P.x)*K.clamp(t,0,1),y:P.y+(Q.y-P.y)*K.clamp(t,0,1)});
  const shortcutSamples=Array.from({length:81},(_,i)=>shortcutPoint(i/80));
  const shortcutLength=K.distance(P,Q),shortcutTangent=()=>Math.atan2(Q.y-P.y,Q.x-P.x);
@@ -19,6 +19,21 @@
  prop('desk-eraser',1635,1090,-.40,145,72);
  prop('desk-pencil',2050,1450,-.19,440,36);
  prop('desk-eraser',3290,1210,-.10,140,65);
+ // Stationery placed on the edge of the legal driving corridor; the centre stays open.
+ function offset(p,side){const q=point(p),a=tangent(p);return {...q,x:q.x-Math.sin(a)*side,y:q.y+Math.cos(a)*side,a,p};}
+ for(const [type,p,side,l,w] of [['desk-pencil',.105,93,174,26],['desk-eraser',.345,-97,82,44],['desk-highlighter',.805,94,104,39]]){
+  const o=offset(p,side);if(!props.some(v=>K.distance(o,v)<v.r+l/2+15)&&shortcutNearest(o).distance>bridgeHalfValue()+80)prop(type,o.x,o.y,o.a+.16,l,w);
+ }
+ function bridgeHalfValue(){return 78;}
+ const papers=[{...offset(.059,-43),rx:92,ry:43},{...offset(.88,48),rx:74,ry:49}];
+ const clips=[],count=Math.floor(length/120);
+ for(let i=1;i<count;i++){const p=i/count;if(p<.016||p>.984)continue;
+  for(const side of [-1,1]){const o=offset(p,side*(laneHalf+5));
+   if(shortcutNearest(o).distance<145||K.nearestTrack(o,points).distance<laneHalf-10||props.some(v=>K.distance(o,v)<v.r+34)||clips.some(v=>K.distance(o,v)<53))continue;
+   const clip={...o,type:'desk-clip',r:18,solid:true};clips.push(clip);props.push(clip);
+  }
+ }
+ function paperContact(c){return papers.some(o=>{const dx=c.x-o.x,dy=c.y-o.y;return Math.abs(dx*Math.cos(o.a)+dy*Math.sin(o.a))<=o.rx&&Math.abs(-dx*Math.sin(o.a)+dy*Math.cos(o.a))<=o.ry;});}
  const pickupPhases=[.10,.31,.74,.91];
- window.TTRDeskTrack=Object.freeze({id:'desk-drift',world:{w:W,h:H},laneHalf,length,anchors,points,point,tangent,pickupPhases,props,objects,entry,exit,shortcutPoint,shortcutSamples,shortcutLength,shortcutTangent,shortcutNearest,bridgeHalf:78,gate:.17,merge:1});
+ window.TTRDeskTrack=Object.freeze({id:'desk-drift',world:{w:W,h:H},laneHalf,length,anchors,points,point,tangent,pickupPhases,props,objects,clips,papers,paperContact,entry,exit,shortcutPoint,shortcutSamples,shortcutLength,shortcutTangent,shortcutNearest,bridgeHalf:78,gate:.07,merge:.98});
 })();

@@ -9,18 +9,27 @@
  function environment(c,old,dt,race,recover,SND){
   const p=K.mod(c.routeStableP??c.p,1),step=K.distance(c,old),physical=step<=40?step:0;
   const b=D.shortcutNearest(c),before=D.shortcutNearest(old),n=K.nearestTrackWindow(c,D.points,p,.032),advance=signed(p,n.p)*D.length;
-  const fail=reason=>{c.routeDecision={kind:reason,branch:!!c.onBridge,phase:p,t:b.t,branchDistance:b.distance};recover(c,reason);return false;};
+  const trace=(decision,distance)=>{if(race.time-(c.routeTraceAt??-Infinity)<.099)return;const log=c.routeTrace??=[];log.push({t:+race.time.toFixed(3),x:+c.x.toFixed(2),y:+c.y.toFixed(2),p:c.p,stable:c.routeStableP??p,near:b.p,d:+distance.toFixed(1),branchT:b.t,decision});if(log.length>40)log.shift();c.routeTraceAt=race.time;};
+  const fail=reason=>{if(c.onBridge)c.shortcutFailed=(c.shortcutFailed||0)+1;trace(reason,b.distance);c.routeDecision={kind:reason,branch:!!c.onBridge,phase:p,t:b.t,branchDistance:b.distance,normalDistance:K.nearestTrackWindow(c,D.points,D.exit,.025).distance,water:D.wet(c)};if(c===race.player&&reason==='bath-water')SND?.sfx('boxPocket');recover(c,reason);return false;};
   // The branch is acquired only at the real entrance plane, with forward movement.
-  if(!c.onBridge&&!(c.respawnGrace>0)&&physical>.02&&plane(old,P,axis)<0&&plane(c,P,axis)>=0&&b.t<gate+.03&&b.distance<D.bridgeHalf-15&&Math.abs(signed(D.entry,p))<.043&&Math.cos(K.angleDiff(c.a,axis))>.58&&c.speed>0){c.onBridge=true;c.bridgeOffSeconds=0;c.routePinch=null;c.deskTry=false;}
+  if(!c.onBridge&&!(c.respawnGrace>0)&&physical>.02&&plane(old,P,axis)<0&&plane(c,P,axis)>=0&&b.t<gate+.03&&b.distance<D.bridgeHalf-15&&Math.abs(signed(D.entry,p))<.043&&Math.cos(K.angleDiff(c.a,axis))>.58&&c.speed>0){c.onBridge=true;c.bridgeOffSeconds=0;c.routePinch=null;c.deskTry=false;c.shortcutEntered=(c.shortcutEntered||0)+1;if(c===race.player)SND?.sfx('oilSkid');}
   if(D.wet(c)&&!(c.jump>0))return fail('bath-water');
   if(c.onBridge){
+   // The legal main lane and the shortcut form one continuous surface at the exit.
+   // Rejoin only from the final branch section, after real movement and on the local exit arm.
+   const rejoin=K.nearestTrackWindow(c,D.points,D.exit,.025),oldBranch=before.t;
+   const exitGap=signed(D.exit,rejoin.p);
+   const forward=physical>.02&&c.speed>0&&((c.x-old.x)*Math.cos(D.tangent(rejoin.p))+(c.y-old.y)*Math.sin(D.tangent(rejoin.p)))>=-physical*.2;
+   if(oldBranch>=.88&&b.t>=.90&&Math.abs(exitGap)<=.022&&rejoin.distance<=D.laneHalf-12&&forward&&Math.abs(b.t-oldBranch)*D.shortcutLength<=physical*2.4+5&&(b.distance>D.bridgeHalf-8||b.t>=.97)){
+    c.onBridge=false;c.offtrack=false;c.offtrackSeconds=0;c.routePinch=null;c.routeStableP=rejoin.p;c.routeResolvedNear={...rejoin,shortcut:false};c.routeDecision='bath-legal-rejoin';c.deskTry=false;c.shortcutCompleted=(c.shortcutCompleted||0)+1;trace(c.routeDecision,rejoin.distance);if(c===race.player)SND?.sfx('landing');return true;
+   }
    if(b.distance>D.bridgeHalf||b.t<gate-.045)return fail('bath-shortcut-fall');
    if(Math.abs(b.t-before.t)*D.shortcutLength>physical*2.4+5)return fail('bath-shortcut-cut');
    c.offtrack=false;c.offtrackSeconds=0;c.routePinch=null;
-   const phase=D.entry+(D.exit-D.entry)*b.t;c.routeStableP=phase;c.routeResolvedNear={...b,p:phase};c.routeDecision='bath-manual-cut';
+   const phase=D.entry+(D.exit-D.entry)*b.t;c.routeStableP=phase;c.routeResolvedNear={...b,p:phase};c.routeDecision='bath-manual-cut';trace(c.routeDecision,b.distance);
    // Wet ceramic: a modest speed-dependent drag, with no steering assistance.
    const cap=(c.profile?.max||250)*.91;if(c.speed>cap)c.speed=cap+(c.speed-cap)*Math.exp(-dt*4.5);
-   if(plane(old,Q,out)<0&&plane(c,Q,out)>=0&&b.t>.97&&b.distance<D.bridgeHalf-10&&c.speed>0&&Math.cos(K.angleDiff(c.a,out))>.35){c.onBridge=false;c.routeStableP=D.exit;c.routeResolvedNear={...D.point(D.exit),distance:K.distance(c,D.point(D.exit)),p:D.exit,shortcut:false};c.deskTry=false;if(c===race.player)SND?.sfx('landing');}
+   if(plane(old,Q,out)<0&&plane(c,Q,out)>=0&&b.t>.97&&b.distance<D.bridgeHalf-10&&c.speed>0&&Math.cos(K.angleDiff(c.a,out))>.35){c.onBridge=false;c.routeStableP=D.exit;c.routeResolvedNear={...D.point(D.exit),distance:K.distance(c,D.point(D.exit)),p:D.exit,shortcut:false};c.deskTry=false;c.shortcutCompleted=(c.shortcutCompleted||0)+1;if(c===race.player)SND?.sfx('landing');}
    return true;
   }
   // Same bounded phase correction as the stability hotfix, but no global arm snap.
@@ -30,12 +39,13 @@
   if(race.time-(c.routeTraceAt??-Infinity)>=.099){const log=c.routeTrace??=[];log.push({t:+race.time.toFixed(3),x:+c.x.toFixed(2),y:+c.y.toFixed(2),p:c.p,stable,near:n.p,d:+near.distance.toFixed(1),decision:c.routeDecision});if(log.length>40)log.shift();c.routeTraceAt=race.time;}
   // The toothbrush is the normal route, not a shortcut. A narrow deck spans the gap.
   const deck=D.brushContact(c);
-  if(stable>D.brush.start&&stable<D.brush.end&&deck.u>.075&&deck.u<.98&&Math.abs(deck.side)>Math.min(85,deck.half)-Math.min(10,(c.width||36)*.2))return fail('bath-toothbrush-fall');
+  const onBrush=D.onBrushPhase(stable)&&deck.u>.11&&deck.u<.965;if(onBrush&&!c.bathBrush&&c===race.player)SND?.sfx('spoon');c.bathBrush=onBrush;
+  if(stable>D.brush.start&&stable<D.brush.end&&deck.u>.11&&deck.u<.965&&Math.abs(deck.side)>D.brushLimit(c,deck.u))return fail('bath-toothbrush-fall');
   if(c.offtrackSeconds>.8&&near.distance>D.laneHalf+38&&!(c.respawnGrace>0)){recover(c,'bath-route-cut');return false;}
-  if(c.jump<=0&&D.damp(c)){c.speed*=Math.exp(-dt*.32);}
-  if(c.jump<=0&&(D.inSoft(c,D.sponge,31)||D.cotton.some(o=>D.inSoft(c,o,18)))){c.speed*=Math.exp(-dt*1.65);if(!c.bathSponge&&c===race.player)SND?.sfx('jamSurface');c.bathSponge=true;}else c.bathSponge=false;
+  if(c.jump<=0&&D.damp(c)){c.speed*=Math.exp(-dt*.32);if(!c.bathDamp&&c===race.player)SND?.sfx('oilSkid');c.bathDamp=true;}else c.bathDamp=false;
+  if(c.jump<=0&&(D.inSoft(c,D.sponge,31)||D.cotton.some(o=>D.inSoft(c,o,18)))){c.speed*=Math.exp(-dt*1.65);if(!c.bathSponge&&c===race.player)SND?.sfx('slowSurface');c.bathSponge=true;}else c.bathSponge=false;
   const ramp=D.towel,rx=Math.cos(ramp.a),ry=Math.sin(ramp.a),alongRamp=q=>(q.x-ramp.x)*rx+(q.y-ramp.y)*ry;
-  if(c.jump<=0&&!(c.jumpCd>0)&&c.speed>110&&alongRamp(old)<ramp.rx*.56&&alongRamp(c)>=ramp.rx*.56&&D.inSoft(c,ramp,18)&&Math.cos(K.angleDiff(c.a,ramp.a))>.7){c.jump=.55;c.jumpTotal=.55;c.jumpCd=1.1;if(c===race.player)SND?.sfx('ramp');}
+  if(c.jump<=0&&!(c.jumpCd>0)&&c.speed>95&&alongRamp(old)<ramp.rx*.56&&alongRamp(c)>=ramp.rx*.56&&Math.abs(-(c.x-ramp.x)*ry+(c.y-ramp.y)*rx)<=ramp.ry&&Math.cos(K.angleDiff(c.a,ramp.a))>.45){c.jump=.55;c.jumpTotal=.55;c.jumpCd=1.1;c.towelJumps=(c.towelJumps||0)+1;if(c===race.player)SND?.sfx('ramp');}
   if(!D.onBrushPhase(stable)&&!c.offtrack&&near.distance<80&&!D.wet(D.point(stable))&&!(c.respawnGrace>0)&&c.speed>=0&&Math.cos(K.angleDiff(c.a,D.tangent(stable)))>.2){c.lastCheckpoint=stable;c.lastValidPosition={...D.point(stable),p:stable,a:D.tangent(stable),laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};}
   return true;
  }
@@ -56,7 +66,11 @@
   if(p>D.entry-.027&&p<D.entry-.005&&c.deskChoiceVisit!==visit){c.deskChoiceVisit=visit;const clear=!race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&K.distance(o,P)<125);c.deskTry=clear&&near.distance<65&&Math.abs(K.angleDiff(c.a,D.tangent(p)))<.55&&speed>80&&speed<290&&Math.random()<(s.pace<.9?.12:s.pace<.99?.30:.50);c.shortcutDecisionCount=(c.shortcutDecisionCount||0)+1;if(c.deskTry)c.shortcutAttemptCount=(c.shortcutAttemptCount||0)+1;}
   if(c.onBridge||c.deskTry&&p>D.entry-.023&&p<D.entry+.043){const b=D.shortcutNearest(c);target=D.shortcutPoint(Math.min(1,b.t+Math.min(.09,95/D.shortcutLength)));if(c.onBridge&&b.t>.93)target=D.point(D.exit+.009);}
   if(!c.onBridge&&(p>D.entry+.043||c.aiRecoveryUntil>race.time||c.respawnGrace>0))c.deskTry=false;
-  const oil=(c.onBridge||c.deskTry)?{target,slow:false}:window.TTRRaceDrivers.avoidOil(c,race,s,target,a,valid,D.props);target=oil.target;
+  // On the narrow mandatory toothbrush, aim at the actual support axis.
+  // No overtaking or oil-avoidance detour may send CPU wheels over its edge.
+  const brushApproach=!c.onBridge&&p>D.brush.start-.012&&p<D.brush.end-.008;
+  if(brushApproach){const q=D.brushContact(c),u=K.clamp(q.u+look/D.brush.length,0,1);target={x:D.brush.P.x+(D.brush.Q.x-D.brush.P.x)*u,y:D.brush.P.y+(D.brush.Q.y-D.brush.P.y)*u};}
+  const oil=(c.onBridge||c.deskTry||brushApproach)?{target,slow:false}:window.TTRRaceDrivers.avoidOil(c,race,s,target,a,valid,D.props);target=oil.target;
   const d=K.angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a),steer=K.clamp(d*(hard?3.7:3.3),-1,1);
   if(c.reverseRecovery>0)return {steer:-steer||1,gas:false,brake:true};
   const bend=Math.max(Math.abs(K.angleDiff(D.tangent(p+.017),D.tangent(p))),Math.abs(K.angleDiff(D.tangent(p+.029),D.tangent(p+.012))));
