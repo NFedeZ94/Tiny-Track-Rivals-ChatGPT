@@ -1,6 +1,4 @@
-/* Tiny Track Rivals — Fase 9: CPU: recupero da blocco e uso tattico dei power-up.
- * Estrazione meccanica dei blocchi della fase 8. Nessuna modifica a condizioni, costanti o ordine.
- * Lo stato resta nella closure del legacy; dipendenze iniettate esplicitamente. */
+/* Tiny Track Rivals — CPU recovery and tactical power-ups. */
 (()=>{'use strict';
 window.TTRRaceCPU=Object.freeze({create(deps){
  const {getRace,getOnlineSession,distance,recoverCar,clawTarget,props,useItem}=deps;
@@ -24,25 +22,38 @@ function updateRecovery(c,dt) {
   c.lastMoveX=c.x;c.lastMoveY=c.y;
  }
 }
-
-
+function tacticalTurboSafe(c,race){
+ const K=window.TTRCore,T=race.trackId==='desk-drift'?window.TTRDeskTrack:race.trackId==='bagno-sprint'?window.TTRBathTrack:race.trackId==='box-di-biliardo'?window.TTRBoxTrack:null;
+ if(c.onBridge||c.jump>0||c.slip>.1||c.oilSpin>0||c.boost>0||c.respawnGrace>0||c.reverseRecovery>0||c.aiRecoveryUntil>race.time||c.aiOilSeen||c.deskTry||c.tryShortcut||c.boxTryPocket||c.boxTransit>0||c.bridgeExitVisual>0||c.deskExitRamp||c.jamTimer>0)return false;
+ const p=c.routeStableP??c.p,point=T?T.point:K.trackPoint,tangent=T?T.tangent:K.tangent,length=T?T.length:K.TRACK_LENGTH;
+ if(T?.brush&&p>T.brush.start-.045&&p<T.brush.end+.007)return false;
+ const horizon=Math.max(160,c.speed*.95),a=tangent(p),fx=Math.cos(c.a),fy=Math.sin(c.a);
+ if(Math.abs(K.angleDiff(a,c.a))>.22)return false;
+ for(const d of [horizon*.45,horizon*.85,horizon*1.15]){
+  const phase=K.mod(p+d/length,1),q=point(phase);
+  if(Math.abs(K.angleDiff(tangent(phase),a))>.31||T?.wet?.(q)||T?.pockets?.some(o=>distance(o,q)<(o.r||30)+45))return false;
+  if(props.some(o=>o.solid&&distance(o,q)<(o.r||25)+40))return false;
+ }
+ const ahead=o=>{const dx=o.x-c.x,dy=o.y-c.y,f=dx*fx+dy*fy,l=-dx*fy+dy*fx;return f>0&&f<horizon&&Math.abs(l)<52;};
+ if(race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&!o.boxTransit&&!!o.onBridge===!!c.onBridge&&ahead(o)&&o.speed<c.speed+25))return false;
+ if(race.oils?.some(o=>o.owner!==c.id&&(o.t??1)>0&&ahead(o)&&(race.trackId!=='desk-drift'||!o.deskDeck)))return false;
+ return true;
+}
 function useTacticalPowerup(c) {
  const race=getRace(),onlineSession=getOnlineSession();
- // Tactical decisions on elapsed time, not random rolls on every frame.
  if(c===race.player||(race.mode==='online'&&onlineSession?.members[c.id])||!c.item)return;
  if(race.mode==='online'){const f=1;if(c.item==='turbo'&&c.speed>95&&Math.random()<.005*f)useItem(c);else if(c.item==='oil'&&Math.random()<.0008*f)useItem(c);else if(c.item==='claw'&&clawTarget(c,race.cars,props,162,.30)&&Math.random()<.09*f)useItem(c);return;}
  const level=race.aiFactor<.95?0:race.aiFactor<1.1?1:2;
  if((c.aiItemCheckAt||0)>race.time)return;
- c.aiItemCheckAt=race.time+[.95,.48,.20][level]+Math.random()*.12;
+ c.aiItemCheckAt=race.time+[.95,.48,.13][level]+Math.random()*.12;
  if(c.item==='turbo'){
-   const aligned=Math.abs(c.steer||0)<[.35,.48,.67][level];
-   if(c.speed>95&&aligned&&!c.onBridge&&Math.random()<[.25,.65,.95][level])useItem(c);
+   const aligned=Math.abs(c.steer||0)<[.35,.48,.50][level];
+   if(c.speed>95&&aligned&&!c.onBridge&&(level===2?tacticalTurboSafe(c,race):Math.random()<[.25,.65][level]))useItem(c);
  }else if(c.item==='oil'){
    const behind=race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&!o.onBridge&&Math.hypot(o.x-c.x,o.y-c.y)<175&&(o.x-c.x)*Math.cos(c.a)+(o.y-c.y)*Math.sin(c.a)<-20);
    if(!c.onBridge&&behind&&Math.random()<[.25,.65,.95][level])useItem(c);
  }else if(c.item==='claw'&&clawTarget(c,race.cars,props,162,.30)&&Math.random()<[.25,.65,.95][level])useItem(c);
-
 }
- return Object.freeze({updateRecovery, useTacticalPowerup});
+ return Object.freeze({updateRecovery,useTacticalPowerup});
 }});
 })();

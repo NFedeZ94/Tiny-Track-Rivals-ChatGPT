@@ -157,18 +157,18 @@
    }else c.aiPassUntil=0;
    if(branch){const bearing=K.angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a);if(Math.abs(bearing)>1.12||p>B.entry+.006||c.aiRecoveryUntil>race.time){c.boxTryPocket=false;target=normal;branch=false;}}
    if(c.aiRecoveryUntil>race.time||near.distance>120){target=guidance(p+.007);branch=false;c.boxTryPocket=false;}
-   const oil=(!branch&&near.distance<85&&!(c.aiRecoveryUntil>race.time))?window.TTRRaceDrivers.avoidOil(c,race,s,target,B.tangent(p+lookP),q=>q.x>220&&q.x<2380&&q.y>185&&q.y<1415&&K.nearestTrackWindow(q,B.points,p+lookP,.033).distance<B.laneHalf-(c.width||36)*.5-5&&!B.pockets.some(o=>Math.hypot(q.x-o.x,q.y-o.y)<o.r+35),guides):{target,slow:false};
+   const oil=(!branch&&near.distance<85&&!(c.aiRecoveryUntil>race.time))?window.TTRRaceDrivers.avoidOil(c,race,s,target,B.tangent(p+lookP),q=>q.x>220&&q.x<2380&&q.y>185&&q.y<1415&&K.nearestTrackWindow(q,B.points,p+lookP,.033).distance<B.laneHalf-(c.width||36)*.5-5&&!B.pockets.some(o=>Math.hypot(q.x-o.x,q.y-o.y)<o.r+35),[...guides,...(race.boxBalls||[])]):{target,slow:false};
    target=oil.target;
    let d=K.angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a);const steer=K.clamp(d*(hard?3.7:3.4),-1,1);
    if(c.reverseRecovery>0)return {steer:-steer||1,gas:false,brake:true};
    const bend=Math.max(Math.abs(K.angleDiff(B.tangent(p+.012),B.tangent(p))),Math.abs(K.angleDiff(B.tangent(p+.023),B.tangent(p+.008))));
-   const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);let desired=cap*(1-K.clamp((bend-(hard?.25:.16))*(hard?.48:.65),0,hard?.48:.60));
+   const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);let desired=cap*(1-K.clamp((bend-(hard?.25:.16))*(hard?.35:.65),0,hard?.48:.60));
    if(Math.abs(d)>.34)desired=Math.min(desired,cap*(1-K.clamp((Math.abs(d)-.28)*.68,0,.66)));
    if(branch)desired=Math.min(desired,Math.max(105,cap*.74));
    if(leader&&gap<60&&!(c.aiPassUntil>race.time))desired=Math.min(desired,Math.max(80,leader.speed));
    if(near.distance>95)desired=Math.min(desired,110);
    if(oil.slow)desired=Math.min(desired,cap*.68);
-   else if(c.aiOilSeen?.side)desired=Math.min(desired,cap*.86);
+   else if(c.aiOilSeen?.side)desired=Math.min(desired,cap*(hard?.94:.86));
    const brake=c.speed>desired+(hard?16:12)&&c.speed>75;return {steer,gas:!brake&&(desired>=cap*.96||c.speed<desired+(hard?7:3)),brake};
  }
  function cameraPose(c){
