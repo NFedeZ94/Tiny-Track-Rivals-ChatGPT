@@ -12,15 +12,15 @@ function avoidOil(c,race,s,target,tangent,valid,obstacles=[],options={}){
  if(!hazards.length){c.aiOilSeen=null;return normal;}
  const seg=(a,b,o)=>{const dx=b.x-a.x,dy=b.y-a.y,t=Math.max(0,Math.min(1,((o.x-a.x)*dx+(o.y-a.y)*dy)/(dx*dx+dy*dy||1)));return Math.hypot(a.x+dx*t-o.x,a.y+dy*t-o.y);};
  const extension=Math.max(0,Math.min(190,horizon-Math.hypot(target.x-c.x,target.y-c.y)));
- const end=q=>{let last=q;for(let k=1;k<=4;k++){const z={x:q.x+Math.cos(tangent)*extension*k/4,y:q.y+Math.sin(tangent)*extension*k/4};if(!valid(z))break;last=z;}return last;};
+ const endpoints=new Map();const end=q=>{if(endpoints.has(q))return endpoints.get(q);let last=q;for(let k=1;k<=4;k++){const z={x:q.x+Math.cos(tangent)*extension*k/4,y:q.y+Math.sin(tangent)*extension*k/4};if(!valid(z))break;last=z;}endpoints.set(q,last);return last;};
  const clearance=(q,o,e)=>Math.min(seg(c,q,o),seg(q,e,o))-radius(o);
- const straightEnd=end(target),threat=hazards.find(o=>clearance(target,o,straightEnd)<0);
+ const straightEnd=end(target),ahead=o=>(o.x-c.x)*fx+(o.y-c.y)*fy,threat=hazards.filter(o=>clearance(target,o,straightEnd)<0).sort((a,b)=>ahead(a)-ahead(b))[0];
  const previous=c.aiOilSeen;
  if(!threat&&(!previous||!hazards.includes(previous.oil))){c.aiOilSeen=null;return normal;}
  // Hold one side for the same obstacle rather than weaving back and forth.
- const oil=previous&&hazards.includes(previous.oil)?previous.oil:threat;
+ const oil=threat&&previous?.oil&&previous.oil!==threat&&ahead(threat)<ahead(previous.oil)-25?threat:previous&&hazards.includes(previous.oil)?previous.oil:threat;
  if(!previous||previous.oil!==oil){c.aiOilSeen={oil,time:race.time,side:0,offset:0};c.aiOilEncounters=(c.aiOilEncounters||0)+1;}
- const state=c.aiOilSeen,delay=.28-.24*skill;
+ const state=c.aiOilSeen,delay=.28-.27*skill;
  if(race.time-state.time<delay)return normal;
  const others=race.cars||[],max=options.maxOffset??(52+skill*28);
  const feasible=(q)=>{
@@ -110,16 +110,19 @@ if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInp
    const r=ramp(),inZone=c.p>.515&&c.p<.63,visit=(race.elim?.round||0)+':'+c.lapsCompleted;
    if(r&&inZone&&c.shortcutDecisionLap!==visit&&!c.bridgeMissActive){
      c.shortcutDecisionLap=visit;
-     const chance=hardLevel?({aggressive:.82,technical:.58,strategic:.72}[c.aiPersonality]??.70):s.shortcut;
+     const chance=hardLevel?({aggressive:.90,technical:.83,strategic:.87}[c.aiPersonality]??.85):s.shortcut;
      const clear=!hardLevel||!race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&o.tryShortcut&&Math.hypot(o.x-c.x,o.y-c.y)<95);
-     c.tryShortcut=Math.random()<chance&&clear&&(!hardLevel||c.aiRampStreak!==2);
-     if(hardLevel)c.aiRampStreak=c.tryShortcut?(c.aiRampStreak||0)+1:0;c.shortcutDecisionCount=(c.shortcutDecisionCount||0)+1;
+     c.tryShortcut=Math.random()<chance&&clear;
+     c.shortcutDecisionCount=(c.shortcutDecisionCount||0)+1;
      if(c.tryShortcut)c.shortcutAttemptCount=(c.shortcutAttemptCount||0)+1;
      c.rampAimOffset=(Math.random()*2-1)*s.aim;
    }
    if(c.bridgeMissActive||c.respawnGrace>0||c.p>.82||c.p<.50||c.aiRecoveryUntil>race.time)c.tryShortcut=false;
-   const phase=mod(c.p+(s.look+Math.max(0,c.speed)*.12)/length,1);
-   let target=linePoint(phase,s.line),plannedBranch=false;
+   // Protect the mandatory coffee-cup apex; no shortcut or gate bypass.
+   const cupZone=c.p>=.205&&c.p<=.345&&!c.onBridge;
+   const phase=mod(c.p+((cupZone?Math.min(s.look,112):s.look)+Math.max(0,c.speed)*.12)/length,1);
+   let target=linePoint(phase,cupZone?Math.min(.15,s.line):s.line),plannedBranch=false;
+   if(cupZone){c.aiPassUntil=0;c.aiPassCooldown=Math.max(c.aiPassCooldown||0,race.time+.5);}
    const a=K.tangent(phase),nx=-Math.sin(a),ny=Math.cos(a);
    if(c.onBridge){const b=K.shortcutNearest(c);target=K.shortcutPoint(Math.min(1,b.t+.075));if(b.t>.96)target=trackPoint(mod(K.shortcutTo+.025,1));plannedBranch=true;}
    else if(c.tryShortcut&&r&&inZone){const along=(c.x-r.x)*Math.cos(r.a)+(c.y-r.y)*Math.sin(r.a),lead=along< -105?-90:38,off=c.rampAimOffset||0;target={x:r.x+Math.cos(r.a)*lead-Math.sin(r.a)*off,y:r.y+Math.sin(r.a)*lead+Math.cos(r.a)*off};plannedBranch=true;}
@@ -133,19 +136,25 @@ if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInp
      // Choose one passing side and hold it; do not weave every simulation step.
      let front=null,frontGap=Infinity;
      for(const other of race.cars){if(other===c||other.eliminated||other.done||other.onBridge||other.jump>0)continue;const dx=other.x-c.x,dy=other.y-c.y,f=dx*Math.cos(c.a)+dy*Math.sin(c.a),side=-dx*Math.sin(c.a)+dy*Math.cos(c.a);if(f>12&&f<140&&Math.abs(side)<46&&f<frontGap){front=other;frontGap=f;}}
-     if(front&&front.speed<c.speed+16&&s.pass>0&&!obstacle){
-       if(!(c.aiPassUntil>race.time)&&!(c.aiPassCooldown>race.time)){const side=(front.x-target.x)*nx+(front.y-target.y)*ny>0?-1:1;c.aiPassSide=side;c.aiPassUntil=race.time+1.15;c.aiPassCooldown=race.time+2.1;c.aiPassAttempts=(c.aiPassAttempts||0)+1;}
+     const passSafe=side=>{
+       const q={x:target.x+nx*side*s.pass,y:target.y+ny*side*s.pass};
+       const n=K.nearestTrackWindow(q,points,phase,.035);
+       return n.distance<K.LANE_HALF-(c.width||36)*.5-12&&!props.some(o=>o.solid&&K.distance(q,o)<(o.r||25)+30)&&!race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&!o.onBridge&&!(o.jump>0)&&K.distance(q,o)<(c.width||36)*.5+(o.width||36)*.5+10);
+     };
+     if(!cupZone&&front&&front.speed<c.speed-(hardLevel?5:10)&&s.pass>0&&!obstacle&&!(c.aiPassUntil>race.time)&&!(c.aiPassCooldown>race.time)){
+       const side=(front.x-target.x)*nx+(front.y-target.y)*ny>0?-1:1,chosen=passSafe(side)?side:passSafe(-side)?-side:0;
+       if(chosen){c.aiPassSide=chosen;c.aiPassUntil=race.time+1.35;c.aiPassCooldown=race.time+3;c.aiPassAttempts=(c.aiPassAttempts||0)+1;}else c.aiPassCooldown=race.time+.7;
      }
-     if(c.aiPassUntil>race.time&&!obstacle){const q={x:target.x+nx*c.aiPassSide*s.pass,y:target.y+ny*c.aiPassSide*s.pass};if(K.nearestTrackWindow(q,points,phase,.035).distance<K.LANE_HALF-(c.width||36)*.5-8&&!props.some(o=>o.solid&&K.distance(q,o)<(o.r||25)+30))offset=c.aiPassSide*s.pass;else c.aiPassUntil=0;}
-     else if(front&&frontGap<58)blocked=true;
-     target={x:target.x+nx*offset,y:target.y+ny*offset};
+     if(c.aiPassUntil>race.time&&!obstacle&&!cupZone&&passSafe(c.aiPassSide))offset=c.aiPassSide*s.pass;
+     else {if(c.aiPassUntil>race.time)c.aiPassUntil=0;if(front&&frontGap<58)blocked=true;}
+     target={x:target.x+nx*(cupZone?clamp(offset,-20,20):offset),y:target.y+ny*(cupZone?clamp(offset,-20,20):offset)};
    }
    const near=nearestTrack(c,points);
    if(c.aiRecoveryUntil>race.time&&!c.onBridge){const q=trackPoint(near.p+.012);target={x:q.x,y:q.y};plannedBranch=false;}
-   if(near.distance>(s.curveSpeed>=.999?92:83)&&!plannedBranch&&!(c.aiRecoveryUntil>race.time)){target={x:near.x,y:near.y};}
+   if(near.distance>(cupZone?58:s.curveSpeed>=.999?92:83)&&!plannedBranch&&!(c.aiRecoveryUntil>race.time)){target=cupZone?trackPoint(mod(c.p+.013,1)):{x:near.x,y:near.y};}
    const edgeRisk=!c.onBridge&&(c.x<120||c.x>K.WORLD_W-120||c.y<120||c.y>K.WORLD_H-120)&&near.distance>75;
    if(edgeRisk){target=trackPoint(near.p+.006);plannedBranch=false;c.tryShortcut=false;}
-   const oil=c.onBridge?avoidOil(c,race,s,target,Math.atan2(target.y-c.y,target.x-c.x),q=>K.shortcutNearest(q).distance<=Math.max(12,44-(c.width||36)*.5),[],{maxOffset:24}):(!plannedBranch&&!edgeRisk&&!(c.aiRecoveryUntil>race.time)&&near.distance<75)?avoidOil(c,race,s,target,a,q=>q.x>80&&q.x<K.WORLD_W-80&&q.y>80&&q.y<K.WORLD_H-80&&K.nearestTrackWindow(q,points,phase,.045).distance<K.LANE_HALF-(c.width||36)*.5-5,props):{target,slow:false};
+   const oil=c.onBridge?avoidOil(c,race,s,target,Math.atan2(target.y-c.y,target.x-c.x),q=>K.shortcutNearest(q).distance<=Math.max(12,44-(c.width||36)*.5),[],{maxOffset:24}):(!plannedBranch&&!edgeRisk&&!(c.aiRecoveryUntil>race.time)&&near.distance<75)?avoidOil(c,race,s,target,a,q=>q.x>80&&q.x<K.WORLD_W-80&&q.y>80&&q.y<K.WORLD_H-80&&K.nearestTrackWindow(q,points,phase,.045).distance<K.LANE_HALF-(c.width||36)*.5-5,props,cupZone?{maxOffset:24}:{}):{target,slow:false};
    target=oil.target;
    const d=angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a),v=Math.abs(d);
    const steer=clamp(d*s.steer,-1,1);
@@ -159,7 +168,8 @@ if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInp
    if(v>turnThreshold)desired=Math.min(desired,cap*(1-clamp((v-turnThreshold+.10)*.46,0,.55)));
    if(obstacle)desired=Math.min(desired,cap*(.78+(s.curveSpeed-.77)*.5));
    if(edgeRisk)desired=Math.min(desired,105);
-   if(oil.slow)desired=Math.min(desired,cap*.68);
+   if(cupZone&&near.distance>58)desired=Math.min(desired,cap*.86);
+   if(oil.slow)desired=Math.min(desired,cap*(hardLevel&&!cupZone&&!c.onBridge?.82:.68));
    else if(c.aiOilSeen?.side)desired=Math.min(desired,cap*(hardLevel?.94:.86));
    if(blocked)desired=Math.min(desired,Math.max(75,frontSpeedFallback(c,race)));
    if(plannedBranch&&c.tryShortcut&&v<.45&&!oil.slow)desired=cap;
