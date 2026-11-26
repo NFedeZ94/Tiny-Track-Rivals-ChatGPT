@@ -59,7 +59,7 @@ function perfRecordLap(m){
  const lapTime=+(race.time-m.lapStart).toFixed(3);m.lapTimes.push(lapTime);const detail={time:lapTime,ramps:m.ramps-(m.lapRampStart||0),respawns:m.respawns-(m.lapRecoveryStart||0)};for(const k of ['shortcutEntered','shortcutCompleted','shortcutFailed','towelJumps'])if(k in m){detail[k]=m[k]-(m['_lap_'+k]||0);m['_lap_'+k]=m[k];}(m.lapDetails??=[]).push(detail);m.lapRampStart=m.ramps;m.lapRecoveryStart=m.respawns;m.lapStart=race.time;
 }
 function perfPublicCar(m){const out=Object.fromEntries(Object.entries(m).filter(([k])=>!k.startsWith('_')));return {...out,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)};}
-function perfSnapshot(session=race){if(session&&perfEnabled)for(const c of session.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m,session);}const input=perfInputSamples.slice().sort((a,b)=>a-b);return {runtimeFault:session?session.runtimeFault??null:perfContext.runtimeFault??null,completed:session?.finished??perfContext.completed??false,diagnosticCoverage:perfContext.coverage===false?'partial':'full',playerId:session?.player?.id??perfContext.playerId??0,build:"v0.13.6.149 · 14.25-online-beta",htmlBuild:document.querySelector('meta[name="ttr-build"]')?.content??null,quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},environmentEvents:session?window.TTREnvironmentEvents.snapshot(session.environmentEvents):perfContext.environmentEvents??null,recoveries:session?.recoveryHistory??perfRecoveries,recoveriesDropped:session?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(perfPublicCar),trackId:session?.trackId??perfContext.trackId,raceMode:session?.mode??perfContext.mode,serverAuthority:session?.serverAuthority??null,serverTick:session?.serverTick??null,network:session?.mode==='online'?{rttMs:onlineRttMs,...onlineNetStats}:null,difficulty:session?.aiFactor??perfContext.difficulty};}
+function perfSnapshot(session=race){if(session&&perfEnabled)for(const c of session.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m,session);}const input=perfInputSamples.slice().sort((a,b)=>a-b);return {runtimeFault:session?session.runtimeFault??null:perfContext.runtimeFault??null,completed:session?.finished??perfContext.completed??false,diagnosticCoverage:perfContext.coverage===false?'partial':'full',playerId:session?.player?.id??perfContext.playerId??0,build:"v0.13.6.150 · 14.25a-online-auto",htmlBuild:document.querySelector('meta[name="ttr-build"]')?.content??null,quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},environmentEvents:session?window.TTREnvironmentEvents.snapshot(session.environmentEvents):perfContext.environmentEvents??null,recoveries:session?.recoveryHistory??perfRecoveries,recoveriesDropped:session?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(perfPublicCar),trackId:session?.trackId??perfContext.trackId,raceMode:session?.mode??perfContext.mode,serverAuthority:session?.serverAuthority??null,serverTick:session?.serverTick??null,network:session?.mode==='online'?{rttMs:onlineRttMs,...onlineNetStats}:null,difficulty:session?.aiFactor??perfContext.difficulty};}
 function perfAnomalies(snapshot){
  const {build,htmlBuild,trackId,raceMode,difficulty,wholeRace,inputLatency,recoveriesDropped}=snapshot;
  const events=snapshot.recoveries||[],counts={};for(const e of events)counts[e.reason]=(counts[e.reason]||0)+1;
@@ -89,7 +89,7 @@ const controls={left:false,right:false,brake:false};
 // TTR Online Beta: server owns race simulation; clients send controls only.
 // The organizer has lobby privileges, not physics authority.
 const ONLINE_BETA_URL="wss://tiny-track-rivals-online-beta.onrender.com/ws-beta";
-let onlineJoinRequest=null,onlineInputSeq=0,onlineEnvironmentSupported=false,onlinePendingSnapshot=null;
+let onlineJoinRequest=null,onlineLobbyPending=false,onlineHandshakeTimer=null,onlineInputSeq=0,onlineEnvironmentSupported=false,onlinePendingSnapshot=null;
 let onlineSocket=null,onlineSession=null,onlineRemoteInputs={},onlineLatest=null,onlineLastSend=0,onlineLastSnapshot=0,onlineFinishDeadline=0;
 // v0.13.6.37: client-side VISUAL prediction and timestamped snapshot interpolation.
 // Authoritative results, collision, pickups, lap count and respawn are server-owned.
@@ -117,16 +117,19 @@ function onlineStatus(text){const el=$('onlineStatus');if(el)el.textContent=Stri
 function onlineSend(obj){if(onlineSocket?.readyState===WebSocket.OPEN)onlineSocket.send(JSON.stringify(obj));}
 function onlineCloseConnection(){
  const sock=onlineSocket;onlineSocket=null;onlineSession=null;onlineLatest=null;onlineRemoteInputs={};
+ clearTimeout(onlineHandshakeTimer);onlineHandshakeTimer=null;onlineLobbyPending=false;
  onlinePingPending=null;onlineRttMs=null;onlineNextPing=0;onlinePingSupported=false;onlineEnvironmentSupported=false;onlinePendingSnapshot=null;onlineJoinRequest=null;onlineRttDisplay();onlineResetSmooth();
- if(sock){if(sock.readyState===WebSocket.OPEN)try{sock.send(JSON.stringify({type:'leave'}))}catch(e){};sock.onclose=null;sock.onmessage=null;sock.close();}
+ if(sock){if(sock.readyState===WebSocket.OPEN)try{sock.send(JSON.stringify({type:'leave'}))}catch(e){};sock.onclose=null;sock.onmessage=null;sock.onerror=null;sock.onopen=null;sock.close();}
  $('onlineGameTag').style.display='none';
 }
-function onlineOpenPanel(){
+function onlineOpenPanel(connect=true){
  $('onlineModal').hidden=false;
- $('onlineServer').value=localStorage.getItem('ttr_online_beta_server')||ONLINE_BETA_URL;
+ // Retire obsolete manual server preferences; never use them for connection.
+ try{localStorage.removeItem('ttr_online_beta_server');}catch(_){}
  $('onlineName').value=localStorage.getItem('ttr_online_name')||'';
  $('onlineCar').value=String(selectedCar<onlineCarNames.length?selectedCar:0);
  onlineRefreshRoom();
+ if(connect&&!onlineSession)onlineEnsureConnection();
 }
 function onlineRefreshRoom(){
  const r=onlineSession,body=$('onlineMembers');body.replaceChildren();
@@ -144,30 +147,39 @@ function onlineRefreshRoom(){
  const me=r.members[r.slot];$('onlineReady').textContent=me?.ready?'✓ Pronto — annulla':'✓ Sono pronto';
  onlineStatus(`${r.members.filter(Boolean).length}/${r.capacity} giocatori reali · ${r.public?'pubblica':'privata'}. CPU riempiranno i posti liberi.`);
 }
+// One fixed endpoint, one connection, and at most one outstanding lobby request.
+function onlineFlushLobbyRequest(){
+ if(!onlineEnvironmentSupported||onlineSocket?.readyState!==WebSocket.OPEN||!onlineJoinRequest)return;
+ const request=onlineJoinRequest;onlineJoinRequest=null;
+ onlineStatus('Accesso alla sala…');onlineSend(request);
+}
+function onlineEnsureConnection(){
+ if(onlineSocket&&onlineSocket.readyState<2){onlineFlushLobbyRequest();return;}
+ // Preserve an action selected while the server is waking up.
+ const request=onlineJoinRequest,pending=onlineLobbyPending;
+ onlineCloseConnection();onlineJoinRequest=request;onlineLobbyPending=pending;
+ onlineStatus('Connessione automatica al server… Se inattivo, può richiedere circa un minuto.');
+ let sock;
+ try{sock=new WebSocket(ONLINE_BETA_URL);}catch(e){onlineJoinRequest=null;onlineLobbyPending=false;onlineStatus('Connessione non disponibile. Riprova.');return;}
+ onlineSocket=sock;
+ onlineHandshakeTimer=setTimeout(()=>{if(onlineSocket!==sock||onlineEnvironmentSupported)return;onlineCloseConnection();onlineRefreshRoom();onlineStatus('Il server non ha risposto. Riprova con un pulsante Online.');},90000);
+ sock.onopen=()=>{if(onlineSocket!==sock)return;onlineStatus('Verifica compatibilità server…');onlineNextPing=performance.now()+450;};
+ sock.onmessage=e=>{if(onlineSocket!==sock)return;let d;try{d=JSON.parse(e.data)}catch(_){return;}onlineOnMessage(d);};
+ sock.onerror=()=>{if(onlineSocket===sock)onlineStatus('Server non raggiungibile. Controlla la connessione internet.');};
+ sock.onclose=()=>{if(onlineSocket!==sock)return;const inGame=race?.mode==='online'||!!onlineSession?.started;onlineCloseConnection();onlineRefreshRoom();if(inGame){mainMenu();onlineOpenPanel(false);onlineStatus('Connessione interrotta durante la gara.');}else onlineStatus('Connessione chiusa. Riprova con un pulsante Online.');};
+}
 function onlineConnect(kind){
- if(onlineSocket&&onlineSocket.readyState<2){onlineStatus('Esci prima dalla sala corrente.');return;}
- let url=$('onlineServer').value.trim();
- if(url.startsWith('https://'))url='wss://'+url.slice(8);
- if(url.startsWith('http://'))url='ws://'+url.slice(7);
- try{const u=new URL(url);if(!['ws:','wss:'].includes(u.protocol)||u.pathname!=='/ws-beta'||u.username||u.password||u.search||u.hash)throw Error();}catch(_){onlineStatus('Usa il server Beta: '+ONLINE_BETA_URL);return;}
- if(location.protocol==='https:'&&!url.startsWith('wss://')){onlineStatus('Su GitHub Pages serve un server WSS (connessione cifrata).');return;}
- let name=$('onlineName').value.trim().slice(0,18)||'Pilota';
- try{localStorage.setItem('ttr_online_beta_server',url);localStorage.setItem('ttr_online_name',name);}catch(e){}
+ if(onlineSession){onlineStatus('Esci prima dalla sala corrente.');return;}
+ if(onlineLobbyPending){onlineStatus('Accesso in corso…');return;}
+ const name=$('onlineName').value.trim().slice(0,18)||'Pilota';
  const request={type:kind,name,eventVersion:149,protocol:2,car:Number($('onlineCar').value),capacity:Number($('onlineCapacity').value)};
  if(kind==='join')request.code=$('onlineCode').value.trim().toUpperCase();
  if(kind==='join'&&!/^[A-Z0-9]{6}$/.test(request.code)){onlineStatus('Inserisci il codice della sala (6 caratteri).');return;}
- onlineCloseConnection();onlineJoinRequest=request;onlineStatus('Connessione al server Beta...');
- onlineRttMs=null;onlinePingPending=null;onlineNextPing=0;onlinePingSupported=false;onlineRttDisplay();
- let sock;
- try{sock=new WebSocket(url);}catch(e){onlineStatus('Indirizzo WebSocket non valido.');return;}
- onlineSocket=sock;
- sock.onopen=()=>{onlineEnvironmentSupported=false;onlineStatus('Verifica compatibilità server Beta...');onlineNextPing=performance.now()+450;};
- sock.onmessage=e=>{let d;try{d=JSON.parse(e.data)}catch(_){return;}onlineOnMessage(d)};
- sock.onerror=()=>onlineStatus('Server non raggiungibile. Controlla l’URL e che sia pubblicato con WSS.');
- sock.onclose=()=>{if(onlineSocket!==sock)return;const inGame=race?.mode==='online'||!!onlineSession?.started;onlineCloseConnection();onlineRefreshRoom();if(inGame){mainMenu();onlineOpenPanel();onlineStatus('Connessione interrotta durante la gara.');}else onlineStatus('Connessione chiusa.');};
+ try{localStorage.setItem('ttr_online_name',name);}catch(e){}
+ onlineJoinRequest=request;onlineLobbyPending=true;onlineEnsureConnection();
 }
 function onlineOnMessage(d){
- if(d.type==='hello'){onlineEnvironmentSupported=d.protocol===2&&Array.isArray(d.features)&&d.features.includes('full-authoritative-149');onlinePingSupported=Array.isArray(d.features)&&d.features.includes('rtt_ping');if(!onlineEnvironmentSupported){onlineCloseConnection();onlineRefreshRoom();onlineStatus('Server Beta non aggiornato alla .149.');return;}if(onlineJoinRequest){onlineSend(onlineJoinRequest);onlineJoinRequest=null;}return;}
+ if(d.type==='hello'){onlineEnvironmentSupported=d.protocol===2&&Array.isArray(d.features)&&d.features.includes('full-authoritative-149');onlinePingSupported=Array.isArray(d.features)&&d.features.includes('rtt_ping');if(!onlineEnvironmentSupported){onlineCloseConnection();onlineRefreshRoom();onlineStatus('Server non compatibile. Riprova dopo un aggiornamento.');return;}clearTimeout(onlineHandshakeTimer);onlineHandshakeTimer=null;onlineStatus('Server connesso. Scegli come giocare.');onlineFlushLobbyRequest();return;}
  if(d.type==='pong'){
   if(onlinePingPending && d.seq===onlinePingPending.seq){
    const elapsed=performance.now()-onlinePingPending.sent;
@@ -176,8 +188,8 @@ function onlineOnMessage(d){
   }
   return;
  }
- if(d.type==='error'){onlineStatus(d.message||'Errore di rete');return;}
- if(d.type==='joined'){onlineSession={slot:d.slot,code:d.code,host:false,organizer:!!d.host,public:false,capacity:4,members:[],started:false};onlineRefreshRoom();return;}
+ if(d.type==='error'){onlineLobbyPending=false;onlineJoinRequest=null;onlineStatus(d.message||'Errore di rete');return;}
+ if(d.type==='joined'){onlineLobbyPending=false;onlineJoinRequest=null;onlineSession={slot:d.slot,code:d.code,host:false,organizer:!!d.host,public:false,capacity:4,members:[],started:false};onlineRefreshRoom();return;}
  if(d.type==='room_state'&&onlineSession){
   Object.assign(onlineSession,{code:d.code,public:d.public,capacity:d.capacity,started:d.started});
   const arr=Array(d.capacity).fill(null);
@@ -213,7 +225,7 @@ function onlineOnMessage(d){
   race.finished=true;showResults();return;
  }
  if(d.type==='room_closed'){
-  const inGame=race?.mode==='online'||!!onlineSession?.started;onlineCloseConnection();if(inGame)mainMenu();onlineOpenPanel();onlineStatus(d.reason||'Sala chiusa');
+  const inGame=race?.mode==='online'||!!onlineSession?.started;onlineCloseConnection();if(inGame)mainMenu();onlineOpenPanel(false);onlineStatus(d.reason||'Sala chiusa. Riprova con un pulsante Online.');
  }
 }
 function onlineLocalInput(){
@@ -345,7 +357,7 @@ function onlineQuit(){
  if($('pauseBtn')){$('pauseBtn').textContent='Ⅱ';$('pauseBtn').setAttribute('aria-label','Pausa');}
 }
 function onlineWire(){
- $('onlineClose').onclick=()=>{if(!onlineSession){$('onlineModal').hidden=true;}else{onlineQuit();}};
+ $('onlineClose').onclick=()=>onlineQuit();
  $('onlineCreate').onclick=()=>onlineConnect('create');
  $('onlineJoin').onclick=()=>onlineConnect('join');
  $('onlinePublic').onclick=()=>onlineConnect('find_public');
@@ -1499,8 +1511,8 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
 function wireMenu(){
  // 14.15: tolerate a cached pre-14.14 HTML shell; manual acceleration is no longer supported.
  const obsoleteAuto=$('auto');if(obsoleteAuto){const label=obsoleteAuto.closest('label');if(label)label.remove();else obsoleteAuto.remove();}
- document.documentElement.dataset.ttrJsBuild='0.13.6.149';
- const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.149 · 14.25-online-beta';
+ document.documentElement.dataset.ttrJsBuild='0.13.6.150';
+ const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.150 · 14.25a-online-auto';
  // A transformed menu creates a non-viewport containing block for fixed dialogs.
  // Move Options to document.body, so the overlay is genuinely viewport-sized on iPhone.
  const settingsDialog=$('retroSettings');if(settingsDialog&&settingsDialog.parentNode!==document.body)document.body.appendChild(settingsDialog);const configDialog=$('raceConfig');if(configDialog&&configDialog.parentNode!==document.body)document.body.appendChild(configDialog);const trackDialog=$('trackSelect');if(trackDialog&&trackDialog.parentNode!==document.body)document.body.appendChild(trackDialog);
@@ -1971,7 +1983,7 @@ window.TTRDebug={
  c.lastValidPosition={x:safe.x,y:safe.y,a:tangent(from),p:from,laps:c.lapsCompleted,flags:c.flags.slice()};
  c.auditP=from;c.auditTravel=350;c.auditCleanTime=0;c.x=pos.x;c.y=pos.y;c.p=from;c.lastP=from;c.a=tangent(to);c.speed=0;c.offtrack=false;c.respawnGrace=0;race.countdown=0;
  const before=c.shortcutRespawns||0;update(1/60);return {before,after:c.shortcutRespawns||0,phase:c.p,expectedPhase:from};
-},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.149',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
+},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.150',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
 })();
 
 
