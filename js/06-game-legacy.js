@@ -55,7 +55,7 @@ function perfRecordLap(m){
  const lapTime=+(race.time-m.lapStart).toFixed(3);m.lapTimes.push(lapTime);const detail={time:lapTime,ramps:m.ramps-(m.lapRampStart||0),respawns:m.respawns-(m.lapRecoveryStart||0)};for(const k of ['shortcutEntered','shortcutCompleted','shortcutFailed','towelJumps'])if(k in m){detail[k]=m[k]-(m['_lap_'+k]||0);m['_lap_'+k]=m[k];}(m.lapDetails??=[]).push(detail);m.lapRampStart=m.ramps;m.lapRecoveryStart=m.respawns;m.lapStart=race.time;
 }
 function perfPublicCar(m){const out=Object.fromEntries(Object.entries(m).filter(([k])=>!k.startsWith('_')));return {...out,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)};}
-function perfSnapshot(){if(race&&perfEnabled)for(const c of race.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m);}const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.143 · 14.22y",htmlBuild:document.querySelector('meta[name="ttr-build"]')?.content??null,quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(perfPublicCar),trackId:race?.trackId??perfContext.trackId,raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
+function perfSnapshot(){if(race&&perfEnabled)for(const c of race.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m);}const input=perfInputSamples.slice().sort((a,b)=>a-b);return {runtimeFault:race?.runtimeFault??null,build:"v0.13.6.145 · 14.23a",htmlBuild:document.querySelector('meta[name="ttr-build"]')?.content??null,quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(perfPublicCar),trackId:race?.trackId??perfContext.trackId,raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
 function perfAnomalies(snapshot){
  const {build,htmlBuild,trackId,raceMode,difficulty,wholeRace,inputLatency,recoveriesDropped}=snapshot;
  const events=snapshot.recoveries||[],counts={};for(const e of events)counts[e.reason]=(counts[e.reason]||0)+1;
@@ -934,7 +934,8 @@ function initRace(mode){
  const modeSettings=window.TTRRaceFlow.modeSettings(mode,cfg,selectedCar,onlineSession,mode==='career'?TTRCareerDifficulty():1);
  const {num,pr,aiFactor,auto}=modeSettings;
  lastRaceSettings={num,pr,aiFactor,auto};
- onlineFinishDeadline=0;race={mode,trackId:circuitId,trackIndex:isBath()?3:isDesk()?2:isBox()?1:0,cars:[],player:null,pickups:[],oils:[],effects:[],time:0,countdown:3.2,paused:false,auto,aiFactor,finished:false,pauseOverlay:false,collisionCount:0,lastImpactSound:-10,careerStats:{pickups:0,turbos:0,oils:0,claws:0},careerRecorded:false};
+ onlineFinishDeadline=0;race={mode,trackId:circuitId,trackIndex:isBath()?3:isDesk()?2:isBox()?1:0,cars:[],player:null,pickups:[],oils:[],effects:[],time:0,countdown:3,paused:false,auto,aiFactor,finished:false,pauseOverlay:false,collisionCount:0,lastImpactSound:-10,careerStats:{pickups:0,turbos:0,oils:0,claws:0},careerRecorded:false};
+ SND.setRaceContext(circuitId,mode);
  if(isBox()){BR.resetBalls(props);race.boxBalls=props.filter(o=>o.movable);}
  if(isDesk()&&!isBath()){DR.resetObjects(props);race.deskProps=props;}
  if(mode==='elimination')race.elim=window.TTRModeElimination.initialState(num,TTRModeConfigs.elimination.elimGoal,ELIM_RULES_TEST.defaultGoal);
@@ -1494,8 +1495,8 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
 function wireMenu(){
  // 14.15: tolerate a cached pre-14.14 HTML shell; manual acceleration is no longer supported.
  const obsoleteAuto=$('auto');if(obsoleteAuto){const label=obsoleteAuto.closest('label');if(label)label.remove();else obsoleteAuto.remove();}
- document.documentElement.dataset.ttrJsBuild='0.13.6.143';
- const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.143 · 14.22y';
+ document.documentElement.dataset.ttrJsBuild='0.13.6.145';
+ const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.145 · 14.23a';
  // A transformed menu creates a non-viewport containing block for fixed dialogs.
  // Move Options to document.body, so the overlay is genuinely viewport-sized on iPhone.
  const settingsDialog=$('retroSettings');if(settingsDialog&&settingsDialog.parentNode!==document.body)document.body.appendChild(settingsDialog);const configDialog=$('raceConfig');if(configDialog&&configDialog.parentNode!==document.body)document.body.appendChild(configDialog);const trackDialog=$('trackSelect');if(trackDialog&&trackDialog.parentNode!==document.body)document.body.appendChild(trackDialog);
@@ -1613,7 +1614,7 @@ function syncPauseAudioControls(){const st=SND.getSettings();
  for(const [pid,key] of [['pauseVolMaster','master'],['pauseVolMusic','music'],['pauseVolEngine','engine'],['pauseVolEffects','effects']]){
   const input=$(pid);if(input)input.value=Math.round(st[key]*100);
  }refreshAudioUI();}
-function togglePause(){if(!race||race.finished)return;race.paused=!race.paused;releaseAllControls();$('pauseOverlay').hidden=!race.paused;$('hint').classList.remove('show');lastHint=0;
+function togglePause(){if(!race||race.finished)return;if(race.runtimeFault){mainMenu();return;}race.paused=!race.paused;releaseAllControls();$('pauseOverlay').hidden=!race.paused;$('hint').classList.remove('show');lastHint=0;
  if(race.paused){$('pauseAudio').open=false;document.querySelector('.pause-card').classList.remove('audio-open');syncPauseAudioControls();SND.stopMusic();SND.sfx('select');}
  else SND.music('race');syncAudio();}
 let miniBase=window.TTRMinimapVisuals.createRaceMiniBase(points,shortcutSamples,WORLD_W,WORLD_H);
@@ -1685,10 +1686,12 @@ function render(){const qualityCap=qualityMode==='low'?1.25:qualityMode==='balan
    race.cars.filter(c=>!c.eliminated&&(!isBox()||BR.visualScale(c)>0)&&visibleProp(c)&&elevated(c)).map(visualCar).sort((a,b)=>a.y-b.y).forEach(c=>carSprite(g,c));
 
  for(const c of race.cars){if(!c.eliminated&&!(c.boxTransit>0)&&c.claw>0&&c.clawTarget)drawClawCable(g,visualCar(c),visualCar(c.clawTarget),clock);}
- let impactBudget=(ttrLowGraphics||qualityMode==='low')?5:12;race.effects.forEach(e=>{if(e.kind==='impactBurst'&&impactBudget--<=0)return;if(Math.abs(e.x-camX)<halfW+160&&Math.abs(e.y-camY)<halfH+160)renderEffect(g,e,clamp);});if(race.countdown>0){g.save();g.setTransform(dpr,0,0,dpr,0,0);g.textAlign='center';g.textBaseline='middle';g.lineWidth=7;g.strokeStyle='#142438';g.font=`950 ${Math.min(90,sw/5)}px system-ui`;const v=Math.ceil(race.countdown);g.strokeText(String(v),sw/2,sh/2);g.fillStyle='#ffe67f';g.fillText(String(v),sw/2,sh/2);g.restore();}}else gameObstacles(g);
+ let impactBudget=(ttrLowGraphics||qualityMode==='low')?5:12;race.effects.forEach(e=>{if(e.kind==='impactBurst'&&impactBudget--<=0)return;if(Math.abs(e.x-camX)<halfW+160&&Math.abs(e.y-camY)<halfH+160)renderEffect(g,e,clamp);});if(race.countdown>0){g.save();g.setTransform(dpr,0,0,dpr,0,0);g.textAlign='center';g.textBaseline='middle';g.lineWidth=7;g.strokeStyle='#142438';g.font=`950 ${Math.min(90,sw/5)}px system-ui`;const v=Math.min(3,Math.ceil(race.countdown));g.strokeText(String(v),sw/2,sh/2);g.fillStyle='#ffe67f';g.fillText(String(v),sw/2,sh/2);g.restore();}}else gameObstacles(g);
  if(clock>lastHint&&lastHint!==0){$('hint').classList.remove('show');lastHint=0;}
 }
 function frame(t){
+ try{
+  if(race?.runtimeFault){frameTime=t;return;}
   const raw=Math.max(0,(t-frameTime)/1000);frameTime=t;
   const dt=document.hidden?0:Math.min(.5,raw);renderDelta=dt||1/60;
   if(simRace!==race){if(simRace){perfRecoveries=simRace.recoveryHistory||[];perfRecoveryDropped=simRace.recoveryHistoryDropped||0;}simRace=race;resetSim();if(race){resetPerf();perfContext={trackId:race.trackId,mode:race.mode,difficulty:race.aiFactor,quality:qualityMode};perfLast=t;ttrFrameMean=1/60;ttrQualityTimer=0;ttrLowGraphics=false;perfQuality=1.65;}}
@@ -1723,7 +1726,10 @@ function frame(t){
      else if(!$('garageScreen').hidden)drawShowroom($('garageCanvas'),garagePreview,'garage');
    }
  }
- requestAnimationFrame(frame);
+ }catch(error){
+  console.error("TTR frame failure",error);
+  if(race){race.runtimeFault=String(error);race.paused=true;resetSim();releaseAllControls();SND.stopMusic();syncAudio();$("pauseOverlay").hidden=false;showHint("Errore di gara · Riavvia / Esci",999);}
+ }finally{requestAnimationFrame(frame);}
 }
 window.addEventListener('ttr:career-start',e=>{const v=(window.TTRVehicleRoster||[]).find(x=>x.id===e.detail?.carId);const pi=profiles.findIndex(p=>p.id===v?.id);if(!v||v.status!=='playable'||pi<0||pi!==e.detail.vehicleIndex)return;if(v.availability!=='initial'&&!window.TTRCareer?.isUnlocked(v.id))return;selectedCar=pi;try{localStorage.setItem('ttr_selected_car',String(selectedCar))}catch(_){}SND.unlock();stopMenuMusic();TTROpenTrackSelect('career');});
 window.addEventListener('ttr:career-close',()=>mainMenu());
@@ -1959,7 +1965,7 @@ window.TTRDebug={
  c.lastValidPosition={x:safe.x,y:safe.y,a:tangent(from),p:from,laps:c.lapsCompleted,flags:c.flags.slice()};
  c.auditP=from;c.auditTravel=350;c.auditCleanTime=0;c.x=pos.x;c.y=pos.y;c.p=from;c.lastP=from;c.a=tangent(to);c.speed=0;c.offtrack=false;c.respawnGrace=0;race.countdown=0;
  const before=c.shortcutRespawns||0;update(1/60);return {before,after:c.shortcutRespawns||0,phase:c.p,expectedPhase:from};
-},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.143',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
+},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.145',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
 })();
 
 

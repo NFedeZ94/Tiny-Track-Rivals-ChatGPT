@@ -23,14 +23,15 @@ function avoidOil(c,race,s,target,tangent,valid,obstacles=[],options={}){
  const state=c.aiOilSeen,delay=.28-.24*skill;
  if(race.time-state.time<delay)return normal;
  const others=race.cars||[],max=options.maxOffset??(52+skill*28);
- const clear=(q)=>{
+ const feasible=(q)=>{
    const e=end(q);
    if(!valid(q)||((straightEnd.x-e.x)*Math.cos(tangent)+(straightEnd.y-e.y)*Math.sin(tangent))>8)return false;
    for(const f of [.35,.65,.9])if(!valid({x:c.x+(q.x-c.x)*f,y:c.y+(q.y-c.y)*f}))return false;
    if(obstacles.some(o=>o.solid&&Math.min(seg(c,q,o),seg(q,e,o))<(o.r||20)+(c.width||36)*.5+5))return false;
    if(others.some(o=>o!==c&&!o.done&&!o.eliminated&&!o.boxTransit&&!(o.jump>0)&&!!o.onBridge===!!c.onBridge&&Math.min(seg(c,q,o),Math.hypot(o.x-q.x,o.y-q.y))<(c.width||36)*.5+(o.width||36)*.5+7))return false;
-   return hazards.every(o=>clearance(q,o,e)>=0);
+   return true;
  };
+ const clear=q=>feasible(q)&&hazards.every(o=>clearance(q,o,end(q))>=0);
  const away=((oil.x-target.x)*nx+(oil.y-target.y)*ny)>0?-1:1;
  const preferred=state.side||away;
  const offsets=[state.offset,24,36,48,60,72,80,max].filter((v,i,a)=>v>0&&v<=max&&a.indexOf(v)===i);
@@ -41,6 +42,11 @@ function avoidOil(c,race,s,target,tangent,valid,obstacles=[],options={}){
  if(!state.slow){state.slow=true;c.aiOilCautions=(c.aiOilCautions||0)+1;}
  // When all safe paths are blocked, reduce speed, never drive off the bridge.
  // Oil still applies its normal skid if contact is unavoidable.
+ if(skill>=.999&&max>=40){
+  const base=Math.min(...hazards.map(o=>clearance(target,o,straightEnd)));let best=target,bestClear=base;
+  for(const side of [preferred,-preferred])for(const offset of [24,36,48,60,72,max]){if(offset>max)continue;const q={x:target.x+nx*side*offset,y:target.y+ny*side*offset};if(!feasible(q))continue;const margin=Math.min(...hazards.map(o=>clearance(q,o,end(q))));if(margin>bestClear+4){best=q;bestClear=margin;}}
+  if(best!==target)return {target:best,slow:true};
+ }
  return {target,slow:true};
 }
 window.TTRRaceDrivers=Object.freeze({avoidOil,create(deps){
@@ -130,7 +136,7 @@ if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInp
      if(front&&front.speed<c.speed+16&&s.pass>0&&!obstacle){
        if(!(c.aiPassUntil>race.time)&&!(c.aiPassCooldown>race.time)){const side=(front.x-target.x)*nx+(front.y-target.y)*ny>0?-1:1;c.aiPassSide=side;c.aiPassUntil=race.time+1.15;c.aiPassCooldown=race.time+2.1;c.aiPassAttempts=(c.aiPassAttempts||0)+1;}
      }
-     if(c.aiPassUntil>race.time&&!obstacle){const q={x:target.x+nx*c.aiPassSide*s.pass,y:target.y+ny*c.aiPassSide*s.pass};if(K.nearestTrackWindow(q,points,phase,.035).distance<K.LANE_HALF-(c.width||36)*.5-8&&!props.some(o=>o.solid&&distance(q,o)<(o.r||25)+30))offset=c.aiPassSide*s.pass;else c.aiPassUntil=0;}
+     if(c.aiPassUntil>race.time&&!obstacle){const q={x:target.x+nx*c.aiPassSide*s.pass,y:target.y+ny*c.aiPassSide*s.pass};if(K.nearestTrackWindow(q,points,phase,.035).distance<K.LANE_HALF-(c.width||36)*.5-8&&!props.some(o=>o.solid&&K.distance(q,o)<(o.r||25)+30))offset=c.aiPassSide*s.pass;else c.aiPassUntil=0;}
      else if(front&&frontGap<58)blocked=true;
      target={x:target.x+nx*offset,y:target.y+ny*offset};
    }

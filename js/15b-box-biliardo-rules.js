@@ -123,7 +123,7 @@
   return true;
  }
  function cpuTarget(c,race,s,normal){const p=c.routeStableP??c.p,visit=(race.elim?.round||0)+':'+c.lapsCompleted;
-  if(p>B.entry-.065&&p<B.entry-.012&&c.boxDecision!==visit){c.boxDecision=visit;const chance=s.pace>=.999?({aggressive:.76,technical:.55,strategic:.65}[c.aiPersonality]??.65):s.shortcut;const clear=!race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&o.boxTryPocket&&Math.hypot(o.x-c.x,o.y-c.y)<100);c.boxTryPocket=Math.random()<chance&&clear&&(c.boxStreak||0)<2;c.boxStreak=c.boxTryPocket?(c.boxStreak||0)+1:0;c.shortcutDecisionCount=(c.shortcutDecisionCount||0)+1;if(c.boxTryPocket)c.shortcutAttemptCount=(c.shortcutAttemptCount||0)+1;}
+  if(p>B.entry-.065&&p<B.entry-.012&&c.boxDecision!==visit){c.boxDecision=visit;const hard=s.pace>=.999,chance=hard?({aggressive:.94,technical:.86,strategic:.92}[c.aiPersonality]??.90):s.shortcut;const queued=race.cars.filter(o=>o!==c&&!o.done&&!o.eliminated&&o.boxTransit>0).length;const clear=hard?queued<3:!race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&o.boxTryPocket&&Math.hypot(o.x-c.x,o.y-c.y)<100);c.boxTryPocket=Math.random()<chance&&clear&&(hard||(c.boxStreak||0)<2);c.boxStreak=c.boxTryPocket?(c.boxStreak||0)+1:0;c.shortcutDecisionCount=(c.shortcutDecisionCount||0)+1;if(c.boxTryPocket)c.shortcutAttemptCount=(c.shortcutAttemptCount||0)+1;}
   if(p<B.entry-.07||p>B.entry+.025||c.respawnGrace>0)c.boxTryPocket=false;
   return c.boxTryPocket&&p>B.entry-.045&&p<B.entry+.018?B.entryPocket:normal;
  }
@@ -141,10 +141,12 @@
  function drive(c,race,s){const p=c.routeStableP??c.p,near=K.nearestTrackWindow(c,B.points,p,.022),hard=s.pace>=.999;
    if(hard&&!c.aiPersonality)c.aiPersonality=['aggressive','technical','strategic'][((c.id-1)%3+3)%3];
    const speed=Math.abs(c.speed),look=(hard?62:52)+Math.min(40,speed*.14),lookP=look/B.length;
-   const normal=guidance(p+lookP);let target=cpuTarget(c,race,s,normal),branch=target!==normal;
+   const aim=p+lookP,normal=guidance(aim),railZone=hard&&p>.425&&p<.49;
+   if(hard&&aim>.435&&aim<.495){const w=K.clamp((aim-.435)/.012,0,1)*K.clamp((.495-aim)/.013,0,1);normal.y+=Math.max(0,270-normal.y)*w;}
+   let target=cpuTarget(c,race,s,normal),branch=target!==normal;
    if(!branch){const a=B.tangent(p+lookP),nx=-Math.sin(a),ny=Math.cos(a);for(const o of race.boxBalls||[]){if(K.distance(c,o)>150||K.distance(target,o)>o.r+30)continue;const side=(o.x-target.x)*nx+(o.y-target.y)*ny>0?-1:1;const q={x:target.x+nx*side*46,y:target.y+ny*side*46};if(K.nearestTrackWindow(q,B.points,p+lookP,.02).distance<B.laneHalf-28)target=q;break;}}
    let leader=null,gap=Infinity;
-   if(!branch&&s.pass>0&&near.distance<85&&!(c.aiRecoveryUntil>race.time)){
+   if(!branch&&!railZone&&s.pass>0&&near.distance<85&&!(c.aiRecoveryUntil>race.time)){
      const a=B.tangent(p),nx=-Math.sin(a),ny=Math.cos(a),fx=Math.cos(a),fy=Math.sin(a);
      for(const o of race.cars){if(o===c||o.done||o.eliminated||o.boxTransit>0||o.jump>0)continue;const dx=o.x-c.x,dy=o.y-c.y,f=dx*fx+dy*fy,l=dx*nx+dy*ny;if(f>12&&f<135&&Math.abs(l)<49&&f<gap){leader=o;gap=f;}}
      const laneSafe=side=>{const q={x:normal.x+nx*side*s.pass*.75,y:normal.y+ny*side*s.pass*.75};const n=K.nearestTrackWindow(q,B.points,p+lookP,.018);return n.distance<75&&q.x>220&&q.x<2380&&q.y>185&&q.y<1415&&!guides.some(o=>Math.hypot(q.x-o.x,q.y-o.y)<o.r+32)&&!B.pockets.some(o=>Math.hypot(q.x-o.x,q.y-o.y)<o.r+35);};
@@ -155,21 +157,21 @@
      }
      if(c.aiPassUntil>race.time&&laneSafe(c.aiPassSide)){target={x:normal.x+nx*c.aiPassSide*s.pass*.75,y:normal.y+ny*c.aiPassSide*s.pass*.75};}else if(c.aiPassUntil>race.time)c.aiPassUntil=0;
    }else c.aiPassUntil=0;
-   if(branch){const bearing=K.angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a);if(Math.abs(bearing)>1.12||p>B.entry+.006||c.aiRecoveryUntil>race.time){c.boxTryPocket=false;target=normal;branch=false;}}
-   if(c.aiRecoveryUntil>race.time||near.distance>120){target=guidance(p+.007);branch=false;c.boxTryPocket=false;}
-   const oil=(!branch&&near.distance<85&&!(c.aiRecoveryUntil>race.time))?window.TTRRaceDrivers.avoidOil(c,race,s,target,B.tangent(p+lookP),q=>q.x>220&&q.x<2380&&q.y>185&&q.y<1415&&K.nearestTrackWindow(q,B.points,p+lookP,.033).distance<B.laneHalf-(c.width||36)*.5-5&&!B.pockets.some(o=>Math.hypot(q.x-o.x,q.y-o.y)<o.r+35),[...guides,...(race.boxBalls||[])]):{target,slow:false};
+   if(branch){const bearing=K.angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a);if(Math.abs(bearing)>(hard?1.20:1.12)||p>B.entry+(hard?.015:.006)||c.aiRecoveryUntil>race.time){c.boxTryPocket=false;target=normal;branch=false;}}
+   if(c.aiRecoveryUntil>race.time||near.distance>120){target=guidance(p+.007);if(railZone)target.y=Math.max(target.y,270);branch=false;c.boxTryPocket=false;}
+   const oil=(!branch&&near.distance<85&&!(c.aiRecoveryUntil>race.time))?window.TTRRaceDrivers.avoidOil(c,race,s,target,B.tangent(p+lookP),q=>q.x>220&&q.x<2380&&q.y>(railZone?230:185)&&q.y<1415&&K.nearestTrackWindow(q,B.points,p+lookP,.033).distance<B.laneHalf-(c.width||36)*.5-5&&!B.pockets.some(o=>Math.hypot(q.x-o.x,q.y-o.y)<o.r+35),[...guides,...(race.boxBalls||[])]):{target,slow:false};
    target=oil.target;
    let d=K.angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a);const steer=K.clamp(d*(hard?3.7:3.4),-1,1);
    if(c.reverseRecovery>0)return {steer:-steer||1,gas:false,brake:true};
    const bend=Math.max(Math.abs(K.angleDiff(B.tangent(p+.012),B.tangent(p))),Math.abs(K.angleDiff(B.tangent(p+.023),B.tangent(p+.008))));
-   const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);let desired=cap*(1-K.clamp((bend-(hard?.25:.16))*(hard?.35:.65),0,hard?.48:.60));
-   if(Math.abs(d)>.34)desired=Math.min(desired,cap*(1-K.clamp((Math.abs(d)-.28)*.68,0,.66)));
-   if(branch)desired=Math.min(desired,Math.max(105,cap*.74));
+   const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);let desired=cap*(1-K.clamp((bend-(hard?.30:.16))*(hard?.27:.65),0,hard?.39:.60));
+   if(Math.abs(d)>(hard?.45:.34))desired=Math.min(desired,cap*(1-K.clamp((Math.abs(d)-(hard?.36:.28))*(hard?.54:.68),0,.66)));
+   if(branch)desired=Math.min(desired,Math.max(105,cap*(hard?.88:.74)));
    if(leader&&gap<60&&!(c.aiPassUntil>race.time))desired=Math.min(desired,Math.max(80,leader.speed));
    if(near.distance>95)desired=Math.min(desired,110);
-   if(oil.slow)desired=Math.min(desired,cap*.68);
+   if(oil.slow)desired=Math.min(desired,cap*(hard?.80:.68));
    else if(c.aiOilSeen?.side)desired=Math.min(desired,cap*(hard?.94:.86));
-   const brake=c.speed>desired+(hard?16:12)&&c.speed>75;return {steer,gas:!brake&&(desired>=cap*.96||c.speed<desired+(hard?7:3)),brake};
+   const brake=c.speed>desired+(hard?16:12)&&c.speed>75;return {steer,gas:!brake&&(desired>=cap*(hard?.93:.96)||c.speed<desired+(hard?9:3)),brake};
  }
  function cameraPose(c){
    if(!(c?.boxTransit>0))return null;
