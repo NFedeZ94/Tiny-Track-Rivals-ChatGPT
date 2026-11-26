@@ -22,9 +22,9 @@ function loadAsset(name,decode=false){return new Promise(resolve=>{
  img.src=(inlineAssets[name]||'assets/'+name+((name.includes('_concept_')||name.includes('_menu_clean'))?'.jpg':'.png'))+'?v=0.13.6.120';
 });}
 const ready=Promise.all(names.filter(name=>!atlasNames.includes(name)).map(name=>loadAsset(name)));
-// Decode sequentially before enabling the showroom, avoiding selection-time upgrades.
+// Bounded parallel pre-decode: the same complete atlases, no lower-resolution frames.
 let garageLoaded=false;
-const garageReady=(async()=>{await ready;const outcomes=[];for(const name of atlasNames)outcomes.push(await loadAsset(name,true));garageLoaded=outcomes.every(Boolean);return garageLoaded;})();
+const garageReady=(async()=>{await ready;const outcomes=new Array(atlasNames.length);let next=0;const worker=async()=>{while(next<atlasNames.length){const i=next++;outcomes[i]=await loadAsset(atlasNames[i],true);}};await Promise.all([worker(),worker()]);garageLoaded=outcomes.every(Boolean);return garageLoaded;})();
 function ensureTurntable(id){const key=id+'_turntable';return status[key]==='ready'?images[key]:null;}
 function isGarageReady(){return garageLoaded;}
 // v0.13.6.34: visual-only race scale, measured from the opaque footprint of each top-down sprite.
