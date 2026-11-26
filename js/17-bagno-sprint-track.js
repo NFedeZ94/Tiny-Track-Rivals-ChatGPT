@@ -1,38 +1,46 @@
-/* Bagno Sprint 04 — lavabo concept, arc-length sampled geometry. */
-(()=>{'use strict';const K=window.TTRCore,S=1,W=3600,H=2500,laneHalf=126;
- const map=(x,y)=>({x:x*S,y:y*S});
- const raw=[[740,390],[1060,390],[1350,405],[1630,390],[1920,405],[2170,400],[2320,555],[2290,770],[2290,1010],[2290,1180],[2520,1120],[2760,910],[2990,820],[3200,930],[3270,1170],[3150,1430],[2820,1600],[2600,1550],[2330,1530],[2300,1770],[2110,1950],[1850,1990],[1620,1790],[1530,1470],[1370,1480],[1110,1590],[860,1690],[740,1720],[495,1690],[345,1490],[330,1170],[330,860],[355,620],[510,440]];
- const anchors=raw.map(([x,y])=>{const q=map(x,y);return[q.x,q.y]});
+/* Bagno Sprint R4: mandatory toothbrush, technical drain cut. */
+(()=>{'use strict';const K=window.TTRCore,W=3600,H=2500,laneHalf=126;
+ const anchors=[[720,390],[1160,390],[1630,390],[2040,405],[2280,540],[2470,597],[2710,670],[2940,740],[3130,870],[3220,1120],[3110,1340],[2850,1430],[2600,1420],[2420,1450],[2300,1800],[2110,1990],[1840,2070],[1530,1970],[1380,1660],[1200,1510],[960,1450],[740,1400],[470,1270],[330,1030],[330,720],[460,480]];
  const samples=[];for(let i=0;i<anchors.length;i++){const [a,b,c,d]=[-1,0,1,2].map(j=>anchors[K.mod(i+j,anchors.length)]);for(let j=0;j<32;j++){const t=j/32,u=t*t,v=u*t;const f=k=>.5*(2*b[k]+(-a[k]+c[k])*t+(2*a[k]-5*b[k]+4*c[k]-d[k])*u+(-a[k]+3*b[k]-3*c[k]+d[k])*v);samples.push({x:f(0),y:f(1)});}}
  const lengths=[0];for(let i=0;i<samples.length;i++)lengths.push(lengths[i]+K.distance(samples[i],samples[(i+1)%samples.length]));const length=lengths.at(-1);
  function point(p){const u=K.mod(p,1)*length;let a=0,b=samples.length;while(b-a>1){const m=(a+b)>>1;if(lengths[m]<=u)a=m;else b=m;}const t=(u-lengths[a])/(lengths[a+1]-lengths[a]),q=samples[a],r=samples[(a+1)%samples.length];return{x:q.x+(r.x-q.x)*t,y:q.y+(r.y-q.y)*t};}
  function tangent(p){const a=point(p-.0006),b=point(p+.0006);return Math.atan2(b.y-a.y,b.x-a.x);}
  const points=Array.from({length:640},(_,i)=>point(i/640));
- function phaseAt(x,y){return K.nearestTrack(map(x,y),points).p;}
- const pickupPhases=[[1290,405],[2990,820],[1850,1990],[330,1170]].map(q=>phaseAt(...q));
- const entry=phaseAt(2600,1550),exit=phaseAt(1370,1480);
- // Wet interior bypass, north of the ordinary drain ring.
- const P=point(entry),Q=point(exit),C1=map(2210,790),C2=map(1710,1050);
- const shortcutPoint=t=>{t=K.clamp(t,0,1);const u=1-t;return{x:u*u*u*P.x+3*u*u*t*C1.x+3*u*t*t*C2.x+t*t*t*Q.x,y:u*u*u*P.y+3*u*u*t*C1.y+3*u*t*t*C2.y+t*t*t*Q.y};};
- const shortcutSamples=Array.from({length:81},(_,i)=>shortcutPoint(i/80));
- const shortcutLength=shortcutSamples.slice(1).reduce((n,q,i)=>n+K.distance(q,shortcutSamples[i]),0);
- const shortcutTangent=t=>{const a=shortcutPoint(t-.001),b=shortcutPoint(t+.001);return Math.atan2(b.y-a.y,b.x-a.x);};
- function shortcutNearest(c){let b={distance:Infinity,t:0};for(let i=0;i<80;i++){const a=shortcutSamples[i],q=shortcutSamples[i+1],dx=q.x-a.x,dy=q.y-a.y,u=K.clamp(((c.x-a.x)*dx+(c.y-a.y)*dy)/(dx*dx+dy*dy),0,1),x=a.x+u*dx,y=a.y+u*dy,d=Math.hypot(c.x-x,c.y-y);if(d<b.distance)b={x,y,distance:d,t:(i+u)/80,p:entry+(exit-entry)*(i+u)/80,shortcut:true};}return b;}
- const props=[];
- const offset=(x,y,lateral)=>{const p=phaseAt(x,y),q=point(p),a=tangent(p);return {x:q.x-Math.sin(a)*lateral,y:q.y+Math.cos(a)*lateral,p,a};};
- const water={...offset(1100,390,0),rx:148,ry:104};
- const landingWater={...offset(650,1710,0),rx:76,ry:100};
- const basinEntry=offset(2820,1600,0),drain=map(1920,1570);
- const soaps=[{...offset(1570,390,76),r:39},{...offset(1860,400,-76),r:39},{...offset(2130,390,76),r:39}];
- const cotton=[{...offset(3200,930,-65),r:48},{...offset(3270,1170,65),r:50},{...offset(3150,1430,-71),r:48}];
- const towel=offset(860,1690,0), toothbrush=offset(2323,1182,0);
- const deckStart=toothbrush.p-325/length,deckEnd=toothbrush.p+225/length;
- const deckPoints=Array.from({length:41},(_,i)=>point(deckStart+(deckEnd-deckStart)*i/40));
- // The normal lap passes over this bridge. The later shortcut crosses its footprint below.
- function upperDeck(c){if(c.onBridge||c.deskBridge)return false;const p=c.routeStableP??c.p??K.nearestTrack(c,points).p;return p>=deckStart-148/length&&p<=deckEnd+148/length&&K.distance(c,point(p))<=laneHalf+12;}
- const sections=[['Sink Start',0],['Splash Zone',water.p],['Soap Slalom',soaps[0].p],['Toothbrush Bridge',toothbrush.p],['Cotton Chaos',cotton[0].p],['Basin Dive',basinEntry.p],['Drain Ring',phaseAt(1850,1990)],['Towel Launch',towel.p],['Mirror Run',phaseAt(330,860)]];
- function inEllipse(c,z){const dx=c.x-z.x,dy=c.y-z.y,co=Math.cos(z.a),si=Math.sin(z.a);return ((dx*co+dy*si)/z.rx)**2+((-dx*si+dy*co)/z.ry)**2<=1;}
- function wet(c){return inEllipse(c,water)||inEllipse(c,landingWater);}
- const inCotton=c=>cotton.some(o=>K.distance(c,o)<o.r+20);
- window.TTRBathTrack=Object.freeze({id:'bagno-sprint',world:{w:W,h:H},laneHalf,length,anchors,points,point,tangent,pickupPhases,props,entry,exit,basinEntry,drain,shortcutPoint,shortcutSamples,shortcutLength,shortcutTangent,shortcutNearest,map,water,landingWater,soaps,cotton,towel,toothbrush,sections,deckStart,deckEnd,deckPoints,upperDeck,wet,inCotton});
+ const phaseAt=(x,y)=>K.nearestTrack({x,y},points).p;
+ const entry=phaseAt(2420,1450),exit=phaseAt(1380,1660),P=point(entry),Q=point(exit);
+ // A separate curved, dry ceramic lane close to standing water. Arc-length sampling.
+ const branchAnchors=[P,{x:2200,y:1300},{x:1970,y:1220},{x:1730,y:1230},{x:1500,y:1410},Q];
+ const bs=[];for(let i=0;i<branchAnchors.length-1;i++){const [a,b,c,d]=[-1,0,1,2].map(j=>branchAnchors[K.clamp(i+j,0,branchAnchors.length-1)]);for(let j=0;j<32;j++){const t=j/32,u=t*t,v=u*t,f=k=>.5*(2*b[k]+(-a[k]+c[k])*t+(2*a[k]-5*b[k]+4*c[k]-d[k])*u+(-a[k]+3*b[k]-3*c[k]+d[k])*v);bs.push({x:f('x'),y:f('y')});}}bs.push(Q);
+ const bl=[0];for(let i=1;i<bs.length;i++)bl.push(bl[i-1]+K.distance(bs[i-1],bs[i]));const shortcutLength=bl.at(-1);
+ function shortcutPoint(t){const u=K.clamp(t,0,1)*shortcutLength;let i=0,j=bl.length-1;while(j-i>1){const m=(i+j)>>1;if(bl[m]<=u)i=m;else j=m;}const v=(u-bl[i])/(bl[j]-bl[i]||1);return{x:bs[i].x+(bs[j].x-bs[i].x)*v,y:bs[i].y+(bs[j].y-bs[i].y)*v};}
+ const shortcutSamples=Array.from({length:129},(_,i)=>shortcutPoint(i/128));
+ function shortcutTangent(t=0){const a=shortcutPoint(t-.003),b=shortcutPoint(t+.003);return Math.atan2(b.y-a.y,b.x-a.x);}
+ function shortcutNearest(c){let best={distance:Infinity};for(let i=0;i<shortcutSamples.length-1;i++){const a=shortcutSamples[i],b=shortcutSamples[i+1],dx=b.x-a.x,dy=b.y-a.y,u=K.clamp(((c.x-a.x)*dx+(c.y-a.y)*dy)/(dx*dx+dy*dy||1),0,1),q={x:a.x+dx*u,y:a.y+dy*u},distance=K.distance(c,q),t=(i+u)/128;if(distance<best.distance)best={...q,t,p:entry+(exit-entry)*t,distance,shortcut:true};}return best;}
+ const pool={x:1840,y:1545,rx:255,ry:235};
+ const brush={start:phaseAt(2280,540),end:phaseAt(2940,740),half:85};brush.a=tangent((brush.start+brush.end)/2);brush.P=point(brush.start);brush.Q=point(brush.end);brush.length=K.distance(brush.P,brush.Q);
+ const onBrushPhase=p=>p>brush.start&&p<brush.end;
+ // Widths of the actual toothbrush body, including tapered neck. Landings are wider.
+ const brushProfile=[[0,126],[.075,126],[.13,76],[.22,84],[.39,80],[.55,69],[.66,49],[.74,48],[.80,68],[.90,72],[.94,76],[.98,126],[1,126]];
+ function brushHalfAt(u){u=K.clamp(u,0,1);for(let i=1;i<brushProfile.length;i++){const [a,x]=brushProfile[i-1],[b,y]=brushProfile[i];if(u<=b)return x+(y-x)*(u-a)/(b-a);}return 126;}
+ function brushContact(c){const dx=brush.Q.x-brush.P.x,dy=brush.Q.y-brush.P.y,l=brush.length;const u=((c.x-brush.P.x)*dx+(c.y-brush.P.y)*dy)/(l*l);return {u,side:((c.y-brush.P.y)*dx-(c.x-brush.P.x)*dy)/l,half:brushHalfAt(u)};}
+ // A small arcade grade: negative downhill, positive uphill. No vertical teleport.
+ function gradeAt(p){const bump=(a,b)=>p>=a&&p<=b?Math.sin(Math.PI*(p-a)/(b-a)):0;return -.11*bump(entry-.028,entry+.012)+.13*bump(exit+.01,exit+.049);}
+ function wetGrip(c){return c.jump>0?1:c.onBridge?.62:damp(c)?.82:1;}
+
+ const props=[],objects=[];
+ function offset(p,side){const q=point(p),a=tangent(p);return {...q,x:q.x-Math.sin(a)*side,y:q.y+Math.cos(a)*side,a,p};}
+ function solid(type,x,y,r,extra={}){const o={type,x,y,r,solid:true,...extra};props.push(o);objects.push(o);return o;}
+ const soaps=[solid('bath-soap',1440,480,43),solid('bath-soap',2150,505,43)];
+ const bottles=[solid('bath-bottle',680,800,66,{h:195,color:'#f4a58f',tall:true}),solid('bath-bottle',2800,990,64,{h:210,color:'#58b9c4',tall:true}),solid('bath-bottle',3410,1010,54,{h:170,color:'#bf92d4',tall:true}),solid('bath-bottle',660,1690,61,{h:180,color:'#91c4a1',tall:true})];
+ const sponge={...offset(phaseAt(1100,1490),-83),rx:123,ry:68};
+ const towel={...offset(phaseAt(740,1400),-12),rx:116,ry:82};
+ const puddles=[{...offset(phaseAt(1600,390),-58),rx:112,ry:45}];
+ const cotton=[{...offset(phaseAt(3220,1120),-64),rx:57,ry:42},{...offset(phaseAt(3110,1340),62),rx:63,ry:46},{...offset(phaseAt(2850,1430),-67),rx:58,ry:40}];
+ const drain={x:1840,y:1545};
+ function inEllipse(c,z){const dx=c.x-z.x,dy=c.y-z.y,a=z.a||0;return ((dx*Math.cos(a)+dy*Math.sin(a))/z.rx)**2+((-dx*Math.sin(a)+dy*Math.cos(a))/z.ry)**2<=1;}
+ function inSoft(c,z,r=24){const dx=c.x-z.x,dy=c.y-z.y,a=z.a||0,x=Math.abs(dx*Math.cos(a)+dy*Math.sin(a)),y=Math.abs(-dx*Math.sin(a)+dy*Math.cos(a));return Math.hypot(Math.max(0,x-(z.rx-r)),Math.max(0,y-(z.ry-r)))<=r;}
+ const wet=c=>inEllipse(c,pool);const damp=c=>puddles.some(z=>inEllipse(c,z));
+ const pickupPhases=[.09,.23,.69,.91];
+ const sections=[['Sink Start',0],['Splash Zone',phaseAt(1600,390)],['Soap Slalom',phaseAt(2130,470)],['Toothbrush Bridge',brush.start],['Cotton Chaos',phaseAt(3220,1120)],['Basin Dive',entry],['Drain Ring',phaseAt(1840,2070)],['Towel Launch',towel.p],['Mirror Run',phaseAt(330,720)]];
+ window.TTRBathTrack=Object.freeze({id:'bagno-sprint',world:{w:W,h:H},laneHalf,length,anchors,points,point,tangent,pickupPhases,props,objects,soaps,bottles,pool,puddles,sponge,towel,drain,entry,exit,shortcutPoint,shortcutSamples,shortcutLength,shortcutTangent,shortcutNearest,bridgeHalf:69,gate:.10,merge:1,wet,damp,cotton,brush,onBrushPhase,brushHalfAt,brushContact,brushProfile,gradeAt,wetGrip,inEllipse,inSoft,sections,upperDeck:c=>!!c.onBridge});
 })();

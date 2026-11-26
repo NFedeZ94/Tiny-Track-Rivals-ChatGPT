@@ -17,7 +17,9 @@
  // Place checkpoint phases outside the pocket branch; all remain mandatory.
  const checkpoints=[.17,.34,.78,.88];
  const pickupPhases=[.10,.39,.76,.92];
- const balls=[{x:1040,y:810,r:40,n:8,color:'#18222b'},{x:1195,y:755,r:40,n:3,color:'#db3c34'},{x:1120,y:885,r:40,n:1,color:'#e9bd36'},{x:1325,y:650,r:40,n:6,color:'#28a75b'},{x:1495,y:825,r:40,n:2,color:'#286dc9'},{x:1540,y:725,r:40,n:5,color:'#ed842e'},{x:960,y:1050,r:39,n:0,color:'#f5eedb'},{x:500,y:460,r:40,n:4,color:'#915dc5'},{x:2145,y:560,r:40,n:7,color:'#943b36'}];
+ // Shared visual and physical radius for every ball, fixed or mobile.
+ const BALL_RADIUS=40;
+ const balls=[{x:1040,y:810,r:BALL_RADIUS,n:8,color:'#18222b'},{x:1195,y:755,r:BALL_RADIUS,n:3,color:'#db3c34'},{x:1120,y:885,r:BALL_RADIUS,n:1,color:'#e9bd36'},{x:1325,y:650,r:BALL_RADIUS,n:6,color:'#28a75b'},{x:1495,y:825,r:BALL_RADIUS,n:2,color:'#286dc9'},{x:1540,y:725,r:BALL_RADIUS,n:5,color:'#ed842e'},{x:960,y:1050,r:BALL_RADIUS,n:0,color:'#f5eedb'},{x:500,y:460,r:BALL_RADIUS,n:4,color:'#915dc5'},{x:2145,y:560,r:BALL_RADIUS,n:7,color:'#943b36'}];
 // Physical props share geometry with the renderer. The rack has an open centre.
  const cues=[{x:1010,y:570,a:-.23,len:660,w:32,jump:false},{x:1570,y:1080,a:.98,len:580,w:34,jump:true}];
  const rack={x:1110,y:1010,a:.18,vertices:[[-164,88],[164,88],[0,-196]],w:23};
@@ -43,7 +45,7 @@
  }
  function pocketEntry(c,pocket,old){const dx=pocket.x-old.x,dy=pocket.y-old.y;return pocket.role==='entry'&&c.p>=entry-.045&&c.p<=entry+.018&&c.speed>50&&Math.cos(c.a)*dx+Math.sin(c.a)*dy>0;}
  function canFinish(c,prev,next){return prev>.95&&next<.05&&c.flags.every(Boolean)&&c.speed>12;}
- for(const [p,side,n,color] of [[.185,-1,9,'#e3be40'],[.355,1,10,'#247bc8'],[.82,-1,11,'#c82d3c']]){const q=point(p),a=tangent(p);balls.push({x:q.x-Math.sin(a)*side*112+(n===11?-35:0),y:q.y+Math.cos(a)*side*112+(n===11?45:0),r:35,n,color});}
+ for(const [p,side,n,color] of [[.185,-1,9,'#e3be40'],[.355,1,10,'#247bc8'],[.82,-1,11,'#c82d3c']]){const q=point(p),a=tangent(p);balls.push({x:q.x-Math.sin(a)*side*112+(n===11?-35:0),y:q.y+Math.cos(a)*side*112+(n===11?45:0),r:BALL_RADIUS,n,color});}
  const api={id:'box-di-biliardo',name:'Box di Biliardo',index:2,world:{w:W,h:H},laneHalf:half,anchors,points,length,point,tangent,nearest,gap,mod,clamp,pockets,entry,exit,outlet,transit,checkpoints,pickupPhases,balls,entryPocket,exitPocket,cues,rack,chalks,propWorld:world,propContact,pocketEntry,canFinish};
  root.TTRBoxTrack=api;if(typeof module==='object'&&module.exports)module.exports=api;
 })(typeof globalThis!=='undefined'?globalThis:this);

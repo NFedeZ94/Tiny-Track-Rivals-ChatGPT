@@ -114,7 +114,10 @@
     if(log.length>40)log.shift();c.routeTraceAt=race.time;
   }
   c.routeDecision={kind:decision,localDistance:+near.distance.toFixed(2),acceptedDistance:+d.toFixed(2),globalPhase:global?.p??null,globalDistance:global?.distance??null,credit,elapsed:c.boxOutside};
-  if(c.boxOutside>1.65&&d>205&&!(c.respawnGrace>0)){c.routeDecision.kind='box-route-penalty';recover(c,'box-route-cut');return false;}
+  // At the upper-right hairpin, a clearly unreachable remote arm is not a legal rejoin.
+  // Penalize before several more seconds of driving on that arm; ordinary wide bends keep their grace.
+  const remoteTop=decision==='box-rejoin-pending'&&global&&c.routeStableP>=.38&&c.routeStableP<=.435&&global.p>=.46&&global.p<=.55&&global.distance<=B.laneHalf&&d>205&&signed(c.routeStableP,global.p)*B.length>credit+12;
+  if((c.boxOutside>1.65&&d>205||remoteTop&&c.boxOutside>.65)&&!(c.respawnGrace>0)){c.routeDecision.kind=remoteTop?'box-remote-arm-penalty':'box-route-penalty';recover(c,'box-route-cut');return false;}
   c.routeResolvedNear={...accepted,p:c.routeStableP,shortcut:false};
   if(!c.offtrack&&d<88&&!(c.respawnGrace>0)&&c.speed>=0&&Math.cos(K.angleDiff(c.a,B.tangent(c.routeStableP)))>.15){const p=c.routeStableP,q=B.point(p);c.lastCheckpoint=p;c.lastValidPosition={...q,p,a:B.tangent(p),laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};}
   return true;

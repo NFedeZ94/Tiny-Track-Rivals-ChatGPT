@@ -53,8 +53,26 @@ function perfRecordLap(m){
  const lapTime=+(race.time-m.lapStart).toFixed(3);m.lapTimes.push(lapTime);(m.lapDetails??=[]).push({time:lapTime,ramps:m.ramps-(m.lapRampStart||0),respawns:m.respawns-(m.lapRecoveryStart||0)});m.lapRampStart=m.ramps;m.lapRecoveryStart=m.respawns;m.lapStart=race.time;
 }
 function perfPublicCar(m){const out=Object.fromEntries(Object.entries(m).filter(([k])=>!k.startsWith('_')));return {...out,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)};}
-function perfSnapshot(){if(race&&perfEnabled)for(const c of race.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m);}const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.126 · 14.22d",quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(perfPublicCar),trackId:race?.trackId??perfContext.trackId,raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
-window.TTRPerformance={snapshot:perfSnapshot};
+function perfSnapshot(){if(race&&perfEnabled)for(const c of race.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m);}const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.134 · 14.22l",htmlBuild:document.querySelector('meta[name="ttr-build"]')?.content??null,quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(perfPublicCar),trackId:race?.trackId??perfContext.trackId,raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
+function perfAnomalies(snapshot){
+ const {build,htmlBuild,trackId,raceMode,difficulty,wholeRace,inputLatency,recoveriesDropped}=snapshot;
+ const events=snapshot.recoveries||[],counts={};for(const e of events)counts[e.reason]=(counts[e.reason]||0)+1;
+ // Every recovery is represented; detailed trajectories are retained in the full JSON file.
+ return {build,htmlBuild,trackId,raceMode,difficulty,wholeRace,inputLatency,recoveriesDropped,counts,
+  cars:(snapshot.cars||[]).map(({id,model,respawns,lastPenalty,lapTimes})=>({id,model,respawns,lastPenalty,lapTimes})),
+  columns:['car','reason','time','lap','round','x','y','phase','stablePhase','lastNear','lastDistance','decision'],
+  recoveries:events.map(({car,reason,time,lap,round,x,y,phase,stablePhase,decision,trajectory})=>{const t=trajectory?.at(-1),r=v=>Number.isFinite(v)?+v.toFixed(5):null;return [car,reason,r(time),lap,round,r(x),r(y),r(phase),r(stablePhase),r(t?.near),r(t?.d),typeof decision==='string'?decision:decision?.kind??t?.decision??null];}),
+  note:'Sintesi compatta: ogni riga segue columns; traiettorie complete nel report JSON.'};
+}
+async function perfExportJSON(){
+ const button=$('ttrPerfExport'),snap=perfSnapshot(),name='TTR_'+(snap.trackId||'report')+'_'+new Date().toISOString().replace(/[:.]/g,'-')+'.json';
+ const data=JSON.stringify(snap,null,2),blob=new Blob([data],{type:'application/json'});
+ if(typeof File==='function'&&navigator.share&&navigator.canShare){try{const file=new File([blob],name,{type:'application/json'});if(navigator.canShare({files:[file]})){await navigator.share({files:[file]});if(button)button.textContent='Esporta JSON';return;}}catch(e){if(e?.name==='AbortError')return;}}
+ const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download=name;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+ if(button)button.textContent='JSON pronto';
+}
+async function perfCopyAnomalies(){const report=JSON.stringify(perfAnomalies(perfSnapshot()));try{await navigator.clipboard.writeText(report);$('ttrPerfAnomalies').textContent='Anomalie copiate';}catch(_){window.prompt('Copia anomalie',report);}}
+window.TTRPerformance={snapshot:perfSnapshot,anomalies:()=>perfAnomalies(perfSnapshot())};
 const points=breakfastPoints.slice();
 const controls={left:false,right:false,brake:false};
 
@@ -587,6 +605,8 @@ function contactWithProp(c,o,previous=null){
 }
 
 function gameObstacles(ctx){
+ if(isBox()){props.filter(o=>o.movable).forEach(o=>BR.drawBall(ctx,o));return;}
+ if(isDesk()){ctx.drawImage(bridgeLayer,0,0);return;}
  if(!isBreakfast())return;
  props.filter(o=>o.type==='milk_cereal_cup').forEach(o=>drawMilkOverflow(ctx,o));
   props.filter(o=>o.type==='milk_cereal_spill').forEach(o=>drawObstacle(ctx,o));
@@ -612,7 +632,7 @@ function drawBox(ctx,p){if(p.cool>0)return;
 // Four genuinely independent silhouettes; Canvas 2D paints light and side depth consistently.
 function glass(ctx,shape){drawPoly(ctx,shape,'#15314a','#a1d6e055',1);}
 function carSprite(ctx,car){
- const pose=isBath()&&car.onBridge?{...car,onBridge:false}:car;
+ const pose=car;
  if(isBox()&&car.boxTransit>0){const scale=BR.visualScale(car);if(scale<=0)return;ctx.save();ctx.translate(car.x,car.y);ctx.scale(scale,scale);ctx.translate(-car.x,-car.y);ctx.globalAlpha*=Math.min(1,scale*1.4);window.TTRVehicleVisuals.carSprite(ctx,pose,clock);ctx.restore();return;}
  return window.TTRVehicleVisuals.carSprite(ctx,pose,clock);
 }
@@ -864,7 +884,7 @@ function openCircuitLoading(mode){
  $('loadingMapKey').textContent='▦ '+copy[2]+'   ◆ POWER-UP   '+((isBox()?'● → ● ':'━ ')+copy[3]);
  $('loadingTipsTitle').textContent=copy[4];
  const guide=$('loadingTips');guide.replaceChildren();
- if(isDesk()){const row=document.createElement('div'),title=document.createElement('b');title.textContent=isBath()?'LAVABO · SCORCIATOIA':'RIGHELLO · SCORCIATOIA';const detail=document.createElement('span');detail.textContent=isBath()?'Nel lavabo imbocca la traccia bagnata a destra: passa sotto lo spazzolino. Evita le saponette e risali dalla rampa di asciugamano.':'Prendi la corsia sinistra con le frecce gialle; il ponte evita il tornante destro.';row.append(title,detail);guide.append(row);}
+ if(isDesk()){const row=document.createElement('div'),title=document.createElement('b');title.textContent=isBath()?'LAVABO · SCORCIATOIA':'RIGHELLO · SCORCIATOIA';const detail=document.createElement('span');detail.textContent=isBath()?'Lo spazzolino fa parte del percorso normale. Dopo la discesa scegli la curva dello scarico o il taglio interno umido. Guida manuale: cadere in acqua provoca respawn.':'Imbocca la rampa in legno e guida sul righello: mantieni la traiettoria fino alla rampa di uscita. Nessun automatismo.';row.append(title,detail);guide.append(row);}
  for(const n of (isDesk()?[]:isBox()?[18,20]:[14,16])){const row=document.createElement('div'),title=document.createElement('b'),detail=document.createElement('span');title.textContent=copy[n];detail.textContent=copy[n+1];row.append(title,detail);guide.append(row);}
  const power=$('loadingPowerups');power.replaceChildren();
  for(const [i,k] of ['turbo','oil','claw'].entries()){
@@ -1045,12 +1065,14 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  c.oilCooldown=Math.max(0,(c.oilCooldown||0)-dt);
  c.respawnGrace=Math.max(0,(c.respawnGrace||0)-dt);
  c.impactGrace=Math.max(0,(c.impactGrace||0)-dt);
- const preSurface=offTrackDynamics(!isBreakfast()?nearestTrackWindow(c,points,c.routeStableP??c.p,.047).distance:nearestCourse(c,points).distance);
+ const preSurface=offTrackDynamics(isDesk()&&c.onBridge?D.shortcutNearest(c).distance:!isBreakfast()?nearestTrackWindow(c,points,c.routeStableP??c.p,.047).distance:nearestCourse(c,points).distance);
  // Jam slowing is handled before acceleration; no fake tiny per-frame drag.
 
  if(preSurface.outside)c.speed*=Math.max(.93,1-(1-preSurface.speedFactor)*dt*1.9);
 
- let turn=c.profile.turn*(.24+clamp(Math.abs(c.speed)/160,0,1)*.76)*(c.slip>0?.38:1)*preSurface.grip*(c.profile.gripFactor||1);
+ const headingBeforeTurn=c.a,bathGrip=isBath()?Bath.wetGrip(c):1;
+ if(isBath()&&c.jump<=0&&c.speed>0&&!c.onBridge)c.speed=Math.max(0,c.speed-95*Bath.gradeAt(c.routeStableP??c.p)*dt);
+ let turn=c.profile.turn*(.24+clamp(Math.abs(c.speed)/160,0,1)*.76)*(c.slip>0?.38:1)*preSurface.grip*bathGrip*(c.profile.gripFactor||1);
  if((c.oilSpin||0)>0){const step=Math.min(dt,c.oilSpin);c.a+=c.oilSpinDir*2*Math.PI*(step/1.16);c.oilSpin-=step;c.speed=Math.sign(c.speed)*Math.min(Math.abs(c.speed),145);}
  else {
    const assist=boxExitAssist;
@@ -1077,7 +1099,15 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  }
  const oldX=c.x,oldY=c.y;
  // Grip and stability govern lateral drift recovery, unlike top speed/acceleration.
- const slideDrag=(c.slip>0?.95:5.6)*(c.profile.gripFactor||1)*(c.profile.stabilityFactor||1);
+ const slideDrag=(c.slip>0?.95:5.6)*(c.profile.gripFactor||1)*(c.profile.stabilityFactor||1)*bathGrip;
+ // On wet ceramic, retain a bounded component of the previous velocity when steering.
+ // No snap to centreline, no hidden guidance. Dry surfaces remain unchanged.
+ if(isBath()&&bathGrip<1&&c.jump<=0&&c.speed>0&&!(c.oilSpin>0)){
+   const lateral=Math.sin(headingBeforeTurn-c.a)*c.speed*(1-bathGrip)*1.35;
+   c.skidVX=(c.skidVX||0)-Math.sin(c.a)*lateral;c.skidVY=(c.skidVY||0)+Math.cos(c.a)*lateral;
+   const skid=Math.hypot(c.skidVX,c.skidVY),cap=Math.max(18,c.speed*.27);
+   if(skid>cap){c.skidVX*=cap/skid;c.skidVY*=cap/skid;}
+ }
  c.skidVX=(c.skidVX||0)*Math.exp(-slideDrag*dt);
  c.skidVY=(c.skidVY||0)*Math.exp(-slideDrag*dt);
  c.x+=(Math.cos(c.a)*c.speed+(c.hitVX||0)+c.skidVX)*dt;
@@ -1106,7 +1136,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  const beforeCPURecovery=c.shortcutRespawns||0;ttrRaceCPU.updateRecovery(c,dt);if(!isBreakfast()&&(c.shortcutRespawns||0)!==beforeCPURecovery)continue;
  // On-road snapshots are only written after complete frame of verified lane contact.
  // No penalty for a normal outside detour at the finish-line seam (p=1 -> p=0).
- if(isDesk()){if(DR.enter(c,{x:oldX,y:oldY},race,SND)){ttrRaceProgress.updateCarProgress(c,dt,oldX,oldY);continue;}if(!DR.environment(c,{x:oldX,y:oldY},dt,race,recoverCar,SND)){continue;}if(edgeOfTable(c)){startTableFall(c);continue;}}else if(isBox()){if(!BR.environment(c,{x:oldX,y:oldY},dt,race,recoverCar,SND)){continue;}}else{
+ if(isDesk()){if(DR.enter(c,{x:oldX,y:oldY},race,SND)){ttrRaceProgress.updateCarProgress(c,dt,oldX,oldY);continue;}const deskWasOnBridge=c.onBridge;if(!DR.environment(c,{x:oldX,y:oldY},dt,race,recoverCar,SND)){continue;}if(deskWasOnBridge&&!c.onBridge&&perfEnabled&&perfCars[c.id])perfCars[c.id].ramps++;if(edgeOfTable(c)){startTableFall(c);continue;}}else if(isBox()){if(!BR.environment(c,{x:oldX,y:oldY},dt,race,recoverCar,SND)){continue;}}else{
  let near=c.onBridge?{...shortcutNearest(c),shortcut:true}:nearestCourse(c,points);
  if(near.shortcut&&!c.onBridge&&!c.bridgeTakeoff&&!c.bridgeLandingActive&&!c.bridgeMissActive)near={...nearestTrack(c,points),shortcut:false};
  const routeCheck=junctionContinuity(c,near,oldX,oldY,dt);
@@ -1412,8 +1442,8 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
 function wireMenu(){
  // 14.15: tolerate a cached pre-14.14 HTML shell; manual acceleration is no longer supported.
  const obsoleteAuto=$('auto');if(obsoleteAuto){const label=obsoleteAuto.closest('label');if(label)label.remove();else obsoleteAuto.remove();}
- document.documentElement.dataset.ttrJsBuild='0.13.6.122';
- const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.126 · 14.22d';
+ document.documentElement.dataset.ttrJsBuild='0.13.6.134';
+ const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.134 · 14.22l';
  // A transformed menu creates a non-viewport containing block for fixed dialogs.
  // Move Options to document.body, so the overlay is genuinely viewport-sized on iPhone.
  const settingsDialog=$('retroSettings');if(settingsDialog&&settingsDialog.parentNode!==document.body)document.body.appendChild(settingsDialog);const configDialog=$('raceConfig');if(configDialog&&configDialog.parentNode!==document.body)document.body.appendChild(configDialog);const trackDialog=$('trackSelect');if(trackDialog&&trackDialog.parentNode!==document.body)document.body.appendChild(trackDialog);
@@ -1426,7 +1456,7 @@ function wireMenu(){
   const setting=$('settingsBtn');if(setting)setting.onclick=()=>{const panel=$('retroSettings');panel.open=true;const selector=$('settingsLanguage');if(selector)selector.value=I18N.getLang();SND.sfx('select');};
   const settingsLanguage=$('settingsLanguage');if(settingsLanguage){settingsLanguage.value=I18N.getLang();settingsLanguage.onchange=()=>{I18N.setLang(settingsLanguage.value);refreshAudioUI();};}
   if(settingsDialog){settingsDialog.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();settingsDialog.open=false;setting?.focus();}});settingsDialog.addEventListener('click',event=>{if(event.target===settingsDialog){settingsDialog.open=false;setting?.focus();}});}
- if(settingsDialog&&!$('ttrQuality')){const row=document.createElement('div');row.className='ttr-quality-row';row.innerHTML='<label>GRAFICA <select id="ttrQuality"><option value="auto">Automatica</option><option value="high">Elevata</option><option value="balanced">Bilanciata</option><option value="low">Risparmio energetico</option></select></label><label><input id="ttrPerfToggle" type="checkbox"> Diagnostica</label><button type="button" class="mini-btn" id="ttrPerfCopy">Copia report</button>';settingsDialog.querySelector('.v11-settings-card').append(row);$('ttrQuality').value=qualityMode;$('ttrPerfToggle').checked=perfEnabled;$('ttrQuality').onchange=()=>{qualityMode=$('ttrQuality').value;try{localStorage.setItem('ttr_quality',qualityMode);}catch(_){}};$('ttrPerfToggle').onchange=()=>{perfEnabled=$('ttrPerfToggle').checked;try{localStorage.setItem('ttr_perf',perfEnabled?'1':'0');}catch(_){}};$('ttrPerfCopy').onclick=async()=>{const report=JSON.stringify(perfSnapshot(),null,2);try{await navigator.clipboard.writeText(report);$('ttrPerfCopy').textContent='Copiato';}catch(_){window.prompt('Copia diagnostica',report);}};}
+ if(settingsDialog&&!$('ttrQuality')){const row=document.createElement('div');row.className='ttr-quality-row';row.innerHTML='<label>GRAFICA <select id="ttrQuality"><option value="auto">Automatica</option><option value="high">Elevata</option><option value="balanced">Bilanciata</option><option value="low">Risparmio energetico</option></select></label><label><input id="ttrPerfToggle" type="checkbox"> Diagnostica</label><button type="button" class="mini-btn" id="ttrPerfCopy">Copia report</button><button type="button" class="mini-btn" id="ttrPerfExport">Esporta JSON</button><button type="button" class="mini-btn" id="ttrPerfAnomalies">Copia solo anomalie</button>';row.style.flexWrap='wrap';settingsDialog.querySelector('.v11-settings-card').append(row);$('ttrQuality').value=qualityMode;$('ttrPerfToggle').checked=perfEnabled;$('ttrQuality').onchange=()=>{qualityMode=$('ttrQuality').value;try{localStorage.setItem('ttr_quality',qualityMode);}catch(_){}};$('ttrPerfToggle').onchange=()=>{perfEnabled=$('ttrPerfToggle').checked;try{localStorage.setItem('ttr_perf',perfEnabled?'1':'0');}catch(_){}};$('ttrPerfExport').onclick=perfExportJSON;$('ttrPerfAnomalies').onclick=perfCopyAnomalies;$('ttrPerfCopy').onclick=async()=>{const report=JSON.stringify(perfSnapshot(),null,2);try{await navigator.clipboard.writeText(report);$('ttrPerfCopy').textContent='Copiato';}catch(_){window.prompt('Copia diagnostica',report);}};}
  if(settingsDialog&&matchMedia('(any-pointer:fine)').matches&&!$('ttrKeyboardSettings')){const row=document.createElement('div');row.className='ttr-keyboard-footer';const b=document.createElement('button');b.id='ttrKeyboardSettings';b.type='button';b.className='ttr-settings-text-action';b.textContent='COMANDI TASTIERA';b.setAttribute('aria-haspopup','dialog');b.onclick=openKeyboardPanel;row.append(b);settingsDialog.querySelector('.v11-settings-card').append(row);}
  if($('closeSettings'))$('closeSettings').onclick=()=>{$('retroSettings').open=false;setting?.focus();SND.sfx('select');};
  // Vehicle selection is exclusively handled by garageSelect (no global car selector).
@@ -1586,7 +1616,7 @@ function render(){const qualityCap=qualityMode==='low'?1.25:qualityMode==='balan
     if(isBreakfast()&&Math.abs(jamPatch.x-camX)<halfW+240&&Math.abs(jamPatch.y-camY)<halfH+280)drawJamPour(g);
  const ghostPose=race.trialGhost&&race.countdown<=0?race.trialGhost(race.time):null;
  const ghostCar=ghostPose&&!(ghostPose.boxTransit>=.8)?{profile:race.player.profile,id:-1,...ghostPose,jumpTotal:ghostPose.jumpTotal||.96,onBridge:!!ghostPose.onBridge,rampEntryVisual:!!ghostPose.rampEntryVisual,bridgeExitVisual:ghostPose.bridgeExitVisual||0,speed:0,slip:0,boost:0,claw:0,tableFalling:ghostPose.tableFalling||0}:null;
- const elevated=c=>isBath()?(!c.onBridge&&(Bath.upperDeck(c)||c.jump>0||c.rampEntryVisual||c.bridgeExitVisual>0)):(c.onBridge||c.jump>0||c.rampEntryVisual||c.bridgeExitVisual>0);
+ const elevated=c=>c.onBridge||c.jump>0||c.rampEntryVisual||c.bridgeExitVisual>0;
  const drawGhost=()=>{if(!ghostCar||!visibleProp(ghostCar))return;g.save();g.globalAlpha=.35;carSprite(g,ghostCar);g.restore();};
  props.filter(o=>(o.type==='orange_bump'||o.type==='orange')&&visibleProp(o)).forEach(o=>drawRaceProp(g,o));
  if(ghostCar&&!elevated(ghostCar))drawGhost();
@@ -1875,7 +1905,7 @@ window.TTRDebug={
  c.lastValidPosition={x:safe.x,y:safe.y,a:tangent(from),p:from,laps:c.lapsCompleted,flags:c.flags.slice()};
  c.auditP=from;c.auditTravel=350;c.auditCleanTime=0;c.x=pos.x;c.y=pos.y;c.p=from;c.lastP=from;c.a=tangent(to);c.speed=0;c.offtrack=false;c.respawnGrace=0;race.countdown=0;
  const before=c.shortcutRespawns||0;update(1/60);return {before,after:c.shortcutRespawns||0,phase:c.p,expectedPhase:from};
-},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.90',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
+},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.134',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
 })();
 
 
