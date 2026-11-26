@@ -1,0 +1,15 @@
+/* 14.22y - pre-race presentation only. Keep the action position stable. */
+#loadingTrack .circuit-load-bottom{
+ display:grid;grid-template-columns:minmax(0,1fr);justify-items:center;
+ gap:5px;margin-top:8px;
+}
+#loadingTrack #loadingStateLabel{text-align:center}
+#loadingTrack .circuit-load-bar{width:min(360px,90%);box-sizing:border-box;height:14px}
+#loadingTrack .ttr-launch-race{grid-column:1!important;margin-top:5px}
+#loadingTrack .ttr-launch-race:disabled{opacity:.58;cursor:default}
+@media(max-height:470px) and (orientation:landscape){
+ #loadingTrack .circuit-load-bottom{gap:3px;margin-top:5px}
+ #loadingTrack .circuit-load-bar{height:12px}
+ #loadingTrack .ttr-launch-race{margin-top:5px}
+ #loadingTrack .circuit-load-side canvas{max-height:26vh!important}
+}
