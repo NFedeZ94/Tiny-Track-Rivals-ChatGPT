@@ -64,6 +64,7 @@
   for(const o of race.cars){if(o===c||o.done||o.eliminated||o.jump>0)continue;const dx=o.x-c.x,dy=o.y-c.y,f=dx*Math.cos(c.a)+dy*Math.sin(c.a),l=-dx*Math.sin(c.a)+dy*Math.cos(c.a);if(f>10&&f<135&&Math.abs(l)<45&&f<gap){lead=o;gap=f;}}
   const valid=q=>K.nearestTrackWindow(q,D.points,phase,.035).distance<D.laneHalf-(c.width||36)*.5-8;
   const safe=q=>valid(q)&&!D.wet(q)&&!D.props.some(o=>K.distance(q,o)<o.r+32)&&!race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&K.distance(q,o)<42);
+  if(hard&&!c.onBridge&&!(p>D.brush.start-.045&&p<D.brush.end+.012)&&!(p>D.entry-.035&&p<D.entry+.043)&&near.distance<55){const delta=105/D.length,l=D.point(phase-delta),r=D.point(phase+delta),off=K.clamp(((l.x+r.x)/2-normal.x)*nx+((l.y+r.y)/2-normal.y)*ny,-28,28);const q={x:normal.x+nx*off,y:normal.y+ny*off};if(safe(q))target=q;}
   if(!(p>D.brush.start-.018&&p<D.brush.end+.008)&&lead&&s.pass>0&&near.distance<75&&lead.speed<c.speed+12&&!(c.aiPassCooldown>race.time)){const side=((lead.x-normal.x)*nx+(lead.y-normal.y)*ny)>0?-1:1;for(const dir of [side,-side]){const q={x:normal.x+nx*dir*s.pass,y:normal.y+ny*dir*s.pass};if(safe(q)){c.aiPassSide=dir;c.aiPassUntil=race.time+1;c.aiPassCooldown=race.time+2;c.aiPassAttempts=(c.aiPassAttempts||0)+1;break;}}}
   if(p>D.brush.start-.018&&p<D.brush.end+.008)c.aiPassUntil=0;
   if(c.aiPassUntil>race.time){const q={x:normal.x+nx*c.aiPassSide*s.pass,y:normal.y+ny*c.aiPassSide*s.pass};if(safe(q))target=q;else c.aiPassUntil=0;}
@@ -83,13 +84,14 @@
    // Queue on the actual bridge axis, including cars returning to the centre.
    lead=null;gap=Infinity;for(const o of race.cars){if(o===c||o.done||o.eliminated||o.onBridge||o.jump>0)continue;const z=D.brushContact(o),f=(z.u-q.u)*D.brush.length;if(f>0&&f<155&&Math.abs(z.side)<D.brush.half+25&&f<gap){gap=f;lead=o;}}
   }
-  const oil=(c.onBridge||c.deskTry||brushApproach)?{target,slow:false}:window.TTRRaceDrivers.avoidOil(c,race,s,target,a,valid,D.props);target=oil.target;
+  const brushAxis=Math.atan2(D.brush.Q.y-D.brush.P.y,D.brush.Q.x-D.brush.P.x);
+  const oil=c.onBridge?window.TTRRaceDrivers.avoidOil(c,race,s,target,D.shortcutTangent(D.shortcutNearest(c).t),q=>!D.wet(q)&&D.shortcutNearest(q).distance<=D.bridgeHalf-(c.width||36)*.5-7,[],{maxOffset:36}):brushApproach?window.TTRRaceDrivers.avoidOil(c,race,s,target,brushAxis,q=>{const z=D.brushContact(q);return z.u<0||z.u>1?valid(q):Math.abs(z.side)<=D.brushDeckHalf(z.u)-(c.width||36)*.5-5;},[],{maxOffset:24}):c.deskTry?{target,slow:false}:window.TTRRaceDrivers.avoidOil(c,race,s,target,a,q=>valid(q)&&!D.wet(q),D.props);target=oil.target;
   const d=K.angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a),steer=K.clamp(d*(hard?3.7:3.3),-1,1);
   if(c.reverseRecovery>0)return {steer:-steer||1,gas:false,brake:true};
   const bend=Math.max(Math.abs(K.angleDiff(D.tangent(p+.017),D.tangent(p))),Math.abs(K.angleDiff(D.tangent(p+.029),D.tangent(p+.012))));
-  const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);let desired=cap*(1-K.clamp((bend-.20)*(hard?.48:.63),0,.6));
+  const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);let desired=cap*(1-K.clamp((bend-.20)*(hard?.34:.63),0,.6));
   if(Math.abs(d)>.30)desired=Math.min(desired,cap*(1-K.clamp((Math.abs(d)-.25)*.68,0,.65)));
-  if(lead&&gap<60&&!(c.aiPassUntil>race.time))desired=Math.min(desired,Math.max(70,lead.speed));if(c.onBridge||c.deskTry){const b=D.shortcutNearest(c);desired=Math.min(desired,cap*.94,b.t>.74&&(b.distance>30||Math.abs(d)>.25)?205:235);}else if(brushApproach){const q=D.brushContact(c),returning=Math.abs(q.side)>24||Math.abs(d)>.22;desired=Math.min(desired,returning?105:195,c.bathRejoinUntil>race.time?125:Infinity);if(lead&&gap<135)desired=Math.min(desired,Math.max(0,lead.speed-(135-gap)*2.5));}else if(near.distance>95)desired=Math.min(desired,110);if(oil.slow)desired=Math.min(desired,cap*.68);
+  if(lead&&gap<60&&!(c.aiPassUntil>race.time))desired=Math.min(desired,Math.max(70,lead.speed));if(c.onBridge||c.deskTry){const b=D.shortcutNearest(c);desired=Math.min(desired,cap*.94,b.t>.74&&(b.distance>30||Math.abs(d)>.25)?205:235);}else if(brushApproach){const q=D.brushContact(c),returning=Math.abs(q.side)>24||Math.abs(d)>.22;desired=Math.min(desired,returning?105:195,c.bathRejoinUntil>race.time?125:Infinity);if(lead&&gap<135)desired=Math.min(desired,Math.max(0,lead.speed-(135-gap)*2.5));}else if(near.distance>95)desired=Math.min(desired,110);if(oil.slow)desired=Math.min(desired,cap*(brushApproach||c.onBridge?.48:.65));
   const brake=c.speed>desired+(brushApproach?5:12)&&c.speed>(brushApproach?8:70);return {steer,gas:!brake&&(desired>=cap*.96||c.speed<desired+5),brake};
  }
  // Preserve legitimate falls, but limit the lateral displacement and impulse
