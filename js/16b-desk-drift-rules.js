@@ -4,18 +4,37 @@
  const axis=D.shortcutTangent(),fx=Math.cos(axis),fy=Math.sin(axis),P=D.shortcutPoint(0);
  const gate=D.gate,merge=D.merge,gatePhase=K.nearestTrackWindow(D.shortcutPoint(gate),D.points,D.entry,.025).p;
  const along=c=>((c.x-P.x)*fx+(c.y-P.y)*fy)/D.shortcutLength;
+ // Render-only pose: the nose reaches the slope before the centre crosses its gate.
+ // An incorrect lateral approach stays on the lower layer. Never change speed/jump/collisions.
+ function rampPose(c){
+  const u=along(c),b=D.shortcutNearest(c),over=(c.length||65)*.5/D.shortcutLength;
+  const aligned=b.distance<D.bridgeHalf-12&&Math.cos(K.angleDiff(c.a,axis))>.80&&c.speed>=0;
+  const approach=!c.onBridge&&!(c.respawnGrace>0)&&u>=gate-over&&u<gate&&aligned&&Math.abs(signed(D.entry,c.routeStableP??c.p??D.entry))<.055;
+  const leaving=!c.onBridge&&c.deskExitRamp===true&&u>=merge-over&&u<=1+over&&b.distance<D.bridgeHalf+35&&!(c.respawnGrace>0);
+  const above=!!c.onBridge||approach||leaving;
+  const hop=c.onBridge&&u>.10&&u<.29?Math.sin(Math.PI*((u-.10)/.19))*8:0;
+  return {above,hop,stage:approach?'approach':leaving?'exit':!c.onBridge?'ground':u<.17?'ascent':u>.82?'descent':'deck'};
+ }
+ function resetObjects(props){for(const o of props)if(o.movable){Object.assign(o,{x:o.homeX,y:o.homeY,a:o.homeA,vx:0,vy:0,spin:0});}}
+ function hitObject(c,o,resolve){const before=c.speed,dx=o.x-c.x,dy=o.y-c.y;if(!resolve(c,o))return false;const d=Math.hypot(dx,dy)||1,force=Math.min(125,Math.abs(before)*.44);o.vx=(o.vx||0)+dx/d*force;o.vy=(o.vy||0)+dy/d*force;o.spin=K.clamp((o.spin||0)+((dx*Math.sin(c.a)-dy*Math.cos(c.a))/d)*2.1,-3,3);return true;}
+ function stepObjects(props,dt){const mobiles=props.filter(o=>o.movable);for(const o of mobiles){const old={x:o.x,y:o.y};o.x+=o.vx*dt;o.y+=o.vy*dt;o.a+=o.spin*dt;const drag=Math.exp(-dt*3.8);o.vx*=drag;o.vy*=drag;o.spin*=drag;
+  // Keep objects within the tabletop, away from the bridge and out of other props.
+  if(Math.hypot(o.x-o.homeX,o.y-o.homeY)>100||D.shortcutNearest(o).distance<D.bridgeHalf+o.r+35||props.some(v=>v!==o&&K.distance(o,v)<o.r+v.r-2)){o.x=old.x;o.y=old.y;o.vx*=-.25;o.vy*=-.25;}
+  if(Math.hypot(o.vx,o.vy)<.3){o.vx=0;o.vy=0;}if(Math.abs(o.spin)<.03)o.spin=0;
+ }}
  function enter(){return false;} // no assisted travel or input interception
  function transit(){return false;}
  function environment(c,old,dt,race,recover,SND){
   const p=K.mod(c.routeStableP??c.p,1),step=K.distance(c,old),physical=step<=40?step:0;
   const b=D.shortcutNearest(c),u=along(c),prevU=along(old),n=K.nearestTrackWindow(c,D.points,p,.032),advance=signed(p,n.p)*D.length;
+  if(c.deskExitRamp&&(u>1+(c.length||65)/D.shortcutLength||u<merge-.06||b.distance>D.bridgeHalf+40||c.respawnGrace>0))c.deskExitRamp=false;
   // Enter via the actual ramp gate, not by proximity to the deck.
-  if(!c.onBridge&&!(c.respawnGrace>0)&&physical>.02&&prevU<gate&&u>=gate&&b.distance<D.bridgeHalf-12&&Math.abs(signed(D.entry,p))<.055&&Math.cos(K.angleDiff(c.a,axis))>.80&&c.speed>0){c.onBridge=true;c.bridgeOffSeconds=0;c.routePinch=null;c.deskTry=false;c.shortcutEntered=(c.shortcutEntered||0)+1;if(c===race.player)SND?.sfx('ramp');}
+  if(!c.onBridge&&!(c.respawnGrace>0)&&physical>.02&&prevU<gate&&u>=gate&&b.distance<D.bridgeHalf-12&&Math.abs(signed(D.entry,p))<.055&&Math.cos(K.angleDiff(c.a,axis))>.80&&c.speed>0){c.onBridge=true;c.deskExitRamp=false;c.bridgeOffSeconds=0;c.routePinch=null;c.deskTry=false;c.shortcutEntered=(c.shortcutEntered||0)+1;if(c===race.player)SND?.sfx('ramp');}
   if(c.onBridge){
    if(u<gate-.03||b.distance>D.bridgeHalf+5||u>1.04){c.bridgeOffSeconds=(c.bridgeOffSeconds||0)+dt;c.offtrack=true;c.routePinch={phase:p};if(c.bridgeOffSeconds>.18){c.shortcutFailed=(c.shortcutFailed||0)+1;recover(c,'desk-bridge-fall');return false;}return true;}
    c.bridgeOffSeconds=0;c.offtrack=false;c.offtrackSeconds=0;c.routePinch=null;
    const phase=gatePhase+(D.exit-gatePhase)*K.clamp((b.t-gate)/(merge-gate),0,1);c.routeStableP=phase;c.routeResolvedNear={...b,p:phase};c.routeDecision='desk-manual-bridge';
-   if(prevU<merge&&u>=merge&&b.distance<D.bridgeHalf-8&&c.speed>0&&Math.cos(K.angleDiff(c.a,axis))>.35){c.onBridge=false;c.routeStableP=D.exit;c.routeResolvedNear={...D.point(D.exit),distance:K.distance(c,D.point(D.exit)),p:D.exit,shortcut:false};c.deskTry=false;c.shortcutCompleted=(c.shortcutCompleted||0)+1;if(c===race.player)SND?.sfx('landing');}
+   if(prevU<merge&&u>=merge&&b.distance<D.bridgeHalf-8&&c.speed>0&&Math.cos(K.angleDiff(c.a,axis))>.35){c.onBridge=false;c.deskExitRamp=true;c.routeStableP=D.exit;c.routeResolvedNear={...D.point(D.exit),distance:K.distance(c,D.point(D.exit)),p:D.exit,shortcut:false};c.deskTry=false;c.shortcutCompleted=(c.shortcutCompleted||0)+1;if(c===race.player)SND?.sfx('landing');}
    return true;
   }
   if(c.jump<=0&&D.paperContact(c)){c.speed*=Math.exp(-dt*.58);if(!c.deskPaper&&c===race.player)SND?.sfx('rindSurface');c.deskPaper=true;}else c.deskPaper=false;
@@ -30,26 +49,27 @@
  }
  function drive(c,race,s){const p=c.routeStableP??c.p,near=K.nearestTrackWindow(c,D.points,p,.028),hard=s.pace>=.999;
   if(hard&&!c.aiPersonality)c.aiPersonality=['aggressive','technical','strategic'][((c.id-1)%3+3)%3];
-  const speed=Math.abs(c.speed),look=(hard?78:65)+Math.min(hard?74:58,speed*.22),phase=p+look/D.length,a=D.tangent(phase),normal=D.point(phase),nx=-Math.sin(a),ny=Math.cos(a);
+  const speed=Math.abs(c.speed),look=(hard?72:65)+Math.min(hard?65:58,speed*.22),phase=p+look/D.length,a=D.tangent(phase),normal=D.point(phase),nx=-Math.sin(a),ny=Math.cos(a);
   let target=normal,lead=null,gap=Infinity;
   for(const o of race.cars){if(o===c||o.done||o.eliminated||o.jump>0||!!o.onBridge!==!!c.onBridge)continue;const dx=o.x-c.x,dy=o.y-c.y,f=dx*Math.cos(c.a)+dy*Math.sin(c.a),l=-dx*Math.sin(c.a)+dy*Math.cos(c.a);if(f>10&&f<135&&Math.abs(l)<45&&f<gap){lead=o;gap=f;}}
   const valid=q=>K.nearestTrackWindow(q,D.points,phase,.035).distance<D.laneHalf-(c.width||36)*.5-8;
-  const safe=q=>valid(q)&&!D.props.some(o=>K.distance(q,o)<o.r+32)&&!race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&K.distance(q,o)<42);
+  const obstacles=race.deskProps||D.props;
+  const safe=q=>valid(q)&&!obstacles.some(o=>K.distance(q,o)<o.r+32)&&!race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&K.distance(q,o)<42);
   if(lead&&s.pass>0&&near.distance<75&&lead.speed<c.speed+12&&!(c.aiPassCooldown>race.time)){const side=((lead.x-normal.x)*nx+(lead.y-normal.y)*ny)>0?-1:1;for(const dir of [side,-side]){const q={x:normal.x+nx*dir*s.pass,y:normal.y+ny*dir*s.pass};if(safe(q)){c.aiPassSide=dir;c.aiPassUntil=race.time+1;c.aiPassCooldown=race.time+2;c.aiPassAttempts=(c.aiPassAttempts||0)+1;break;}}}
   if(c.aiPassUntil>race.time){const q={x:normal.x+nx*c.aiPassSide*s.pass,y:normal.y+ny*c.aiPassSide*s.pass};if(safe(q))target=q;else c.aiPassUntil=0;}
-  for(const o of D.props){if(o.type==='desk-clip'||K.distance(c,o)>160||K.distance(target,o)>o.r+35)continue;const side=((o.x-normal.x)*nx+(o.y-normal.y)*ny)>0?-1:1;const q={x:normal.x+nx*side*46,y:normal.y+ny*side*46};if(safe(q))target=q;break;}
+  for(const o of obstacles){if(o.type==='desk-clip'||K.distance(c,o)>160||K.distance(target,o)>o.r+35)continue;const side=((o.x-normal.x)*nx+(o.y-normal.y)*ny)>0?-1:1;const q={x:normal.x+nx*side*46,y:normal.y+ny*side*46};if(safe(q))target=q;break;}
   if(near.distance>100||c.aiRecoveryUntil>race.time)target=D.point(p+.008);
   const visit=(race.elim?.round||0)+':'+c.lapsCompleted;
   if(p>D.entry-.045&&p<D.entry+.008&&c.deskChoiceVisit!==visit){c.deskChoiceVisit=visit;c.deskTry=Math.random()<(s.pace<.9?.12:s.pace<.99?.40:.58);c.shortcutDecisionCount=(c.shortcutDecisionCount||0)+1;if(c.deskTry)c.shortcutAttemptCount=(c.shortcutAttemptCount||0)+1;}
   if(c.onBridge||c.deskTry&&p>D.entry-.035&&p<D.entry+.035){const b=D.shortcutNearest(c);target=D.shortcutPoint(Math.min(1,b.t+.12));if(c.onBridge&&b.t>.85)target=D.point(D.exit+.009);}
   if(!c.onBridge&&(p>D.entry+.035||c.aiRecoveryUntil>race.time))c.deskTry=false;
-  const oil=(c.onBridge||c.deskTry)?{target,slow:false}:window.TTRRaceDrivers.avoidOil(c,race,s,target,a,valid,D.props);target=oil.target;
+  const oil=(c.onBridge||c.deskTry)?{target,slow:false}:window.TTRRaceDrivers.avoidOil(c,race,s,target,a,valid,obstacles);target=oil.target;
   const d=K.angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a),steer=K.clamp(d*(hard?3.7:3.3),-1,1);
   if(c.reverseRecovery>0)return {steer:-steer||1,gas:false,brake:true};
   const bend=c.onBridge?0:Math.max(Math.abs(K.angleDiff(D.tangent(p+.017),D.tangent(p))),Math.abs(K.angleDiff(D.tangent(p+.029),D.tangent(p+.012))));
-  const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);let desired=cap*(1-K.clamp((bend-(hard?.30:.20))*(hard?.30:.63),0,hard?.45:.6));
-  if(Math.abs(d)>.30)desired=Math.min(desired,cap*(1-K.clamp((Math.abs(d)-.25)*(hard?.42:.68),0,hard?.48:.65)));
+  const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);let desired=cap*(1-K.clamp((bend-(hard?.30:.20))*(hard?.26:.63),0,hard?.45:.6));
+  if(Math.abs(d)>.30)desired=Math.min(desired,cap*(1-K.clamp((Math.abs(d)-.25)*(hard?.38:.68),0,hard?.48:.65)));
   if(lead&&gap<60&&!(c.aiPassUntil>race.time))desired=Math.min(desired,Math.max(70,lead.speed));if(c.onBridge)desired=Math.min(desired,cap,hard?260:225);else if(c.deskTry&&p>D.entry-.018)desired=Math.min(desired,cap,hard?245:210);else if(near.distance>95)desired=Math.min(desired,110);if(oil.slow)desired=Math.min(desired,cap*.68);
-  const brake=c.speed>desired+(hard?17:12)&&c.speed>70;return {steer,gas:!brake&&(desired>=cap*.96||c.speed<desired+(hard?9:5)),brake};
+  const brake=c.speed>desired+(hard?17:12)&&c.speed>70;return {steer,gas:!brake&&(desired>=cap*(hard?.94:.96)||c.speed<desired+(hard?12:5)),brake};
  }
- window.TTRDeskRules=Object.freeze({environment,drive,enter,transit,exitAssistDuration});})();
+ window.TTRDeskRules=Object.freeze({environment,drive,enter,transit,exitAssistDuration,rampPose,resetObjects,hitObject,stepObjects});})();

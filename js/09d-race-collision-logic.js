@@ -3,7 +3,7 @@
 (()=>{'use strict';
 window.TTRRaceCollisions=Object.freeze({create(deps){
  const {getRace,props,contactWithProp,stuckRecoveryStep,recoverCar,resolveCarContacts,eliminationActive,edgeOfTable,startTableFall,SND}=deps;
- const cues={'box-ball':'boxBall','desk-clip':'spoon','desk-pencil':'boxWood','desk-eraser':'boxRack','desk-highlighter':'boxChalk','bath-soap':'slowSurface','bath-bottle':'boxBall','knife':'spoon','spoon':'spoon','toast':'boxWood','cookie':'boxRack','cookie_alt':'boxRack','cereal':'boxChalk','glass':'boxBall','plate_croissant':'boxBall'};
+ const cues={'box-ball':'boxBall','desk-clip':'spoon','desk-pencil':'boxWood','desk-eraser':'boxRack','desk-highlighter':'boxChalk','desk-sharpener':'spoon','bath-soap':'slowSurface','bath-bottle':'boxBall','knife':'spoon','spoon':'spoon','toast':'boxWood','cookie':'boxRack','cookie_alt':'boxRack','cereal':'boxChalk','glass':'boxBall','plate_croissant':'boxBall'};
 function handleObstacles(c,oldX,oldY,dt) {
  const race=getRace();
  let touchedObstacle=race.trackId==='box-di-biliardo'&&!!c.boxPropContact;c.boxPropContact=false;

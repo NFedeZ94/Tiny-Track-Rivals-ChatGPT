@@ -54,7 +54,7 @@ function perfRecordLap(m){
  const lapTime=+(race.time-m.lapStart).toFixed(3);m.lapTimes.push(lapTime);const detail={time:lapTime,ramps:m.ramps-(m.lapRampStart||0),respawns:m.respawns-(m.lapRecoveryStart||0)};for(const k of ['shortcutEntered','shortcutCompleted','shortcutFailed','towelJumps'])if(k in m){detail[k]=m[k]-(m['_lap_'+k]||0);m['_lap_'+k]=m[k];}(m.lapDetails??=[]).push(detail);m.lapRampStart=m.ramps;m.lapRecoveryStart=m.respawns;m.lapStart=race.time;
 }
 function perfPublicCar(m){const out=Object.fromEntries(Object.entries(m).filter(([k])=>!k.startsWith('_')));return {...out,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)};}
-function perfSnapshot(){if(race&&perfEnabled)for(const c of race.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m);}const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.136 · 14.22p.1",htmlBuild:document.querySelector('meta[name="ttr-build"]')?.content??null,quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(perfPublicCar),trackId:race?.trackId??perfContext.trackId,raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
+function perfSnapshot(){if(race&&perfEnabled)for(const c of race.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m);}const input=perfInputSamples.slice().sort((a,b)=>a-b);return {build:"v0.13.6.138 · 14.22t",htmlBuild:document.querySelector('meta[name="ttr-build"]')?.content??null,quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},recoveries:race?.recoveryHistory??perfRecoveries,recoveriesDropped:race?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(perfPublicCar),trackId:race?.trackId??perfContext.trackId,raceMode:race?.mode??perfContext.mode,difficulty:race?.aiFactor??perfContext.difficulty};}
 function perfAnomalies(snapshot){
  const {build,htmlBuild,trackId,raceMode,difficulty,wholeRace,inputLatency,recoveriesDropped}=snapshot;
  const events=snapshot.recoveries||[],counts={};for(const e of events)counts[e.reason]=(counts[e.reason]||0)+1;
@@ -400,7 +400,7 @@ function addProp(p,t,side,r,solid=true){const at=trackPoint(p),a=tangent(p),nx=-
 function drawCrumb(ctx,x,y,r,seed){ctx.save();ctx.translate(x,y);ctx.rotate((seed*1.731)%Math.PI);ctx.fillStyle='#472816bd';ctx.beginPath();ctx.ellipse(2,4,r*1.12,r*.69,0,0,Math.PI*2);ctx.fill();drawPoly(ctx,[[-r*.97,-r*.3],[-r*.43,-r*.92],[r*.55,-r*.70],[r,.08],[r*.32,r*.78],[-r*.82,r*.66]],seed%3===0?'#d49448':seed%3===1?'#f2c276':'#b66d2c','#784321',1.15);ctx.strokeStyle='#fff3b8ba';ctx.lineWidth=1.05;ctx.beginPath();ctx.moveTo(-r*.5,-r*.28);ctx.lineTo(r*.28,-r*.54);ctx.stroke();ctx.restore();}
 function worldInit(){
   props.length=0;milkCerealSpills.length=0;
-  if(isDesk()){props.push(...D.props.map(o=>({...o})));(isBath()?window.TTRBathVisuals:window.TTRDeskVisuals).render(trackCtx,bridgeCtx);return;}
+  if(isDesk()){props.push(...D.props.map(o=>({...o})),...(!isBath()?D.movable.map(o=>({...o})):[]));(isBath()?window.TTRBathVisuals:window.TTRDeskVisuals).render(trackCtx,bridgeCtx);return;}
   if(isBox()){props.push(...BR.obstacles());const original=B.balls.slice();try{B.balls.splice(0,B.balls.length,...original.filter(o=>!BR.movableBall(o)));window.TTRBoxVisuals.render(trackCtx);}finally{B.balls.splice(0,B.balls.length,...original);}bridgeCtx.clearRect(0,0,WORLD_W,WORLD_H);return;}
   // Interactive props are deliberately few: props not marked solid never obstruct racing.
   addProp(.231,'mug',-188,58,true);props.at(-1).tall=true;        // Mug Bend
@@ -537,6 +537,7 @@ function prepareRaceProp(o){
 }
 function drawRaceProp(ctx,o){
  if(isBox()&&o.movable){BR.drawBall(ctx,o);return;}
+ if(isDesk()&&!isBath()&&o.movable){window.TTRDeskVisuals.stationery(ctx,o);return;}
  if(!isBreakfast())return;
  if(!o.staticSprite){drawObstacle(ctx,o);return;}const {cv,pad}=o.staticSprite;ctx.drawImage(cv,o.x-pad,o.y-pad,pad*2,pad*2);
 }
@@ -552,6 +553,7 @@ function contactWithProp(c,o,previous=null){
  if(o.type==='orange_bump'||o.type==='orange'){if(c.jump<=0&&K.segmentCircle(previous||c,c,o,(o.r||29)+(c.width||36)*.30)){c.speed*=.982;if(c===race?.player&&race.time-(c.lastRindSound??-10)>.7){c.lastRindSound=race.time;SND.sfx('rindSurface');}}return false;}
  if(!o.solid||c.jump>0||(!isBath()&&isDesk()&&c.onBridge))return false;
  if(isBox()&&o.movable)return BR.hitBall(c,o,previous);
+ if(isDesk()&&!isBath()&&o.movable)return DR.hitObject(c,o,resolveCarObstacle);
  if(o.type!=='knife')return resolveCarObstacle(c,o.collisionR?{...o,r:o.collisionR}:o);
  if(o.interactive!==true)return false;
  const ca=Math.cos(o.angle),sa=Math.sin(o.angle),dx=c.x-o.x,dy=c.y-o.y;
@@ -635,6 +637,7 @@ function glass(ctx,shape){drawPoly(ctx,shape,'#15314a','#a1d6e055',1);}
 function carSprite(ctx,car){
  const pose=car;
  if(isBox()&&car.boxTransit>0){const scale=BR.visualScale(car);if(scale<=0)return;ctx.save();ctx.translate(car.x,car.y);ctx.scale(scale,scale);ctx.translate(-car.x,-car.y);ctx.globalAlpha*=Math.min(1,scale*1.4);window.TTRVehicleVisuals.carSprite(ctx,pose,clock);ctx.restore();return;}
+ if(isDesk()&&!isBath()){const lift=DR.rampPose(car).hop;if(lift>0){ctx.save();ctx.translate(car.x,car.y-lift);ctx.scale(1+lift*.003,1+lift*.003);ctx.translate(-car.x,-car.y);window.TTRVehicleVisuals.carSprite(ctx,pose,clock);ctx.restore();return;}}
  return window.TTRVehicleVisuals.carSprite(ctx,pose,clock);
 }
 
@@ -741,6 +744,7 @@ function knockOutElimination(c,reason='distacco'){return ttrEliminationMode.knoc
 function awardEliminationPoint(winner){return ttrEliminationMode.awardEliminationPoint(winner);}
 function eliminationNewRound(){
  const e=race.elim;if(perfEnabled)for(const c of race.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m);}e.state='race';e.timer=0;e.winner=null;e.round++;e.roundTime=0;
+ if(isDesk()&&!isBath())DR.resetObjects(props);
  race.oils=[];race.effects=[];race.countdown=2.15;race.pickups.forEach(p=>p.cool=0);
  const placement=eliminationChooseGrid(e.restartPhase??0,race.cars.length);
  race.cars.forEach((c,i)=>{
@@ -913,6 +917,7 @@ function initRace(mode){
  lastRaceSettings={num,pr,aiFactor,auto};
  onlineFinishDeadline=0;race={mode,trackId:circuitId,trackIndex:isBath()?3:isDesk()?2:isBox()?1:0,cars:[],player:null,pickups:[],oils:[],effects:[],time:0,countdown:3.2,paused:false,auto,aiFactor,finished:false,pauseOverlay:false,collisionCount:0,lastImpactSound:-10,careerStats:{pickups:0,turbos:0,oils:0,claws:0},careerRecorded:false};
  if(isBox()){BR.resetBalls(props);race.boxBalls=props.filter(o=>o.movable);}
+ if(isDesk()&&!isBath()){DR.resetObjects(props);race.deskProps=props;}
  if(mode==='elimination')race.elim=window.TTRModeElimination.initialState(num,TTRModeConfigs.elimination.elimGoal,ELIM_RULES_TEST.defaultGoal);
  const opponents=mode==='online'?null:window.TTRRaceGrid.offlineOpponents(profiles.length,pr,num-1,mode==='trial'?0:offlineGridCursor);
  if(mode!=='online'&&mode!=='trial')offlineGridCursor=(offlineGridCursor+Math.max(1,num-1))%profiles.length;
@@ -939,7 +944,20 @@ function initRace(mode){
 }
 // One recovery path for excessive shortcut, tabletop edge and blocked obstacles.
 // All recoveries are silent on the HUD; the audio cue is subtle and never prints text.
-function recoverCar(c,reason='edge'){return ttrRaceSafety.recoverCar(c,reason);}
+function recoverCar(c,reason='edge'){
+ if(isDesk()&&!isBath())c.deskExitRamp=false;
+ if(isBath()){
+  c.bathBrushOff=0;c.bathBrush=false;
+  // A valid completed lap is committed; stale pre-finish checkpoints cannot undo it.
+  const committed=c.lapsCompleted||0;
+  const safe=c.routePinch?.safe||c.offtrackEntry||c.lastValidPosition;
+  if(safe&&Number.isFinite(safe.laps)&&safe.laps<committed){
+   const p=.002,q=trackPoint(p),snapshot={...q,p,a:tangent(p),laps:committed,flags:[false,false,false],elimDistance:c.elimDistance};
+   c.lastValidPosition=snapshot;c.lastCheckpoint=p;c.offtrackEntry=null;c.routePinch={phase:p,safe:snapshot};
+  }
+ }
+ return ttrRaceSafety.recoverCar(c,reason);
+}
 // Guard a real geometric crossing between two non-adjacent curves.
 // An abrupt phase jump is only suspicious at the known adjacent hairpin pair.
 // Legitimate inside lines are allowed until the car physically commits to the other arm.
@@ -984,6 +1002,11 @@ const ttrRaceProgress=window.TTRRaceProgress.create({
  getRace:()=>race,nearestCourse,points,eliminationProgressUpdate,finishEdgeTolerance,
  finishLinePlane,trackPoint,tangent,showHint,t:(...args)=>t(...args),SND
 });
+// Commit a new-lap checkpoint immediately after the real finish-plane crossing.
+function updateCommittedProgress(c,dt,oldX,oldY){
+ const laps=c.lapsCompleted;ttrRaceProgress.updateCarProgress(c,dt,oldX,oldY);
+ if(isBath()&&c.lapsCompleted>laps){const p=.002,q=trackPoint(p);c.lastCheckpoint=p;c.lastValidPosition={...q,p,a:tangent(p),laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};c.previousValidPosition=null;c.offtrackEntry=null;c.routePinch=null;}
+}
 const ttrRaceTiming=window.TTRRaceTiming.create({
  getRace:()=>race,showHint,t:(...args)=>t(...args),SND
 });
@@ -1019,8 +1042,9 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  if(race.countdown>0){ttrRaceTiming.advanceCountdown(dt);syncAudio();return;}
  ttrRaceTiming.advanceLiveFrame(dt);
  if(isBox())BR.stepBalls(props,dt);
+ if(isDesk()&&!isBath())DR.stepObjects(props,dt);
  for(const c of race.cars){if(c.done)continue;
-  if(isDesk()&&c.deskBridge){const old={x:c.x,y:c.y};DR.transit(c,dt,race,SND,c===race.player&&inputFor(c).brake);ttrRaceProgress.updateCarProgress(c,dt,old.x,old.y);if(!c.deskBridge){c.lastCheckpoint=c.p;c.lastValidPosition={x:c.x,y:c.y,p:c.p,a:c.a,laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};if(perfEnabled&&perfCars[c.id])perfCars[c.id].ramps++;}continue;}
+  if(isDesk()&&c.deskBridge){const old={x:c.x,y:c.y};DR.transit(c,dt,race,SND,c===race.player&&inputFor(c).brake);updateCommittedProgress(c,dt,old.x,old.y);if(!c.deskBridge){c.lastCheckpoint=c.p;c.lastValidPosition={x:c.x,y:c.y,p:c.p,a:c.a,laps:c.lapsCompleted,flags:c.flags.slice(),elimDistance:c.elimDistance};if(perfEnabled&&perfCars[c.id])perfCars[c.id].ramps++;}continue;}
   if(isBox()&&BR.transit(c,dt,race,SND)){if(perfEnabled&&perfCars[c.id]){const m=perfCars[c.id];if(!c.boxTransit&&Number.isFinite(c.boxEntryTime)){m.ramps++;(m.boxTunnelTimes??=[]).push(+(race.time-c.boxEntryTime).toFixed(3));if(m.boxTunnelTimes.length>30)m.boxTunnelTimes.shift();}}continue;}
   if((c.tableFalling||0)>0){
     c.tableFalling=Math.max(0,c.tableFalling-dt);
@@ -1137,7 +1161,7 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  const beforeCPURecovery=c.shortcutRespawns||0;ttrRaceCPU.updateRecovery(c,dt);if(!isBreakfast()&&(c.shortcutRespawns||0)!==beforeCPURecovery)continue;
  // On-road snapshots are only written after complete frame of verified lane contact.
  // No penalty for a normal outside detour at the finish-line seam (p=1 -> p=0).
- if(isDesk()){if(DR.enter(c,{x:oldX,y:oldY},race,SND)){ttrRaceProgress.updateCarProgress(c,dt,oldX,oldY);continue;}const deskWasOnBridge=c.onBridge;if(!DR.environment(c,{x:oldX,y:oldY},dt,race,recoverCar,SND)){continue;}if(deskWasOnBridge&&!c.onBridge&&perfEnabled&&perfCars[c.id])perfCars[c.id].ramps++;if(edgeOfTable(c)){startTableFall(c);continue;}}else if(isBox()){if(!BR.environment(c,{x:oldX,y:oldY},dt,race,recoverCar,SND)){continue;}}else{
+ if(isDesk()){if(DR.enter(c,{x:oldX,y:oldY},race,SND)){updateCommittedProgress(c,dt,oldX,oldY);continue;}const deskWasOnBridge=c.onBridge;if(!DR.environment(c,{x:oldX,y:oldY},dt,race,recoverCar,SND)){continue;}if(deskWasOnBridge&&!c.onBridge&&perfEnabled&&perfCars[c.id])perfCars[c.id].ramps++;if(edgeOfTable(c)){startTableFall(c);continue;}}else if(isBox()){if(!BR.environment(c,{x:oldX,y:oldY},dt,race,recoverCar,SND)){continue;}}else{
  let near=c.onBridge?{...shortcutNearest(c),shortcut:true}:nearestCourse(c,points);
  if(near.shortcut&&!c.onBridge&&!c.bridgeTakeoff&&!c.bridgeLandingActive&&!c.bridgeMissActive)near={...nearestTrack(c,points),shortcut:false};
  const routeCheck=junctionContinuity(c,near,oldX,oldY,dt);
@@ -1268,14 +1292,14 @@ function update(dt,refreshHud=true){clock+=dt;if(!race)return;if(race.mode==='on
  ttrRaceOil.handleOilContact(c,oldX,oldY);
  ttrRacePickups.collect(c);
  const lapBefore=c.lapsCompleted;
- ttrRaceProgress.updateCarProgress(c,dt,oldX,oldY);
+ updateCommittedProgress(c,dt,oldX,oldY);
  if(perfEnabled&&perfCars[c.id]&&c.lapsCompleted===lapBefore+1){const m=perfCars[c.id];perfSyncCounters(c,m);perfRecordLap(m);}
  if(race.mode==='elimination'&&c.lastValidPosition&&K.phaseGap(c.lastValidPosition.p,c.elimPrevP)<.008){const d=((K.forwardProgress(c.elimPrevP,c.lastValidPosition.p)+.5)%1-.5)*TRACK_LENGTH;c.lastValidPosition.elimDistance=c.elimDistance+d;}
  ttrRaceCPU.useTacticalPowerup(c);
  }
  ttrRaceCollisions.handleCars();
  if(perfEnabled)for(const c of race.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m);}
- if(race.trialSession)race.trialSession.sample(race.time,race.player,{discontinuity:race.trialRecovery!==(race.player.shortcutRespawns||0)});race.trialRecovery=race.player.shortcutRespawns||0;
+ if(race.trialSession)race.trialSession.sample(race.time,isDesk()&&!isBath()&&race.player.deskExitRamp?{...race.player,bridgeExitVisual:.1}:race.player,{discontinuity:race.trialRecovery!==(race.player.shortcutRespawns||0)});race.trialRecovery=race.player.shortcutRespawns||0;
  if(race.mode==='elimination'){eliminationEvaluate(dt);syncAudio();}
  else if(race.mode==='online'&&onlineSession?.host){
   const members=onlineSession.members.filter(Boolean);const humans=members.map(m=>race.cars[m.slot]).filter(Boolean);
@@ -1443,8 +1467,8 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
 function wireMenu(){
  // 14.15: tolerate a cached pre-14.14 HTML shell; manual acceleration is no longer supported.
  const obsoleteAuto=$('auto');if(obsoleteAuto){const label=obsoleteAuto.closest('label');if(label)label.remove();else obsoleteAuto.remove();}
- document.documentElement.dataset.ttrJsBuild='0.13.6.136';
- const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.136 · 14.22p.1';
+ document.documentElement.dataset.ttrJsBuild='0.13.6.138';
+ const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.138 · 14.22t';
  // A transformed menu creates a non-viewport containing block for fixed dialogs.
  // Move Options to document.body, so the overlay is genuinely viewport-sized on iPhone.
  const settingsDialog=$('retroSettings');if(settingsDialog&&settingsDialog.parentNode!==document.body)document.body.appendChild(settingsDialog);const configDialog=$('raceConfig');if(configDialog&&configDialog.parentNode!==document.body)document.body.appendChild(configDialog);const trackDialog=$('trackSelect');if(trackDialog&&trackDialog.parentNode!==document.body)document.body.appendChild(trackDialog);
@@ -1618,7 +1642,7 @@ function render(){const qualityCap=qualityMode==='low'?1.25:qualityMode==='balan
     if(isBreakfast()&&Math.abs(jamPatch.x-camX)<halfW+240&&Math.abs(jamPatch.y-camY)<halfH+280)drawJamPour(g);
  const ghostPose=race.trialGhost&&race.countdown<=0?race.trialGhost(race.time):null;
  const ghostCar=ghostPose&&!(ghostPose.boxTransit>=.8)?{profile:race.player.profile,id:-1,...ghostPose,jumpTotal:ghostPose.jumpTotal||.96,onBridge:!!ghostPose.onBridge,rampEntryVisual:!!ghostPose.rampEntryVisual,bridgeExitVisual:ghostPose.bridgeExitVisual||0,speed:0,slip:0,boost:0,claw:0,tableFalling:ghostPose.tableFalling||0}:null;
- const elevated=c=>c.onBridge||c.jump>0||c.rampEntryVisual||c.bridgeExitVisual>0;
+ const elevated=c=>c.onBridge||c.jump>0||c.rampEntryVisual||c.bridgeExitVisual>0||(isDesk()&&!isBath()&&DR.rampPose(c).above);
  const drawGhost=()=>{if(!ghostCar||!visibleProp(ghostCar))return;g.save();g.globalAlpha=.35;carSprite(g,ghostCar);g.restore();};
  props.filter(o=>(o.type==='orange_bump'||o.type==='orange')&&visibleProp(o)).forEach(o=>drawRaceProp(g,o));
  if(ghostCar&&!elevated(ghostCar))drawGhost();
@@ -1907,7 +1931,7 @@ window.TTRDebug={
  c.lastValidPosition={x:safe.x,y:safe.y,a:tangent(from),p:from,laps:c.lapsCompleted,flags:c.flags.slice()};
  c.auditP=from;c.auditTravel=350;c.auditCleanTime=0;c.x=pos.x;c.y=pos.y;c.p=from;c.lastP=from;c.a=tangent(to);c.speed=0;c.offtrack=false;c.respawnGrace=0;race.countdown=0;
  const before=c.shortcutRespawns||0;update(1/60);return {before,after:c.shortcutRespawns||0,phase:c.p,expectedPhase:from};
-},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.136',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
+},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.138',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
 })();
 
 

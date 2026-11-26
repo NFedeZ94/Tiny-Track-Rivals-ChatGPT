@@ -24,10 +24,14 @@
  function brushHalfAt(u){u=K.clamp(u,0,1);for(let i=1;i<brushProfile.length;i++){const [a,x]=brushProfile[i-1],[b,y]=brushProfile[i];if(u<=b){const t=(u-a)/(b-a);return x+(y-x)*t*t*(3-2*t);}}return 126;}
  function brushContact(c){const dx=brush.Q.x-brush.P.x,dy=brush.Q.y-brush.P.y,l=brush.length;const u=((c.x-brush.P.x)*dx+(c.y-brush.P.y)*dy)/(l*l);return {u,side:((c.y-brush.P.y)*dx-(c.x-brush.P.x)*dy)/l,half:brushHalfAt(u)};}
  function brushDeckHalf(u){return Math.min(brush.half,brushHalfAt(u));}
- function brushLimit(c,u){return brushDeckHalf(u)-(c.width||36)*.5;}
+ // A body overhang is not a fall. The centre of the supported axle may reach
+ // the edge; a small contact tolerance absorbs sampling and collision jitter.
+ function brushLimit(c,u){return brushDeckHalf(u)+2;}
+ function brushSupported(c){const q=brushContact(c);return q.u<=.10||q.u>=.965||Math.abs(q.side)<=brushLimit(c,q.u);}
+
  // A small arcade grade: negative downhill, positive uphill. No vertical teleport.
  function gradeAt(p){const bump=(a,b)=>p>=a&&p<=b?Math.sin(Math.PI*(p-a)/(b-a)):0;return -.11*bump(entry-.028,entry+.012)+.13*bump(towel.p-towel.rx/length,towel.p+towel.rx/length);}
- function wetGrip(c){return c.jump>0?1:c.onBridge?.58:damp(c)?.82:1;}
+ function wetGrip(c){return c.jump>0?1:c.onBridge?.68:damp(c)?.82:1;}
 
  const props=[],objects=[];
  function offset(p,side){const q=point(p),a=tangent(p);return {...q,x:q.x-Math.sin(a)*side,y:q.y+Math.cos(a)*side,a,p};}
@@ -44,5 +48,5 @@
  const wet=c=>inEllipse(c,pool);const damp=c=>puddles.some(z=>inEllipse(c,z));
  const pickupPhases=[.09,.23,.69,.91];
  const sections=[['Sink Start',0],['Splash Zone',phaseAt(1600,390)],['Soap Slalom',phaseAt(2130,470)],['Toothbrush Bridge',brush.start],['Cotton Chaos',phaseAt(3220,1120)],['Basin Dive',entry],['Drain Ring',phaseAt(1840,2070)],['Towel Launch',towel.p],['Mirror Run',phaseAt(330,720)]];
- window.TTRBathTrack=Object.freeze({id:'bagno-sprint',world:{w:W,h:H},laneHalf,length,anchors,points,point,tangent,pickupPhases,props,objects,soaps,bottles,pool,puddles,sponge,towel,drain,entry,exit,shortcutPoint,shortcutSamples,shortcutLength,shortcutTangent,shortcutNearest,bridgeHalf:69,gate:.10,merge:1,wet,damp,cotton,brush,onBrushPhase,brushHalfAt,brushContact,brushProfile,brushDeckHalf,brushLimit,gradeAt,wetGrip,inEllipse,inSoft,sections,upperDeck:c=>!!c.onBridge});
+ window.TTRBathTrack=Object.freeze({id:'bagno-sprint',world:{w:W,h:H},laneHalf,length,anchors,points,point,tangent,pickupPhases,props,objects,soaps,bottles,pool,puddles,sponge,towel,drain,entry,exit,shortcutPoint,shortcutSamples,shortcutLength,shortcutTangent,shortcutNearest,bridgeHalf:69,gate:.10,merge:1,wet,damp,cotton,brush,onBrushPhase,brushHalfAt,brushContact,brushProfile,brushDeckHalf,brushLimit,brushSupported,gradeAt,wetGrip,inEllipse,inSoft,sections,upperDeck:c=>!!c.onBridge});
 })();

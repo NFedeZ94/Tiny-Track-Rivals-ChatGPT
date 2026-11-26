@@ -34,6 +34,22 @@
   }
  }
  function paperContact(c){return papers.some(o=>{const dx=c.x-o.x,dy=c.y-o.y;return Math.abs(dx*Math.cos(o.a)+dy*Math.sin(o.a))<=o.rx&&Math.abs(-dx*Math.sin(o.a)+dy*Math.cos(o.a))<=o.ry;});}
+ // Small movable objects are independent runtime bodies, not painted onto the desk.
+ const movable=[];
+ for(const [type,phase,side,r] of [['desk-eraser',.185,70,24],['desk-eraser',.416,-72,23],['desk-sharpener',.89,-66,25]]){
+  const q=offset(phase,side);if(props.some(o=>K.distance(q,o)<o.r+r+18)||shortcutNearest(q).distance<220||movable.some(o=>K.distance(o,q)<o.r+r+20))continue;
+  movable.push({...q,type,r,len:r*1.85,w:r*1.6,movable:true,solid:true,homeX:q.x,homeY:q.y,homeA:q.a,vx:0,vy:0,spin:0});
+ }
+ // A fixed sharpener occupies one side of the lane, leaving the racing line open.
+ for(const [phase,side] of [[.265,89],[.755,-89]]){const q=offset(phase,side),r=28;if(props.some(o=>K.distance(q,o)<o.r+r+16)||shortcutNearest(q).distance<200||movable.some(o=>K.distance(q,o)<o.r+r+16))continue;const o={...q,type:'desk-sharpener',r,len:48,w:42,solid:true};objects.push(o);props.push(o);}
  const pickupPhases=[.10,.31,.74,.91];
- window.TTRDeskTrack=Object.freeze({id:'desk-drift',world:{w:W,h:H},laneHalf,length,anchors,points,point,tangent,pickupPhases,props,objects,clips,papers,paperContact,entry,exit,shortcutPoint,shortcutSamples,shortcutLength,shortcutTangent,shortcutNearest,bridgeHalf:78,gate:.07,merge:.98});
+ // Keep the original physical layout and object generation unchanged.
+ // The directional view reverses every progress-dependent quantity exactly once.
+ const reverse=p=>K.mod(-p,1),rPoint=p=>point(-p),rTangent=p=>K.mod(tangent(-p)+2*Math.PI,2*Math.PI)-Math.PI;
+ const rPoints=Array.from({length:640},(_,i)=>rPoint(i/640));
+ const rEntry=reverse(exit),rExit=reverse(entry),rShortcutPoint=t=>shortcutPoint(1-K.clamp(t,0,1));
+ const rShortcutSamples=Array.from({length:81},(_,i)=>rShortcutPoint(i/80));
+ const rShortcutTangent=()=>Math.atan2(P.y-Q.y,P.x-Q.x);
+ function rShortcutNearest(c){const b=shortcutNearest(c),t=1-b.t;return {...b,t,p:rEntry+(rExit-rEntry)*t};}
+ window.TTRDeskTrack=Object.freeze({id:'desk-drift',world:{w:W,h:H},laneHalf,length,anchors:[anchors[0],...anchors.slice(1).reverse()],points:rPoints,point:rPoint,tangent:rTangent,pickupPhases:pickupPhases.map(reverse),props,objects,clips,papers,movable,paperContact,entry:rEntry,exit:rExit,shortcutPoint:rShortcutPoint,shortcutSamples:rShortcutSamples,shortcutLength,shortcutTangent:rShortcutTangent,shortcutNearest:rShortcutNearest,bridgeHalf:78,gate:.02,merge:.93});
 })();
