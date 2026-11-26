@@ -28,10 +28,10 @@ function tacticalTurboSafe(c,race){
  const p=c.routeStableP??c.p,point=T?T.point:K.trackPoint,tangent=T?T.tangent:K.tangent,length=T?T.length:K.TRACK_LENGTH;
  if(T?.brush&&p>T.brush.start-.045&&p<T.brush.end+.007)return false;
  const horizon=Math.max(160,c.speed*.95),a=tangent(p),fx=Math.cos(c.a),fy=Math.sin(c.a);
- if(Math.abs(K.angleDiff(a,c.a))>.22)return false;
+ if(Math.abs(K.angleDiff(a,c.a))>.30)return false;
  for(const d of [horizon*.45,horizon*.85,horizon*1.15]){
   const phase=K.mod(p+d/length,1),q=point(phase);
-  if(Math.abs(K.angleDiff(tangent(phase),a))>.31||T?.wet?.(q)||T?.pockets?.some(o=>distance(o,q)<(o.r||30)+45))return false;
+  if(Math.abs(K.angleDiff(tangent(phase),a))>.40||T?.wet?.(q)||T?.pockets?.some(o=>distance(o,q)<(o.r||30)+45))return false;
   if(props.some(o=>o.solid&&distance(o,q)<(o.r||25)+40))return false;
  }
  const ahead=o=>{const dx=o.x-c.x,dy=o.y-c.y,f=dx*fx+dy*fy,l=-dx*fy+dy*fx;return f>0&&f<horizon&&Math.abs(l)<52;};
@@ -47,7 +47,7 @@ function useTacticalPowerup(c) {
  if((c.aiItemCheckAt||0)>race.time)return;
  c.aiItemCheckAt=race.time+[.95,.48,.13][level]+Math.random()*.12;
  if(c.item==='turbo'){
-   const aligned=Math.abs(c.steer||0)<[.35,.48,.50][level];
+   const aligned=Math.abs(c.steer||0)<[.35,.48,.58][level];
    if(c.speed>95&&aligned&&!c.onBridge&&(level===2?tacticalTurboSafe(c,race):Math.random()<[.25,.65][level]))useItem(c);
  }else if(c.item==='oil'){
    const behind=race.cars.some(o=>o!==c&&!o.done&&!o.eliminated&&!o.onBridge&&Math.hypot(o.x-c.x,o.y-c.y)<175&&(o.x-c.x)*Math.cos(c.a)+(o.y-c.y)*Math.sin(c.a)<-20);
