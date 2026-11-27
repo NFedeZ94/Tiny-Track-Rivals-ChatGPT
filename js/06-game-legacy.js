@@ -59,7 +59,7 @@ function perfRecordLap(m){
  const lapTime=+(race.time-m.lapStart).toFixed(3);m.lapTimes.push(lapTime);const detail={time:lapTime,ramps:m.ramps-(m.lapRampStart||0),respawns:m.respawns-(m.lapRecoveryStart||0)};for(const k of ['shortcutEntered','shortcutCompleted','shortcutFailed','towelJumps'])if(k in m){detail[k]=m[k]-(m['_lap_'+k]||0);m['_lap_'+k]=m[k];}(m.lapDetails??=[]).push(detail);m.lapRampStart=m.ramps;m.lapRecoveryStart=m.respawns;m.lapStart=race.time;
 }
 function perfPublicCar(m){const out=Object.fromEntries(Object.entries(m).filter(([k])=>!k.startsWith('_')));return {...out,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)};}
-function perfSnapshot(session=race){if(session&&perfEnabled)for(const c of session.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m,session);}const input=perfInputSamples.slice().sort((a,b)=>a-b);return {runtimeFault:session?session.runtimeFault??null:perfContext.runtimeFault??null,completed:session?.finished??perfContext.completed??false,diagnosticCoverage:perfContext.coverage===false?'partial':'full',playerId:session?.player?.id??perfContext.playerId??0,build:"v0.13.6.150 · 14.25a-online-auto",htmlBuild:document.querySelector('meta[name="ttr-build"]')?.content??null,quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},environmentEvents:session?window.TTREnvironmentEvents.snapshot(session.environmentEvents):perfContext.environmentEvents??null,recoveries:session?.recoveryHistory??perfRecoveries,recoveriesDropped:session?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(perfPublicCar),trackId:session?.trackId??perfContext.trackId,raceMode:session?.mode??perfContext.mode,serverAuthority:session?.serverAuthority??null,serverTick:session?.serverTick??null,network:session?.mode==='online'?{rttMs:onlineRttMs,...onlineNetStats}:null,difficulty:session?.aiFactor??perfContext.difficulty};}
+function perfSnapshot(session=race){if(session&&perfEnabled)for(const c of session.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m,session);}const input=perfInputSamples.slice().sort((a,b)=>a-b);return {runtimeFault:session?session.runtimeFault??null:perfContext.runtimeFault??null,completed:session?.finished??perfContext.completed??false,diagnosticCoverage:perfContext.coverage===false?'partial':'full',playerId:session?.player?.id??perfContext.playerId??0,build:"v0.13.6.151 · 14.25b-online-events",htmlBuild:document.querySelector('meta[name="ttr-build"]')?.content??null,quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},environmentEvents:session?window.TTREnvironmentEvents.snapshot(session.environmentEvents):perfContext.environmentEvents??null,recoveries:session?.recoveryHistory??perfRecoveries,recoveriesDropped:session?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(perfPublicCar),trackId:session?.trackId??perfContext.trackId,raceMode:session?.mode??perfContext.mode,serverAuthority:session?.serverAuthority??null,serverTick:session?.serverTick??null,network:session?.mode==='online'?{rttMs:onlineRttMs,...onlineNetStats}:null,difficulty:session?.aiFactor??perfContext.difficulty};}
 function perfAnomalies(snapshot){
  const {build,htmlBuild,trackId,raceMode,difficulty,wholeRace,inputLatency,recoveriesDropped}=snapshot;
  const events=snapshot.recoveries||[],counts={};for(const e of events)counts[e.reason]=(counts[e.reason]||0)+1;
@@ -93,7 +93,7 @@ let onlineJoinRequest=null,onlineLobbyPending=false,onlineHandshakeTimer=null,on
 let onlineSocket=null,onlineSession=null,onlineRemoteInputs={},onlineLatest=null,onlineLastSend=0,onlineLastSnapshot=0,onlineFinishDeadline=0;
 // v0.13.6.37: client-side VISUAL prediction and timestamped snapshot interpolation.
 // Authoritative results, collision, pickups, lap count and respawn are server-owned.
-// Requires the full-authoritative-149 capability on /ws-beta.
+// Requires the full-authoritative-151 capability on /ws-beta.
 const TTR_NET={inputIntervalMs:40,snapshotIntervalMs:50,bufferDelayMs:105,maxExtrapolateMs:55};
 let onlineLastInputSignature='',onlineNetStats={snapshots:0,lastArrival:0,arrivalGapMs:null,jitterMs:null,maxCorrection:0};
 function onlineResetSmooth(){onlineLastInputSignature='';onlineNetStats={snapshots:0,lastArrival:0,arrivalGapMs:null,jitterMs:null,maxCorrection:0};}
@@ -112,12 +112,14 @@ function onlinePingTick(now){
  const seq=++onlinePingSeq;onlinePingPending={seq,sent:now};onlineNextPing=now+3000;
  onlineSend({type:'ping',seq});
 }
-const onlineCarNames=['Scatto GT','Tuono V8','Polvere X','Lampo ZX','Aero R'];
+const onlineCarNames=profiles.map(p=>p.name);
+let onlineRetryTimer=null,onlineDeadline=0,onlineAckTimer=null,onlineOutstanding=null;
+function onlineClearAttempt(){clearTimeout(onlineRetryTimer);clearTimeout(onlineAckTimer);onlineRetryTimer=onlineAckTimer=null;onlineOutstanding=null;onlineDeadline=0;}
 function onlineStatus(text){const el=$('onlineStatus');if(el)el.textContent=String(text);}
 function onlineSend(obj){if(onlineSocket?.readyState===WebSocket.OPEN)onlineSocket.send(JSON.stringify(obj));}
 function onlineCloseConnection(){
  const sock=onlineSocket;onlineSocket=null;onlineSession=null;onlineLatest=null;onlineRemoteInputs={};
- clearTimeout(onlineHandshakeTimer);onlineHandshakeTimer=null;onlineLobbyPending=false;
+ clearTimeout(onlineHandshakeTimer);onlineHandshakeTimer=null;onlineLobbyPending=false;onlineClearAttempt();
  onlinePingPending=null;onlineRttMs=null;onlineNextPing=0;onlinePingSupported=false;onlineEnvironmentSupported=false;onlinePendingSnapshot=null;onlineJoinRequest=null;onlineRttDisplay();onlineResetSmooth();
  if(sock){if(sock.readyState===WebSocket.OPEN)try{sock.send(JSON.stringify({type:'leave'}))}catch(e){};sock.onclose=null;sock.onmessage=null;sock.onerror=null;sock.onopen=null;sock.close();}
  $('onlineGameTag').style.display='none';
@@ -137,7 +139,7 @@ function onlineRefreshRoom(){
  $('onlineCopy').hidden=!r?.code;
  $('onlineReady').disabled=!r||r.started;
  $('onlineStart').disabled=!r||!r.organizer||r.started||r.members.filter(Boolean).length<2||!r.members.filter(Boolean).every(m=>m.ready);
- $('onlineLeave').disabled=!r;$('onlineTrack').disabled=!r?.organizer||!!r.started;
+ $('onlineLeave').disabled=!r;$('onlineTrack').disabled=!!r&&(!r.organizer||!!r.started);
  if(!r)return;
  for(const m of r.members.filter(Boolean)){
   const chip=document.createElement('span');chip.className='online-member'+(m.ready?' ready':'');
@@ -150,36 +152,45 @@ function onlineRefreshRoom(){
 // One fixed endpoint, one connection, and at most one outstanding lobby request.
 function onlineFlushLobbyRequest(){
  if(!onlineEnvironmentSupported||onlineSocket?.readyState!==WebSocket.OPEN||!onlineJoinRequest)return;
- const request=onlineJoinRequest;onlineJoinRequest=null;
- onlineStatus('Accesso alla sala…');onlineSend(request);
+ const request=onlineJoinRequest;onlineJoinRequest=null;onlineOutstanding=request;
+ onlineStatus('Accesso alla sala…');onlineSend(request);clearTimeout(onlineAckTimer);onlineAckTimer=setTimeout(()=>{if(onlineLobbyPending&&!onlineSession)onlineRetryLobby('Nessuna risposta dalla sala');},12000);
+}
+function onlineRetryLobby(reason){
+ const req=onlineJoinRequest||onlineOutstanding,deadline=onlineDeadline;
+ onlineCloseConnection();onlineRefreshRoom();
+ if($('onlineModal').hidden||!deadline||Date.now()>=deadline){onlineStatus(reason+'. Riprova con un pulsante Online.');return;}
+ onlineJoinRequest=req;onlineLobbyPending=!!req;onlineDeadline=deadline;onlineStatus('Server in risveglio o rete instabile… nuovo tentativo automatico.');
+ onlineRetryTimer=setTimeout(()=>{onlineRetryTimer=null;if(!$('onlineModal').hidden)onlineEnsureConnection();},2500);
 }
 function onlineEnsureConnection(){
  if(onlineSocket&&onlineSocket.readyState<2){onlineFlushLobbyRequest();return;}
  // Preserve an action selected while the server is waking up.
- const request=onlineJoinRequest,pending=onlineLobbyPending;
- onlineCloseConnection();onlineJoinRequest=request;onlineLobbyPending=pending;
+ const request=onlineJoinRequest,pending=onlineLobbyPending,deadline=onlineDeadline||Date.now()+105000;
+ onlineCloseConnection();onlineJoinRequest=request;onlineLobbyPending=pending;onlineDeadline=deadline;
+ // HTTP wake-up in parallel; no response body or CORS permission needed.
+ try{fetch('https://tiny-track-rivals-online-beta.onrender.com/health',{mode:'no-cors',cache:'no-store',signal:AbortSignal.timeout(65000)}).catch(()=>{});}catch(_){}
  onlineStatus('Connessione automatica al server… Se inattivo, può richiedere circa un minuto.');
  let sock;
  try{sock=new WebSocket(ONLINE_BETA_URL);}catch(e){onlineJoinRequest=null;onlineLobbyPending=false;onlineStatus('Connessione non disponibile. Riprova.');return;}
  onlineSocket=sock;
- onlineHandshakeTimer=setTimeout(()=>{if(onlineSocket!==sock||onlineEnvironmentSupported)return;onlineCloseConnection();onlineRefreshRoom();onlineStatus('Il server non ha risposto. Riprova con un pulsante Online.');},90000);
+ onlineHandshakeTimer=setTimeout(()=>{if(onlineSocket!==sock||onlineEnvironmentSupported)return;onlineRetryLobby('Il server non ha risposto');},Math.max(1000,Math.min(35000,onlineDeadline-Date.now())));
  sock.onopen=()=>{if(onlineSocket!==sock)return;onlineStatus('Verifica compatibilità server…');onlineNextPing=performance.now()+450;};
  sock.onmessage=e=>{if(onlineSocket!==sock)return;let d;try{d=JSON.parse(e.data)}catch(_){return;}onlineOnMessage(d);};
  sock.onerror=()=>{if(onlineSocket===sock)onlineStatus('Server non raggiungibile. Controlla la connessione internet.');};
- sock.onclose=()=>{if(onlineSocket!==sock)return;const inGame=race?.mode==='online'||!!onlineSession?.started;onlineCloseConnection();onlineRefreshRoom();if(inGame){mainMenu();onlineOpenPanel(false);onlineStatus('Connessione interrotta durante la gara.');}else onlineStatus('Connessione chiusa. Riprova con un pulsante Online.');};
+ sock.onclose=()=>{if(onlineSocket!==sock)return;const inGame=race?.mode==='online'||!!onlineSession?.started;if(!onlineSession){onlineRetryLobby('Connessione chiusa');return;}onlineCloseConnection();onlineRefreshRoom();if(inGame){mainMenu();onlineOpenPanel(false);onlineStatus('Connessione interrotta durante la gara.');}else onlineStatus('Connessione chiusa. Riprova con un pulsante Online.');};
 }
 function onlineConnect(kind){
  if(onlineSession){onlineStatus('Esci prima dalla sala corrente.');return;}
  if(onlineLobbyPending){onlineStatus('Accesso in corso…');return;}
  const name=$('onlineName').value.trim().slice(0,18)||'Pilota';
- const request={type:kind,name,eventVersion:149,protocol:2,car:Number($('onlineCar').value),capacity:Number($('onlineCapacity').value)};
+ const request={type:kind,name,eventVersion:151,protocol:2,track:$('onlineTrack').value,car:Number($('onlineCar').value),capacity:Number($('onlineCapacity').value)};
  if(kind==='join')request.code=$('onlineCode').value.trim().toUpperCase();
  if(kind==='join'&&!/^[A-Z0-9]{6}$/.test(request.code)){onlineStatus('Inserisci il codice della sala (6 caratteri).');return;}
  try{localStorage.setItem('ttr_online_name',name);}catch(e){}
- onlineJoinRequest=request;onlineLobbyPending=true;onlineEnsureConnection();
+ onlineJoinRequest=request;onlineLobbyPending=true;onlineDeadline=Date.now()+105000;onlineEnsureConnection();
 }
 function onlineOnMessage(d){
- if(d.type==='hello'){onlineEnvironmentSupported=d.protocol===2&&Array.isArray(d.features)&&d.features.includes('full-authoritative-149');onlinePingSupported=Array.isArray(d.features)&&d.features.includes('rtt_ping');if(!onlineEnvironmentSupported){onlineCloseConnection();onlineRefreshRoom();onlineStatus('Server non compatibile. Riprova dopo un aggiornamento.');return;}clearTimeout(onlineHandshakeTimer);onlineHandshakeTimer=null;onlineStatus('Server connesso. Scegli come giocare.');onlineFlushLobbyRequest();return;}
+ if(d.type==='hello'){onlineEnvironmentSupported=d.protocol===2&&Array.isArray(d.features)&&d.features.includes('full-authoritative-151')&&d.carCount===profiles.length&&Array.isArray(d.tracks)&&window.TTREnvironmentEvents.TRACKS.every(t=>d.tracks.includes(t));onlinePingSupported=Array.isArray(d.features)&&d.features.includes('rtt_ping');if(!onlineEnvironmentSupported){onlineCloseConnection();onlineRefreshRoom();onlineStatus('Server non compatibile. Riprova dopo un aggiornamento.');return;}clearTimeout(onlineHandshakeTimer);onlineHandshakeTimer=null;onlineStatus('Server connesso. Scegli come giocare.');onlineFlushLobbyRequest();return;}
  if(d.type==='pong'){
   if(onlinePingPending && d.seq===onlinePingPending.seq){
    const elapsed=performance.now()-onlinePingPending.sent;
@@ -188,13 +199,13 @@ function onlineOnMessage(d){
   }
   return;
  }
- if(d.type==='error'){onlineLobbyPending=false;onlineJoinRequest=null;onlineStatus(d.message||'Errore di rete');return;}
- if(d.type==='joined'){onlineLobbyPending=false;onlineJoinRequest=null;onlineSession={slot:d.slot,code:d.code,host:false,organizer:!!d.host,public:false,capacity:4,members:[],started:false};onlineRefreshRoom();return;}
+ if(d.type==='error'){onlineClearAttempt();onlineLobbyPending=false;onlineJoinRequest=null;onlineStatus(d.message||'Errore di rete');return;}
+ if(d.type==='joined'){onlineClearAttempt();onlineLobbyPending=false;onlineJoinRequest=null;onlineSession={slot:d.slot,code:d.code,host:false,organizer:!!d.host,public:false,capacity:4,members:[],started:false};onlineRefreshRoom();return;}
  if(d.type==='room_state'&&onlineSession){
   Object.assign(onlineSession,{code:d.code,public:d.public,capacity:d.capacity,started:d.started});
   const arr=Array(d.capacity).fill(null);
   for(const m of d.members)arr[m.slot]=m;
-  onlineSession.members=arr;onlineSession.organizer=!!arr[onlineSession.slot]?.host;
+  onlineSession.members=arr;onlineSession.organizer=!!arr[onlineSession.slot]?.host;if(d.track&&window.TTREnvironmentEvents.TRACKS.includes(d.track))$('onlineTrack').value=d.track;
   onlineRefreshRoom();return;
  }
  if(d.type==='player_left'&&onlineSession){
@@ -203,7 +214,7 @@ function onlineOnMessage(d){
   onlineStatus('Un giocatore si è disconnesso: la CPU prende il suo posto.');return;
  }
  if(d.type==='race_start'&&onlineSession){
-  if(!onlineEnvironmentSupported||d.authority!=='server'||!window.TTREnvironmentEvents.TRACKS.includes(d.track)){onlineStatus('Aggiorna il server /ws-beta e tutti i giocatori alla .149.');onlineSend({type:'leave'});onlineCloseConnection();onlineRefreshRoom();return;}
+  if(!onlineEnvironmentSupported||d.authority!=='server'||!window.TTREnvironmentEvents.TRACKS.includes(d.track)){onlineStatus('Aggiorna il server /ws-beta e tutti i giocatori alla .151.');onlineSend({type:'leave'});onlineCloseConnection();onlineRefreshRoom();return;}
   onlineSession.trackId=d.track;onlineSession.allLoaded=false;onlinePendingSnapshot=null;
   onlineSession.started=true;onlineSession.members=Array(d.capacity).fill(null);
   for(const m of d.members)onlineSession.members[m.slot]=m;
@@ -362,9 +373,10 @@ function onlineWire(){
  $('onlineJoin').onclick=()=>onlineConnect('join');
  $('onlinePublic').onclick=()=>onlineConnect('find_public');
  $('onlineReady').onclick=()=>{const p=onlineSession?.members[onlineSession.slot];if(p)onlineSend({type:'ready',ready:!p.ready});};
- $('onlineStart').onclick=()=>{if(!onlineEnvironmentSupported){onlineStatus('Server non aggiornato: serve Online Beta .149 su /ws-beta.');return;}onlineSend({type:'start',track:$('onlineTrack').value});};
+ $('onlineStart').onclick=()=>{if(!onlineEnvironmentSupported){onlineStatus('Server non aggiornato: serve Online Beta .151 su /ws-beta.');return;}onlineSend({type:'start',track:$('onlineTrack').value});};
  $('onlineLeave').onclick=()=>{onlineQuit();onlineRefreshRoom();onlineStatus('Hai lasciato la sala.')};
  $('onlineCar').onchange=()=>{if(onlineSession)onlineSend({type:'car',car:Number($('onlineCar').value)});};
+ $('onlineTrack').onchange=()=>{if(onlineSession?.organizer&&!onlineSession.started)onlineSend({type:'track',track:$('onlineTrack').value});};
  $('onlineCopy').onclick=()=>{const code=onlineSession?.code;if(!code)return;const fld=$('onlineCode');fld.value=code;fld.focus();fld.select();try{navigator.clipboard?.writeText(code)}catch(e){}};
 }
 
@@ -1425,7 +1437,7 @@ function TTROpenTrackSelect(mode){
 function TTRUpdateTrackPreview(){const c=TTRCircuitCatalog.find(t=>t.id===selectedTrackId);const copy=TTRTrackCopy[I18N.getLang()]||TTRTrackCopy.it;if(!c)return;
  const available=TTRTrackAvailable(c,activeTrackMode);
  $('trackSelectSelected').textContent=String(c.index).padStart(2,'0')+' · '+c.name.toUpperCase();$('trackSelectInfo').textContent=c.prototype&&available?TTRProtoCopy()[1]:c.ready?copy.info:copy.lockedInfo;
- if(available){TTRDrawSelectedTrack($('trackSelectMap'),c);try{const id=profiles[selectedCar]?.id,db=JSON.parse(localStorage.getItem('ttr_trial_records_v1_'+c.id+'-events148')||'{}');const best=db[id]?.bestLap;$('trackSelectInfo').textContent+=' · '+TTRLoadText()[22]+': '+(typeof best==='number'&&Number.isFinite(best)&&best>0?window.TTRTrialSession.formatTime(best):'—');}catch(_){}}
+ if(available){TTRDrawSelectedTrack($('trackSelectMap'),c);try{const id=profiles[selectedCar]?.id,db=JSON.parse(localStorage.getItem('ttr_trial_records_v1_'+c.id+'-events151')||'{}');const best=db[id]?.bestLap;$('trackSelectInfo').textContent+=' · '+TTRLoadText()[22]+': '+(typeof best==='number'&&Number.isFinite(best)&&best>0?window.TTRTrialSession.formatTime(best):'—');}catch(_){}}
  $('trackSelectNext').textContent=c.prototype&&available?TTRProtoCopy()[2]:copy.continue;
  $('trackSelectNext').disabled=!available;
 }
@@ -1511,8 +1523,8 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
 function wireMenu(){
  // 14.15: tolerate a cached pre-14.14 HTML shell; manual acceleration is no longer supported.
  const obsoleteAuto=$('auto');if(obsoleteAuto){const label=obsoleteAuto.closest('label');if(label)label.remove();else obsoleteAuto.remove();}
- document.documentElement.dataset.ttrJsBuild='0.13.6.150';
- const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.150 · 14.25a-online-auto';
+ document.documentElement.dataset.ttrJsBuild='0.13.6.151';
+ const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.151 · 14.25b-online-events';
  // A transformed menu creates a non-viewport containing block for fixed dialogs.
  // Move Options to document.body, so the overlay is genuinely viewport-sized on iPhone.
  const settingsDialog=$('retroSettings');if(settingsDialog&&settingsDialog.parentNode!==document.body)document.body.appendChild(settingsDialog);const configDialog=$('raceConfig');if(configDialog&&configDialog.parentNode!==document.body)document.body.appendChild(configDialog);const trackDialog=$('trackSelect');if(trackDialog&&trackDialog.parentNode!==document.body)document.body.appendChild(trackDialog);
@@ -1983,7 +1995,7 @@ window.TTRDebug={
  c.lastValidPosition={x:safe.x,y:safe.y,a:tangent(from),p:from,laps:c.lapsCompleted,flags:c.flags.slice()};
  c.auditP=from;c.auditTravel=350;c.auditCleanTime=0;c.x=pos.x;c.y=pos.y;c.p=from;c.lastP=from;c.a=tangent(to);c.speed=0;c.offtrack=false;c.respawnGrace=0;race.countdown=0;
  const before=c.shortcutRespawns||0;update(1/60);return {before,after:c.shortcutRespawns||0,phase:c.p,expectedPhase:from};
-},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.150',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
+},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.151',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
 })();
 
 

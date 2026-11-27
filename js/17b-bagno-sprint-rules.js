@@ -31,7 +31,7 @@
    const alongExit=physical>.02?((c.x-old.x)*Math.cos(D.tangent(rejoin.p))+(c.y-old.y)*Math.sin(D.tangent(rejoin.p)))/physical:0;
    // Both lanes overlap at the dry outlet; allow the final 12% only if
    // the previous sample was already there and the car actually heads into the outgoing lane.
-   const dryEarly=p>=D.entry+(D.exit-D.entry)*.865&&oldBranch>=.875&&b.t>=.88&&b.distance>=D.bridgeHalf-8&&b.distance<=D.bridgeHalf+22&&rejoin.distance<=D.laneHalf-12&&exitGap>=0&&exitGap<=.022&&alongExit>.55;
+   const dryEarly=p>=D.entry+(D.exit-D.entry)*.865&&oldBranch>=.87&&b.t>=.88&&b.distance>=D.bridgeHalf-8&&b.distance<=D.bridgeHalf+28&&rejoin.distance<=D.laneHalf-8&&exitGap>=-.004&&exitGap<=.022&&alongExit>.48;
    if((dryEarly||oldBranch>=.88&&b.t>=.90&&Math.abs(exitGap)<=.022&&rejoin.distance<=D.laneHalf-12&&forward&&(b.distance>D.bridgeHalf-8||b.t>=.97))&&physical>.02&&c.speed>0&&Math.abs(b.t-oldBranch)*D.shortcutLength<=physical*2.4+5){
     c.onBridge=false;c.bridgeOffSeconds=0;c.offtrack=false;c.offtrackSeconds=0;c.routePinch=null;c.routeStableP=rejoin.p;c.routeResolvedNear={...rejoin,shortcut:false};c.routeDecision=dryEarly?'bath-dry-exit-rejoin':'bath-legal-rejoin';c.deskTry=false;c.shortcutCompleted=(c.shortcutCompleted||0)+1;trace(c.routeDecision,rejoin.distance);if(c===race.player)SND?.sfx('landing');return true;
    }
