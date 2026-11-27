@@ -170,7 +170,7 @@
    for(const off of offsets){const x=q.x+nx*off,y=q.y+ny*off;let score=Math.abs(off)*.34;
     if(x<218||x>2382||y<183||y>1417)score+=1000;
     for(const o of guides){const d=Math.hypot(x-o.x,y-o.y),gap=d-o.r-30;if(gap<22)score+=(22-gap)**2*.5;}
-    for(const o of B.pockets){const d=Math.hypot(x-o.x,y-o.y);if(d<o.r+28)score+=(o.r+28-d)**2;}
+    for(const o of B.pockets){const d=Math.hypot(x-o.x,y-o.y);const margin=o.role==='hazard'?o.triggerR+42:o.r+28;if(d<margin)score+=(margin-d)**2;}
     if(score<cost){cost=score;best=off;}}
    return best;});
  function guidance(p){const q=B.point(p),a=B.tangent(p),i=Math.round(K.mod(p,1)*N)%N;let off=0,w=0;for(let j=-5;j<=5;j++){const v=6-Math.abs(j);off+=guide[K.mod(i+j,N)]*v;w+=v;}off/=w;return{x:q.x-Math.sin(a)*off,y:q.y+Math.cos(a)*off};}
@@ -187,7 +187,7 @@
    if(hard&&aim>.435&&aim<.495){const w=K.clamp((aim-.435)/.012,0,1)*K.clamp((.495-aim)/.013,0,1);normal.y+=Math.max(0,270-normal.y)*w;}
    const live=[...guides,...(race.boxBalls||[]).filter(o=>o.movable&&!o.pocketed)];
    let target=cpuTarget(c,race,s,normal),branch=target!==normal;
-   if(!branch){const a=B.tangent(p+lookP),nx=-Math.sin(a),ny=Math.cos(a);for(const o of race.boxBalls||[]){if(o.pocketed||K.distance(c,o)>150||K.distance(target,o)>o.r+30)continue;const side=(o.x-target.x)*nx+(o.y-target.y)*ny>0?-1:1;const q={x:target.x+nx*side*46,y:target.y+ny*side*46};if(K.nearestTrackWindow(q,B.points,p+lookP,.02).distance<B.laneHalf-28)target=q;break;}}
+   if(!branch){const a=B.tangent(p+lookP),nx=-Math.sin(a),ny=Math.cos(a);for(const o of race.boxBalls||[]){if(o.pocketed||K.distance(c,o)>150||K.distance(target,o)>o.r+30)continue;const side=(o.x-target.x)*nx+(o.y-target.y)*ny>0?-1:1;const q={x:target.x+nx*side*46,y:target.y+ny*side*46};if(K.nearestTrackWindow(q,B.points,p+lookP,.02).distance<B.laneHalf-28&&!B.pockets.some(v=>K.distance(q,v)<(v.triggerR||v.r)+35))target=q;break;}}
    let leader=null,gap=Infinity;
    if(!branch&&!railZone&&s.pass>0&&near.distance<85&&!(c.aiRecoveryUntil>race.time)){
      const a=B.tangent(p),nx=-Math.sin(a),ny=Math.cos(a),fx=Math.cos(a),fy=Math.sin(a);
