@@ -17,7 +17,7 @@ for(const id of Object.keys(atlasLayouts))inlineAssets[id+'_turntable']='assets/
 // .153: bounded loading, retryable failures, and explicit readiness by asset group.
 const pending=new Map(),queue=[];let active=0;
 const MAX_PARALLEL=4, TIMEOUT=15000;
-const assetUrl=name=>(inlineAssets[name]||'assets/'+name+((name.includes('_concept_')||name.includes('_menu_clean'))?'.jpg':'.png'))+'?v=0.13.6.120';
+const assetUrl=name=>(inlineAssets[name]||'assets/'+name+((name.includes('_concept_')||name.includes('_menu_clean'))?'.jpg':'.png'))+(name.startsWith('behemoth')?'?v=0.13.6.157':'?v=0.13.6.120');
 function pump(){while(active<MAX_PARALLEL&&queue.length){const job=queue.shift();active++;run(job).finally(()=>{active--;pending.delete(job.name);job.resolve(status[job.name]==='ready');pump();});}}
 async function run(job){const {name}=job;for(let attempt=0;attempt<2;attempt++){
  status[name]='loading';const ok=await new Promise(resolve=>{const img=new Image();let settled=false;const finish=ok=>{if(settled)return;settled=true;clearTimeout(timer);img.onload=img.onerror=null;if(ok&&img.naturalWidth>0&&img.naturalHeight>0){images[name]=img;resolve(true);}else resolve(false);};
