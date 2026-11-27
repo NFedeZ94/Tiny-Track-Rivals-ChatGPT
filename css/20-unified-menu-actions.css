@@ -1,0 +1,32 @@
+/* TTR 14.25f — one action language, matching the approved circuit selector.
+   Secondary: navy + cream frame. Primary: cream + navy text. No race controls. */
+:root{--ttr-action-secondary:#243973;--ttr-action-primary:#ffe5a5;--ttr-action-frame:#ecdbab;--ttr-action-text:#ffe8aa;--ttr-action-ink:#142447}
+html body :is(#loadingTrack #ttrLoadingBack,#loadingTrack #ttrLaunchRace,#garageScreen #garageClose,#garageScreen #garageSelect,#garageScreen #ttrRosterOpen,#ttrGarageLoading #ttrGarageRetry,#ttrGarageLoading #ttrGarageCancel,#careerScreen .career-btn,#careerMissionsScreen .career-btn,#onlineModal button,#ttrRosterModal #ttrRosterClose,#raceConfig #raceConfigCancel,#raceConfig #raceConfigStart,#raceConfig #raceConfigClose,#retroSettings #closeSettings,#screen .resultsPanel .menu-row button,#screen #resultMissions){
+ box-sizing:border-box!important;border:2px solid var(--ttr-action-frame)!important;background:var(--ttr-action-secondary)!important;color:var(--ttr-action-text)!important;
+ border-radius:2px!important;box-shadow:none!important;text-shadow:none!important;-webkit-text-stroke:0!important;
+ font:900 clamp(11px,2.6vh,15px)/1.13 Impact,Arial,sans-serif!important;letter-spacing:.025em!important;text-transform:uppercase!important;
+ min-height:33px!important;padding:5px 12px!important;cursor:pointer;touch-action:manipulation!important;
+}
+html body :is(#loadingTrack #ttrLaunchRace,#garageScreen #garageSelect,#careerScreen #careerPlay,#onlineModal #onlineStart,#raceConfig #raceConfigStart,#screen .resultsPanel #again,#ttrGarageLoading #ttrGarageRetry){background:var(--ttr-action-primary)!important;color:var(--ttr-action-ink)!important}
+html body :is(#loadingTrack button,#garageScreen button,#careerScreen button,#careerMissionsScreen button,#onlineModal button,#ttrGarageLoading button,#ttrRosterModal button,#raceConfig button,#screen .resultsPanel button):focus-visible{outline:2px solid #fff!important;outline-offset:2px}
+html body :is(#loadingTrack button,#garageScreen button,#careerScreen button,#careerMissionsScreen button,#onlineModal button,#ttrGarageLoading button,#raceConfig button):disabled{opacity:.43!important;cursor:not-allowed!important}
+html body #loadingTrack #ttrLoadingBack{min-width:0!important;max-width:46%;white-space:normal!important;text-align:center;flex:0 0 auto}
+html body #loadingTrack #ttrLaunchRace{min-width:min(160px,90%)!important;max-width:90%;width:min(360px,90%)!important}
+html body #garageScreen .garage-header{gap:5px!important;flex-wrap:nowrap!important}
+html body #garageScreen .garage-header>div:first-child{min-width:0;flex:1 1 auto}
+html body #garageScreen :is(#garageClose,#ttrRosterOpen){flex:0 0 auto!important;width:auto!important;white-space:nowrap!important;margin:0!important}
+html body #garageScreen .garage-list .ttr-pack-head{display:flex;align-items:center;justify-content:space-between;flex:none;gap:4px;font:900 clamp(9px,2.2vh,13px)/1.15 Impact,Arial,sans-serif;color:#ffe8aa;min-height:13px}
+html body #garageScreen #ttrGaragePackStatus{color:#c3dbff;font:700 clamp(8px,2vh,11px)/1.15 Arial,sans-serif;text-align:right;min-width:0}
+html body #garageScreen #ttrGaragePacks{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;flex:none;min-width:0;margin:2px 0 4px}
+html body #garageScreen #ttrGaragePacks .ttr-pack-button{box-sizing:border-box;min-width:0!important;min-height:27px;padding:3px 1px!important;border:2px solid var(--ttr-action-frame)!important;border-radius:2px!important;background:var(--ttr-action-secondary)!important;color:var(--ttr-action-text)!important;font:900 clamp(9px,2.5vh,13px)/1 Impact,Arial,sans-serif!important;white-space:nowrap;touch-action:manipulation;cursor:pointer}
+html body #garageScreen #ttrGaragePacks .ttr-pack-button.active{background:var(--ttr-action-primary)!important;color:var(--ttr-action-ink)!important}
+html body #garageScreen #garageChoices{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important}
+html body #onlineModal #onlineClose{flex:0 0 auto;white-space:nowrap}
+@media (orientation:landscape) and (max-height:470px){
+ html body :is(#loadingTrack #ttrLoadingBack,#loadingTrack #ttrLaunchRace,#garageScreen #garageClose,#garageScreen #garageSelect,#garageScreen #ttrRosterOpen,#careerScreen .career-btn,#careerMissionsScreen .career-btn,#onlineModal button,#ttrRosterModal #ttrRosterClose,#screen .resultsPanel .menu-row button,#screen #resultMissions){min-height:29px!important;padding:3px 8px!important;font-size:clamp(10px,2.65vh,13px)!important}
+ html body #garageScreen #ttrGaragePacks .ttr-pack-button{min-height:24px}
+ html body #garageScreen .garage-list>p.eyebrow{margin:0 0 2px!important;font-size:clamp(8px,2vh,11px)!important}
+}
+/* Collection filter controls belong to the same action palette; vehicle cards are unchanged. */
+html body #ttrRosterModal .ttr-roster-tab{border:2px solid var(--ttr-action-frame)!important;background:var(--ttr-action-secondary)!important;color:var(--ttr-action-text)!important;border-radius:2px!important;box-shadow:none!important;font:900 clamp(10px,2.4vh,13px)/1.1 Impact,Arial,sans-serif!important;text-transform:uppercase}
+html body #ttrRosterModal .ttr-roster-tab[aria-pressed="true"]{background:var(--ttr-action-primary)!important;color:var(--ttr-action-ink)!important}
