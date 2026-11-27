@@ -163,7 +163,7 @@ if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInp
    // Predict turn severity ahead, not merely current heading error. Preserve
    // full throttle on straights and a useful speed on the approved ramp.
    const bend=Math.abs(angleDiff(K.tangent(c.p+.033),K.tangent(c.p+.008)));
-   const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);
+   const cap=c.profile.max*(c.boost>0?1.42:1);
    let desired=cap*(1-clamp((bend-.30)*.34,0,.38)*(.10+(1-s.curveSpeed)*3.3));
    const turnThreshold=.65+(s.curveSpeed-.77)*.9+(s.curveSpeed>=.999?.12:0);
    if(v>turnThreshold)desired=Math.min(desired,cap*(1-clamp((v-turnThreshold+.10)*.46,0,.55)));
@@ -178,7 +178,7 @@ if(race?.mode==='online'&&onlineSession?.host&&c.id!==0){const net=onlineHostInp
    // Avoid needless throttle/coast oscillation at the vehicle speed limiter.
    // Only hard AI gets the tighter racing-line and throttle calibration.
    const brake=c.speed>desired+(hard?16:12)&&c.speed>85;
-   return {steer,gas:!brake&&(hard&&desired>=cap*.96||c.speed<desired+(hard?8:3)),brake};
+   return {steer,gas:!brake&&(desired>=cap*.96||c.speed<desired+(hard?8:3)),brake};
  }
  function frontSpeedFallback(c,race){let speed=c.speed;for(const other of race.cars){if(other!==c&&!other.done&&!other.eliminated&&Math.hypot(other.x-c.x,other.y-c.y)<90)speed=Math.min(speed,other.speed);}return speed;}
  return Object.freeze({inputFor,skillFor});

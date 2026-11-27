@@ -1,6 +1,6 @@
 /* TTR 14.4: persistent circuit/car records; legacy bests imported without fabricated laps. */
 (()=>{'use strict';
- let track='colazione-turbo', key='ttr_trial_records_v1_colazione-turbo-events151';const storeTrack=()=>track+'-events151';const ghostKey=id=>'ttr_trial_ghost_v1_'+storeTrack()+'_'+id;
+ let track='colazione-turbo', key='ttr_trial_records_v1_colazione-turbo-bridge152';const storeTrack=()=>track+(track==='colazione-turbo'?'-bridge152':'-events151');const ghostKey=id=>'ttr_trial_ghost_v1_'+storeTrack()+'_'+id;
  function setTrack(id){track=['box-di-biliardo','desk-drift','bagno-sprint','garage-grid'].includes(id)?id:'colazione-turbo';key='ttr_trial_records_v1_'+storeTrack();}
  const lapKey=id=>'ttr_trial_lap_ghost_v1_'+storeTrack()+'_'+id;const S=()=>window.TTRTrialSession; const fmt=n=>n==null?'—':S().formatTime(n);
  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
