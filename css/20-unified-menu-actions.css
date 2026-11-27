@@ -63,3 +63,41 @@ html body #garageScreen #ttrGaragePacks .ttr-pack-button{display:flex!important;
 html body #garageScreen #ttrGaragePacks .ttr-pack-button svg{display:block;width:14px;height:14px;flex:none;pointer-events:none}
 html body #garageScreen #ttrGaragePacks .ttr-pack-button span{display:block;max-width:100%;overflow-wrap:normal;pointer-events:none}
 @media(max-height:470px) and (orientation:landscape){html body #garageScreen #ttrGaragePacks .ttr-pack-button{min-height:34px!important;gap:1px;padding:2px 1px!important}html body #garageScreen #ttrGaragePacks .ttr-pack-button svg{width:12px;height:12px}}
+
+/* v158: online lobby. Single screen in landscape, room for eight real players.
+   Keep all IDs and native controls; emergency scrolling only on tiny viewports/keyboard. */
+html body #onlineModal{box-sizing:border-box!important;align-items:center!important;justify-content:center!important;padding:max(4px,env(safe-area-inset-top)) max(6px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left))!important;overflow:hidden!important;touch-action:pan-y!important}
+html body #onlineModal[hidden]{display:none!important}
+html body #onlineModal .online-panel{box-sizing:border-box!important;display:flex!important;flex-direction:column!important;gap:clamp(3px,1.2vh,9px);width:min(940px,100%)!important;max-width:100%!important;max-height:100%!important;min-height:0!important;margin:0!important;padding:clamp(5px,1.5vh,12px)!important;overflow-y:auto!important;overscroll-behavior:contain;touch-action:pan-y!important;background:linear-gradient(135deg,#33447c,#192b51)!important;border:2px solid var(--ttr-action-frame)!important;border-radius:3px!important;box-shadow:none!important;color:#e5efff!important}
+html body #onlineModal .online-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none;border-bottom:1px solid #9db3dc;padding-bottom:3px}
+html body #onlineModal h2{margin:0!important;font:italic 900 clamp(17px,4.8vh,29px)/1 Impact,'Arial Black',Arial,sans-serif!important;letter-spacing:.035em;color:var(--ttr-action-text)!important}
+html body #onlineModal h3{margin:0!important;color:var(--ttr-action-text)!important;font:900 clamp(11px,2.9vh,18px)/1.1 Impact,'Arial Black',Arial,sans-serif!important;letter-spacing:.045em}
+html body #onlineModal .online-main{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(4px,1vw,10px);flex:none;min-width:0}
+html body #onlineModal :is(.online-config,.online-room){display:flex;flex-direction:column;gap:clamp(3px,1vh,7px);min-width:0;padding:clamp(4px,1.2vh,8px);background:#101f43;border:1px solid #829ac8;border-radius:2px;box-sizing:border-box}
+html body #onlineModal .online-fields{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(3px,1vh,7px);min-width:0}
+html body #onlineModal .online-fields label{display:flex!important;flex-direction:column!important;gap:2px!important;min-width:0!important;margin:0!important;color:var(--ttr-action-text)!important;font:800 clamp(10px,2.6vh,14px)/1.12 Arial,sans-serif!important}
+html body #onlineModal .online-fields label:last-child{grid-column:1/-1}
+html body #onlineModal :is(input,select){display:block!important;box-sizing:border-box!important;width:100%!important;min-width:0!important;max-width:100%!important;margin:0!important;height:clamp(25px,6.5vh,36px)!important;min-height:0!important;padding:2px 5px!important;border:1px solid #9db3dc!important;border-radius:3px!important;background:#16264d!important;color:#f3f7ff!important;font:600 clamp(12px,3vh,16px)/1.1 Arial,sans-serif!important;touch-action:manipulation!important}
+html body #onlineModal .online-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;min-width:0;align-items:stretch}
+html body #onlineModal .online-lobby-actions{margin-top:auto}
+html body #onlineModal button{margin:0!important;min-width:0!important;min-height:clamp(28px,7vh,36px)!important;padding:3px 5px!important;white-space:normal!important;line-height:1.1!important;font-size:clamp(10px,2.7vh,14px)!important}
+html body #onlineModal #onlineClose{white-space:nowrap!important}
+html body #onlineModal #onlineStart{background:var(--ttr-action-primary)!important;color:var(--ttr-action-ink)!important}
+html body #onlineModal #onlineStart::before,html body #onlineModal #onlineStart::after{content:none!important;display:none!important}
+html body #onlineModal .online-room-head{display:flex;gap:4px;align-items:center;flex:none;min-width:0;flex-wrap:wrap}
+html body #onlineModal .room-code{font:900 clamp(10px,2.7vh,14px)/1.1 Arial,sans-serif!important;letter-spacing:.05em!important;white-space:nowrap;color:#ffe5a5;flex:1 1 auto;min-width:0}
+html body #onlineModal .room-code:empty{display:none}
+html body #onlineModal #onlineCopy{margin-left:auto!important;font-size:clamp(9px,2.4vh,12px)!important;min-height:25px!important}
+html body #onlineModal #onlineCopy[hidden]{display:none!important}
+html body #onlineModal #onlineMembers{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:3px!important;flex:1 1 auto;min-height:0!important;margin:0!important;align-content:stretch}
+html body #onlineModal #onlineMembers:empty::before{content:'Nessuna sala attiva';grid-column:1/-1;grid-row:1/-1;align-self:center;text-align:center;color:#c3d5ed;font:600 clamp(11px,3vh,15px)/1.2 Arial,sans-serif}
+html body #onlineModal .online-member{display:flex!important;flex-direction:column;justify-content:center;min-width:0;gap:1px;padding:2px 4px!important;background:#192c50!important;border:1px solid #6c89b9!important;border-radius:2px!important;color:#e5efff;font:600 clamp(9px,2.4vh,12px)/1.1 Arial,sans-serif!important;overflow:hidden}
+html body #onlineModal .online-member.ready{border-color:#7cc9aa!important}
+html body #onlineModal .online-member b,html body #onlineModal .online-member span{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html body #onlineModal .online-member .online-host{color:#ffe5a5}
+html body #onlineModal .online-member.ready span{color:#a9e5c7}
+html body #onlineModal .online-footer{display:flex;flex-direction:column;gap:4px;flex:none;min-width:0;border-top:1px solid #829ac8;padding-top:3px}
+html body #onlineModal #onlineStatus{margin:0!important;min-height:0!important;color:#ffe5a5!important;font:600 clamp(10px,2.65vh,13px)/1.18 Arial,sans-serif!important;overflow-wrap:anywhere}
+@media(orientation:landscape) and (max-height:340px){html body #onlineModal .online-panel{gap:3px;padding:4px!important}html body #onlineModal .online-main{gap:4px}html body #onlineModal :is(.online-config,.online-room){gap:3px;padding:4px}html body #onlineModal .online-fields{gap:3px}html body #onlineModal :is(input,select){height:25px!important}html body #onlineModal .online-member{padding:1px 3px!important}html body #onlineModal .online-footer{gap:3px}}
+@media(orientation:portrait){html body #onlineModal .online-main{grid-template-columns:1fr}html body #onlineModal #onlineMembers{min-height:100px!important}}
+@media(orientation:landscape) and (max-height:300px){html body #onlineModal .online-panel{gap:2px;padding:3px!important}html body #onlineModal :is(.online-config,.online-room){gap:2px;padding:3px}html body #onlineModal .online-fields{gap:2px}html body #onlineModal :is(input,select){height:23px!important}html body #onlineModal button{min-height:25px!important;padding:2px 3px!important}html body #onlineModal .online-footer{gap:2px}html body #onlineModal .online-member{font-size:9px!important}}
