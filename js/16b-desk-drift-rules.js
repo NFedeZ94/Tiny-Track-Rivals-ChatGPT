@@ -93,7 +93,7 @@
   const d=K.angleDiff(Math.atan2(target.y-c.y,target.x-c.x),c.a),steer=K.clamp(d*(hard?3.7:3.3),-1,1);
   if(c.reverseRecovery>0)return {steer:-steer||1,gas:false,brake:true};
   const bend=c.onBridge?0:Math.max(Math.abs(K.angleDiff(D.tangent(p+.017),D.tangent(p))),Math.abs(K.angleDiff(D.tangent(p+.029),D.tangent(p+.012))));
-  const cap=c.profile.max*s.pace*(c.boost>0?1.42:1);let desired=cap*(1-K.clamp((bend-(hard?.30:.20))*(hard?.19:.63),0,hard?.45:.6));
+  const cap=c.profile.max*(c.boost>0?1.42:1);let desired=cap*(1-K.clamp((bend-(hard?.30:.20))*(hard?.19:.63),0,hard?.45:.6));
   if(Math.abs(d)>.30)desired=Math.min(desired,cap*(1-K.clamp((Math.abs(d)-.25)*(hard?.30:.68),0,hard?.48:.65)));
   if(!c.onBridge&&Math.abs(d)>.90)desired=Math.min(desired,Math.abs(d)>1.55?78:118);
   if(!c.onBridge&&near.distance>65&&Math.abs(d)>.60)desired=Math.min(desired,125);

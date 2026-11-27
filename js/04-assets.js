@@ -14,19 +14,33 @@ const images={}; const status={};
 const atlasLayouts=Object.freeze({"aero":[24,54,144,87,192,192],"apex":[34,73,188,124,256,256],"behemoth":[15,48,226,153,256,256],"brezza":[19,78,218,119,256,256],"enduro":[17,7,158,108,192,128],"hotflash":[52,88,152,99,256,256],"interceptor":[43,92,170,99,256,256],"lampo":[15,26,162,92,192,144],"martello":[16,60,224,142,256,256],"metrocab":[43,80,170,109,256,256],"neon":[6,27,244,179,256,256],"polvere":[20,27,152,98,192,144],"retrosprint":[46,95,164,92,256,256],"roccia":[21,55,214,145,256,256],"tempesta":[41,61,174,132,256,256],"titan":[48,60,160,128,256,256],"tuono":[23,45,210,103,256,192],"turbovan":[29,44,198,152,256,256],"volt":[4,35,248,172,256,256]});
 const atlasNames=names.filter(name=>name.endsWith('_turntable'));
 for(const id of Object.keys(atlasLayouts))inlineAssets[id+'_turntable']='assets/images/'+id+'_turntable_compact.webp';
-function loadAsset(name,decode=false){return new Promise(resolve=>{
- const img=new Image();images[name]=img;status[name]='loading';
- const done=ok=>{status[name]=ok?'ready':'failed';resolve(ok);};
- img.onload=()=>{if(decode&&typeof img.decode==='function')img.decode().then(()=>done(true),()=>done(false));else done(true);};
- img.onerror=()=>{console.warn('Asset unavailable:',name);done(false);};
- img.src=(inlineAssets[name]||'assets/'+name+((name.includes('_concept_')||name.includes('_menu_clean'))?'.jpg':'.png'))+'?v=0.13.6.120';
-});}
-const ready=Promise.all(names.filter(name=>!atlasNames.includes(name)).map(name=>loadAsset(name)));
-// Bounded parallel pre-decode: the same complete atlases, no lower-resolution frames.
-let garageLoaded=false;
-const garageReady=(async()=>{await ready;const outcomes=new Array(atlasNames.length);let next=0;const worker=async()=>{while(next<atlasNames.length){const i=next++;outcomes[i]=await loadAsset(atlasNames[i],true);}};await Promise.all([worker(),worker()]);garageLoaded=outcomes.every(Boolean);return garageLoaded;})();
+// .153: bounded loading, retryable failures, and explicit readiness by asset group.
+const pending=new Map(),queue=[];let active=0;
+const MAX_PARALLEL=4, TIMEOUT=15000;
+const assetUrl=name=>(inlineAssets[name]||'assets/'+name+((name.includes('_concept_')||name.includes('_menu_clean'))?'.jpg':'.png'))+'?v=0.13.6.120';
+function pump(){while(active<MAX_PARALLEL&&queue.length){const job=queue.shift();active++;run(job).finally(()=>{active--;pending.delete(job.name);job.resolve(status[job.name]==='ready');pump();});}}
+async function run(job){const {name}=job;for(let attempt=0;attempt<2;attempt++){
+ status[name]='loading';const ok=await new Promise(resolve=>{const img=new Image();let settled=false;const finish=ok=>{if(settled)return;settled=true;clearTimeout(timer);img.onload=img.onerror=null;if(ok&&img.naturalWidth>0&&img.naturalHeight>0){images[name]=img;resolve(true);}else resolve(false);};
+ const timer=setTimeout(()=>{finish(false);try{img.src='';}catch(_){}},TIMEOUT);
+ img.onload=()=>{if(!name.endsWith('_turntable')||typeof img.decode!=='function'){finish(true);return;}Promise.resolve().then(()=>img.decode()).then(()=>finish(true),()=>finish(false));};img.onerror=()=>finish(false);img.src=assetUrl(name);});
+ if(ok){status[name]='ready';return;}if(attempt===0)await new Promise(r=>setTimeout(r,300));
+ }status[name]='failed';}
+function loadAsset(name,priority=false){if(status[name]==='ready')return Promise.resolve(true);const existing=pending.get(name);if(existing){if(priority){const i=queue.indexOf(existing);if(i>=0){queue.splice(i,1);queue.unshift(existing);}}return existing.promise;}
+ let resolve;const promise=new Promise(r=>resolve=r),job={name,promise,resolve};pending.set(name,job);status[name]='queued';if(priority)queue.unshift(job);else queue.push(job);pump();return promise;}
+const modelNames=atlasNames.map(n=>n.replace(/_turntable$/,''));
+const raceNames=modelNames.flatMap(id=>[id,id+'_color1',id+'_color2',id+'_color3']);
+function groupReady(keys){return keys.every(k=>status[k]==='ready');}
+async function ensureGroup(keys,limit=45000){let timer;try{return await Promise.race([Promise.all([...keys].reverse().map(k=>loadAsset(k,true))).then(v=>v.every(Boolean)),new Promise(r=>{timer=setTimeout(()=>r(false),limit);})]);}finally{clearTimeout(timer);}}
+const ready=Promise.all([...modelNames,...raceNames.filter(n=>!modelNames.includes(n)),...names.filter(n=>!atlasNames.includes(n)&&!raceNames.includes(n))].map(n=>loadAsset(n)));
+// Full atlas prefetch is opt-in; only the selected model is prioritized by the showroom.
+const garageReady=()=>ensureGroup(atlasNames);
 function ensureTurntable(id){const key=id+'_turntable';return status[key]==='ready'?images[key]:null;}
-function isGarageReady(){return garageLoaded;}
+function isGarageReady(){return groupReady(atlasNames);}
+const retryAt=new Map();
+function requestTurntable(id){const key=id+'_turntable';if(!atlasNames.includes(key)||status[key]==='ready'||pending.has(key))return;if(Date.now()<(retryAt.get(key)||0))return;retryAt.set(key,Date.now()+5000);loadAsset(key,true).then(ok=>{if(!ok)retryAt.set(key,Date.now()+5000);});}
+function ensureRaceReady(){return ensureGroup(raceNames);}
+function ensureGarageReady(id){return ensureGroup([id+'_turntable',...modelNames]);}
+function missingRace(){return raceNames.filter(k=>status[k]!=='ready');}
 // v0.13.6.34: visual-only race scale, measured from the opaque footprint of each top-down sprite.
 // No modifications to physics widths/lengths, track, or GLB meshes.
 window.TTRArtRevision='TTRToyScaleV1-Scatto92-Tuono125-Brezza93-Volt-Neon-v100';
@@ -96,6 +110,6 @@ function drawVehicle(ctx,car,clock){
   if(car.boost>0&&!mini){ctx.fillStyle='#72e7ffce';for(const k of [-8,8]){ctx.beginPath();ctx.moveTo(k,28);ctx.lineTo(k-4,39+Math.sin(clock*27)*4);ctx.lineTo(k+4,38);ctx.fill();}}
   ctx.restore();return true;
 }
-root.TTRAssets={images,status,ready,garageReady,isGarageReady,atlasLayouts,ensureTurntable,has,draw,drawVehicle,raceVisualScale:spriteVisualScale,raceAspect,vehicleLengthRatios};
+root.TTRAssets={images,status,ready,get garageReady(){return garageReady();},isGarageReady,atlasLayouts,ensureTurntable,requestTurntable,ensureRaceReady,ensureGarageReady,missingRace,has,draw,drawVehicle,raceVisualScale:spriteVisualScale,raceAspect,vehicleLengthRatios};
 })(typeof window==='undefined'?globalThis:window);
 

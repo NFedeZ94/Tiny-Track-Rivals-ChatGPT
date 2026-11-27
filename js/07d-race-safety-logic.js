@@ -17,7 +17,7 @@ function recoverCar(c,reason='edge'){
  c.speed=46;c.jump=0;c.jumpCd=.45;c.boost=0;c.claw=0;c.clawTarget=null;
  c.hitVX=0;c.hitVY=0;c.hitYaw=0;c.impactGrace=0;c.slip=0;c.skidVX=0;c.skidVY=0;c.oilCooldown=0;c.oilSpin=0;
  c.offtrack=false;c.offtrackSeconds=0;c.offtrackEntry=null;c.maxInteriorCut=0;c.offtrackReturnGrace=0;c.offtrackLastDistance=0;c.onBridge=false;c.rampEntryVisual=false;c.bridgeOffSeconds=0;c.bridgeExitVisual=0;c.bridgeContactGrace=0;
- c.bridgeMissActive=false;c.bridgeMissPenalty=0;c.bridgeMissGrace=0;c.bridgeTakeoff=false;c.bridgeFalling=0;c.lapGateBlocked=true;c.respawnGrace=1.1;c.stuckAnchor=null;c.obstacleStuckSeconds=0;
+ c.bridgeFallAudit=null;c.bridgeEntrySafe=null;c.bridgeMissActive=false;c.bridgeMissPenalty=0;c.bridgeMissGrace=0;c.bridgeTakeoff=false;c.bridgeFalling=0;c.lapGateBlocked=true;c.respawnGrace=1.1;c.stuckAnchor=null;c.obstacleStuckSeconds=0;
  c.stuckTime=0;c.reverseRecovery=0;c.lastObstacleContact=-100;c.elimDistance=safe.elimDistance??c.elimDistance;c.tryShortcut=false;c.elimBranchStart=null;
  if(race?.mode==='elimination'){
    const now=race.time,progress=c.elimDistance||0;
@@ -180,12 +180,32 @@ function finishEdgeTolerance(c,near){
      && !c.routePinch && !(c.respawnGrace>0) && !(c.tableFalling>0);
  }
 
+function bridgeLog(c,kind,extra={}){const race=getRace();if(!race)return;const log=race.bridgeEvents??=[];if(log.length<256)log.push({kind,car:c.id,t:+race.time.toFixed(3),x:+c.x.toFixed(1),y:+c.y.toFixed(1),p:c.p,...extra});else race.bridgeEventsDropped=(race.bridgeEventsDropped||0)+1;}
+function bridgeFallGuard(c,main,dt,entry){
+ const audit=c.bridgeFallAudit;if(!audit)return 'none';
+ audit.elapsed+=dt;
+ // Only the ordinary road near the saved entrance is a legal return. A fall
+ // must not grant progress towards the shortcut exit. Keep the original anchor.
+ const delta=((main.p-audit.safe.p+1.5)%1)-.5;
+ if(main.distance<=112&&Math.abs(delta)<=.065&&main.p>=entry-.085&&main.p<=entry+.045){
+   bridgeLog(c,'return',{mainP:main.p,anchor:audit.safe.p,elapsed:+audit.elapsed.toFixed(3)});
+   c.bridgeFallAudit=null;c.bridgeEntrySafe=null;c.bridgeLandingActive=false;c.bridgeMissActive=false;c.bridgeMissPenalty=0;c.bridgeMissGrace=.35;c.routeStableP=main.p;c.auditP=main.p;c.auditTravel=0;c.auditOutsideTime=0;c.offtrack=false;c.offtrackEntry=null;c.offtrackSeconds=0;return 'return';
+ }
+ if((main.distance<=112&&audit.elapsed>=.48)||audit.elapsed>=2.6){
+   bridgeLog(c,'illegal-return',{mainP:main.p,mainDistance:main.distance,anchor:audit.safe.p,elapsed:+audit.elapsed.toFixed(3)});
+   c.routePinch=null;c.offtrackEntry=audit.safe;c.lastValidPosition=audit.safe;recoverCar(c,'bridge-cut');return 'recover';
+ }
+ return 'pending';
+}
 function bridgeFall(c){
  const race=getRace();
 
- if(c.bridgeMissGrace>0)return false;
+ if(c.bridgeFallAudit||c.bridgeMissGrace>0)return false;
+ const saved=c.bridgeEntrySafe||c.lastValidPosition;
+ const safe=saved?{...saved,flags:(saved.flags||c.flags).slice()}:{...trackPoint(c.lastCheckpoint??c.lastP??0),p:c.lastCheckpoint??c.lastP??0,a:tangent(c.lastCheckpoint??c.lastP??0),laps:c.lapsCompleted,flags:c.flags.slice()};
+ c.bridgeFallAudit={safe,elapsed:0};bridgeLog(c,'fall',{anchor:safe.p});
  c.bridgeTakeoff=false;
- c.onBridge=false;c.rampEntryVisual=false;c.bridgeOffSeconds=0;c.bridgeExitVisual=0;c.bridgeMissGrace=10.0;c.bridgeMissPenalty=1.60;c.bridgeMissActive=true;c.bridgeLandingActive=true;
+ c.onBridge=false;c.rampEntryVisual=false;c.bridgeOffSeconds=0;c.bridgeExitVisual=0;c.bridgeMissGrace=.55;c.bridgeMissPenalty=1.60;c.bridgeMissActive=true;c.bridgeLandingActive=true;
  c.bridgeFalling=.48;c.jump=0;c.jumpCd=.85;c.boost=0;
  c.speed=Math.min(40,Math.max(12,Math.abs(c.speed)*.22));
  c.hitVX=(c.hitVX||0)*.18;c.hitVY=(c.hitVY||0)*.18;
@@ -206,6 +226,6 @@ function startTableFall(c){
  if(c===race?.player)SND.sfx('fall');
  return true;
 }
- return Object.freeze({recoverCar,junctionContinuity,finishEdgeTolerance,bridgeFall,startTableFall});
+ return Object.freeze({recoverCar,junctionContinuity,finishEdgeTolerance,bridgeFall,bridgeFallGuard,bridgeLog,startTableFall});
 }});
 })();
