@@ -40,6 +40,7 @@ const retryAt=new Map();
 function requestTurntable(id){const key=id+'_turntable';if(!atlasNames.includes(key)||status[key]==='ready'||pending.has(key))return;if(Date.now()<(retryAt.get(key)||0))return;retryAt.set(key,Date.now()+5000);loadAsset(key,true).then(ok=>{if(!ok)retryAt.set(key,Date.now()+5000);});}
 function ensureRaceReady(){return ensureGroup(raceNames);}
 function ensureGarageReady(id){return ensureGroup([id+'_turntable',...modelNames]);}
+function ensureShowroom(id){const key=id+'_turntable';return atlasNames.includes(key)?ensureGroup([key]):Promise.resolve(false);}
 function missingRace(){return raceNames.filter(k=>status[k]!=='ready');}
 // v0.13.6.34: visual-only race scale, measured from the opaque footprint of each top-down sprite.
 // No modifications to physics widths/lengths, track, or GLB meshes.
@@ -110,6 +111,6 @@ function drawVehicle(ctx,car,clock){
   if(car.boost>0&&!mini){ctx.fillStyle='#72e7ffce';for(const k of [-8,8]){ctx.beginPath();ctx.moveTo(k,28);ctx.lineTo(k-4,39+Math.sin(clock*27)*4);ctx.lineTo(k+4,38);ctx.fill();}}
   ctx.restore();return true;
 }
-root.TTRAssets={images,status,ready,get garageReady(){return garageReady();},isGarageReady,atlasLayouts,ensureTurntable,requestTurntable,ensureRaceReady,ensureGarageReady,missingRace,has,draw,drawVehicle,raceVisualScale:spriteVisualScale,raceAspect,vehicleLengthRatios};
+root.TTRAssets={images,status,ready,get garageReady(){return garageReady();},isGarageReady,atlasLayouts,ensureTurntable,requestTurntable,ensureRaceReady,ensureGarageReady,ensureShowroom,missingRace,has,draw,drawVehicle,raceVisualScale:spriteVisualScale,raceAspect,vehicleLengthRatios};
 })(typeof window==='undefined'?globalThis:window);
 

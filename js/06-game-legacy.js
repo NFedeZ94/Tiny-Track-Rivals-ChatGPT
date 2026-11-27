@@ -59,7 +59,7 @@ function perfRecordLap(m){
  const lapTime=+(race.time-m.lapStart).toFixed(3);m.lapTimes.push(lapTime);const detail={time:lapTime,ramps:m.ramps-(m.lapRampStart||0),respawns:m.respawns-(m.lapRecoveryStart||0)};for(const k of ['shortcutEntered','shortcutCompleted','shortcutFailed','towelJumps'])if(k in m){detail[k]=m[k]-(m['_lap_'+k]||0);m['_lap_'+k]=m[k];}(m.lapDetails??=[]).push(detail);m.lapRampStart=m.ramps;m.lapRecoveryStart=m.respawns;m.lapStart=race.time;
 }
 function perfPublicCar(m){const out=Object.fromEntries(Object.entries(m).filter(([k])=>!k.startsWith('_')));return {...out,average:+(m.sum/Math.max(m.seconds,.001)).toFixed(1)};}
-function perfSnapshot(session=race){if(session&&perfEnabled)for(const c of session.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m,session);}const input=perfInputSamples.slice().sort((a,b)=>a-b);return {runtimeFault:session?session.runtimeFault??null:perfContext.runtimeFault??null,completed:session?.finished??perfContext.completed??false,diagnosticCoverage:perfContext.coverage===false?'partial':'full',playerId:session?.player?.id??perfContext.playerId??0,build:"v0.13.6.153 · 14.25d-android-ai",htmlBuild:document.querySelector('meta[name="ttr-build"]')?.content??null,quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{kind:(session?.mode??perfContext.mode)==='online'?'input-to-render-step':'input-to-local-simulation',samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},environmentEvents:session?window.TTREnvironmentEvents.snapshot(session.environmentEvents):perfContext.environmentEvents??null,recoveries:session?.recoveryHistory??perfRecoveries,recoveriesDropped:session?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(perfPublicCar),trackId:session?.trackId??perfContext.trackId,raceMode:session?.mode??perfContext.mode,serverAuthority:session?.serverAuthority??perfContext.serverAuthority??null,serverTick:session?.serverTick??perfContext.serverTick??null,network:session?.mode==='online'?(session.networkFinal||onlineReport()):perfContext.mode==='online'?onlineLastReport:null,bridgeEvents:session?.bridgeEvents??perfContext.bridgeEvents??[],bridgeEventsDropped:session?.bridgeEventsDropped??perfContext.bridgeEventsDropped??0,difficulty:session?.aiFactor??perfContext.difficulty};}
+function perfSnapshot(session=race){if(session&&perfEnabled)for(const c of session.cars){const m=perfCars[c.id];if(m)perfSyncCounters(c,m,session);}const input=perfInputSamples.slice().sort((a,b)=>a-b);return {runtimeFault:session?session.runtimeFault??null:perfContext.runtimeFault??null,completed:session?.finished??perfContext.completed??false,diagnosticCoverage:perfContext.coverage===false?'partial':'full',playerId:session?.player?.id??perfContext.playerId??0,build:"v0.13.6.154 · 14.25e-ui-events",htmlBuild:document.querySelector('meta[name="ttr-build"]')?.content??null,quality:perfContext.quality??qualityMode,metrics:perfReport,wholeRace:summarizePerf(perfTotal),inputLatency:{kind:(session?.mode??perfContext.mode)==='online'?'input-to-render-step':'input-to-local-simulation',samples:input.length,medianMs:input.length?+input[Math.floor(input.length/2)].toFixed(2):null,p95Ms:input.length?+input[Math.ceil(input.length*.95)-1].toFixed(2):null},environmentEvents:session?window.TTREnvironmentEvents.snapshot(session.environmentEvents):perfContext.environmentEvents??null,recoveries:session?.recoveryHistory??perfRecoveries,recoveriesDropped:session?.recoveryHistoryDropped??perfRecoveryDropped,cars:Object.values(perfCars).map(perfPublicCar),trackId:session?.trackId??perfContext.trackId,raceMode:session?.mode??perfContext.mode,serverAuthority:session?.serverAuthority??perfContext.serverAuthority??null,serverTick:session?.serverTick??perfContext.serverTick??null,network:session?.mode==='online'?(session.networkFinal||onlineReport()):perfContext.mode==='online'?onlineLastReport:null,bridgeEvents:session?.bridgeEvents??perfContext.bridgeEvents??[],bridgeEventsDropped:session?.bridgeEventsDropped??perfContext.bridgeEventsDropped??0,difficulty:session?.aiFactor??perfContext.difficulty};}
 function perfAnomalies(snapshot){
  const {build,htmlBuild,trackId,raceMode,difficulty,wholeRace,inputLatency,recoveriesDropped}=snapshot;
  const events=snapshot.recoveries||[],counts={};for(const e of events)counts[e.reason]=(counts[e.reason]||0)+1;
@@ -1474,6 +1474,7 @@ function TTRStartConfiguredRace(){const mode=activeConfigMode;const track=TTRCir
 try{selectedCar=+localStorage.getItem('ttr_selected_car')||0;}catch(e){}selectedCar=clamp(selectedCar,0,profiles.length-1);
 const initialMenu=$('screen').innerHTML;
 function mainMenu(){
+ cancelGarageLoad();
  selectedTrackId='colazione-turbo';selectCircuit(selectedTrackId);
  if(onlineSession)onlineQuit();
  ttrRaceResults.cancelMusicTimer();
@@ -1492,15 +1493,40 @@ function drawShowroom(canvas,index,view='menu'){
  if(!assets?.ensureTurntable(id)){assets?.requestTurntable(id);const ctx=canvas.getContext('2d',{alpha:false});if(!ctx)return;ctx.setTransform(1,0,0,1,0,0);ctx.fillStyle='#24265f';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#fff1aa';ctx.font='bold '+Math.max(12,Math.round(canvas.height*.055))+'px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(assetCopy()[assets?.status[id+'_turntable']==='failed'?1:0],canvas.width/2,canvas.height/2);return;}
  return window.TTRVehicleVisuals.drawShowroom(canvas,index,view,clock,garageRotationOrigin,profiles);
 }
-async function showGarage(){
- const button=$('garageBtn');
- if(button){button.disabled=true;button.textContent=assetCopy()[0];}
- const ok=await window.TTRAssets.ensureGarageReady(profiles[selectedCar].id);
- if(button){button.disabled=false;button.textContent=ok?t('garage'):t('garage')+' · '+assetCopy()[2];}
- if(!ok||$('screen').hidden||$('garageBtn')!==button)return;
- stopMenuMusic();SND.music('garage');$('screen').hidden=true;$('screen').style.display='none';$('garageScreen').hidden=false;
- garagePreview=selectedCar;garageRotationOrigin=clock;refreshGarage();ping(650,.10,.13);
+// Gate showroom entry and selection on the real decoded atlas. Keep old preview until ready.
+let garageLoadToken=0;
+const garageLoadCopy={it:['PREPARAZIONE GARAGE…','PREPARAZIONE VETTURA…'],en:['PREPARING GARAGE…','PREPARING VEHICLE…'],es:['PREPARANDO GARAJE…','PREPARANDO VEHÍCULO…'],de:['GARAGE WIRD VORBEREITET…','FAHRZEUG WIRD VORBEREITET…'],fr:['PRÉPARATION DU GARAGE…','PRÉPARATION DU VÉHICULE…'],pt:['PREPARANDO GARAGEM…','PREPARANDO VEÍCULO…']};
+function cancelGarageLoad(){garageLoadToken++;const overlay=$('ttrGarageLoading');if(overlay)overlay.hidden=true;}
+function garagePaint(){return new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));}
+function prefetchNextGarage(index){const a=window.TTRAssets;const next=profiles[(index+1)%profiles.length];if(next)a.requestTurntable(next.id);}
+async function loadGarageModel(index,enter=false){
+ const assets=window.TTRAssets,id=profiles[index]?.id,overlay=$('ttrGarageLoading');if(!id||!overlay||!assets)return;
+ if(!enter&&$('garageScreen').hidden)return;
+ if(enter&&$('screen').hidden)return;
+ const token=++garageLoadToken,copy=garageLoadCopy[I18N.getLang()]||garageLoadCopy.it;
+ const current=()=>token===garageLoadToken&&(enter?!$('screen').hidden||!$('garageScreen').hidden:!$('garageScreen').hidden);
+ const show=enter||!assets.ensureTurntable(id);
+ const commit=()=>{if(!current())return false;
+   if(enter){stopMenuMusic();SND.music('garage');$('screen').hidden=true;$('screen').style.display='none';$('garageScreen').hidden=false;}
+   garagePreview=index;garageRotationOrigin=clock;refreshGarage();ping(enter?650:640,.08,.09);return true;
+ };
+ if(!show){if(commit())prefetchNextGarage(index);return;}
+ overlay.hidden=false;overlay.dataset.failed='false';$('ttrGarageLoadingTitle').textContent=t('garage');$('ttrGarageLoadingStatus').textContent=copy[enter?0:1];
+ const retry=$('ttrGarageRetry'),cancel=$('ttrGarageCancel');retry.hidden=true;retry.textContent=assetCopy()[2];cancel.textContent=assetCopy()[3];cancel.onclick=cancelGarageLoad;
+ const started=performance.now();
+ try{
+   await garagePaint();if(!current())return;
+   const ok=await (enter?assets.ensureGarageReady(id):assets.ensureShowroom(id));
+   if(!current())return;
+   if(!ok||!assets.ensureTurntable(id))throw new Error('Garage atlas not ready');
+   // Brief transition only, not a fake progress percentage; never reveal an unfinished atlas.
+   const remaining=(enter?350:120)-(performance.now()-started);if(remaining>0)await new Promise(r=>setTimeout(r,remaining));
+   if(!current()||!commit())return;
+   await garagePaint();if(token!==garageLoadToken)return;
+   overlay.hidden=true;prefetchNextGarage(index);
+ }catch(err){if(token!==garageLoadToken)return;overlay.dataset.failed='true';$('ttrGarageLoadingStatus').textContent=assetCopy()[1];retry.hidden=false;retry.onclick=()=>loadGarageModel(index,enter);}
 }
+function showGarage(){return loadGarageModel(selectedCar,true);}
 window.TTRVehicleDesignStats=Object.freeze({"scatto":[6,7,7,7,5,7],"tuono":[7,8,5,6,8,6],"polvere":[6,7,8,8,6,7],"lampo":[8,7,8,7,4,5],"aero":[9,8,7,8,4,5],"enduro":[8,7,9,9,3,6],"brezza":[7,8,10,8,2,5],"volt":[9,10,6,7,4,5],"roccia":[6,6,5,7,9,9],"martello":[6,7,5,6,10,7],"turbovan":[6,7,6,7,8,7],"titan":[5,6,6,9,9,8],"hotflash":[8,10,5,5,7,5],"metrocab":[6,7,7,7,6,7],"interceptor":[7,8,7,7,8,6],"retrosprint":[7,6,8,8,5,6],"apex":[10,9,10,9,2,3],"tempesta":[8,9,9,7,5,5],"neon":[10,10,4,5,3,3],"behemoth":[5,6,3,5,10,10]});
 function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='function')window.TTRUpdateGarageCollectionCount();const p=profiles[garagePreview];$('garageName').textContent=p.name;
  $('garageDesc').textContent=t(p.id+'Desc');
@@ -1514,7 +1540,7 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
  if(list.dataset.rosterKey!==listKey){list.dataset.rosterKey=listKey;
  $('garageChoices').innerHTML=profiles.map((q,i)=>`<button class="car-choice ${i===garagePreview?'active':''}" data-car="${i}"><img class="car-choice-preview" data-image="${q.id}" alt="" aria-hidden="true"><span class="car-choice-info"><b>${String((window.TTRVehicleRoster||[]).find(v=>v.id===q.id)?.index??(i+1)).padStart(2,'0')} · ${q.name}</b><small>${q.id===profiles[selectedCar].id?t('selected'):['HOT HATCH','V8','BUGGY','SPORT','SUPERCAR · TEST','ENDURANCE · TEST','ROADSTER · TEST','ELETTRICA · TEST','HYPER EV · TEST','SUV · TEST','PICKUP · TEST','VAN · TEST','4X4 · TEST','HOT ROD · TEST','TAXI · TEST','POLIZIA · TEST','CLASSICA · TEST','MONOPOSTO · TEST','RALLY · TEST','MONSTER · TEST'][i]}</small></span></button>`).join('');
  document.querySelectorAll('.car-choice-preview').forEach(el=>{const car=el.dataset.image.replace('_showroom','');const pic=window.TTRAssets?.images[car+'_showroom']||window.TTRAssets?.images[car];const thumb=window.TTRVehicleThumbnail?.(car);if(thumb)el.src=thumb;else if(pic?.src)el.src=pic.src;});
- list.querySelectorAll('[data-car]').forEach(el=>el.onclick=()=>{garagePreview=+el.dataset.car;garageRotationOrigin=clock;ping(640,.08,.07);refreshGarage();});
+ list.querySelectorAll('[data-car]').forEach(el=>el.onclick=()=>loadGarageModel(+el.dataset.car));
  }
  list.querySelectorAll('[data-car]').forEach(el=>el.classList.toggle('active',+el.dataset.car===garagePreview));
  const artCard=$('garageCanon');if(artCard){
@@ -1530,15 +1556,15 @@ function refreshGarage(){if(typeof window.TTRUpdateGarageCollectionCount==='func
 function wireMenu(){
  // 14.15: tolerate a cached pre-14.14 HTML shell; manual acceleration is no longer supported.
  const obsoleteAuto=$('auto');if(obsoleteAuto){const label=obsoleteAuto.closest('label');if(label)label.remove();else obsoleteAuto.remove();}
- document.documentElement.dataset.ttrJsBuild='0.13.6.153';
- const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.153 · 14.25d-android-ai';
+ document.documentElement.dataset.ttrJsBuild='0.13.6.154';
+ const buildLabel=$('ttrBuildLabel');if(buildLabel)buildLabel.textContent='BUILD v0.13.6.154 · 14.25e-ui-events';
  // A transformed menu creates a non-viewport containing block for fixed dialogs.
  // Move Options to document.body, so the overlay is genuinely viewport-sized on iPhone.
  const settingsDialog=$('retroSettings');if(settingsDialog&&settingsDialog.parentNode!==document.body)document.body.appendChild(settingsDialog);const configDialog=$('raceConfig');if(configDialog&&configDialog.parentNode!==document.body)document.body.appendChild(configDialog);const trackDialog=$('trackSelect');if(trackDialog&&trackDialog.parentNode!==document.body)document.body.appendChild(trackDialog);
  const r=$('raceBtn'),trial=$('trialBtn'),garage=$('garageBtn'),mute=$('menuMute');
  const careerBtn=$('careerBtn');if(careerBtn)careerBtn.onclick=()=>{SND.unlock();window.TTRCareer?.open();};
   if(r)r.onclick=()=>{SND.unlock();TTROpenTrackSelect('race')};if(trial)trial.onclick=()=>{SND.unlock();TTROpenTrackSelect('trial');};const onlineBtn=$('onlineBtn');if(onlineBtn)onlineBtn.onclick=()=>{SND.unlock();onlineOpenPanel();};const eliminationBtn=$('eliminationBtn');if(eliminationBtn)eliminationBtn.onclick=()=>{SND.unlock();TTROpenTrackSelect('elimination')};
- if(garage)garage.onclick=()=>{SND.unlock().then(ok=>{if(ok)SND.music('garage')});showGarage();};
+ if(garage)garage.onclick=()=>{SND.unlock();showGarage();};
  if($('raceConfigStart'))$('raceConfigStart').onclick=TTRStartConfiguredRace;for(const id of ['raceConfigCancel','raceConfigClose'])if($(id))$(id).onclick=()=>TTRCloseRaceConfig(true);if(configDialog){configDialog.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();TTRCloseRaceConfig(true);}});configDialog.addEventListener('click',e=>{if(e.target===configDialog)TTRCloseRaceConfig(true);});}
   if($('trackSelectNext'))$('trackSelectNext').onclick=TTRAdvanceTrackSelect;for(const id of ['trackSelectClose','trackSelectBack'])if($(id))$(id).onclick=()=>{const mode=activeTrackMode;TTRCloseTrackSelect();if(mode==='career')$('careerPlay')?.focus();else $('screen').querySelector(mode==='elimination'?'#eliminationBtn':mode==='trial'?'#trialBtn':'#raceBtn')?.focus();};if(trackDialog){trackDialog.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();TTRCloseTrackSelect();}});trackDialog.addEventListener('click',e=>{if(e.target===trackDialog)TTRCloseTrackSelect();});}
   const setting=$('settingsBtn');if(setting)setting.onclick=()=>{const panel=$('retroSettings');panel.open=true;const selector=$('settingsLanguage');if(selector)selector.value=I18N.getLang();SND.sfx('select');};
@@ -2003,7 +2029,7 @@ window.TTRDebug={
  c.lastValidPosition={x:safe.x,y:safe.y,a:tangent(from),p:from,laps:c.lapsCompleted,flags:c.flags.slice()};
  c.auditP=from;c.auditTravel=350;c.auditCleanTime=0;c.x=pos.x;c.y=pos.y;c.p=from;c.lastP=from;c.a=tangent(to);c.speed=0;c.offtrack=false;c.respawnGrace=0;race.countdown=0;
  const before=c.shortcutRespawns||0;update(1/60);return {before,after:c.shortcutRespawns||0,phase:c.p,expectedPhase:from};
-},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.153',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
+},getRouteAudit:()=>race?{anchor:race.player.auditP,travel:race.player.auditTravel,p:race.player.p,penalties:race.player.shortcutRespawns||0,pinch:race.player.routePinch,stable:race.player.routeStableP}:null,getOilSpin:()=>race?{left:race.player.oilSpin||0,heading:race.player.a,slip:race.player.slip}:null,getGrid:()=>race?.cars.map(c=>({x:c.x,y:c.y,p:c.p,id:c.id})),version:'0.13.6.154',getAudioStatus:()=>SND.status(),getCars:()=>race?.cars.map(c=>({id:c.id,x:c.x,y:c.y,speed:c.speed,slip:c.slip,claw:c.claw,p:c.p,stuckTime:c.stuckTime,hitVX:c.hitVX,hitVY:c.hitVY})),getState:()=>race?{mode:race.mode,oilCount:race.oils.length,playerSlip:race.player.slip,lap:race.player.lapsCompleted,position:race.player.p,x:race.player.x,y:race.player.y,angle:race.player.a,speed:race.player.speed,camX,camY,scale,jump:race.player.jump,car:race.player.profile.id,checkpoint:race.player.flags.slice(),pickupCount:race.pickups.length,pickupSegments:race.pickups.map(p=>p.segment),pickupTypes:race.cars.map(c=>c.item),loading:!$('loadingTrack').hidden,carCount:race.cars.length,offtrack:race.player.offtrack,offtrackSeconds:race.player.offtrackSeconds,spoonCd:race.player.spoonCd,shortcutRespawns:race.player.shortcutRespawns||0,claw:race.player.claw,clawTargetId:race.player.clawTarget?.id??null}:null,start:mode=>initRace(mode||'race')};
 })();
 
 
