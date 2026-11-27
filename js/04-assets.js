@@ -39,7 +39,10 @@ function isGarageReady(){return groupReady(atlasNames);}
 const retryAt=new Map();
 function requestTurntable(id){const key=id+'_turntable';if(!atlasNames.includes(key)||status[key]==='ready'||pending.has(key))return;if(Date.now()<(retryAt.get(key)||0))return;retryAt.set(key,Date.now()+5000);loadAsset(key,true).then(ok=>{if(!ok)retryAt.set(key,Date.now()+5000);});}
 function ensureRaceReady(){return ensureGroup(raceNames);}
-function ensureGarageReady(id){return ensureGroup([id+'_turntable',...modelNames]);}
+function ensureGarageReady(id){return ensureGaragePack([id]);}
+// Only the requested set is mandatory; neighbouring sets are warmed one atlas at a time.
+function ensureGaragePack(ids){const valid=[...new Set(ids)].filter(id=>modelNames.includes(id));return valid.length===ids.length&&valid.length>0?ensureGroup(valid.flatMap(id=>[id+'_turntable',id,id+'_showroom'])):Promise.resolve(false);}
+function trimGarageAtlases(keep){const allowed=new Set(keep.map(id=>id+'_turntable'));for(const key of atlasNames){if(!allowed.has(key)&&status[key]==='ready'&&!pending.has(key)){delete images[key];delete status[key];retryAt.delete(key);}}}
 function ensureShowroom(id){const key=id+'_turntable';return atlasNames.includes(key)?ensureGroup([key]):Promise.resolve(false);}
 function missingRace(){return raceNames.filter(k=>status[k]!=='ready');}
 // v0.13.6.34: visual-only race scale, measured from the opaque footprint of each top-down sprite.
@@ -111,6 +114,6 @@ function drawVehicle(ctx,car,clock){
   if(car.boost>0&&!mini){ctx.fillStyle='#72e7ffce';for(const k of [-8,8]){ctx.beginPath();ctx.moveTo(k,28);ctx.lineTo(k-4,39+Math.sin(clock*27)*4);ctx.lineTo(k+4,38);ctx.fill();}}
   ctx.restore();return true;
 }
-root.TTRAssets={images,status,ready,get garageReady(){return garageReady();},isGarageReady,atlasLayouts,ensureTurntable,requestTurntable,ensureRaceReady,ensureGarageReady,ensureShowroom,missingRace,has,draw,drawVehicle,raceVisualScale:spriteVisualScale,raceAspect,vehicleLengthRatios};
+root.TTRAssets={images,status,ready,get garageReady(){return garageReady();},isGarageReady,atlasLayouts,ensureTurntable,requestTurntable,ensureRaceReady,ensureGarageReady,ensureGaragePack,trimGarageAtlases,ensureShowroom,missingRace,has,draw,drawVehicle,raceVisualScale:spriteVisualScale,raceAspect,vehicleLengthRatios};
 })(typeof window==='undefined'?globalThis:window);
 
